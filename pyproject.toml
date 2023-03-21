@@ -1,0 +1,65 @@
+# Copyright (c) 2022, Oracle and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+[tool.poetry]
+name = "coherence"
+version = "0.1.0"
+description = """The Coherence Python Client allows Python applications to act as cache clients to a \
+Coherence Cluster using Google's gRPC framework as the network transport."""
+authors = ["Dhiru Pandey <dhiru.pandey@oracle.com>", "Ryan Lubke <ryan.lubke@oracle.com>"]
+
+[tool.poetry.dependencies]
+python = "~3.10"
+protobuf = "~4.21"
+grpcio = "~1.51"
+grpcio-tools = "~1.51"
+jsonpickle = "~2.2"
+pymitter = "~0.4"
+
+[tool.poetry.dev-dependencies]
+pytest = "~7.2"
+pytest-asyncio = "~0.19"
+pytest-cov = "~4.0"
+pytest-unordered = "~0.5"
+pre-commit = "~2.20"
+Sphinx = "~4.5"
+sphinx-rtd-theme = "~1.1"
+sphinxcontrib-napoleon = "~0.7"
+m2r = "~0.3"
+third-party-license-file-generator = "~2022.3"
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 120
+
+[tool.black]
+line-length = 120
+target-version = ['py310']
+include = '\.pyi?$'
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

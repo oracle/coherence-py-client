@@ -1,0 +1,6 @@
+[run]
+omit =
+  coherence/messages_pb2.py
+  coherence/messages_pb2_grpc.py
+  coherence/services_pb2.py
+  coherence/services_pb2_grpc.py
