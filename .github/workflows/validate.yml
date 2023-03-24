@@ -28,7 +28,7 @@ jobs:
       - name: Install Poetry
         shell: bash
         run: |
-          pip install poetry==${{ matrix.poetry-version }}m
+          pip install poetry==${{ matrix.poetry-version }}
       - name: Install Dependencies
         run: python -m poetry install
       - name: Configure Validation
