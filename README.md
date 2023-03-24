@@ -1,5 +1,9 @@
-![CI/CD](https://github.com/oracle/coherence-py-client/actions/workflows/validate.yml/badge.svg)
 # Coherence Python Client
+
+![CI/CD](https://github.com/oracle/coherence-py-client/actions/workflows/validate.yml/badge.svg)
+[![License](http://img.shields.io/badge/license-UPL%201.0-blue.svg)](https://oss.oracle.com/licenses/upl/)
+
+<img src=https://oracle.github.io/coherence/assets/images/logo-red.png width="30%"><img>
 
 The Coherence Python Client allows Python applications to act as cache clients to an Oracle Coherence cluster using
 the Google gRPC framework as the network transport.
@@ -32,6 +36,7 @@ pip install coherence
 
 ## Documentation
 
+TBC
 
 ## Examples
 
@@ -72,6 +77,15 @@ print("Size of the cache test is " + str(await cache.size()))
 await cache.remove(k1)
 ```
 ## Help
+
+We have a **public Slack channel** where you can get in touch with us to ask questions about using the Coherence CLI
+or give us feedback or suggestions about what features and improvements you would like to see. We would love
+to hear from you. To join our channel,
+please [visit this site to get an invitation](https://join.slack.com/t/oraclecoherence/shared_invite/enQtNzcxNTQwMTAzNjE4LTJkZWI5ZDkzNGEzOTllZDgwZDU3NGM2YjY5YWYwMzM3ODdkNTU2NmNmNDFhOWIxMDZlNjg2MzE3NmMxZWMxMWE).  
+The invitation email will include details of how to access our Slack
+workspace.  After you are logged in, please come to `#coherence` and say, "hello!"
+
+If you would like to raise an issue please see [here](https://github.com/oracle/coherence-py-client/issues/new/choose).
 
 ## Contributing
 
