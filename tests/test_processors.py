@@ -288,7 +288,6 @@ async def test_method_invocation(setup_and_teardown: NamedCache[Any, Any]) -> No
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
 async def test_touch() -> None:
-
     tp = TouchProcessor.create()
     serializer = JSONSerializer()
     j = serializer.serialize(tp)
@@ -314,7 +313,6 @@ async def test_script() -> None:
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
 async def test_preload() -> None:
-
     tp = PreloadRequest.create()
     serializer = JSONSerializer()
     j = serializer.serialize(tp)

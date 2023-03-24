@@ -25,14 +25,10 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-#      - name: Run image
-#        uses: abatilo/actions-poetry@v2
-#        with:
-#          poetry-version: ${{ matrix.poetry-version }}
       - name: Install Poetry
         shell: bash
         run: |
-          pip install poetry==${{ matrix.poetry-version }}
+          pip install poetry==${{ matrix.poetry-version }}m
       - name: Install Dependencies
         run: python -m poetry install
       - name: Configure Validation

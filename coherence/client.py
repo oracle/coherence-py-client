@@ -736,7 +736,6 @@ class NamedCacheClient(NamedCache[K, V]):
 
 
 class TlsOptions:
-
     ENV_CA_CERT = "COHERENCE_TLS_CERTS_PATH"
     ENV_CLIENT_CERT = "COHERENCE_TLS_CLIENT_CERT"
     ENV_CLIENT_KEY = "COHERENCE_TLS_CLIENT_KEY"

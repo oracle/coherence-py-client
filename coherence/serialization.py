@@ -174,7 +174,6 @@ class LargeIntHandler(jsonpickle.handlers.BaseHandler):
 
 
 class JavaProxyUnpickler(jsonpickle.Unpickler):
-
     # noinspection PyUnresolvedReferences
     def _restore(self, obj: Any) -> Any:
         if isinstance(obj, dict):

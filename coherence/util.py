@@ -256,7 +256,6 @@ class RequestFactory:
         return r
 
     def keys_request(self, filter: Optional[Filter] = None) -> KeySetRequest:
-
         r: KeySetRequest = KeySetRequest(
             scope=self._scope,
             cache=self._cache_name,
