@@ -62,6 +62,4 @@ jobs:
       - name: Run test
         shell: bash
         run: |
-          python -m poetry run \
-          COHERENCE_VERSION=22.06.2 \
-          make clean test-cluster-shutdown remove-app-images build-test-images test-cluster-startup just-wait test
+          python -m poetry run ./tests/scripts/run-tests.sh
