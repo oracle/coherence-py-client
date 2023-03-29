@@ -122,7 +122,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         against the map, with the key, old-value and new-value included.
 
         :param listener:      the MapListener to register
-        :param listener_for:  the optional the key that identifies the entry for which to raise events or a Filter
+        :param listener_for:  the optional key that identifies the entry for which to raise events or a Filter
          that will be passed MapEvent objects to select from; a MapEvent will be delivered to the listener only if the
          filter evaluates to `True` for that MapEvent. `None` is equivalent to a Filter that always returns `True`
         :param lite:          optionally pass `True` to indicate that the MapEvent objects do not have to include the
@@ -134,7 +134,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
     async def remove_map_listener(self, listener: MapListener[K, V], listener_for: Optional[K | Filter] = None) -> None:
         """
         Remove a standard map listener that previously registered to receive events.
-        :param listener:      the MapListener to removed
+        :param listener:      the MapListener to be removed
         :param listener_for:  the key or filter, if any, passed to a previous addMapListener invocation
         :raises ValueError: if `listener` is `None`
         """
@@ -179,7 +179,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
     @abc.abstractmethod
     async def get_all(self, keys: set[K]) -> dict[K, V]:
         """
-        Get all the specified keys, if they are in the map. For each key that is in the map,
+        Get all the specified keys if they are in the map. For each key that is in the map,
         that key and its corresponding value will be placed in the map that is returned by
         this method. The absence of a key in the returned map indicates that it was not in the cache,
         which may imply (for caches that can load behind the scenes) that the requested data
@@ -197,9 +197,9 @@ class NamedMap(abc.ABC, Generic[K, V]):
 
         :param key: the key with which the specified value is to be associated
         :param value: the value to be associated with the specified key
-        :return: the previous value associated with specified key, or `None`
+        :return: the previous value associated with the specified key, or `None`
          if there was no mapping for key. A `None` return can also indicate
-         that the map previously associated `None` with the specified key,
+         that the map previously associated `None` with the specified key
          if the implementation supports `None` values
         """
 
@@ -211,8 +211,8 @@ class NamedMap(abc.ABC, Generic[K, V]):
 
         :param key: the key with which the specified value is to be associated
         :param value: the value to be associated with the specified key
-        :return: the previous value associated with specified key, or `None` if there was no mapping for key. A
-         `None` return can also indicate that the map previously associated `None` with the specified key,
+        :return: the previous value associated with the specified key, or `None` if there was no mapping for key. A
+         `None` return can also indicate that the map previously associated `None` with the specified key
          if the implementation supports `None` values
 
         """
@@ -285,7 +285,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         :param key: key whose associated value is to be replaced
         :param value: value expected to be associated with the specified key
         :return: resolving to the previous value associated with the specified key, or `None` if there was no mapping
-         for the key. (A `None` return can also indicate that the map previously associated `None` with the key,
+         for the key. (A `None` return can also indicate that the map previously associated `None` with the key
          if the implementation supports `None` values.)
         """
 
@@ -340,7 +340,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         Invoke the passed EntryProcessor against the Entry specified by the
         passed key, returning the result of the invocation.
 
-        :param key: the key to process it is not required to exist within the Map
+        :param key: the key to process - it is not required to exist within the Map
         :param processor: the EntryProcessor to use to process the specified key
         :return: the result of the invocation as returned from the EntryProcessor
         """
@@ -377,7 +377,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
 
         :param aggregator: the EntryAggregator that is used to aggregate across the specified entries of this Map
         :param keys: the Iterable of keys that specify the entries within this Map to aggregate across
-        :param filter: the that is used to select entries within this Map to aggregate across
+        :param filter: the Filter that is used to select entries within this Map to aggregate across
         :return: the result of the invocation as returned from the EntryProcessor
         """
 
@@ -385,14 +385,14 @@ class NamedMap(abc.ABC, Generic[K, V]):
     async def values(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> set[V]:
         """
         Return a Set of the values contained in this map that satisfy the criteria expressed by the filter.
-        If no filter or comparator is specified It returns a Set view of the values contained in this map.The
+        If no filter or comparator is specified, it returns a Set view of the values contained in this map.The
         collection is backed by the map, so changes to the map are reflected in the collection, and vice-versa. If
         the map is modified while an iteration over the collection is in progress (except through the iterator's own
         `remove` operation), the results of the iteration are undefined.
 
         :param filter: the Filter object representing the criteria that the entries of this map should satisfy
         :param comparator:  the Comparator object which imposes an ordering on entries in the resulting set; or null
-         if the entries values natural ordering should be used
+         if the entries' natural ordering should be used
         :return: resolves to the values in the set that satisfy the specified criteria
         """
 
@@ -415,14 +415,14 @@ class NamedMap(abc.ABC, Generic[K, V]):
         :param filter: the Filter object representing the criteria that the entries of this map should satisfy
         :param comparator: the Comparator object which imposes an ordering on entries in the resulting set; or `None`
          if the entries' values natural ordering should be used
-        :return: a set of entries that satisfy the specif]ied criteria
+        :return: a set of entries that satisfy the specified criteria
         """
 
 
 class NamedCache(NamedMap[K, V]):
     """
     A Map-based data-structure that manages entries across one or more processes. Entries are typically managed in
-    memory, and are often comprised of data that is also stored in an external system, for example a database,
+    memory, and are often comprised of data that is also stored in an external system, for example, a database,
     or data that has been assembled or calculated at some significant cost.  Such entries are referred to as being
     `cached`.
 
@@ -440,7 +440,7 @@ class NamedCache(NamedMap[K, V]):
         :param value: the value to be associated with the specified key
         :param ttl: the expiry time in millis (optional)
         :return: resolving to the previous value associated with specified key, or `None` if there was no mapping for
-         key. A `None` return can also indicate that the map previously associated `None` with the specified key,
+         key. A `None` return can also indicate that the map previously associated `None` with the specified key
          if the implementation supports `None` values
 
         """
@@ -455,7 +455,7 @@ class NamedCache(NamedMap[K, V]):
         :param value: the value to be associated with the specified key
         :param ttl: the expiry time in millis (optional)
         :return: resolving to the previous value associated with specified key, or `None` if there was no mapping for
-         key. A `None` return can also indicate that the map previously associated `None` with the specified key,
+         key. A `None` return can also indicate that the map previously associated `None` with the specified key
          if the implementation supports `None` values
 
         """
