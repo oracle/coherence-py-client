@@ -7,6 +7,7 @@ from __future__ import annotations
 import abc
 import asyncio
 import os
+import typing
 from asyncio import Task
 from typing import Any, Callable, Final, Generic, Literal, Optional, Sequence, Set, Tuple, TypeVar, cast, no_type_check
 
@@ -27,6 +28,7 @@ from .util import RequestFactory
 K = TypeVar("K")
 V = TypeVar("V")
 R = TypeVar("R")
+T = TypeVar("T")
 
 
 @no_type_check
@@ -67,7 +69,7 @@ def _pre_call_session(func):
     return inner
 
 
-class MapEntry:
+class MapEntry(Generic[K, V]):
     """
     A map entry (key-value pair).
     """
@@ -397,7 +399,14 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def keys(self, filter: Optional[Filter] = None) -> set[K]:
+    async def values(self) -> Stream[K]:
+        """
+        TODO
+        :return:
+        """
+
+    @abc.abstractmethod
+    async def keys(self, filter: Optional[Filter] = None) -> Stream[K]:
         """
         Return a set view of the keys contained in this map for entries that satisfy the criteria expressed by the
         filter.
@@ -407,7 +416,8 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def entries(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> set[MapEntry]:
+    async def entries(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> set[
+        MapEntry[K, V]]:
         """
         Return a set view of the entries contained in this map that satisfy the criteria expressed by the filter.
         Each element in the returned set is a :func:`coherence.client.MapEntry`.
@@ -416,6 +426,12 @@ class NamedMap(abc.ABC, Generic[K, V]):
         :param comparator: the Comparator object which imposes an ordering on entries in the resulting set; or `None`
          if the entries' values natural ordering should be used
         :return: a set of entries that satisfy the specified criteria
+        """
+
+    async def entries(self) -> Stream[MapEntry[K, V]]:
+        """
+        TODO
+        :return:
         """
 
 
@@ -655,13 +671,22 @@ class NamedCacheClient(NamedCache[K, V]):
         return result_set
 
     @_pre_call_cache
-    async def keys(self, filter: Optional[Filter] = None) -> set[K]:
-        r = self._request_factory.keys_request(filter)
-        results = self._client_stub.keySet(r)
-        result_set: set[Any] = set()
-        async for item in results:
-            result_set.add(self._request_factory.get_serializer().deserialize(item.value))
-        return result_set
+    def keys(self, filter: Optional[Filter] = None) -> Stream[K]:
+        if filter is None:
+            pass
+        else:
+            r = self._request_factory.keys_request(filter)
+            results = self._client_stub.keySet(r)
+
+            async def producer():
+                async for item in results:
+                    return self._request_factory.get_serializer().deserialize(item.value);
+                raise StopAsyncIteration
+
+            return Stream(producer)
+
+    async def keys_stream(self) -> Stream[K]:
+        pass
 
     @_pre_call_cache
     async def entries(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> set[MapEntry]:
@@ -1167,3 +1192,19 @@ async def watch_channel_state(session: Session) -> None:
             await channel.wait_for_state_change(state)
     except asyncio.CancelledError:
         return
+
+
+class Stream(abc.ABC, typing.AsyncIterator[T]):
+
+    def __init__(self, next_producer: typing.Callable[[], T]) -> None:
+        super().__init__()
+        self.next_producer = next_producer
+
+    def __aiter__(self):
+        return self
+
+    def __anext__(self):
+        return self.next_producer()
+
+
+

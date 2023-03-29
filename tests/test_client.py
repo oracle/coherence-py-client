@@ -11,7 +11,7 @@ from typing import Any, AsyncGenerator, Final, Optional, TypeVar
 import pytest
 import pytest_asyncio
 
-from coherence import NamedCache, Options, Session, TlsOptions
+from coherence import Filters, NamedCache, Options, Session, TlsOptions
 from coherence.event import MapLifecycleEvent, SessionLifecycleEvent
 from coherence.extractor import ChainedExtractor, UniversalExtractor
 from coherence.processor import ExtractorProcessor
@@ -170,6 +170,22 @@ async def test_put_if_absent(setup_and_teardown: NamedCache[str, str]) -> None:
 
     r = await cache.put_if_absent(k, v)
     assert r == v
+
+
+# noinspection PyShadowingNames
+@pytest.mark.asyncio
+async def test_keys(setup_and_teardown: NamedCache[str, str]) -> None:
+    cache: NamedCache[str, str] = setup_and_teardown
+
+    k: str = "one"
+    v: str = "only-one"
+    await cache.put(k, v)
+    k1: str = "two"
+    v1: str = "only-two"
+    await cache.put(k1, v1)
+    print("\n")
+    async for e in cache.keys(Filters.always()):
+        print(e)
 
 
 # noinspection PyShadowingNames
