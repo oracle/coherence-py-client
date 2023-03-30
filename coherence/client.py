@@ -1,4 +1,4 @@
-# Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -7,9 +7,23 @@ from __future__ import annotations
 import abc
 import asyncio
 import os
-import typing
 from asyncio import Task
-from typing import Any, Callable, Final, Generic, Literal, Optional, Sequence, Set, Tuple, TypeVar, cast, no_type_check
+from typing import (
+    Any,
+    AsyncIterator,
+    Awaitable,
+    Callable,
+    Final,
+    Generic,
+    Literal,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    TypeVar,
+    cast,
+    no_type_check,
+)
 
 # noinspection PyPackageRequirements
 import grpc
@@ -19,7 +33,8 @@ from coherence.aggregator import EntryAggregator
 
 from .comparator import Comparator
 from .event import MapLifecycleEvent, MapListener, SessionLifecycleEvent
-from .filter import Filter
+from .filter import AlwaysFilter, Filter
+from .messages_pb2 import PageRequest
 from .processor import EntryProcessor
 from .serialization import Serializer, SerializerRegistry
 from .services_pb2_grpc import NamedCacheServiceStub
@@ -179,7 +194,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def get_all(self, keys: set[K]) -> dict[K, V]:
+    def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
         """
         Get all the specified keys if they are in the map. For each key that is in the map,
         that key and its corresponding value will be placed in the map that is returned by
@@ -188,7 +203,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         could not be loaded.
 
         :param keys: an Iterable of keys that may be in this map
-        :return: a Map of keys to values for the specified keys passed in `keys`
+        :return: an AsyncIterator of MapEntry instances for the specified keys passed in `keys`
         """
 
     @abc.abstractmethod
@@ -348,9 +363,9 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def invoke_all(
+    def invoke_all(
         self, processor: EntryProcessor, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
-    ) -> dict[K, R]:
+    ) -> AsyncIterator[MapEntry[K, R]]:
         """
         Invoke the passed EntryProcessor against the set of entries that are selected by the given Filter,
         returning the result of the invocation for each.
@@ -367,7 +382,8 @@ class NamedMap(abc.ABC, Generic[K, V]):
         :param processor: the EntryProcessor to use to process the specified keys
         :param keys: the keys to process these keys are not required to exist within the Map
         :param filter: a Filter that results in the set of keys to be processed
-        :return: a Map containing the results of invoking the EntryProcessor against each of the specified keys
+        :return: an AsyncIterator of MapEntry instances containing the results of invoking the EntryProcessor against
+         each of the specified keys
         """
 
     @abc.abstractmethod
@@ -384,7 +400,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def values(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> set[V]:
+    def values(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> AsyncIterator[V]:
         """
         Return a Set of the values contained in this map that satisfy the criteria expressed by the filter.
         If no filter or comparator is specified, it returns a Set view of the values contained in this map.The
@@ -395,29 +411,23 @@ class NamedMap(abc.ABC, Generic[K, V]):
         :param filter: the Filter object representing the criteria that the entries of this map should satisfy
         :param comparator:  the Comparator object which imposes an ordering on entries in the resulting set; or null
          if the entries' natural ordering should be used
-        :return: resolves to the values in the set that satisfy the specified criteria
+        :return: an AsyncIterator of MapEntry instances resolving to the values that satisfy the specified criteria
         """
 
     @abc.abstractmethod
-    async def values(self) -> Stream[K]:
-        """
-        TODO
-        :return:
-        """
-
-    @abc.abstractmethod
-    async def keys(self, filter: Optional[Filter] = None) -> Stream[K]:
+    def keys(self, filter: Optional[Filter] = None) -> AsyncIterator[K]:
         """
         Return a set view of the keys contained in this map for entries that satisfy the criteria expressed by the
         filter.
 
         :param filter: the Filter object representing the criteria that the entries of this map should satisfy
-        :return: a set of keys for entries that satisfy the specified criteria
+        :return: an AsyncIterator of keys for entries that satisfy the specified criteria
         """
 
     @abc.abstractmethod
-    async def entries(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> set[
-        MapEntry[K, V]]:
+    def entries(
+        self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None
+    ) -> AsyncIterator[MapEntry[K, V]]:
         """
         Return a set view of the entries contained in this map that satisfy the criteria expressed by the filter.
         Each element in the returned set is a :func:`coherence.client.MapEntry`.
@@ -425,13 +435,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         :param filter: the Filter object representing the criteria that the entries of this map should satisfy
         :param comparator: the Comparator object which imposes an ordering on entries in the resulting set; or `None`
          if the entries' values natural ordering should be used
-        :return: a set of entries that satisfy the specified criteria
-        """
-
-    async def entries(self) -> Stream[MapEntry[K, V]]:
-        """
-        TODO
-        :return:
+        :return: an AsyncIterator of MapEntry instances that satisfy the specified criteria
         """
 
 
@@ -529,19 +533,11 @@ class NamedCacheClient(NamedCache[K, V]):
             return default_value
 
     @_pre_call_cache
-    async def get_all(self, keys: set[K]) -> dict[K, V]:
+    def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
         r = self._request_factory.get_all_request(keys)
+        stream = self._client_stub.getAll(r)
 
-        dict_result: dict[K, V] = {}
-
-        results = self._client_stub.getAll(r)
-
-        async for resp in results:
-            dict_result[
-                self._request_factory.get_serializer().deserialize(resp.key)
-            ] = self._request_factory.get_serializer().deserialize(resp.value)
-
-        return dict_result
+        return _Stream(self._request_factory.get_serializer(), stream, _entry_producer)
 
     @_pre_call_cache
     async def put(self, key: K, value: V, ttl: int = -1) -> V:
@@ -637,20 +633,13 @@ class NamedCacheClient(NamedCache[K, V]):
         return self._request_factory.get_serializer().deserialize(v.value)
 
     @_pre_call_cache
-    async def invoke_all(
+    def invoke_all(
         self, processor: EntryProcessor, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
-    ) -> dict[K, R]:
+    ) -> AsyncIterator[MapEntry[K, R]]:
         r = self._request_factory.invoke_all_request(processor, keys, filter)
+        stream = self._client_stub.invokeAll(r)
 
-        dict_result: dict[K, R] = {}
-
-        results = self._client_stub.invokeAll(r)
-        async for resp in results:
-            dict_result[
-                self._request_factory.get_serializer().deserialize(resp.key)
-            ] = self._request_factory.get_serializer().deserialize(resp.value)
-
-        return dict_result
+        return _Stream(self._request_factory.get_serializer(), stream, _entry_producer)
 
     @_pre_call_cache
     async def aggregate(
@@ -662,45 +651,42 @@ class NamedCacheClient(NamedCache[K, V]):
         return cast(R, value)
 
     @_pre_call_cache
-    async def values(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> set[V]:
-        r = self._request_factory.values_request(filter, comparator)
-        results = self._client_stub.values(r)
-        result_set: set[Any] = set()
-        async for item in results:
-            result_set.add(self._request_factory.get_serializer().deserialize(item.value))
-        return result_set
+    def values(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> AsyncIterator[V]:
+        # if there is no filter or no co, or the filter is an AlwaysFilter,
+        # obtain results by-page
+        if (comparator is None and filter is None) or (comparator is None and isinstance(filter, AlwaysFilter)):
+            return _PagedStream(self, _scalar_deserializer)
+        else:
+            r = self._request_factory.values_request(filter)
+            stream = self._client_stub.values(r)
+
+            return _Stream(self._request_factory.get_serializer(), stream, _scalar_producer)
 
     @_pre_call_cache
-    def keys(self, filter: Optional[Filter] = None) -> Stream[K]:
-        if filter is None:
-            pass
+    def keys(self, filter: Optional[Filter] = None) -> AsyncIterator[K]:
+        # if there is no filter, or the filter is an AlwaysFilter,
+        # obtain results by-page
+        if filter is None or isinstance(filter, AlwaysFilter):
+            return _PagedStream(self, _scalar_deserializer, True)
         else:
             r = self._request_factory.keys_request(filter)
-            results = self._client_stub.keySet(r)
+            stream = self._client_stub.keySet(r)
 
-            async def producer():
-                async for item in results:
-                    return self._request_factory.get_serializer().deserialize(item.value);
-                raise StopAsyncIteration
-
-            return Stream(producer)
-
-    async def keys_stream(self) -> Stream[K]:
-        pass
+            return _Stream(self._request_factory.get_serializer(), stream, _scalar_producer)
 
     @_pre_call_cache
-    async def entries(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> set[MapEntry]:
-        r = self._request_factory.entries_request(filter, comparator)
-        results = self._client_stub.entrySet(r)
-        result_set: set[MapEntry] = set()
-        async for item in results:
-            result_set.add(
-                MapEntry(
-                    self._request_factory.get_serializer().deserialize(item.key),
-                    self._request_factory.get_serializer().deserialize(item.value),
-                )
-            )
-        return result_set
+    def entries(
+        self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None
+    ) -> AsyncIterator[MapEntry[K, V]]:
+        # if there is no filter and no comparator, or the filter is an AlwaysFilter,
+        # obtain results by-page
+        if (comparator is None and filter is None) or (comparator is None and isinstance(filter, AlwaysFilter)):
+            return _PagedStream(self, _entry_deserializer)
+        else:
+            r = self._request_factory.entries_request(filter, comparator)
+            stream = self._client_stub.entrySet(r)
+
+            return _Stream(self._request_factory.get_serializer(), stream, _entry_producer)
 
     from .event import MapListener
 
@@ -1194,17 +1180,162 @@ async def watch_channel_state(session: Session) -> None:
         return
 
 
-class Stream(abc.ABC, typing.AsyncIterator[T]):
+class _Stream(abc.ABC, AsyncIterator[T]):
+    """
+    A simple AsyncIterator that wraps a Callable that produces iteration
+    elements.
+    """
 
-    def __init__(self, next_producer: typing.Callable[[], T]) -> None:
+    def __init__(
+        self,
+        serializer: Serializer,
+        stream: grpc.Channel.unary_stream,
+        next_producer: Callable[[Serializer, grpc.Channel.unary_stream], Awaitable[T]],
+    ) -> None:
         super().__init__()
-        self.next_producer = next_producer
+        # A function that may be called to produce a series of results
+        self._next_producer = next_producer
 
-    def __aiter__(self):
+        # the Serializer that should be used to deserialize results
+        self._serializer = serializer
+
+        # the gRPC stream providing results
+        self._stream = stream
+
+    def __aiter__(self) -> AsyncIterator[T]:
         return self
 
-    def __anext__(self):
-        return self.next_producer()
+    def __anext__(self) -> Awaitable[T]:
+        return self._next_producer(self._serializer, self._stream)
 
 
+# noinspection PyProtectedMember
+class _PagedStream(abc.ABC, AsyncIterator[T]):
+    """
+    An AsyncIterator that will stream results in pages.
+    """
 
+    def __init__(
+        self, client: NamedCacheClient[K, V], result_handler: Callable[[Serializer, Any], Any], keys: bool = False
+    ) -> None:
+        super().__init__()
+        # flag indicating that all pages have been processed
+        self._exhausted: bool = False
+
+        # the gRPC client
+        self._client: NamedCacheClient[K, V] = client
+
+        # the handler responsible for deserializing the result
+        self._result_handler: Callable[[Serializer, Any], Any] = result_handler
+
+        # the serializer to be used when deserializing streamed results
+        self._serializer: Serializer = client._request_factory.get_serializer()
+
+        # cookie that tracks page streaming; used for each new page request
+        self._cookie: bytes = bytes()
+
+        # the gRPC stream providing the results
+        self._stream: grpc.Channel.unary_stream = None
+
+        # flag indicating a new page has been loaded
+        self._new_page: bool = True
+
+        # flag indicating that pages will be keys only
+        self._keys: bool = keys
+
+    def __aiter__(self) -> AsyncIterator[T]:
+        return self
+
+    async def __anext__(self) -> T:
+        # keep the loop running to ensure we don't exit
+        # prematurely which would result in a None value
+        # being returned incorrectly between pages
+        while True:
+            if self._stream is None and not self._exhausted:
+                await self.__load_next_page()
+
+            if self._stream is None and self._exhausted:
+                raise StopAsyncIteration
+
+            async for item in self._stream:
+                if self._new_page:  # a new page has been loaded; the cookie will be the first result
+                    self._new_page = False
+                    self._cookie = item.value if self._keys else item.cookie
+                    if self._cookie == b"":
+                        self._exhausted = True  # processing the last page
+                    continue
+                else:
+                    return self._result_handler(self._serializer, item)
+
+            self._stream = None
+            if self._exhausted:
+                raise StopAsyncIteration
+
+    # noinspection PyProtectedMember
+    async def __load_next_page(self) -> None:
+        """
+        Requests the next page of results to be streamed.
+
+        :return: None
+        """
+        request: PageRequest = self._client._request_factory.page_request(self._cookie)
+        self._stream = self._get_stream(request)
+        self._new_page = True
+
+    def _get_stream(self, request: PageRequest) -> grpc.Channel.unary_stream:
+        """
+        Obtain the gRPC unary_stream for the provided PageRequest.
+
+        :param request: the PageRequest
+        :return: the gRPC unary_stream for the given request
+        """
+        client_stub: NamedCacheServiceStub = self._client._client_stub
+        return client_stub.nextKeySetPage(request) if self._keys else client_stub.nextEntrySetPage(request)
+
+
+def _scalar_deserializer(serializer: Serializer, item: Any) -> Any:
+    """
+    Helper method to deserialize a key or value returned in a stream.
+
+    :param serializer: the serializer that should be used
+    :param item: the key or value to deserialize
+    :return: the deserialized key or value
+    """
+    return serializer.deserialize(item.value)
+
+
+def _entry_deserializer(serializer: Serializer, item: Any) -> MapEntry[Any, Any]:
+    """
+    Helper method to deserialize entries returned in a stream.
+
+    :param serializer: the serializer that should be used to deserialize the entry
+    :param item: the entry
+    :return: the deserialized entry
+    """
+    return MapEntry(serializer.deserialize(item.key), serializer.deserialize(item.value))
+
+
+async def _scalar_producer(serializer: Serializer, stream: grpc.Channel.unary_stream) -> T:
+    """
+    Helper method to iterate over a stream and produce scalar results.
+
+    :param serializer: the serializer that should be used to deserialize the scalar value
+    :param stream: the gRPC stream
+    :return: one or more deserialized scalar values
+    """
+    async for item in stream:
+        return _scalar_deserializer(serializer, item)
+    raise StopAsyncIteration
+
+
+async def _entry_producer(serializer: Serializer, stream: grpc.Channel.unary_stream) -> MapEntry[K, V]:
+    """
+    Helper method to iterate over a stream and produce MapEntry instances
+    .
+    :param serializer: the serializer that should be used to deserialize the entry
+    :param stream: the gRPC stream
+    :return: one or more deserialized MapEntry instances
+    """
+    async for item in stream:
+        return _entry_deserializer(serializer, item)
+    raise StopAsyncIteration
