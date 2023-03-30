@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2023 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -25,6 +25,7 @@ from .messages_pb2 import (
     IsEmptyRequest,
     KeySetRequest,
     MapListenerRequest,
+    PageRequest,
     PutAllRequest,
     PutIfAbsentRequest,
     PutRequest,
@@ -284,6 +285,20 @@ class RequestFactory:
 
         if comparator is not None:
             r.comparator = self._serializer.serialize(comparator)
+
+        return r
+
+    def page_request(self, cookie: bytes) -> PageRequest:
+        """
+        Creates a gRPC PageRequest.
+
+        :param cookie: the cookie used for paging
+        :return: a new PageRequest
+        """
+
+        r: PageRequest = PageRequest(
+            scope=self._scope, cache=self._cache_name, format=self._serializer.format(), cookie=cookie
+        )
 
         return r
 

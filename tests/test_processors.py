@@ -7,7 +7,7 @@ from typing import Any, AsyncGenerator, Final
 import pytest
 import pytest_asyncio
 
-from coherence import NamedCache, Options, Session, TlsOptions
+from coherence import MapEntry, NamedCache, Options, Session, TlsOptions
 from coherence.extractor import ChainedExtractor, UniversalExtractor
 from coherence.filter import AlwaysFilter, EqualsFilter, Filter, NeverFilter, NotFilter, PresentFilter
 from coherence.processor import (
@@ -222,13 +222,17 @@ async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> 
 
     f = AlwaysFilter()  # This will always return True
     cp = ConditionalPutAll(f, dict([(k1, "only-one-one"), (k2, "only-two-two")]))
-    await cache.invoke_all(cp)
+    async for _ in cache.invoke_all(cp):
+        break  # ignore the results
+
     assert await cache.get(k1) == "only-one-one"
     assert await cache.get(k2) == "only-two-two"
 
     pf = PresentFilter()
     cp = ConditionalPutAll(NotFilter(pf), dict([("three", "only-three")]))
-    await cache.invoke_all(cp, {"one", "three"})
+    async for _ in cache.invoke_all(cp, {"one", "three"}):
+        break  # ignore the results
+
     assert await cache.get(k1) == "only-one-one"
     assert await cache.get(k2) == "only-two-two"
     assert await cache.get("three") == "only-three"
@@ -447,6 +451,9 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
     await cache.put(k2, versioned234)
 
     vpa = VersionedPutAll.create(dict([(k1, versioned123_update), (k2, versioned234_update)]))
-    await cache.invoke_all(vpa)
+    e: MapEntry[Any, Any]
+    async for e in cache.invoke_all(vpa):
+        break
+
     assert await cache.get(k1) == expected_versioned123_update
     assert await cache.get(k2) == expected_versioned234_update
