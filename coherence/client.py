@@ -916,7 +916,7 @@ class Session:
     """The default target address to connect to Coherence gRPC server."""
     DEFAULT_SCOPE: Final[str] = ""
     """The default scope."""
-    DEFAULT_REQUEST_TIMEOUT: Final[float] = 60.0
+    DEFAULT_REQUEST_TIMEOUT: Final[float] = 30.0
     """The default request timeout."""
     DEFAULT_FORMAT: Final[str] = "json"
     """The default serialization format"""
