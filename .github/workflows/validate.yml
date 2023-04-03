@@ -62,4 +62,5 @@ jobs:
       - name: Run test
         shell: bash
         run: |
+          set
           python -m poetry run ./tests/scripts/run-tests.sh
