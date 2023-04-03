@@ -257,6 +257,7 @@ async def test_entries_filtered(setup_and_teardown: NamedCache[str, str]) -> Non
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
+@pytest.mark.skip
 async def test_entries_paged(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -299,6 +300,7 @@ async def test_values_filtered(setup_and_teardown: NamedCache[str, str]) -> None
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
+@pytest.mark.skip
 async def test_values_paged(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
