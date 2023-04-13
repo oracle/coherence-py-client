@@ -4,7 +4,7 @@
 
 import os
 from decimal import Decimal
-from typing import Any, AsyncGenerator, Final, List, Tuple, TypeVar
+from typing import Any, AsyncGenerator, Final, List, Tuple, cast
 
 import pytest
 import pytest_asyncio
@@ -12,25 +12,17 @@ import pytest_asyncio
 from coherence import Aggregators, Filters, NamedCache, Options, Session, TlsOptions
 from coherence.aggregator import (
     AggregationResult,
-    DistinctValuesAggregator,
     EntryAggregator,
-    GroupAggregator,
     PriorityAggregator,
     RecordType,
-    ReducerAggregator,
     ReducerResult,
     Schedule,
     ScriptAggregator,
-    SumAggregator,
     Timeout,
     TopAggregator,
 )
 from coherence.serialization import JSONSerializer
 from tests.person import Person
-
-K = TypeVar("K", covariant=True)
-V = TypeVar("V", covariant=True)
-R = TypeVar("R", covariant=True)
 
 
 def get_session() -> Session:
@@ -113,7 +105,7 @@ async def test_min(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_sum(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    ag: SumAggregator = Aggregators.sum("age")
+    ag = Aggregators.sum("age")
     r: Decimal = await cache.aggregate(ag)
     assert r == (
         Person.Andy().age
@@ -163,7 +155,7 @@ async def test_count(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_distinct_values(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    ag: DistinctValuesAggregator[List[str]] = Aggregators.distinct("gender")
+    ag: EntryAggregator[List[str]] = Aggregators.distinct("gender")
     r: list[str] = await cache.aggregate(ag)
     assert sorted(r) == ["Female", "Male"]
 
@@ -195,7 +187,7 @@ async def test_top(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_group(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    ag: GroupAggregator[AggregationResult[str, int]] = Aggregators.group_by(
+    ag: EntryAggregator[AggregationResult[str, int]] = Aggregators.group_by(
         "gender", Aggregators.min("age"), Filters.always()
     )
 
@@ -219,10 +211,11 @@ async def test_group(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_priority(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    agg: PriorityAggregator[Decimal] = Aggregators.priority(Aggregators.sum("age"))
-    assert agg.execution_timeout_in_millis == Timeout.DEFAULT
-    assert agg.request_timeout_in_millis == Timeout.DEFAULT
-    assert agg.scheduling_priority == Schedule.STANDARD
+    agg: EntryAggregator[Decimal] = Aggregators.priority(Aggregators.sum("age"))
+    agg_actual: PriorityAggregator[Decimal] = cast(PriorityAggregator[Decimal], agg)
+    assert agg_actual.execution_timeout_in_millis == Timeout.DEFAULT
+    assert agg_actual.request_timeout_in_millis == Timeout.DEFAULT
+    assert agg_actual.scheduling_priority == Schedule.STANDARD
 
     r: Decimal = await cache.aggregate(agg)
     assert r == (
@@ -235,15 +228,16 @@ async def test_priority(setup_and_teardown: NamedCache[Any, Any]) -> None:
         + Person.Jim().age
     )
 
-    agg2 = Aggregators.priority(
+    agg2: EntryAggregator[Decimal] = Aggregators.priority(
         Aggregators.sum("age"),
         execution_timeout=Timeout.NONE,
         request_timeout=Timeout.NONE,
         scheduling_priority=Schedule.IMMEDIATE,
     )
-    assert agg2.execution_timeout_in_millis == Timeout.NONE
-    assert agg2.request_timeout_in_millis == Timeout.NONE
-    assert agg2.scheduling_priority == Schedule.IMMEDIATE
+    agg2_actual: PriorityAggregator[Decimal] = cast(PriorityAggregator[Decimal], agg2)
+    assert agg2_actual.execution_timeout_in_millis == Timeout.NONE
+    assert agg2_actual.request_timeout_in_millis == Timeout.NONE
+    assert agg2_actual.scheduling_priority == Schedule.IMMEDIATE
 
     filter = Filters.equals("gender", "Male")
     r = await cache.aggregate(agg, None, filter)
@@ -255,7 +249,7 @@ async def test_priority(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 def test_script() -> None:
-    agg: ScriptAggregator[Any] = Aggregators.script("py", "test_script.py", 0, "abc", 2, 4.0)
+    agg: EntryAggregator[Any] = Aggregators.script("py", "test_script.py", 0, "abc", 2, 4.0)
     serializer = JSONSerializer()
     j = serializer.serialize(agg)
 
@@ -295,7 +289,7 @@ async def test_query_recorder(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_reducer(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    agg: ReducerAggregator[ReducerResult[str]] = Aggregators.reduce("age")
+    agg: EntryAggregator[ReducerResult[str]] = Aggregators.reduce("age")
     f = Filters.between("age", 20, 30)
     my_result: ReducerResult[str] = await cache.aggregate(agg, None, f)
     print("\n" + str(my_result))

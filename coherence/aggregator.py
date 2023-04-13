@@ -574,7 +574,7 @@ class Aggregators:
     in lieu of direct construction of :func:`coherence.aggregator.EntryAggregator`  classes."""
 
     @staticmethod
-    def max(extractor_or_property: ExtractorExpression[T, E]) -> MaxAggregator[R]:
+    def max(extractor_or_property: ExtractorExpression[T, E]) -> EntryAggregator[R]:
         """
         Return an aggregator that calculates a maximum of the numeric values extracted from a set of entries in a Map.
 
@@ -584,7 +584,7 @@ class Aggregators:
         return MaxAggregator(extractor_or_property)
 
     @staticmethod
-    def min(extractor_or_property: ExtractorExpression[T, E]) -> MinAggregator[R]:
+    def min(extractor_or_property: ExtractorExpression[T, E]) -> EntryAggregator[R]:
         """
         Return an aggregator that calculates a minimum of the numeric values extracted from a set of entries in a Map.
 
@@ -594,7 +594,7 @@ class Aggregators:
         return MinAggregator(extractor_or_property)
 
     @staticmethod
-    def sum(extractor_or_property: ExtractorExpression[T, E]) -> SumAggregator:
+    def sum(extractor_or_property: ExtractorExpression[T, E]) -> EntryAggregator[Decimal]:
         """
         Return an aggregator that calculates a sum of the numeric values extracted from a set of entries in a Map.
 
@@ -604,7 +604,7 @@ class Aggregators:
         return SumAggregator(extractor_or_property)
 
     @staticmethod
-    def average(extractor_or_property: ExtractorExpression[T, E]) -> AverageAggregator:
+    def average(extractor_or_property: ExtractorExpression[T, E]) -> EntryAggregator[Decimal]:
         """
         Return an aggregator that calculates an average of the numeric values extracted from a set of entries in a Map.
 
@@ -615,7 +615,7 @@ class Aggregators:
         return AverageAggregator(extractor_or_property)
 
     @staticmethod
-    def distinct(extractor_or_property: ExtractorExpression[T, E]) -> DistinctValuesAggregator[R]:
+    def distinct(extractor_or_property: ExtractorExpression[T, E]) -> EntryAggregator[List[R]]:
         """
         Return an aggregator that calculates the set of distinct values from the entries in a Map.
 
@@ -625,7 +625,7 @@ class Aggregators:
         return DistinctValuesAggregator(extractor_or_property)
 
     @staticmethod
-    def count() -> CountAggregator:
+    def count() -> EntryAggregator[int]:
         """
         Return an aggregator that calculates a number of values in an entry set.
 
@@ -648,7 +648,7 @@ class Aggregators:
         extractor_or_property: ExtractorExpression[T, E],
         aggregator: EntryAggregator[Any],
         filter: Optional[Filter] = None,
-    ) -> GroupAggregator[AggregationResult[G, T]]:
+    ) -> EntryAggregator[AggregationResult[G, T]]:
         """
         Return a :func:`coherence.aggregator.GroupAggregator` based on a specified property or method name(s) and an
         :func:`coherence.aggregator.EntryAggregator`.
@@ -668,7 +668,7 @@ class Aggregators:
         execution_timeout: Timeout = Timeout.DEFAULT,
         request_timeout: Timeout = Timeout.DEFAULT,
         scheduling_priority: Schedule = Schedule.STANDARD,
-    ) -> PriorityAggregator[R]:
+    ) -> EntryAggregator[R]:
         """
         Return a new :func:`coherence.aggregator.PriorityAggregator` to control scheduling priority of an aggregation
         operation.
@@ -683,7 +683,7 @@ class Aggregators:
         return PriorityAggregator(aggregator, execution_timeout, request_timeout, scheduling_priority)
 
     @staticmethod
-    def script(language: str, script_name: str, characteristics: int = 0, *args: Any) -> ScriptAggregator[R]:
+    def script(language: str, script_name: str, characteristics: int = 0, *args: Any) -> EntryAggregator[R]:
         """
         Return an aggregator that is implemented in a script using the specified language.
 
@@ -696,7 +696,7 @@ class Aggregators:
         return ScriptAggregator(language, script_name, characteristics, *args)
 
     @staticmethod
-    def record(query_type: RecordType = RecordType.EXPLAIN) -> QueryRecorder:
+    def record(query_type: RecordType = RecordType.EXPLAIN) -> EntryAggregator[Any]:
         """
         Returns a new :func:`coherence.aggregator.QueryRecorder` aggregator which may be used is used to produce an
         object that contains an estimated or actual cost of the query execution for a given
@@ -710,7 +710,7 @@ class Aggregators:
         return QueryRecorder(query_type)
 
     @staticmethod
-    def reduce(extractor_or_property: ExtractorExpression[T, E]) -> ReducerAggregator[ReducerResult[K]]:
+    def reduce(extractor_or_property: ExtractorExpression[T, E]) -> EntryAggregator[ReducerResult[K]]:
         """
         Return an aggregator that will return the extracted value for each entry in the map.
 
