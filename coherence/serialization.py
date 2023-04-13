@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -105,6 +105,9 @@ class JavaProxyPickler(jsonpickle.Pickler):
         if isinstance(obj, int):
             if obj > self.MAX_NUMERIC or obj < self.MIN_NUMERIC:
                 return {"@class": "math.BigInt", "value": str(obj)}
+
+        if isinstance(obj, set):
+            return super()._flatten(list(obj))
 
         return super()._flatten(obj)
 

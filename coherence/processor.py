@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -10,6 +10,7 @@ from typing import Any, TypeVar
 from .extractor import (
     ChainedExtractor,
     CompositeUpdater,
+    ExtractorExpression,
     IdentityExtractor,
     UniversalExtractor,
     UniversalUpdater,
@@ -20,9 +21,11 @@ from .extractor import (
 from .filter import Filter
 from .serialization import mappings, proxy
 
-K = TypeVar("K", covariant=True)
-V = TypeVar("V", covariant=True)
-R = TypeVar("R", covariant=True)
+E = TypeVar("E")
+K = TypeVar("K")
+R = TypeVar("R")
+T = TypeVar("T")
+V = TypeVar("V")
 
 
 class EntryProcessor(ABC):
@@ -73,7 +76,7 @@ class ExtractorProcessor(EntryProcessor):
     For clustered caches using the ExtractorProcessor could significantly reduce the amount of network traffic.
     """
 
-    def __init__(self, value_extractor: ValueExtractor | str):
+    def __init__(self, value_extractor: ExtractorExpression[T, E]):
         """
         Construct an ExtractorProcessor using the given extractor or method name.
 
@@ -82,7 +85,7 @@ class ExtractorProcessor(EntryProcessor):
         """
         super().__init__()
         if value_extractor is None:
-            self.extractor: ValueExtractor = IdentityExtractor()
+            self.extractor: ValueExtractor[T, E] = IdentityExtractor()
         else:
             if isinstance(value_extractor, ValueExtractor):
                 self.extractor = value_extractor
@@ -95,7 +98,7 @@ class ExtractorProcessor(EntryProcessor):
                 raise ValueError("value_extractor cannot be any other type")
 
     @classmethod
-    def create(cls, method_or_field: ValueExtractor | str) -> ExtractorProcessor:
+    def create(cls, method_or_field: ExtractorExpression[T, E]) -> ExtractorProcessor:
         """
         Class method to Construct an ExtractorProcessor using the given extractor or method name.
 
@@ -147,7 +150,7 @@ class ConditionalProcessor(EntryProcessor):
         `true`; otherwise the result of the invocation will return `null`.
 
         :param filter: the filter
-        :param processor: the the entry processor
+        :param processor: the entry processor
         """
         super().__init__()
         self.filter = filter
@@ -159,7 +162,7 @@ class ConditionalProcessor(EntryProcessor):
         The class method to Construct a ConditionalProcessor for the specified filter and the processor.
 
         :param filter: the filter
-        :param processor: the the entry processor
+        :param processor: the entry processor
         :return: the constructed ConditionalProcessor
         """
         return cls(filter, processor)
@@ -238,7 +241,7 @@ class PropertyManipulator(ValueManipulator):
         self.property_name = property_name
         self.useIsPrefix = use_is
 
-    def get_extractor(self) -> ValueExtractor:
+    def get_extractor(self) -> ValueExtractor[T, E]:
         raise Exception("Method not implemented")
 
     def get_updator(self) -> ValueUpdater:
@@ -327,7 +330,7 @@ class ConditionalPut(EntryProcessor):
 
         :param filter: the filter to evaluate an entry
         :param value: a value to update an entry with
-        :param return_value: specifies whether or not the processor should return the current value in case it has
+        :param return_value: specifies whether the processor should return the current value in case it has
          not been updated
         """
         super().__init__()
@@ -379,7 +382,7 @@ class ConditionalPutAll(EntryProcessor):
 @mappings({"return_": "return"})
 class ConditionalRemove(EntryProcessor):
     """
-    ConditionalRemove is an EntryProcessor that performs an remove operation if the specified condition is satisfied.
+    ConditionalRemove is an EntryProcessor that performs n remove operation if the specified condition is satisfied.
 
     While the ConditionalRemove processing could be implemented via direct key-based NamedMap operations, it is more
     efficient and enforces concurrency control without explicit locking.
@@ -391,7 +394,7 @@ class ConditionalRemove(EntryProcessor):
         the entry evaluates to `true`. The result of the invocation does not return any result.
 
         :param filter: the filter to evaluate an entry
-        :param return_value: specifies whether or not the processor should return the current value if it has not
+        :param return_value: specifies whether the processor should return the current value if it has not
          been removed
         """
         super().__init__()
@@ -498,7 +501,7 @@ class PreloadRequest(EntryProcessor):
     """
     PreloadRequest is a simple EntryProcessor that performs a get call. No results are reported back to the caller.
 
-    The PreloadRequest process provides a means to "pre-load" an entry or a collection of entries into the cache
+    The PreloadRequest process provides a means to "preload" an entry or a collection of entries into the cache
     using the cache loader without incurring the cost of sending the value(s) over the network. If the corresponding
     entry (or entries) already exists in the cache, or if the cache does not have a loader, then invoking this
     EntryProcessor has no effect.
@@ -579,8 +582,8 @@ class VersionedPut(EntryProcessor):
         result of the invocation if it has not been updated (the versions did not match).
 
         :param value: a value to update an entry with
-        :param allow_insert: specifies whether or not an insert should be allowed (no currently existing value)
-        :param return_current: specifies whether or not the processor should return the current value in case it has
+        :param allow_insert: specifies whether an insert should be allowed (no currently existing value)
+        :param return_current: specifies whether the processor should return the current value in case it has
          not been updated
         """
         super().__init__()
@@ -594,8 +597,8 @@ class VersionedPut(EntryProcessor):
         Class method to construct a `VersionedPut`
 
         :param value: a value to update an entry with
-        :param allow_insert: specifies whether or not an insert should be allowed (no currently existing value)
-        :param return_current: specifies whether or not the processor should return the current value in case it has
+        :param allow_insert: specifies whether an insert should be allowed (no currently existing value)
+        :param return_current: specifies whether the processor should return the current value in case it has
          not been updated
         :return: an instance of `VersionedPut`
         """
@@ -619,8 +622,8 @@ class VersionedPutAll(EntryProcessor):
         optionally returns a map of entries that have not been updated (the versions did not match).
 
         :param the_map: a map of values to update entries with
-        :param allow_insert: specifies whether or not an insert should be allowed (no currently existing value)
-        :param return_current: specifies whether or not the processor should return the current value in case it has
+        :param allow_insert: specifies whether an insert should be allowed (no currently existing value)
+        :param return_current: specifies whether the processor should return the current value in case it has
          not been updated
         """
         super().__init__()
@@ -634,8 +637,8 @@ class VersionedPutAll(EntryProcessor):
         Class method to construct a VersionedPutAll processor
 
         :param the_map: a map of values to update entries with
-        :param allow_insert: specifies whether or not an insert should be allowed (no currently existing value)
-        :param return_current: specifies whether or not the processor should return the current value in case it has
+        :param allow_insert: specifies whether an insert should be allowed (no currently existing value)
+        :param return_current: specifies whether the processor should return the current value in case it has
         :return: an instance of VersionedPutAll processor
         """
         return cls(the_map, allow_insert, return_current)

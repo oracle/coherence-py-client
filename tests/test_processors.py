@@ -1,6 +1,7 @@
 # Copyright (c) 2022, 2023, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
+
 import os
 from typing import Any, AsyncGenerator, Final
 
@@ -9,7 +10,7 @@ import pytest_asyncio
 
 from coherence import MapEntry, NamedCache, Options, Session, TlsOptions
 from coherence.extractor import ChainedExtractor, UniversalExtractor
-from coherence.filter import AlwaysFilter, EqualsFilter, Filter, NeverFilter, NotFilter, PresentFilter
+from coherence.filter import Filter, Filters
 from coherence.processor import (
     ConditionalProcessor,
     ConditionalPut,
@@ -133,13 +134,13 @@ async def test_conditional(setup_and_teardown: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    f: Filter = EqualsFilter.create(UniversalExtractor.create("id"), 123)
+    f: Filter = Filters.equals("id", 123)
     cp = ConditionalProcessor(f, extract("my_str"))
     r: Any = await cache.invoke(k, cp)
     assert r == "123"
 
     await cache.put(k, v)
-    f = EqualsFilter.create(UniversalExtractor.create("id"), 1234)
+    f = Filters.equals("id", 1234)
     cp = ConditionalProcessor.create(f, extract("my_str"))
     r = await cache.invoke(k, cp)
     assert r is None
@@ -193,7 +194,7 @@ async def test_conditional_put(setup_and_teardown: NamedCache[Any, Any]) -> None
     v1 = "only-one"
     await cache.put(k1, v1)
 
-    f: Filter = NeverFilter()  # This will always return False
+    f: Filter = Filters.never()  # This will always return False
     cp = ConditionalPut(f, "only-one-one")
     r: Any = await cache.invoke(k1, cp)
     assert r == v1
@@ -201,7 +202,7 @@ async def test_conditional_put(setup_and_teardown: NamedCache[Any, Any]) -> None
     r = await cache.invoke(k1, cp)
     assert r is None
 
-    f = AlwaysFilter()  # This will always return True
+    f = Filters.always()  # This will always return True
     cp = ConditionalPut(f, "only-one-one")
     await cache.invoke(k1, cp)
     assert await cache.get(k1) == "only-one-one"
@@ -220,7 +221,7 @@ async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> 
     v2 = "only-two"
     await cache.put(k2, v2)
 
-    f = AlwaysFilter()  # This will always return True
+    f = Filters.always()  # This will always return True
     cp = ConditionalPutAll(f, dict([(k1, "only-one-one"), (k2, "only-two-two")]))
     async for _ in cache.invoke_all(cp):
         break  # ignore the results
@@ -228,8 +229,8 @@ async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> 
     assert await cache.get(k1) == "only-one-one"
     assert await cache.get(k2) == "only-two-two"
 
-    pf = PresentFilter()
-    cp = ConditionalPutAll(NotFilter(pf), dict([("three", "only-three")]))
+    pf = Filters.present()
+    cp = ConditionalPutAll(Filters.negate(pf), dict([("three", "only-three")]))
     async for _ in cache.invoke_all(cp, {"one", "three"}):
         break  # ignore the results
 
@@ -247,7 +248,7 @@ async def test_conditional_remove(setup_and_teardown: NamedCache[Any, Any]) -> N
     v1 = "only-one"
     await cache.put(k1, v1)
 
-    f: Filter = NeverFilter()  # This will always return False
+    f: Filter = Filters.never()  # This will always return False
     cp = ConditionalRemove(f)
     r: Any = await cache.invoke(k1, cp)
     assert r == v1
@@ -257,7 +258,7 @@ async def test_conditional_remove(setup_and_teardown: NamedCache[Any, Any]) -> N
     assert r is None
     assert await cache.get(k1) == "only-one"
 
-    f = AlwaysFilter()  # This will always return True
+    f = Filters.always()  # This will always return True
     cp = ConditionalRemove(f)
     r = await cache.invoke(k1, cp)
     assert r is None

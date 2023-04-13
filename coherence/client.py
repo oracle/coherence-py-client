@@ -388,7 +388,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
 
     @abc.abstractmethod
     async def aggregate(
-        self, aggregator: EntryAggregator, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
+        self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> R:
         """
         Perform an aggregating operation against the entries specified by the passed keys.
@@ -643,7 +643,7 @@ class NamedCacheClient(NamedCache[K, V]):
 
     @_pre_call_cache
     async def aggregate(
-        self, aggregator: EntryAggregator, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
+        self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> R:
         r = self._request_factory.aggregate_request(aggregator, keys, filter)
         results = await self._client_stub.aggregate(r)

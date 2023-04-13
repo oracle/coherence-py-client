@@ -5,26 +5,33 @@
 from __future__ import annotations
 
 from abc import ABC
+from decimal import Decimal
 from enum import Enum, IntEnum
-from typing import Any, Optional, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Tuple, TypeAlias, TypeVar
 
 from .comparator import Comparator, InverseComparator, SafeComparator
-from .extractor import IdentityExtractor, UniversalExtractor, ValueExtractor
+from .extractor import ExtractorExpression, IdentityExtractor, ValueExtractor, extract
 from .filter import Filter
 from .serialization import proxy
 
-K = TypeVar("K", covariant=True)
-V = TypeVar("V", covariant=True)
-R = TypeVar("R", covariant=True)
+E = TypeVar("E")
+G = TypeVar("G")
+K = TypeVar("K")
+R = TypeVar("R")
+T = TypeVar("T")
+V = TypeVar("V")
+
+ReducerResult: TypeAlias = Dict[K, Any | List[Any]]
+AggregationResult: TypeAlias = List[Tuple[G, T]]
 
 
-class EntryAggregator(ABC):
+class EntryAggregator(ABC, Generic[R]):
     """An EntryAggregator represents processing that can be directed to occur against some subset of the entries in
-    an cache, resulting in a aggregated result. Common examples of aggregation include functions such as min(),
+    n cache, resulting in an aggregated result. Common examples of aggregation include functions such as min(),
     max() and avg(). However, the concept of aggregation applies to any process that needs to evaluate a group of
     entries to come up with a single answer."""
 
-    def __init__(self, extractor_or_property: Optional[ValueExtractor | str] = None):
+    def __init__(self, extractor_or_property: Optional[ExtractorExpression[T, E]] = None):
         """
         Construct an AbstractAggregator that will aggregate values extracted from the cache entries.
 
@@ -39,21 +46,21 @@ class EntryAggregator(ABC):
             if isinstance(extractor_or_property, ValueExtractor):
                 self.extractor = extractor_or_property
             else:
-                self.extractor = UniversalExtractor(extractor_or_property)
+                self.extractor = extract(extractor_or_property)
 
-    def and_then(self, aggregator: EntryAggregator) -> CompositeAggregator:
+    def and_then(self, aggregator: EntryAggregator[R]) -> EntryAggregator[List[R]]:
         """
         Returns a :func:`coherence.aggregator.CompositeAggregator` comprised of this and the provided aggregator.
 
         :param aggregator: the next aggregator
         :return: a :func:`coherence.aggregator.CompositeAggregator` comprised of this and the provided aggregator
         """
-        return CompositeAggregator([self, aggregator])
+        return CompositeAggregator[R]([self, aggregator])
 
 
-class AbstractComparableAggregator(EntryAggregator):
+class AbstractComparableAggregator(EntryAggregator[R]):
     """Abstract aggregator that processes values extracted from a set of entries in a Map, with knowledge of how to
-    compare those values. There are two way to use the AbstractComparableAggregator:
+    compare those values. There are two-way to use the AbstractComparableAggregator:
 
     * All the extracted objects must implement the Java Comparable interface, or
 
@@ -62,7 +69,7 @@ class AbstractComparableAggregator(EntryAggregator):
 
     If there are no entries to aggregate, the returned result will be `None`."""
 
-    def __init__(self, extractor_or_property: ValueExtractor | str):
+    def __init__(self, extractor_or_property: ExtractorExpression[T, E]):
         """
         Construct an AbstractComparableAggregator that will aggregate Java-Comparable values extracted from the cache
         entries.
@@ -76,12 +83,12 @@ class AbstractComparableAggregator(EntryAggregator):
         super().__init__(extractor_or_property)
 
 
-class AbstractDoubleAggregator(EntryAggregator):
+class AbstractDoubleAggregator(EntryAggregator[Decimal]):
     """Abstract aggregator that processes numeric values extracted from a set of entries in a Map. All the extracted
     Number objects will be treated as Java `double` values and the result of the aggregator is a Double. If
     the set of entries is empty, a `None` result is returned."""
 
-    def __init__(self, extractor_or_property: ValueExtractor | str):
+    def __init__(self, extractor_or_property: ExtractorExpression[T, E]):
         """
         Construct an AbstractDoubleAggregator that will aggregate numeric values extracted from the cache entries.
 
@@ -95,12 +102,12 @@ class AbstractDoubleAggregator(EntryAggregator):
 
 
 @proxy("aggregator.CompositeAggregator")
-class CompositeAggregator(EntryAggregator):
+class CompositeAggregator(EntryAggregator[List[R]]):
     """`CompositeAggregator` provides an ability to execute a collection of aggregators against the same subset of
-    the entries in an Map, resulting in a list of corresponding aggregation results. The size of the returned list
+    the entries in a Map, resulting in a list of corresponding aggregation results. The size of the returned list
     will always be equal to the length of the aggregators list."""
 
-    def __init__(self, aggregators: list[EntryAggregator]):
+    def __init__(self, aggregators: list[EntryAggregator[R]]):
         """
         Construct a CompositeAggregator based on a specified :func:`coherence.aggregator.EntryAggregator` list.
 
@@ -114,12 +121,12 @@ class CompositeAggregator(EntryAggregator):
 
 
 @proxy("aggregator.ComparableMax")
-class MaxAggregator(AbstractComparableAggregator):
+class MaxAggregator(AbstractComparableAggregator[R]):
     """Calculates a maximum of numeric values extracted from a set of entries in a Map in a form of a numerical
     value. All the extracted objects will be treated as numerical values. If the set of entries is empty,
     a `None` result is returned."""
 
-    def __init__(self, extractor_or_property: ValueExtractor | str):
+    def __init__(self, extractor_or_property: ExtractorExpression[T, E]):
         """
         Constructs a new `MaxAggregator`.
 
@@ -133,12 +140,12 @@ class MaxAggregator(AbstractComparableAggregator):
 
 
 @proxy("aggregator.ComparableMin")
-class MinAggregator(AbstractComparableAggregator):
+class MinAggregator(AbstractComparableAggregator[R]):
     """Calculates a minimum of numeric values extracted from a set of entries in a Map in a form of a numerical
     value. All the extracted objects will be treated as numerical values. If the set of entries is empty,
     a `None` result is returned."""
 
-    def __init__(self, extractor_or_property: ValueExtractor | str):
+    def __init__(self, extractor_or_property: ExtractorExpression[T, E]):
         """
         Constructs a new `MinAggregator`.
 
@@ -153,12 +160,12 @@ class MinAggregator(AbstractComparableAggregator):
 
 @proxy("aggregator.BigDecimalSum")
 class SumAggregator(AbstractDoubleAggregator):
-    """Calculates an sum for values of any numeric type extracted from a set of entries in a Map in a form of a
+    """Calculates a sum for values of any numeric type extracted from a set of entries in a Map in a form of a
     numeric value.
 
     If the set of entries is empty, a 'None' result is returned."""
 
-    def __init__(self, extractor_or_property: ValueExtractor | str):
+    def __init__(self, extractor_or_property: ExtractorExpression[T, E]):
         """
         Constructs a new `SumAggregator`.
 
@@ -177,7 +184,7 @@ class AverageAggregator(AbstractDoubleAggregator):
     numerical value. All the extracted objects will be treated as numerical values. If the set of entries is empty,
     a `None` result is returned."""
 
-    def __init__(self, extractor_or_property: ValueExtractor | str):
+    def __init__(self, extractor_or_property: ExtractorExpression[T, E]):
         """
         Construct an `AverageAggregator` that will sum numeric values extracted from the cache entries.
 
@@ -191,7 +198,7 @@ class AverageAggregator(AbstractDoubleAggregator):
 
 
 @proxy("aggregator.Count")
-class CountAggregator(EntryAggregator):
+class CountAggregator(EntryAggregator[int]):
     """Calculates a number of values in an entry set."""
 
     def __init__(self) -> None:
@@ -202,7 +209,7 @@ class CountAggregator(EntryAggregator):
 
 
 @proxy("aggregator.DistinctValues")
-class DistinctValuesAggregator(AbstractDoubleAggregator):
+class DistinctValuesAggregator(EntryAggregator[R]):
     """Return the set of unique values extracted from a set of entries in a Map. If the set of entries is empty,
     an empty array is returned.
 
@@ -213,7 +220,7 @@ class DistinctValuesAggregator(AbstractDoubleAggregator):
     `GroupAggregator`, which in addition to collecting all distinct values or tuples, runs an aggregation against
     each distinct entry set (group)."""
 
-    def __init__(self, extractor_or_property: ValueExtractor | str):
+    def __init__(self, extractor_or_property: ExtractorExpression[T, E]):
         """
         Construct a DistinctValuesAggregator that will aggregate numeric values extracted from the cache entries.
 
@@ -227,7 +234,7 @@ class DistinctValuesAggregator(AbstractDoubleAggregator):
 
 
 @proxy("aggregator.TopNAggregator")
-class TopAggregator(EntryAggregator):
+class TopAggregator(Generic[E, R], EntryAggregator[List[R]]):
     """`TopAggregator` aggregates the top *N* extracted values into an array.  The extracted values must not be
     `None`, but do not need to be unique."""
 
@@ -235,7 +242,7 @@ class TopAggregator(EntryAggregator):
         self,
         number: int = 0,
         inverse: bool = False,
-        extractor: ValueExtractor = IdentityExtractor(),
+        extractor: ValueExtractor[Any, Any] = IdentityExtractor(),
         comparator: Optional[Comparator] = None,
         property_name: Optional[str] = None,
     ):
@@ -256,7 +263,7 @@ class TopAggregator(EntryAggregator):
         self.comparator = comparator
         self.property = property_name
 
-    def order_by(self, property_name: str) -> TopAggregator:
+    def order_by(self, property_name: str) -> TopAggregator[E, R]:
         """
         Order the results based on the values of the specified property.
 
@@ -268,7 +275,7 @@ class TopAggregator(EntryAggregator):
         return self
 
     @property
-    def ascending(self) -> TopAggregator:
+    def ascending(self) -> TopAggregator[E, R]:
         """
         Sort the returned values in ascending order.
 
@@ -280,7 +287,7 @@ class TopAggregator(EntryAggregator):
         return self
 
     @property
-    def descending(self) -> TopAggregator:
+    def descending(self) -> TopAggregator[E, R]:
         """
         Sort the returned values in descending order.
 
@@ -291,7 +298,7 @@ class TopAggregator(EntryAggregator):
             self.comparator = SafeComparator(self.property)
         return self
 
-    def extract(self, property_name: str) -> TopAggregator:
+    def extract(self, property_name: str) -> TopAggregator[E, R]:
         """
         The property name of the value to extract.
 
@@ -304,7 +311,7 @@ class TopAggregator(EntryAggregator):
 
 
 @proxy("aggregator.GroupAggregator")
-class GroupAggregator(EntryAggregator):
+class GroupAggregator(EntryAggregator[R]):
     """The `GroupAggregator` provides an ability to split a subset of entries in a Map into a collection of
     non-intersecting subsets and then aggregate them separately and independently. The splitting (grouping) is
     performed using the results of the underlying :func:`coherence.extractor.UniversalExtractor` in such a way that
@@ -324,7 +331,10 @@ class GroupAggregator(EntryAggregator):
     values (tuples) without performing any additional aggregation work."""
 
     def __init__(
-        self, extractor_or_property: ValueExtractor | str, aggregator: EntryAggregator, filter: Optional[Filter] = None
+        self,
+        extractor_or_property: ExtractorExpression[T, E],
+        aggregator: EntryAggregator[R],
+        filter: Optional[Filter] = None,
     ):
         """
         Construct a `GroupAggregator` based on a specified :func:`coherence.extractor.ValueExtractor` and underlying
@@ -370,7 +380,7 @@ class Schedule(Enum):
 
 
 @proxy("aggregator.PriorityAggregator")
-class PriorityAggregator(EntryAggregator):
+class PriorityAggregator(Generic[R], EntryAggregator[R]):
     """A `PriorityAggregator` is used to explicitly control the scheduling priority and timeouts for execution of
     EntryAggregator-based methods.
 
@@ -389,7 +399,7 @@ class PriorityAggregator(EntryAggregator):
 
     def __init__(
         self,
-        aggregator: EntryAggregator,
+        aggregator: EntryAggregator[R],
         execution_timeout: int = Timeout.DEFAULT,
         request_timeout: int = Timeout.DEFAULT,
         scheduling_priority: Schedule = Schedule.STANDARD,
@@ -465,7 +475,7 @@ class PriorityAggregator(EntryAggregator):
 
 
 @proxy("aggregator.ScriptAggregator")
-class ScriptAggregator(EntryAggregator):
+class ScriptAggregator(Generic[R], EntryAggregator[R]):
     """ScriptAggregator is a :func:`coherence.aggregator.EntryAggregator` that wraps a script written in one of the
     languages supported by Graal VM."""
 
@@ -495,8 +505,9 @@ class RecordType(Enum):
     """Produce an object that contains the actual cost of the query execution."""
 
 
+# TODO IMPROVE
 @proxy("aggregator.QueryRecorder")
-class QueryRecorder(EntryAggregator):
+class QueryRecorder(EntryAggregator[Any]):
     """This aggregator is used to produce an object that contains an estimated or actual cost of the query execution
     for a given :func:`coherence.filter.Filter`.
 
@@ -533,7 +544,7 @@ class QueryRecorder(EntryAggregator):
 
 
 @proxy("aggregator.ReducerAggregator")
-class ReducerAggregator(EntryAggregator):
+class ReducerAggregator(EntryAggregator[R]):
     """The `ReducerAggregator` is used to implement functionality similar to :func:`coherence.client.NamedMap.getAll(
     )` API.  Instead of returning the complete set of values, it will return a portion of value attributes based on
     the provided :func:`coherence.extractor.ValueExtractor`.
@@ -541,7 +552,7 @@ class ReducerAggregator(EntryAggregator):
     This aggregator could be used in combination with {@link MultiExtractor} allowing one to collect tuples that are
     a subset of the attributes of each object stored in the cache."""
 
-    def __init__(self, extractor_or_property: ValueExtractor | str):
+    def __init__(self, extractor_or_property: ExtractorExpression[T, E]):
         """
         Creates a new `ReducerAggregator`.
 
@@ -563,7 +574,7 @@ class Aggregators:
     in lieu of direct construction of :func:`coherence.aggregator.EntryAggregator`  classes."""
 
     @staticmethod
-    def max(extractor_or_property: ValueExtractor | str) -> MaxAggregator:
+    def max(extractor_or_property: ExtractorExpression[T, E]) -> MaxAggregator[R]:
         """
         Return an aggregator that calculates a maximum of the numeric values extracted from a set of entries in a Map.
 
@@ -573,7 +584,7 @@ class Aggregators:
         return MaxAggregator(extractor_or_property)
 
     @staticmethod
-    def min(extractor_or_property: ValueExtractor | str) -> MinAggregator:
+    def min(extractor_or_property: ExtractorExpression[T, E]) -> MinAggregator[R]:
         """
         Return an aggregator that calculates a minimum of the numeric values extracted from a set of entries in a Map.
 
@@ -583,7 +594,7 @@ class Aggregators:
         return MinAggregator(extractor_or_property)
 
     @staticmethod
-    def sum(extractor_or_property: ValueExtractor | str) -> SumAggregator:
+    def sum(extractor_or_property: ExtractorExpression[T, E]) -> SumAggregator:
         """
         Return an aggregator that calculates a sum of the numeric values extracted from a set of entries in a Map.
 
@@ -593,17 +604,18 @@ class Aggregators:
         return SumAggregator(extractor_or_property)
 
     @staticmethod
-    def average(extractor_or_property: ValueExtractor | str) -> AverageAggregator:
+    def average(extractor_or_property: ExtractorExpression[T, E]) -> AverageAggregator:
         """
-        Return an aggregator that calculates a average of the numeric values extracted from a set of entries in a Map.
+        Return an aggregator that calculates an average of the numeric values extracted from a set of entries in a Map.
 
         :param extractor_or_property: the extractor or method/property name to provide values for aggregation
-        :return: an aggregator that calculates a average of the numeric values extracted from a set of entries in a Map.
+        :return: an aggregator that calculates an average of the numeric values extracted from a
+                 set of entries in a Map.
         """
         return AverageAggregator(extractor_or_property)
 
     @staticmethod
-    def distinct(extractor_or_property: ValueExtractor | str) -> DistinctValuesAggregator:
+    def distinct(extractor_or_property: ExtractorExpression[T, E]) -> DistinctValuesAggregator[R]:
         """
         Return an aggregator that calculates the set of distinct values from the entries in a Map.
 
@@ -622,7 +634,7 @@ class Aggregators:
         return CountAggregator()
 
     @staticmethod
-    def top(count: int) -> TopAggregator:
+    def top(count: int) -> TopAggregator[Any, Any]:
         """
         Return an aggregator that aggregates the top *N* extracted values into an array.
 
@@ -633,10 +645,10 @@ class Aggregators:
 
     @staticmethod
     def group_by(
-        extractor_or_property: ValueExtractor | str,
-        aggregator: EntryAggregator,
+        extractor_or_property: ExtractorExpression[T, E],
+        aggregator: EntryAggregator[Any],
         filter: Optional[Filter] = None,
-    ) -> GroupAggregator:
+    ) -> GroupAggregator[AggregationResult[G, T]]:
         """
         Return a :func:`coherence.aggregator.GroupAggregator` based on a specified property or method name(s) and an
         :func:`coherence.aggregator.EntryAggregator`.
@@ -652,11 +664,11 @@ class Aggregators:
 
     @staticmethod
     def priority(
-        aggregator: EntryAggregator,
+        aggregator: EntryAggregator[R],
         execution_timeout: Timeout = Timeout.DEFAULT,
         request_timeout: Timeout = Timeout.DEFAULT,
         scheduling_priority: Schedule = Schedule.STANDARD,
-    ) -> PriorityAggregator:
+    ) -> PriorityAggregator[R]:
         """
         Return a new :func:`coherence.aggregator.PriorityAggregator` to control scheduling priority of an aggregation
         operation.
@@ -671,7 +683,7 @@ class Aggregators:
         return PriorityAggregator(aggregator, execution_timeout, request_timeout, scheduling_priority)
 
     @staticmethod
-    def script(language: str, script_name: str, characteristics: int = 0, *args: Any) -> ScriptAggregator:
+    def script(language: str, script_name: str, characteristics: int = 0, *args: Any) -> ScriptAggregator[R]:
         """
         Return an aggregator that is implemented in a script using the specified language.
 
@@ -698,7 +710,7 @@ class Aggregators:
         return QueryRecorder(query_type)
 
     @staticmethod
-    def reduce(extractor_or_property: ValueExtractor | str) -> ReducerAggregator:
+    def reduce(extractor_or_property: ExtractorExpression[T, E]) -> ReducerAggregator[ReducerResult[K]]:
         """
         Return an aggregator that will return the extracted value for each entry in the map.
 
