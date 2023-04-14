@@ -5,10 +5,9 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Any, TypeVar
+from typing import Any, List, Optional, TypeVar
 
 from .extractor import (
-    ChainedExtractor,
     CompositeUpdater,
     ExtractorExpression,
     IdentityExtractor,
@@ -17,6 +16,7 @@ from .extractor import (
     ValueExtractor,
     ValueManipulator,
     ValueUpdater,
+    extract,
 )
 from .filter import Filter
 from .serialization import mappings, proxy
@@ -90,23 +90,9 @@ class ExtractorProcessor(EntryProcessor):
             if isinstance(value_extractor, ValueExtractor):
                 self.extractor = value_extractor
             elif type(value_extractor) == str:
-                if value_extractor.find(".") == -1:
-                    self.extractor = UniversalExtractor(value_extractor)
-                else:
-                    self.extractor = ChainedExtractor(value_extractor)
+                self.extractor = extract(value_extractor)
             else:
                 raise ValueError("value_extractor cannot be any other type")
-
-    @classmethod
-    def create(cls, method_or_field: ExtractorExpression[T, E]) -> ExtractorProcessor:
-        """
-        Class method to Construct an ExtractorProcessor using the given extractor or method name.
-
-        :param method_or_field: the extractor.ValueExtractor to use by this filter or the name of the method to
-                          invoke via reflection
-        :return: the constructed ExtractorProcessor
-        """
-        return cls(method_or_field)
 
 
 @proxy("processor.CompositeProcessor")
@@ -156,17 +142,6 @@ class ConditionalProcessor(EntryProcessor):
         self.filter = filter
         self.processor = processor
 
-    @classmethod
-    def create(cls, filter: Filter, processor: EntryProcessor) -> ConditionalProcessor:
-        """
-        The class method to Construct a ConditionalProcessor for the specified filter and the processor.
-
-        :param filter: the filter
-        :param processor: the entry processor
-        :return: the constructed ConditionalProcessor
-        """
-        return cls(filter, processor)
-
 
 @proxy("util.NullEntryProcessor")
 class NullProcessor(EntryProcessor):
@@ -183,19 +158,6 @@ class NullProcessor(EntryProcessor):
         Construct a Null EntryProcessor.
         """
         super().__init__()
-        if NullProcessor.__instance is None:
-            NullProcessor.__instance = self
-
-    @classmethod
-    def get_instance(cls) -> Any:
-        """
-        Returns the singleton instance of Null EntryProcessor
-
-        :return: the singleton instance of Null EntryProcessor
-        """
-        if NullProcessor.__instance is None:
-            NullProcessor()
-        return NullProcessor.__instance
 
 
 class PropertyProcessor(EntryProcessor):
@@ -356,7 +318,7 @@ class ConditionalPutAll(EntryProcessor):
 
         or `putAllIfAbsent` could be done by inverting the filter:
 
-            >>> filter = NotFilter(PresentFilter.INSTANCE)
+            >>> filter = NotFilter(PresentFilter())
 
 
     Obviously, using more specific, fine-tuned filters may provide additional flexibility and efficiency allowing the
@@ -388,7 +350,7 @@ class ConditionalRemove(EntryProcessor):
     efficient and enforces concurrency control without explicit locking.
     """
 
-    def __init__(self, filter: Filter, return_value: bool = True):
+    def __init__(self, filter: Filter, return_value: bool = False):
         """
         Construct a ConditionalRemove processor that removes an NamedMap entry if and only if the filter applied to
         the entry evaluates to `true`. The result of the invocation does not return any result.
@@ -421,22 +383,7 @@ class MethodInvocationProcessor(EntryProcessor):
         super().__init__()
         self.methodName = method_name
         self.mutator = mutator
-        self.args = list()
-        for arg in args:
-            self.args.append(arg)
-
-    @classmethod
-    def create(cls, method_name: str, mutator: bool, *args: Any) -> MethodInvocationProcessor:
-        """
-        Class method to Construct MethodInvocationProcessor instance.
-
-        :param method_name: the name of the method to invoke
-        :param mutator: the flag specifying whether the method mutates the state of a target object, which implies
-         that the entry value should be updated after method invocation
-        :param args: the method arguments
-        :return: an instance of MethodInvocationProcessor
-        """
-        return cls(method_name, mutator, *args)
+        self.args: List[Any] = list(*args)
 
 
 @proxy("processor.TouchProcessor")
@@ -450,15 +397,6 @@ class TouchProcessor(EntryProcessor):
         Construct a `TouchProcessor`
         """
         super().__init__()
-
-    @classmethod
-    def create(cls) -> TouchProcessor:
-        """
-        Class method to construct a `TouchProcessor`
-
-        :return: an instance of `TouchProcessor`
-        """
-        return cls()
 
 
 @proxy("processor.ScriptProcessor")
@@ -479,21 +417,7 @@ class ScriptProcessor(EntryProcessor):
         super().__init__()
         self.name = name
         self.language = language
-        self.args = list()
-        for arg in args:
-            self.args.append(arg)
-
-    @classmethod
-    def create(cls, name: str, language: str, *args: Any) -> ScriptProcessor:
-        """
-        Class method to create an instance of :func:`coherence.processor.ScriptProcessor`
-
-        :param name: the name of the :func:`coherence.processor.EntryProcessor` that needs to be executed
-        :param language: the language the script is written. Currently, only `js` (for JavaScript) is supported
-        :param args: the arguments to be passed to the :func:`coherence.processor.EntryProcessor`
-        :return:
-        """
-        return cls(name, language, *args)
+        self.args: List[Any] = list(*args)
 
 
 @proxy("processor.PreloadRequest")
@@ -512,15 +436,6 @@ class PreloadRequest(EntryProcessor):
         Construct a PreloadRequest EntryProcessor.
         """
         super().__init__()
-
-    @classmethod
-    def create(cls) -> PreloadRequest:
-        """
-        Class method to create an instance of PreloadRequest EntryProcessor
-
-        :return: an instance of PreloadRequest EntryProcessor
-        """
-        return cls()
 
 
 @proxy("processor.UpdaterProcessor")
@@ -552,18 +467,6 @@ class UpdaterProcessor(EntryProcessor):
             self.updater = updater_or_property_name
         self.value = value
 
-    @classmethod
-    def create(cls, updater_or_property_name: ValueUpdater | str, value: Any) -> UpdaterProcessor:
-        """
-        Class method to construct an `UpdaterProcessor` based on the specified ValueUpdater.
-
-        :param updater_or_property_name: a ValueUpdater object or the method name; passing null will simpy replace
-         the entry's value with the specified one instead of updating it
-        :param value: the value to update the target entry with
-        :return: an instance of an `UpdaterProcessor`
-        """
-        return cls(updater_or_property_name, value)
-
 
 @proxy("processor.VersionedPut")
 @mappings({"return_": "return"})
@@ -590,19 +493,6 @@ class VersionedPut(EntryProcessor):
         self.value = value
         self.allowInsert = allow_insert
         self.return_ = return_current
-
-    @classmethod
-    def create(cls, value: Any, allow_insert: bool = False, return_current: bool = False) -> VersionedPut:
-        """
-        Class method to construct a `VersionedPut`
-
-        :param value: a value to update an entry with
-        :param allow_insert: specifies whether an insert should be allowed (no currently existing value)
-        :param return_current: specifies whether the processor should return the current value in case it has
-         not been updated
-        :return: an instance of `VersionedPut`
-        """
-        return cls(value, allow_insert, return_current)
 
 
 @proxy("processor.VersionedPutAll")
@@ -631,18 +521,71 @@ class VersionedPutAll(EntryProcessor):
         self.allowInsert = allow_insert
         self.return_ = return_current
 
-    @classmethod
-    def create(cls, the_map: dict[K, V], allow_insert: bool = False, return_current: bool = False) -> VersionedPutAll:
-        """
-        Class method to construct a VersionedPutAll processor
 
-        :param the_map: a map of values to update entries with
-        :param allow_insert: specifies whether an insert should be allowed (no currently existing value)
-        :param return_current: specifies whether the processor should return the current value in case it has
-        :return: an instance of VersionedPutAll processor
-        """
-        return cls(the_map, allow_insert, return_current)
+class Processors:
+    @staticmethod
+    def conditional_put(filter: Filter, value: V, return_: bool = False) -> EntryProcessor:
+        return ConditionalPut(filter, value, return_)
 
+    @staticmethod
+    def conditional_put_all(filter: Filter, values: dict[K, V]) -> EntryProcessor:
+        return ConditionalPutAll(filter, values)
 
-def extract(method_or_field: str) -> EntryProcessor:
-    return ExtractorProcessor(method_or_field)
+    @staticmethod
+    def conditional_remove(filter: Filter, return_: bool = False) -> EntryProcessor:
+        return ConditionalRemove(filter, return_)
+
+    @staticmethod
+    def extract(extractor: Optional[ExtractorExpression[T, E]] = None) -> EntryProcessor:
+        ext: ExtractorExpression[T, E] = extractor if extractor is not None else IdentityExtractor()
+        return ExtractorProcessor(ext)
+
+    @staticmethod
+    def increment(
+        name_or_manipulator: ValueManipulator | str, increment: int, post_increment: bool = False
+    ) -> EntryProcessor:
+        return NumberIncrementor(name_or_manipulator, increment, post_increment)
+
+    @staticmethod
+    def invoke_accessor(method_name: str, *args: Any) -> EntryProcessor:
+        return MethodInvocationProcessor(method_name, False, args)
+
+    @staticmethod
+    def invoke_mutator(method_name: str, *args: Any) -> EntryProcessor:
+        return MethodInvocationProcessor(method_name, True, args)
+
+    @staticmethod
+    def multiply(
+        name_or_manipulator: ValueManipulator | str, multiplier: int, post_multiplication: bool = False
+    ) -> EntryProcessor:
+        return NumberMultiplier(name_or_manipulator, multiplier, post_multiplication)
+
+    @staticmethod
+    def nop() -> EntryProcessor:
+        return NullProcessor()
+
+    @staticmethod
+    def preload() -> EntryProcessor:
+        return PreloadRequest()
+
+    @staticmethod
+    def script(name: str, language: str, *args: Any) -> EntryProcessor:
+        return ScriptProcessor(name, language, args)
+
+    @staticmethod
+    def touch() -> EntryProcessor:
+        return TouchProcessor()
+
+    @staticmethod
+    def update(updater_or_property_name: ValueUpdater | str, value: V) -> EntryProcessor:
+        return UpdaterProcessor(updater_or_property_name, value)
+
+    @staticmethod
+    def versioned_put(value: V, allow_insert: bool = False, return_current: bool = False) -> EntryProcessor:
+        return VersionedPut(value, allow_insert, return_current)
+
+    @staticmethod
+    def versioned_put_all(
+        values: dict[K, V], allow_insert: bool = False, return_current: bool = False
+    ) -> EntryProcessor:
+        return VersionedPutAll(values, allow_insert, return_current)
