@@ -173,6 +173,18 @@ async def test_get_and_put(setup_and_teardown: NamedCache[str, str | int | Perso
     assert r.address.city == Person.Andy().address.city
 
 
+@pytest.mark.asyncio
+async def test_object_as_key(setup_and_teardown: NamedCache[Person, Address]) -> None:
+    cache: NamedCache[Person, Address] = setup_and_teardown
+
+    k1: Person = Person.Andy()
+    v1: Address = k1.address
+    await cache.put(k1, v1)
+    r = await cache.get(k1)
+    assert type(r) == Address
+    assert r.city == "Miami"
+
+
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
 async def test_put_if_absent(setup_and_teardown: NamedCache[str, str]) -> None:
