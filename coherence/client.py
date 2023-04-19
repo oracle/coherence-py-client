@@ -820,18 +820,45 @@ class TlsOptions:
 
 
 class Options:
+    ENV_SERVER_ADDRESS = "COHERENCE_SERVER_ADDRESS"
+    ENV_REQUEST_TIMEOUT = "COHERENCE_CLIENT_REQUEST_TIMEOUT"
+
+    DEFAULT_ADDRESS: Final[str] = "localhost:1408"
+    """The default target address to connect to Coherence gRPC server."""
+    DEFAULT_SCOPE: Final[str] = ""
+    """The default scope."""
+    DEFAULT_REQUEST_TIMEOUT: Final[float] = 30.0
+    """The default request timeout."""
+    DEFAULT_FORMAT: Final[str] = "json"
+    """The default serialization format"""
+
     def __init__(
         self,
-        address: str,
-        scope: str,
-        request_timeout_seconds: float,
-        ser_format: str,
+        address: str = DEFAULT_ADDRESS,
+        scope: str = DEFAULT_SCOPE,
+        request_timeout_seconds: float = DEFAULT_REQUEST_TIMEOUT,
+        ser_format: str = DEFAULT_FORMAT,
         channel_options: Optional[Sequence[Tuple[str, Any]]] = None,
         tls_options: Optional[TlsOptions] = None,
     ) -> None:
-        self._address = address
+        addr = os.getenv(Options.ENV_SERVER_ADDRESS)
+        if addr is not None:
+            self._address = addr
+        else:
+            self._address = address
+
+        timeout = os.getenv(Options.ENV_REQUEST_TIMEOUT)
+        if timeout is not None:
+            time_out: float
+            try:
+                time_out = float(timeout)
+            except ValueError:
+                print(f"The value of {Options.ENV_REQUEST_TIMEOUT} cannot be converted to a float")
+            self._request_timeout_seconds = time_out
+        else:
+            self._request_timeout_seconds = request_timeout_seconds
+
         self._scope = scope
-        self._request_timeout_seconds = request_timeout_seconds
         self._ser_format = ser_format
 
         if channel_options is not None:
@@ -912,12 +939,6 @@ class Session:
 
     """
 
-    DEFAULT_ADDRESS: Final[str] = "localhost:1408"
-    """The default target address to connect to Coherence gRPC server."""
-    DEFAULT_SCOPE: Final[str] = ""
-    """The default scope."""
-    DEFAULT_REQUEST_TIMEOUT: Final[float] = 30.0
-    """The default request timeout."""
     DEFAULT_FORMAT: Final[str] = "json"
     """The default serialization format"""
 
@@ -931,9 +952,7 @@ class Session:
         if session_options is not None:
             self._session_options = session_options
         else:
-            self._session_options = Options(
-                Session.DEFAULT_ADDRESS, Session.DEFAULT_SCOPE, Session.DEFAULT_REQUEST_TIMEOUT, Session.DEFAULT_FORMAT
-            )
+            self._session_options = Options()
 
         self._tasks: Set[Task[None]] = set()
 
@@ -1279,6 +1298,7 @@ class _PagedStream(abc.ABC, AsyncIterator[T]):
         :return: None
         """
         request: PageRequest = self._client._request_factory.page_request(self._cookie)
+        print("### DEBUG: __load_next_page() called!")
         self._stream = self._get_stream(request)
         self._new_page = True
 
