@@ -101,12 +101,11 @@ async def test_min(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-@pytest.mark.skip
 async def test_sum(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
     ag = Aggregators.sum("age")
-    r: Decimal = await cache.aggregate(ag)
+    r = await cache.aggregate(ag)
     assert r == (
         Person.Andy().age
         + Person.Alice().age
@@ -207,7 +206,6 @@ async def test_group(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-@pytest.mark.skip
 async def test_priority(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
@@ -217,7 +215,7 @@ async def test_priority(setup_and_teardown: NamedCache[Any, Any]) -> None:
     assert agg_actual.request_timeout_in_millis == Timeout.DEFAULT
     assert agg_actual.scheduling_priority == Schedule.STANDARD
 
-    r: Decimal = await cache.aggregate(agg)
+    r = await cache.aggregate(agg)
     assert r == (
         Person.Andy().age
         + Person.Alice().age
