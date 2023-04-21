@@ -1,21 +1,28 @@
 # Copyright (c) 2022, 2023, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
-import decimal
+
 import os
-from typing import Any, AsyncGenerator, Final, TypeVar
+from decimal import Decimal
+from typing import Any, AsyncGenerator, Final, List, Tuple, cast
 
 import pytest
 import pytest_asyncio
 
 from coherence import Aggregators, Filters, NamedCache, Options, Session, TlsOptions
-from coherence.aggregator import RecordType, Schedule, ScriptAggregator, Timeout
+from coherence.aggregator import (
+    AggregationResult,
+    EntryAggregator,
+    PriorityAggregator,
+    RecordType,
+    ReducerResult,
+    Schedule,
+    ScriptAggregator,
+    Timeout,
+    TopAggregator,
+)
 from coherence.serialization import JSONSerializer
 from tests.person import Person
-
-K = TypeVar("K", covariant=True)
-V = TypeVar("V", covariant=True)
-R = TypeVar("R", covariant=True)
 
 
 def get_session() -> Session:
@@ -77,7 +84,7 @@ async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
 async def test_max(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    ag = Aggregators.max("age")
+    ag: EntryAggregator[int] = Aggregators.max("age")
     r: int = await cache.aggregate(ag)
     assert r == Person.Pat().age
 
@@ -87,7 +94,7 @@ async def test_max(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_min(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    ag = Aggregators.min("age")
+    ag: EntryAggregator[int] = Aggregators.min("age")
     r: int = await cache.aggregate(ag)
     assert r == Person.Alice().age
 
@@ -99,7 +106,7 @@ async def test_sum(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
     ag = Aggregators.sum("age")
-    r: float = await cache.aggregate(ag)
+    r: Decimal = await cache.aggregate(ag)
     assert r == (
         Person.Andy().age
         + Person.Alice().age
@@ -117,7 +124,7 @@ async def test_average(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
     ag = Aggregators.average("age")
-    r: decimal.Decimal = await cache.aggregate(ag)
+    r: Decimal = await cache.aggregate(ag)
     assert float(r) == round(
         (
             Person.Andy().age
@@ -148,7 +155,7 @@ async def test_count(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_distinct_values(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    ag = Aggregators.distinct("gender")
+    ag: EntryAggregator[List[str]] = Aggregators.distinct("gender")
     r: list[str] = await cache.aggregate(ag)
     assert sorted(r) == ["Female", "Male"]
 
@@ -158,7 +165,7 @@ async def test_distinct_values(setup_and_teardown: NamedCache[Any, Any]) -> None
 async def test_top(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    ag = Aggregators.top(2).order_by("age").ascending
+    ag: TopAggregator[int, Person] = Aggregators.top(2).order_by("age").ascending
     r: list[Person] = await cache.aggregate(ag)
     assert r == [Person.Alice(), Person.Andy()]
 
@@ -180,8 +187,11 @@ async def test_top(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_group(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    ag = Aggregators.group_by("gender", Aggregators.min("age"), Filters.always())
-    r: list[tuple[Any, Any]] = await cache.aggregate(ag)
+    ag: EntryAggregator[AggregationResult[str, int]] = Aggregators.group_by(
+        "gender", Aggregators.min("age"), Filters.always()
+    )
+
+    r: list[Tuple[Any, Any]] = await cache.aggregate(ag)
     print("\n" + str(r))
     assert r == {"Male": 25, "Female": 22}
 
@@ -201,12 +211,13 @@ async def test_group(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_priority(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    agg = Aggregators.priority(Aggregators.sum("age"))
-    assert agg.execution_timeout_in_millis == Timeout.DEFAULT
-    assert agg.request_timeout_in_millis == Timeout.DEFAULT
-    assert agg.scheduling_priority == Schedule.STANDARD
+    agg: EntryAggregator[Decimal] = Aggregators.priority(Aggregators.sum("age"))
+    agg_actual: PriorityAggregator[Decimal] = cast(PriorityAggregator[Decimal], agg)
+    assert agg_actual.execution_timeout_in_millis == Timeout.DEFAULT
+    assert agg_actual.request_timeout_in_millis == Timeout.DEFAULT
+    assert agg_actual.scheduling_priority == Schedule.STANDARD
 
-    r: float = await cache.aggregate(agg)
+    r: Decimal = await cache.aggregate(agg)
     assert r == (
         Person.Andy().age
         + Person.Alice().age
@@ -217,15 +228,16 @@ async def test_priority(setup_and_teardown: NamedCache[Any, Any]) -> None:
         + Person.Jim().age
     )
 
-    agg2 = Aggregators.priority(
+    agg2: EntryAggregator[Decimal] = Aggregators.priority(
         Aggregators.sum("age"),
         execution_timeout=Timeout.NONE,
         request_timeout=Timeout.NONE,
         scheduling_priority=Schedule.IMMEDIATE,
     )
-    assert agg2.execution_timeout_in_millis == Timeout.NONE
-    assert agg2.request_timeout_in_millis == Timeout.NONE
-    assert agg2.scheduling_priority == Schedule.IMMEDIATE
+    agg2_actual: PriorityAggregator[Decimal] = cast(PriorityAggregator[Decimal], agg2)
+    assert agg2_actual.execution_timeout_in_millis == Timeout.NONE
+    assert agg2_actual.request_timeout_in_millis == Timeout.NONE
+    assert agg2_actual.scheduling_priority == Schedule.IMMEDIATE
 
     filter = Filters.equals("gender", "Male")
     r = await cache.aggregate(agg, None, filter)
@@ -237,11 +249,11 @@ async def test_priority(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 def test_script() -> None:
-    agg = Aggregators.script("py", "test_script.py", 0, "abc", 2, 4.0)
+    agg: EntryAggregator[Any] = Aggregators.script("py", "test_script.py", 0, "abc", 2, 4.0)
     serializer = JSONSerializer()
     j = serializer.serialize(agg)
 
-    script_aggregator: ScriptAggregator = serializer.deserialize(j)
+    script_aggregator: ScriptAggregator[Any] = serializer.deserialize(j)
     assert script_aggregator.name == "test_script.py"
     assert script_aggregator.language == "py"
     assert script_aggregator.args == ["abc", 2, 4.0]
@@ -277,9 +289,9 @@ async def test_query_recorder(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_reducer(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    agg = Aggregators.reduce("age")
+    agg: EntryAggregator[ReducerResult[str]] = Aggregators.reduce("age")
     f = Filters.between("age", 20, 30)
-    my_result: dict[str, Any | list[dict[str, Any]]] = await cache.aggregate(agg, None, f)
+    my_result: ReducerResult[str] = await cache.aggregate(agg, None, f)
     print("\n" + str(my_result))
     assert my_result == {"Andy": 25, "Fiona": 29, "Alice": 22}
 

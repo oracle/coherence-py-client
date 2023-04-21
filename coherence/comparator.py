@@ -1,10 +1,11 @@
-# Copyright (c) 2022 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 from __future__ import annotations
 
 from abc import ABC
+from typing import Any
 
 from coherence.extractor import UniversalExtractor
 from coherence.serialization import proxy
@@ -33,4 +34,4 @@ class InverseComparator(Comparator):
 class ExtractorComparator(Comparator):
     def __init__(self, property_name: str) -> None:
         super().__init__()
-        self.extractor = UniversalExtractor(property_name)
+        self.extractor = UniversalExtractor[Any](property_name)

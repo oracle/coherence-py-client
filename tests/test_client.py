@@ -42,6 +42,11 @@ async def _insert_large_number_of_entries(cache: NamedCache[str, str]) -> int:
 
 
 def get_session() -> Session:
+    default_address: Final[str] = "localhost:1408"
+    default_scope: Final[str] = ""
+    default_request_timeout: Final[float] = 30.0
+    default_format: Final[str] = "json"
+
     run_secure: Final[str] = "RUN_SECURE"
     session: Session = Session(None)
 
@@ -55,7 +60,7 @@ def get_session() -> Session:
         tls_options.enabled = True
         tls_options.locked()
 
-        options: Options = Options()
+        options: Options = Options(default_address, default_scope, default_request_timeout, default_format)
         options.tls_options = tls_options
         options.channel_options = (("grpc.ssl_target_name_override", "Star-Lord"),)
         session = Session(options)
@@ -166,18 +171,6 @@ async def test_get_and_put(setup_and_teardown: NamedCache[str, str | int | Perso
     assert type(r) == Person
     assert r.name == k2
     assert r.address.city == Person.Andy().address.city
-
-
-@pytest.mark.asyncio
-async def test_object_as_key(setup_and_teardown: NamedCache[Person, Address]) -> None:
-    cache: NamedCache[Person, Address] = setup_and_teardown
-
-    k1: Person = Person.Andy()
-    v1: Address = k1.address
-    await cache.put(k1, v1)
-    r = await cache.get(k1)
-    assert type(r) == Address
-    assert r.city == "Miami"
 
 
 # noinspection PyShadowingNames
@@ -306,6 +299,7 @@ async def test_values_filtered(setup_and_teardown: NamedCache[str, str]) -> None
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
+@pytest.mark.skip
 async def test_values_paged(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 

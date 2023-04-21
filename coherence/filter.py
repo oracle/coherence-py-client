@@ -1,18 +1,20 @@
-# Copyright (c) 2022 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 from __future__ import annotations
 
 from abc import ABC
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Set, TypeVar
 
-from .extractor import UniversalExtractor, ValueExtractor
+from .extractor import ExtractorExpression, ValueExtractor, extract
 from .serialization import proxy
 
-K = TypeVar("K", covariant=True)
-V = TypeVar("V", covariant=True)
-R = TypeVar("R", covariant=True)
+E = TypeVar("E")
+K = TypeVar("K")
+R = TypeVar("R")
+T = TypeVar("T")
+V = TypeVar("V")
 
 
 class Filter(ABC):
@@ -22,7 +24,7 @@ class Filter(ABC):
         """
         super().__init__()
 
-    def and_(self, other: Filter) -> Filter:
+    def And(self, other: Filter) -> Filter:
         """
         Return a composed filter that represents a short-circuiting logical `AND` of this filter and another.  When
         evaluating the composed filter, if this filter is `false`, then the *other* filter is not evaluated.
@@ -36,7 +38,7 @@ class Filter(ABC):
         """
         return AndFilter(self, other)
 
-    def or_(self, other: Filter) -> Filter:
+    def Or(self, other: Filter) -> Filter:
         """
         Return a composed predicate that represents a short-circuiting logical `OR` of this predicate and another.
         When evaluating the composed predicate, if this predicate is `true`, then the *other* predicate is not
@@ -51,7 +53,7 @@ class Filter(ABC):
         """
         return OrFilter(self, other)
 
-    def xor_(self, other: Filter) -> Filter:
+    def Xor(self, other: Filter) -> Filter:
         """
         Return a composed predicate that represents a logical `XOR` of this predicate and another.
 
@@ -64,76 +66,12 @@ class Filter(ABC):
         return XorFilter(self, other)
 
 
-class Filters:
-    @staticmethod
-    def all(filters: list[Filter]) -> AllFilter:
-        """
-        Return a composite filter representing logical `AND` of all specified filters.
-
-        :param filters: a variable number of filters
-        :return: a composite filter representing logical `AND` of all specified filters
-        """
-        return AllFilter(filters)
-
-    @staticmethod
-    def always() -> AlwaysFilter:
-        """
-        Return a filter that always evaluates to true.
-
-        :return: a filter that always evaluates to true.
-        """
-        return AlwaysFilter()
-
-    @staticmethod
-    def any(filters: list[Filter]) -> AnyFilter:
-        """
-        Return a composite filter representing logical OR of all specified filters.
-
-        :param filters: a variable number of filters
-        :return: a composite filter representing logical `OR` of all specified filters
-        """
-        return AnyFilter(filters)
-
-    @staticmethod
-    def between(
-        extractor_or_method: ValueExtractor | str,
-        from_range: int,
-        to_range: int,
-        include_lower_bound: bool = False,
-        include_upper_bound: bool = False,
-    ) -> BetweenFilter:
-        """
-        Return a filter that tests if the extracted value is `between` the specified values (inclusive).
-
-        :param extractor_or_method: the {@link extractor.ValueExtractor} used by this filter or the name of the
-         method to invoke via reflection
-        :param from_range: the lower bound to compare the extracted value with
-        :param to_range:   the upper bound to compare the extracted value with
-        :param include_lower_bound: a flag indicating whether values matching the lower bound evaluate to `true`
-        :param include_upper_bound: a flag indicating whether values matching the upper bound evaluate to `true`
-        :return: a filter that tests if the extracted value is between the specified values
-        """
-        return BetweenFilter(extractor_or_method, from_range, to_range, include_lower_bound, include_upper_bound)
-
-    @staticmethod
-    def equals(extractor_or_method: ValueExtractor | str, value: Any) -> EqualsFilter:
-        """
-        Return a filter that tests for equality against the extracted value.
-
-        :param extractor_or_method: the {@link extractor.ValueExtractor} used by this filter or the name of the
-         method to invoke via reflection
-        :param value: the value to compare the extracted value with
-        :return: a filter that tests for equality
-        """
-        return EqualsFilter(extractor_or_method, value)
-
-
 class ExtractorFilter(Filter):
-    def __init__(self, extractor: ValueExtractor | str):
+    def __init__(self, extractor: ExtractorExpression[T, E]):
         """
         Construct an `ExtractorFilter` for the given {@link extractor.ValueExtractor}.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or a
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or a
          method name to make a {@link UniversalExtractor} for; this parameter can also be a dot-delimited sequence of
          method names which would result in an ExtractorFilter based on the {@link ChainedExtractor} that is based on
          an array of corresponding ReflectionExtractor objects
@@ -142,21 +80,18 @@ class ExtractorFilter(Filter):
         if isinstance(extractor, ValueExtractor):
             self.extractor = extractor
         elif type(extractor) == str:
-            if extractor.find(".") == -1:
-                self.extractor = UniversalExtractor(extractor)
-            else:
-                pass  # TODO for ChainedExtractor
+            self.extractor = extract(extractor)
         else:
             raise ValueError("extractor cannot be any other type")
 
 
 @proxy("filter.ComparisonFilter")
 class ComparisonFilter(ExtractorFilter):
-    def __init__(self, extractor: ValueExtractor | str, value: V):
+    def __init__(self, extractor: ExtractorExpression[T, E], value: V):
         """
         Construct a `ComparisonFilter`.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
@@ -166,152 +101,80 @@ class ComparisonFilter(ExtractorFilter):
 
 @proxy("filter.EqualsFilter")
 class EqualsFilter(ComparisonFilter):
-    def __init__(self, extractor: ValueExtractor | str, value: V):
+    def __init__(self, extractor: ExtractorExpression[T, E], value: V):
         """
         Construct an EqualsFilter for testing equality.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
         super().__init__(extractor, value)
-
-    @classmethod
-    def create(cls, extractor: ValueExtractor | str, value: Any) -> EqualsFilter:
-        """
-        Class method to construct an EqualsFilter
-
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
-         name of the method to invoke via reflection
-        :param value: the object to compare the result with
-        :return: an instance of EqualsFilter
-        """
-        return cls(extractor, value)
 
 
 @proxy("filter.NotEqualsFilter")
 class NotEqualsFilter(ComparisonFilter):
-    def __init__(self, extractor: ValueExtractor | str, value: V):
+    def __init__(self, extractor: ExtractorExpression[T, E], value: V):
         """
         Construct a `NotEqualsFilter` for testing inequality.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
         super().__init__(extractor, value)
-
-    @classmethod
-    def create(cls, extractor: ValueExtractor | str, value: Any) -> NotEqualsFilter:
-        """
-        Class method to construct a NotEqualsFilter instance
-
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
-         name of the method to invoke via reflection
-        :param value: the object to compare the result with
-        :return: an instance of :func:`coherence.filter.NotEqualsFilter`
-        """
-        return cls(extractor, value)
 
 
 @proxy("filter.GreaterFilter")
 class GreaterFilter(ComparisonFilter):
-    def __init__(self, extractor: ValueExtractor | str, value: V):
+    def __init__(self, extractor: ExtractorExpression[T, E], value: V):
         """
         Construct a `GreaterFilter` for testing `Greater` condition.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
         super().__init__(extractor, value)
-
-    @classmethod
-    def create(cls, extractor: ValueExtractor | str, value: Any) -> GreaterFilter:
-        """
-        Class method to construct a `GreaterFilter` instance
-
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
-         name of the method to invoke via reflection
-        :param value: the object to compare the result with
-        :return: an instance of :func:`coherence.filter.GreaterFilter`
-        """
-        return cls(extractor, value)
 
 
 @proxy("filter.GreaterEqualsFilter")
 class GreaterEqualsFilter(ComparisonFilter):
-    def __init__(self, extractor: ValueExtractor | str, value: V):
+    def __init__(self, extractor: ExtractorExpression[T, E], value: V):
         """
         Construct a `GreaterEqualFilter` for testing `Greater or Equal` condition.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
         super().__init__(extractor, value)
-
-    @classmethod
-    def create(cls, extractor: ValueExtractor | str, value: Any) -> GreaterEqualsFilter:
-        """
-        Class method to construct a `GreaterEqualsFilter` instance
-
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
-         name of the method to invoke via reflection
-        :param value: the object to compare the result with
-        :return: an instance of :func:`coherence.filter.GreaterEqualsFilter`
-        """
-        return cls(extractor, value)
 
 
 @proxy("filter.LessFilter")
 class LessFilter(ComparisonFilter):
-    def __init__(self, extractor: ValueExtractor | str, value: V):
+    def __init__(self, extractor: ExtractorExpression[T, E], value: V):
         """
         Construct a LessFilter for testing `Less` condition.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
         super().__init__(extractor, value)
-
-    @classmethod
-    def create(cls, extractor: ValueExtractor | str, value: Any) -> LessFilter:
-        """
-        Class method to construct a `LessFilter` instance
-
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
-         name of the method to invoke via reflection
-        :param value: the object to compare the result with
-        :return: an instance of :func:`coherence.filter.LessFilter`
-        """
-        return cls(extractor, value)
 
 
 @proxy("filter.LessEqualsFilter")
 class LessEqualsFilter(ComparisonFilter):
-    def __init__(self, extractor: ValueExtractor | str, value: V):
+    def __init__(self, extractor: ExtractorExpression[T, E], value: V):
         """
         Construct a `LessEqualsFilter` for testing `Less or Equals` condition.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
         super().__init__(extractor, value)
-
-    @classmethod
-    def create(cls, extractor: ValueExtractor | str, value: Any) -> LessEqualsFilter:
-        """
-        Class method to construct a `LessEqualsFilter` instance
-
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
-         name of the method to invoke via reflection
-        :param value: the object to compare the result with
-        :return: an instance of :func:`coherence.filter.LessEqualsFilter`
-        """
-        return cls(extractor, value)
 
 
 @proxy("filter.NotFilter")
@@ -325,61 +188,29 @@ class NotFilter(Filter):
         super().__init__()
         self.filter = filter
 
-    @classmethod
-    def create(cls, filter: Filter) -> NotFilter:
-        """
-        Class method to construct a `NotFilter` instance
-
-        :param filter: The Filter whose results are negated by this filter.
-        :return: an instance of :func:`coherence.filter.NotFilter`
-        """
-        return cls(filter)
-
 
 @proxy("filter.IsNullFilter")
 class IsNoneFilter(EqualsFilter):
-    def __init__(self, extractor_or_method: ValueExtractor | str):
+    def __init__(self, extractor_or_method: ExtractorExpression[T, E]):
         """
         Construct a `IsNoneFilter` for testing equality to `None`.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         """
         super().__init__(extractor_or_method, None)
-
-    @classmethod
-    def create(cls, extractor: ValueExtractor | str, value: Any = None) -> IsNoneFilter:
-        """
-        Class method to construct a `IsNoneFilter` instance
-
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
-         name of the method to invoke via reflection
-        :return: an instance of :func:`coherence.filter.IsNoneFilter`
-        """
-        return cls(extractor)
 
 
 @proxy("filter.IsNotNullFilter")
 class IsNotNoneFilter(NotEqualsFilter):
-    def __init__(self, extractor_or_method: ValueExtractor | str):
+    def __init__(self, extractor_or_method: ExtractorExpression[T, E]):
         """
         Construct a `IsNotNoneFilter` for testing inequality to `None`.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         """
         super().__init__(extractor_or_method, None)
-
-    @classmethod
-    def create(cls, extractor: ValueExtractor | str, value: Any = None) -> IsNotNoneFilter:
-        """
-        Class method to construct a `IsNotNoneFilter` instance
-
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
-         name of the method to invoke via reflection
-        :return: an instance of :func:`coherence.filter.IsNotNoneFilter`
-        """
-        return cls(extractor)
 
 
 @proxy("filter.AlwaysFilter")
@@ -391,19 +222,6 @@ class AlwaysFilter(Filter):
         Construct a Filter which always evaluates to `true`.
         """
         super().__init__()
-        if AlwaysFilter._instance is None:
-            AlwaysFilter._instance = self
-
-    @classmethod
-    def get_instance(cls) -> Any:
-        """
-        Return an instance of :func:`coherence.filter.AlwaysFilter`
-
-        :return: an instance of :func:`coherence.filter.AlwaysFilter`
-        """
-        if AlwaysFilter._instance is None:
-            AlwaysFilter()
-        return AlwaysFilter._instance
 
 
 @proxy("filter.NeverFilter")
@@ -415,19 +233,6 @@ class NeverFilter(Filter):
         Construct a Filter which always evaluates to `false`.
         """
         super().__init__()
-        if NeverFilter._instance is None:
-            NeverFilter._instance = self
-
-    @classmethod
-    def get_instance(cls) -> Any:
-        """
-        Return an instance of :func:`coherence.filter.NeverFilter`
-
-        :return: an instance of :func:`coherence.filter.NeverFilter`
-        """
-        if NeverFilter._instance is None:
-            NeverFilter()
-        return NeverFilter._instance
 
 
 class ArrayFilter(Filter):
@@ -515,7 +320,7 @@ class XorFilter(ArrayFilter):
 class BetweenFilter(AndFilter):
     def __init__(
         self,
-        extractor_or_method: ValueExtractor | str,
+        extractor_or_method: ExtractorExpression[T, E],
         from_range: int,
         to_range: int,
         include_lower_bound: bool = False,
@@ -530,50 +335,28 @@ class BetweenFilter(AndFilter):
         Construct a `BetweenFilter` for testing "Between" condition.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param from_range: the lower bound of the range
         :param to_range: the upper bound of the range
         :param include_lower_bound: a flag indicating whether values matching the lower bound evaluate to true
         :param include_upper_bound: a flag indicating whether values matching the upper bound evaluate to true
         """
         left = (
-            GreaterEqualsFilter.create(extractor_or_method, from_range)
+            GreaterEqualsFilter(extractor_or_method, from_range)
             if include_lower_bound
             else GreaterFilter(extractor_or_method, from_range)
         )
         right = (
-            LessEqualsFilter.create(extractor_or_method, to_range)
+            LessEqualsFilter(extractor_or_method, to_range)
             if include_upper_bound
             else LessFilter(extractor_or_method, to_range)
         )
         super().__init__(left, right)
 
-    @classmethod
-    def create(
-        cls,
-        extractor_or_method: ValueExtractor | str,
-        from_range: int,
-        to_range: int,
-        include_lower_bound: bool = False,
-        include_upper_bound: bool = False,
-    ) -> BetweenFilter:
-        """
-        Class method to create an instance of :func:`coherence.filter.BetweenFilter`
-
-        :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
-        :param from_range: the lower bound of the range
-        :param to_range: the upper bound of the range
-        :param include_lower_bound: a flag indicating whether values matching the lower bound evaluate to true
-        :param include_upper_bound: a flag indicating whether values matching the upper bound evaluate to true
-        :return: an instance of :func:`coherence.filter.BetweenFilter`
-        """
-        return cls(extractor_or_method, from_range, to_range, include_lower_bound, include_upper_bound)
-
 
 @proxy("filter.ContainsFilter")
 class ContainsFilter(ComparisonFilter):
-    def __init__(self, extractor_or_method: ValueExtractor | str, value: V):
+    def __init__(self, extractor_or_method: ExtractorExpression[T, E], value: V):
         """
         Filter which tests a collection or array value returned from a method invocation for containment of a given
         value.
@@ -581,27 +364,15 @@ class ContainsFilter(ComparisonFilter):
         Construct a `ContainsFilter` for testing containment of the given object.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param value: the object that a collection or array is tested to contain
         """
         super().__init__(extractor_or_method, value)
 
-    @classmethod
-    def create(cls, extractor_or_method: ValueExtractor | str, value: Any) -> ContainsFilter:
-        """
-        Class method to create an instance of :func:`coherence.filter.ContainsFilter`
-
-        :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
-        :param value: the object that a collection or array is tested to contain
-        :return: an instance of :func:`coherence.filter.ContainsFilter`
-        """
-        return cls(extractor_or_method, value)
-
 
 @proxy("filter.ContainsAnyFilter")
 class ContainsAnyFilter(ComparisonFilter):
-    def __init__(self, extractor_or_method: ValueExtractor | str, set_values: V):
+    def __init__(self, extractor_or_method: ExtractorExpression[T, E], values: Set[Any]):
         """
         Filter which tests Collection or Object array value returned from a method invocation for containment of any
         value in a Set.
@@ -609,27 +380,15 @@ class ContainsAnyFilter(ComparisonFilter):
         Construct an `ContainsAllFilter` for testing containment of any value within the given Set.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
-        :param set_values: the Set of values that a Collection or array is tested to contain
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
+        :param values: the Set of values that a Collection or array is tested to contain
         """
-        super().__init__(extractor_or_method, set_values)
-
-    @classmethod
-    def create(cls, extractor_or_method: ValueExtractor | str, set_values: Any) -> ContainsAnyFilter:
-        """
-        Class method to create an instance of :func:`coherence.filter.ContainsAnyFilter`
-
-        :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
-        :param set_values: the Set of values that a Collection or array is tested to contain
-        :return: an instance of :func:`coherence.filter.ContainsAnyFilter`
-        """
-        return cls(extractor_or_method, set_values)
+        super().__init__(extractor_or_method, values)
 
 
 @proxy("filter.ContainsAllFilter")
 class ContainsAllFilter(ComparisonFilter):
-    def __init__(self, extractor_or_method: ValueExtractor | str, set_values: V):
+    def __init__(self, extractor_or_method: ExtractorExpression[T, E], values: Set[Any]):
         """
         Filter which tests a Collection or array value returned from a method invocation for containment of all
         values in a Set.
@@ -637,55 +396,35 @@ class ContainsAllFilter(ComparisonFilter):
         Construct an `ContainsAllFilter` for testing containment of the given Set of values.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
-        :param set_values: the Set of values that a Collection or array is tested to contain
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
+        :param values: the Set of values that a Collection or array is tested to contain
         """
-        super().__init__(extractor_or_method, set_values)
-
-    @classmethod
-    def create(cls, extractor_or_method: ValueExtractor | str, set_values: Any) -> ContainsAllFilter:
-        """
-        Class method to create an instance of :func:`coherence.filter.ContainsAllFilter`
-
-        :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
-        :param set_values: the Set of values that a Collection or array is tested to contain
-        :return: an instance of :func:`coherence.filter.ContainsAllFilter`
-        """
-        return cls(extractor_or_method, set_values)
+        super().__init__(extractor_or_method, values)
 
 
 @proxy("filter.InFilter")
 class InFilter(ComparisonFilter):
-    def __init__(self, extractor_or_method: ValueExtractor | str, set_values: V):
+    def __init__(self, extractor_or_method: ExtractorExpression[T, E], values: Set[Any]):
         """
         Filter which checks whether the result of a method invocation belongs to a predefined set of values.
 
         Construct an `InFilter` for testing `In` condition.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
-        :param set_values: the Set of values that a Collection or array is tested to contain
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
+        :param values: the Set of values that a Collection or array is tested to contain
         """
-        super().__init__(extractor_or_method, set_values)
-
-    @classmethod
-    def create(cls, extractor_or_method: ValueExtractor | str, set_values: Any) -> InFilter:
-        """
-        Class method to create an instance of :func:`coherence.filter.InFilter`
-
-        :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
-        :param set_values: the Set of values that a Collection or array is tested to contain
-        :return: an instance of :func:`coherence.filter.InFilter`
-        """
-        return cls(extractor_or_method, set_values)
+        super().__init__(extractor_or_method, values)
 
 
 @proxy("filter.LikeFilter")
 class LikeFilter(ComparisonFilter):
     def __init__(
-        self, extractor_or_method: ValueExtractor | str, pattern: str, escape_char: str = "0", ignore_case: bool = False
+        self,
+        extractor_or_method: ExtractorExpression[T, E],
+        pattern: str,
+        escape_char: str = "0",
+        ignore_case: bool = False,
     ):
         """
         Filter which compares the result of a method invocation with a value for pattern match. A pattern can include
@@ -698,7 +437,7 @@ class LikeFilter(ComparisonFilter):
         Construct a `LikeFilter` for pattern match.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param pattern: the string pattern to compare the result with
         :param escape_char: the escape character for escaping `%` and `_`
         :param ignore_case: `true` to be case-insensitive
@@ -707,59 +446,31 @@ class LikeFilter(ComparisonFilter):
         self.escapeChar = escape_char
         self.ignoreCase = ignore_case
 
-    @classmethod
-    def create(
-        cls, extractor_or_method: ValueExtractor | str, pattern: str, escape_char: str = "0", ignore_case: bool = False
-    ) -> LikeFilter:
-        """
-        Class method to create an instance of :func:`coherence.filter.LikeFilter`
-
-        :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
-        :param pattern: the string pattern to compare the result with
-        :param escape_char: the escape character for escaping `%` and `_`
-        :param ignore_case: `true` to be case-insensitive
-        :return: an instance of :func:`coherence.filter.LikeFilter`
-        """
-        return cls(extractor_or_method, pattern, escape_char, ignore_case)
-
 
 @proxy("filter.RegexFilter")
 class RegexFilter(ComparisonFilter):
-    def __init__(self, extractor_or_method: ValueExtractor | str, regex: str):
+    def __init__(self, extractor_or_method: ExtractorExpression[T, E], regex: str):
         """
         Filter which uses the regular expression pattern match defined by the Java's `String.matches` contract. This
         implementation is not index aware and will not take advantage of existing indexes.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param regex: the regular expression to match the result with
         """
         super().__init__(extractor_or_method, regex)
 
-    @classmethod
-    def create(cls, extractor_or_method: ValueExtractor | str, regex: str) -> RegexFilter:
-        """
-        Class method to create an instance of :func:`coherence.filter.RegexFilter`
-
-        :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
-        :param regex: the regular expression to match the result with
-        :return: an instance of :func:`coherence.filter.RegexFilter`
-        """
-        return cls(extractor_or_method, regex)
-
 
 @proxy("filter.PredicateFilter")
 class PredicateFilter(ExtractorFilter):
-    def __init__(self, extractor_or_method: ValueExtractor | str, predicate: Any):
+    def __init__(self, extractor_or_method: ExtractorExpression[T, E], predicate: Any):
         """
-        A predicate based :func:`coherence.filter.ExtractorFilter`
+        A predicate based :class:`coherence.filter.ExtractorFilter`
 
-        Constructs a :func:`coherence.filter.PredicateFilter`
+        Constructs a :class:`coherence.filter.PredicateFilter`
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param predicate: predicate for testing the value. The object must have an '@class' attribute.
         """
         super().__init__(extractor_or_method)
@@ -775,28 +486,17 @@ class PresentFilter(Filter):
         Filter which returns true for entries that currently exist in a map.
 
         This Filter is intended to be used solely in combination with a
-        :func:`coherence.processor.ConditionalProcessor` and is unnecessary for standard
-        :func:`coherence.client.NamedMap` operations.
+        :class:`coherence.processor.ConditionalProcessor` and is unnecessary for standard
+        :class:`coherence.client.NamedMap` operations.
         """
         super().__init__()
         if PresentFilter._instance is None:
             PresentFilter._instance = self
 
-    @classmethod
-    def get_instance(cls) -> Any:
-        """
-        Returns an instance of :func:`coherence.filter.PresentFilter`
-
-        :return: an instance of :func:`coherence.filter.PresentFilter`
-        """
-        if PresentFilter._instance is None:
-            PresentFilter()
-        return PresentFilter._instance
-
 
 @proxy("filter.MapEventFilter")
 class MapEventFilter(Filter, Generic[K, V]):
-    INSERTED: int = 0x0001
+    INSERTED = 0x0001
     """This value indicates that insert events should be evaluated.
        The event will be fired if there is no filter specified or the
        filter evaluates to true for a new value."""
@@ -811,8 +511,30 @@ class MapEventFilter(Filter, Generic[K, V]):
        The event will be fired if there is no filter specified or the
        filter evaluates to true for an old value."""
 
+    UPDATED_ENTERED: int = 0x0008
+    """This value indicates that update events should be evaluated, but only if filter
+        evaluation is `false` for the old value and true for the new value. This corresponds to an item
+        that was not in a keySet filter result changing such that it would now
+        be in that keySet filter result."""
+
+    UPDATED_LEFT: int = 0x0010
+    """This value indicates that update events should be evaluated, but only if filter
+       evaluation is `true` for the old value and false for the new value. This corresponds to an item
+       that was in a keySet filter result changing such that it would no
+       longer be in that keySet filter result."""
+
+    UPDATED_WITHIN: int = 0x0020
+    """This value indicates that update events should be evaluated, but only if filter
+       evaluation is true for both the old and the new value. This corresponds to an item
+       that was in a keySet filter result changing but not leaving the keySet
+       filter result."""
+
     ALL: int = INSERTED | UPDATED | DELETED
     """This value indicates that all events should be evaluated."""
+
+    KEY_SET: int = INSERTED | DELETED | UPDATED_ENTERED | UPDATED_LEFT
+    """This value indicates that all events that would affect the result of
+       a NamedMap.keySet(Filter) query should be evaluated."""
 
     def __init__(self, mask: int, filter: Filter) -> None:
         """
@@ -822,7 +544,7 @@ class MapEventFilter(Filter, Generic[K, V]):
 
         Construct a MapEventFilter that evaluates MapEvent objects based on the specified combination of event types.
 
-        :param mask: combination of any of the E_* values or the filter passed previously to a keySet() query method
+        :param mask: combination of any E_* values or the filter passed previously to a keySet() query method
         :param filter: the filter used for evaluating event values
         """
         super().__init__()
@@ -840,3 +562,280 @@ class MapEventFilter(Filter, Generic[K, V]):
         """TODO DOCS"""
 
         return cls(cls.ALL, filter)
+
+
+class Filters:
+    @staticmethod
+    def all(filters: list[Filter]) -> Filter:
+        """
+        Return a composite filter representing logical `AND` of all specified filters.
+
+        :param filters: a variable number of filters
+        :return: a composite filter representing logical `AND` of all specified filters
+        """
+        return AllFilter(filters)
+
+    @staticmethod
+    def always() -> Filter:
+        """
+        Return a filter that always evaluates to true.
+
+        :return: a filter that always evaluates to true.
+        """
+        return AlwaysFilter()
+
+    @staticmethod
+    def any(filters: list[Filter]) -> Filter:
+        """
+        Return a composite filter representing logical OR of all specified filters.
+
+        :param filters: a variable number of filters
+        :return: a composite filter representing logical `OR` of all specified filters
+        """
+        return AnyFilter(filters)
+
+    @staticmethod
+    def array_contains(extractor_or_method: ExtractorExpression[T, E], value: V) -> Filter:
+        """
+        Return a filter that tests if the extracted array contains the specified value.
+
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
+               method to invoke via reflection
+        :param value: the object that a Collection or Object array is tested to contain
+        :return: a filter that tests if the extracted array contains the specified value
+        """
+        return ContainsFilter(extractor_or_method, value)
+
+    @staticmethod
+    def array_contains_all(extractor_or_method: ExtractorExpression[T, E], values: Set[Any]) -> Filter:
+        """
+        Return a filter that tests if the extracted array contains `all` of the specified values.
+
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
+               method to invoke via reflection
+        :param values: the set of objects that a Collection or Object array is tested to contain
+        :return: a filter that tests if the extracted array contains `all` of the specified values
+        """
+        return ContainsAllFilter(extractor_or_method, values)
+
+    @staticmethod
+    def array_contains_any(extractor_or_method: ExtractorExpression[T, E], values: Set[Any]) -> Filter:
+        """
+        Return a filter that tests if the extracted array contains `any` of the specified values.
+
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
+               method to invoke via reflection
+        :param values: the set of objects that a Collection or Object array is tested to contain
+        :return: a filter that tests if the extracted array contains `any` of the specified values
+        """
+        return ContainsAllFilter(extractor_or_method, values)
+
+    @staticmethod
+    def between(
+        extractor_or_method: ExtractorExpression[T, E],
+        from_range: int,
+        to_range: int,
+        include_lower_bound: bool = False,
+        include_upper_bound: bool = False,
+    ) -> Filter:
+        """
+        Return a filter that tests if the extracted value is `between` the specified values (inclusive).
+
+        :param extractor_or_method: the {@link extractor.ValueExtractor} used by this filter or the name of the
+         method to invoke via reflection
+        :param from_range: the lower bound to compare the extracted value with
+        :param to_range:   the upper bound to compare the extracted value with
+        :param include_lower_bound: a flag indicating whether values matching the lower bound evaluate to `true`
+        :param include_upper_bound: a flag indicating whether values matching the upper bound evaluate to `true`
+        :return: a filter that tests if the extracted value is between the specified values
+        """
+        return BetweenFilter(extractor_or_method, from_range, to_range, include_lower_bound, include_upper_bound)
+
+    @staticmethod
+    def contains(extractor_or_method: ExtractorExpression[T, E], value: V) -> Filter:
+        """
+        Return a filter that tests if the extracted collection contains the specified value.
+
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
+               method to invoke via reflection
+        :param value: the object that a Collection or Object array is tested to contain
+        :return: a filter that tests if the extracted collection contains the specified value
+        """
+        return ContainsFilter(extractor_or_method, value)
+
+    @staticmethod
+    def contains_all(extractor_or_method: ExtractorExpression[T, E], values: Set[Any]) -> Filter:
+        """
+        Return a filter that tests if the extracted collection contains `all` of the specified values.
+
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
+               method to invoke via reflection
+        :param values: the set of objects that a Collection or Object array is tested to contain
+        :return: a filter that tests if the extracted collection contains `all` of the specified values
+        """
+        return ContainsAllFilter(extractor_or_method, values)
+
+    @staticmethod
+    def contains_any(extractor_or_method: ExtractorExpression[T, E], values: Set[Any]) -> Filter:
+        """
+        Return a filter that tests if the extracted collection contains `any` of the specified values.
+
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
+               method to invoke via reflection
+        :param values: the set of objects that a Collection or Object array is tested to contain
+        :return: a filter that tests if the extracted collection contains `any` of the specified values
+        """
+        return ContainsAnyFilter(extractor_or_method, values)
+
+    @staticmethod
+    def equals(extractor_or_method: ExtractorExpression[T, E], value: Any) -> Filter:
+        """
+        Return a filter that tests for equality against the extracted value.
+
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
+               method to invoke via reflection
+        :param value: the value to compare the extracted value with
+        :return: a filter that tests for equality
+        """
+        return EqualsFilter(extractor_or_method, value)
+
+    @staticmethod
+    def event(filter: Filter, mask: int = MapEventFilter.KEY_SET) -> Filter:
+        """
+        Returns a filter that may be passed to a :class:`event.MapListener` to restrict the events sent
+        to the listener to a subset of the notifications emitted by the map.
+
+        :param filter: the filter used to evaluate event values
+        :param mask: the event mask
+        :return: a filter that may be passed to a :class:`event.MapListener` to restrict the events sent
+                 to the listener to a subset of the notifications emitted by the map
+        """
+
+        return MapEventFilter(mask, filter)
+
+    @staticmethod
+    def greater(extractor_or_method: ExtractorExpression[T, E], value: Any) -> Filter:
+        """
+
+        :param extractor_or_method:
+        :param value:
+        :return:
+        """
+        return GreaterFilter(extractor_or_method, value)
+
+    @staticmethod
+    def greater_equals(extractor_or_method: ExtractorExpression[T, E], value: Any) -> Filter:
+        """
+
+        :param extractor_or_method:
+        :param value:
+        :return:
+        """
+        return GreaterEqualsFilter(extractor_or_method, value)
+
+    @staticmethod
+    def is_in(extractor_or_method: ExtractorExpression[T, E], values: Set[Any]) -> Filter:
+        """
+
+        :param extractor_or_method:
+        :param values:
+        :return:
+        """
+        return InFilter(extractor_or_method, values)
+
+    @staticmethod
+    def is_not_none(extractor_or_method: ExtractorExpression[T, E]) -> Filter:
+        """
+
+        :param extractor_or_method:
+        :return:
+        """
+        return IsNotNoneFilter(extractor_or_method)
+
+    @staticmethod
+    def is_none(extractor_or_method: ExtractorExpression[T, E]) -> Filter:
+        """
+
+        :param extractor_or_method:
+        :return:
+        """
+        return IsNoneFilter(extractor_or_method)
+
+    @staticmethod
+    def less(extractor_or_method: ExtractorExpression[T, E], value: Any) -> Filter:
+        """
+
+        :param extractor_or_method:
+        :param value:
+        :return:
+        """
+        return LessFilter(extractor_or_method, value)
+
+    @staticmethod
+    def less_equals(extractor_or_method: ExtractorExpression[T, E], value: Any) -> Filter:
+        """
+
+        :param extractor_or_method:
+        :param value:
+        :return:
+        """
+        return LessEqualsFilter(extractor_or_method, value)
+
+    @staticmethod
+    def like(
+        extractor_or_method: ExtractorExpression[T, E], pattern: str, escape: str = "0", ignore_case: bool = False
+    ) -> Filter:
+        """
+
+        :param extractor_or_method:
+        :param pattern:
+        :param escape:
+        :param ignore_case:
+        :return:
+        """
+        return LikeFilter(extractor_or_method, pattern, escape, ignore_case)
+
+    @staticmethod
+    def negate(filter: Filter) -> Filter:
+        """
+
+        :param filter:
+        :return:
+        """
+        return NotFilter(filter)
+
+    @staticmethod
+    def never() -> Filter:
+        """
+
+        :return:
+        """
+        return NeverFilter()
+
+    @staticmethod
+    def not_equals(extractor_or_method: ExtractorExpression[T, E], value: Any) -> Filter:
+        """
+
+        :param extractor_or_method:
+        :param value:
+        :return:
+        """
+        return NotEqualsFilter(extractor_or_method, value)
+
+    @staticmethod
+    def present() -> Filter:
+        """
+
+        :return:
+        """
+        return PresentFilter()
+
+    @staticmethod
+    def regex(extractor_or_method: ExtractorExpression[T, E], regex: str) -> Filter:
+        """
+
+        :param extractor_or_method:
+        :param regex:
+        :return:
+        """
+        return RegexFilter(extractor_or_method, regex)

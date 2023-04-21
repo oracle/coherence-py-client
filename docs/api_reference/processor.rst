@@ -9,6 +9,12 @@ coherence.processor
 .. toctree::
    :maxdepth: 4
 
+Processors
+---------------
+.. autoclass:: coherence.processor.Processors
+    :show-inheritance:
+    :members:
+
 EntryProcessor
 --------------
 .. autoclass:: coherence.processor.EntryProcessor

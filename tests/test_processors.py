@@ -1,6 +1,7 @@
 # Copyright (c) 2022, 2023, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
+
 import os
 from typing import Any, AsyncGenerator, Final
 
@@ -8,26 +9,8 @@ import pytest
 import pytest_asyncio
 
 from coherence import MapEntry, NamedCache, Options, Session, TlsOptions
-from coherence.extractor import ChainedExtractor, UniversalExtractor
-from coherence.filter import AlwaysFilter, EqualsFilter, Filter, NeverFilter, NotFilter, PresentFilter
-from coherence.processor import (
-    ConditionalProcessor,
-    ConditionalPut,
-    ConditionalPutAll,
-    ConditionalRemove,
-    ExtractorProcessor,
-    MethodInvocationProcessor,
-    NullProcessor,
-    NumberIncrementor,
-    NumberMultiplier,
-    PreloadRequest,
-    ScriptProcessor,
-    TouchProcessor,
-    UpdaterProcessor,
-    VersionedPut,
-    VersionedPutAll,
-    extract,
-)
+from coherence.filter import Filter, Filters
+from coherence.processor import EntryProcessor, PreloadRequest, Processors, ScriptProcessor, TouchProcessor
 from coherence.serialization import JSONSerializer
 from tests.address import Address
 from tests.person import Person
@@ -84,24 +67,24 @@ async def test_extractor(setup_and_teardown: NamedCache[Any, Any]) -> None:
     v2 = "only-two"
     await cache.put(k2, v2)
 
-    r: Any = await cache.invoke(k2, extract("length()"))
+    r: Any = await cache.invoke(k2, Processors.extract("length()"))
     assert r == len(v2)
 
-    r = await cache.invoke(k2, extract("isEmpty()"))
+    r = await cache.invoke(k2, Processors.extract("isEmpty()"))
     assert r is False
 
-    r = await cache.invoke(k2, extract("toUpperCase()"))
+    r = await cache.invoke(k2, Processors.extract("toUpperCase()"))
     assert r == v2.upper()
 
     k3 = Person.Andy().name
     v3 = Person.Andy()
     await cache.put(k3, v3)
-    r = await cache.invoke(k3, ExtractorProcessor(UniversalExtractor("name")))
+    r = await cache.invoke(k3, Processors.extract("name"))
     assert r == k3
-    r = await cache.invoke(k3, ExtractorProcessor(UniversalExtractor("address")))
+    r = await cache.invoke(k3, Processors.extract("address"))
     assert type(r) == Address
     assert r.zipcode == v3.address.zipcode
-    r = await cache.invoke(k3, ExtractorProcessor(ChainedExtractor("address.zipcode")))
+    r = await cache.invoke(k3, Processors.extract("address.zipcode"))
     assert r == v3.address.zipcode
 
 
@@ -113,14 +96,14 @@ async def test_composite(setup_and_teardown: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    cp = extract("id").and_then(extract("my_str"))
+    cp = Processors.extract("id").and_then(Processors.extract("my_str"))
     r: Any = await cache.invoke(k, cp)
     assert r == [123, "123"]
 
     k3 = Person.Pat().name
     v3 = Person.Pat()
     await cache.put(k3, v3)
-    cp = extract("weight").and_then(extract("address.zipcode"))
+    cp = Processors.extract("weight").and_then(Processors.extract("address.zipcode"))
     r = await cache.invoke(k3, cp)
     assert r == [Person.Pat().weight, Person.Pat().address.zipcode]
 
@@ -133,14 +116,12 @@ async def test_conditional(setup_and_teardown: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    f: Filter = EqualsFilter.create(UniversalExtractor.create("id"), 123)
-    cp = ConditionalProcessor(f, extract("my_str"))
+    cp = Processors.extract("my_str").when(Filters.equals("id", 123))
     r: Any = await cache.invoke(k, cp)
     assert r == "123"
 
     await cache.put(k, v)
-    f = EqualsFilter.create(UniversalExtractor.create("id"), 1234)
-    cp = ConditionalProcessor.create(f, extract("my_str"))
+    cp = Processors.extract("my_str").when(Filters.equals("id", 1234))
     r = await cache.invoke(k, cp)
     assert r is None
 
@@ -153,7 +134,7 @@ async def test_null(setup_and_teardown: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    cp = NullProcessor.get_instance()
+    cp = Processors.nop()
     r: Any = await cache.invoke(k, cp)
     assert r is True
 
@@ -166,7 +147,7 @@ async def test_multiplier(setup_and_teardown: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    cp = NumberMultiplier("ival", 2)
+    cp = Processors.multiply("ival", 2)
     r: Any = await cache.invoke(k, cp)
     assert r == 246
 
@@ -179,7 +160,7 @@ async def test_incrementor(setup_and_teardown: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    cp = NumberIncrementor("ival", 2)
+    cp = Processors.increment("ival", 2)
     r: Any = await cache.invoke(k, cp)
     assert r == 125
 
@@ -193,16 +174,16 @@ async def test_conditional_put(setup_and_teardown: NamedCache[Any, Any]) -> None
     v1 = "only-one"
     await cache.put(k1, v1)
 
-    f: Filter = NeverFilter()  # This will always return False
-    cp = ConditionalPut(f, "only-one-one")
+    f: Filter = Filters.never()  # This will always return False
+    cp = Processors.conditional_put(f, "only-one-one", True)
     r: Any = await cache.invoke(k1, cp)
     assert r == v1
-    cp = ConditionalPut(f, "only-one-one", False)
+    cp = Processors.conditional_put(f, "only-one-one", False)
     r = await cache.invoke(k1, cp)
     assert r is None
 
-    f = AlwaysFilter()  # This will always return True
-    cp = ConditionalPut(f, "only-one-one")
+    f = Filters.always()  # This will always return True
+    cp = Processors.conditional_put(f, "only-one-one")
     await cache.invoke(k1, cp)
     assert await cache.get(k1) == "only-one-one"
 
@@ -220,16 +201,16 @@ async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> 
     v2 = "only-two"
     await cache.put(k2, v2)
 
-    f = AlwaysFilter()  # This will always return True
-    cp = ConditionalPutAll(f, dict([(k1, "only-one-one"), (k2, "only-two-two")]))
+    f = Filters.always()  # This will always return True
+    cp = Processors.conditional_put_all(f, dict([(k1, "only-one-one"), (k2, "only-two-two")]))
     async for _ in cache.invoke_all(cp):
         break  # ignore the results
 
     assert await cache.get(k1) == "only-one-one"
     assert await cache.get(k2) == "only-two-two"
 
-    pf = PresentFilter()
-    cp = ConditionalPutAll(NotFilter(pf), dict([("three", "only-three")]))
+    pf = Filters.present()
+    cp = Processors.conditional_put_all(Filters.negate(pf), dict([("three", "only-three")]))
     async for _ in cache.invoke_all(cp, {"one", "three"}):
         break  # ignore the results
 
@@ -247,18 +228,18 @@ async def test_conditional_remove(setup_and_teardown: NamedCache[Any, Any]) -> N
     v1 = "only-one"
     await cache.put(k1, v1)
 
-    f: Filter = NeverFilter()  # This will always return False
-    cp = ConditionalRemove(f)
+    f: Filter = Filters.never()  # This will always return False
+    cp = Processors.conditional_remove(f, True)
     r: Any = await cache.invoke(k1, cp)
     assert r == v1
     assert await cache.get(k1) == "only-one"
-    cp = ConditionalRemove(f, False)
+    cp = Processors.conditional_remove(f)
     r = await cache.invoke(k1, cp)
     assert r is None
     assert await cache.get(k1) == "only-one"
 
-    f = AlwaysFilter()  # This will always return True
-    cp = ConditionalRemove(f)
+    f = Filters.always()  # This will always return True
+    cp = Processors.conditional_remove(f, True)
     r = await cache.invoke(k1, cp)
     assert r is None
     assert await cache.get(k1) is None
@@ -272,19 +253,19 @@ async def test_method_invocation(setup_and_teardown: NamedCache[Any, Any]) -> No
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    p = MethodInvocationProcessor.create("get", False, "ival")  # Non-mutating form
+    p = Processors.invoke_accessor("get", "ival")  # Non-mutating form
     r: Any = await cache.invoke(k, p)
     assert r == 123
 
-    p = MethodInvocationProcessor.create("size", False)  # Non-mutating form
+    p = Processors.invoke_accessor("size")  # Non-mutating form
     r = await cache.invoke(k, p)
     assert r == 6
 
-    p = MethodInvocationProcessor.create("isEmpty", False)  # Non-mutating form
+    p = Processors.invoke_accessor("isEmpty")  # Non-mutating form
     r = await cache.invoke(k, p)
     assert r is False
 
-    p = MethodInvocationProcessor.create("remove", True, "ival")  # Mutating form
+    p = Processors.invoke_mutator("remove", "ival")  # Mutating form
     r = await cache.invoke(k, p)
     assert r == 123
 
@@ -292,21 +273,21 @@ async def test_method_invocation(setup_and_teardown: NamedCache[Any, Any]) -> No
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
 async def test_touch() -> None:
-    tp = TouchProcessor.create()
+    tp = Processors.touch()
     serializer = JSONSerializer()
     j = serializer.serialize(tp)
-    json_object: TouchProcessor = serializer.deserialize(j)
+    json_object: EntryProcessor = serializer.deserialize(j)
     assert json_object is not None
     assert isinstance(json_object, TouchProcessor)
 
 
-# noinspection PyShadowingNames
+# noinspection PyShadowingNames,PyUnresolvedReferences
 @pytest.mark.asyncio
 async def test_script() -> None:
-    sp = ScriptProcessor.create("test_script.py", "py", "abc", 2, 4.0)
+    sp = Processors.script("test_script.py", "py", "abc", 2, 4.0)
     serializer = JSONSerializer()
     j = serializer.serialize(sp)
-    json_object: ScriptProcessor = serializer.deserialize(j)
+    json_object: EntryProcessor = serializer.deserialize(j)
     assert json_object is not None
     assert isinstance(json_object, ScriptProcessor)
     assert json_object.name == "test_script.py"
@@ -317,10 +298,10 @@ async def test_script() -> None:
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
 async def test_preload() -> None:
-    tp = PreloadRequest.create()
+    tp = Processors.preload()
     serializer = JSONSerializer()
     j = serializer.serialize(tp)
-    json_object: PreloadRequest = serializer.deserialize(j)
+    json_object: EntryProcessor = serializer.deserialize(j)
     assert json_object is not None
     assert isinstance(json_object, PreloadRequest)
 
@@ -333,7 +314,7 @@ async def test_updater(setup_and_teardown: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    ep = UpdaterProcessor.create("my_str", "12300").and_then(UpdaterProcessor.create("ival", 12300))
+    ep = Processors.update("my_str", "12300").and_then(Processors.update("ival", 12300))
     r: Any = await cache.invoke(k, ep)
     assert r == [True, True]
 
@@ -374,7 +355,7 @@ async def test_versioned_put(setup_and_teardown: NamedCache[Any, Any]) -> None:
     }
 
     await cache.put(k, versioned123)
-    vp = VersionedPut.create(versioned123_update)
+    vp = Processors.versioned_put(versioned123_update)
     r: Any = await cache.invoke(k, vp)
     assert r is None
     result = await cache.get(k)
@@ -450,7 +431,7 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
     await cache.put(k1, versioned123)
     await cache.put(k2, versioned234)
 
-    vpa = VersionedPutAll.create(dict([(k1, versioned123_update), (k2, versioned234_update)]))
+    vpa = Processors.versioned_put_all(dict([(k1, versioned123_update), (k2, versioned234_update)]))
     e: MapEntry[Any, Any]
     async for e in cache.invoke_all(vpa):
         break

@@ -40,7 +40,10 @@ from .messages_pb2 import (
 from .processor import EntryProcessor
 from .serialization import Serializer
 
+E = TypeVar("E")
 K = TypeVar("K")
+R = TypeVar("R")
+T = TypeVar("T")
 V = TypeVar("V")
 
 
@@ -218,7 +221,7 @@ class RequestFactory:
         return r
 
     def aggregate_request(
-        self, aggregator: EntryAggregator, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
+        self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> AggregateRequest:
         if keys is not None and filter is not None:
             raise ValueError("keys and filter are mutually exclusive")

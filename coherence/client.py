@@ -388,7 +388,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
 
     @abc.abstractmethod
     async def aggregate(
-        self, aggregator: EntryAggregator, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
+        self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> R:
         """
         Perform an aggregating operation against the entries specified by the passed keys.
@@ -430,7 +430,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
     ) -> AsyncIterator[MapEntry[K, V]]:
         """
         Return a set view of the entries contained in this map that satisfy the criteria expressed by the filter.
-        Each element in the returned set is a :func:`coherence.client.MapEntry`.
+        Each element in the returned set is a :class:`coherence.client.MapEntry`.
 
         :param filter: the Filter object representing the criteria that the entries of this map should satisfy
         :param comparator: the Comparator object which imposes an ordering on entries in the resulting set; or `None`
@@ -643,7 +643,7 @@ class NamedCacheClient(NamedCache[K, V]):
 
     @_pre_call_cache
     async def aggregate(
-        self, aggregator: EntryAggregator, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
+        self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> R:
         r = self._request_factory.aggregate_request(aggregator, keys, filter)
         results = await self._client_stub.aggregate(r)
@@ -926,16 +926,16 @@ class Session:
 
     This class emits the following events:
 
-        1. :func:`coherence.event.MapLifecycleEvent.DESTROYED`: when the underlying cache is destroyed
-        2. :func:`coherence.event.MapLifecycleEvent.TRUNCATED`: When the underlying cache is truncated
-        3. :func:`coherence.event.MapLifecycleEvent.RELEASED`: When the underlying cache is released
-        4. :func:`coherence.event.SessionLifecycleEvent.CONNECT`: when the Session detects the underlying `gRPC`
+        1. :class:`coherence.event.MapLifecycleEvent.DESTROYED`: when the underlying cache is destroyed
+        2. :class:`coherence.event.MapLifecycleEvent.TRUNCATED`: When the underlying cache is truncated
+        3. :class:`coherence.event.MapLifecycleEvent.RELEASED`: When the underlying cache is released
+        4. :class:`coherence.event.SessionLifecycleEvent.CONNECT`: when the Session detects the underlying `gRPC`
             channel has connected.
-        5. :func:`coherence.event.SessionLifecycleEvent.DISCONNECT`: when the Session detects the underlying `gRPC`
+        5. :class:`coherence.event.SessionLifecycleEvent.DISCONNECT`: when the Session detects the underlying `gRPC`
             channel has disconnected
-        6. :func:`coherence.event.SessionLifecycleEvent.RECONNECTED`: when the Session detects the underlying `gRPC`
+        6. :class:`coherence.event.SessionLifecycleEvent.RECONNECTED`: when the Session detects the underlying `gRPC`
             channel has re-connected
-        7. :func:`coherence.event.SessionLifecycleEvent.CLOSED`: when the Session has been closed
+        7. :class:`coherence.event.SessionLifecycleEvent.CLOSED`: when the Session has been closed
 
     """
 
@@ -1297,6 +1297,7 @@ class _PagedStream(abc.ABC, AsyncIterator[T]):
 
         :return: None
         """
+        print("### DEBUG: __load_next_page() called!")
         request: PageRequest = self._client._request_factory.page_request(self._cookie)
         print("### DEBUG: __load_next_page() called!")
         self._stream = self._get_stream(request)
