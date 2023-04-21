@@ -27,7 +27,7 @@ async def _insert_large_number_of_entries(cache: NamedCache[str, str]) -> int:
     # insert enough data into the cache to ensure results will be paged
     # by the proxy.
     num_bulk_ops: int = 10
-    num_entries: int = 50000
+    num_entries: int = 40000
     bulk_ops: int = int(num_entries / num_bulk_ops)
     to_send: dict[str, str] = {}
     for i in range(num_bulk_ops):

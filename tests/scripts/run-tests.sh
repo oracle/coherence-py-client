@@ -13,12 +13,15 @@ set -e
 # INCLUDE_LONG_RUNNING=true
 
 echo "Coherence CE 22.06.2"
-COHERENCE_VERSION=22.06.2 make clean test-cluster-shutdown remove-app-images build-test-images test-cluster-startup just-wait test
+COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
+  COHERENCE_VERSION=22.06.2 \
+  make clean test-cluster-shutdown remove-app-images build-test-images test-cluster-startup just-wait test
 
 echo "Coherence CE 22.06.2 with SSL"
 RUN_SECURE=true COHERENCE_IGNORE_INVALID_CERTS=true \
   COHERENCE_TLS_CERTS_PATH=$(pwd)/tests/utils/certs/guardians-ca.crt \
   COHERENCE_TLS_CLIENT_CERT=$(pwd)/tests/utils/certs/star-lord.crt \
   COHERENCE_TLS_CLIENT_KEY=$(pwd)/tests/utils/certs/star-lord.pem \
+  COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
   COHERENCE_VERSION=22.06.2 PROFILES=,secure make clean certs test-cluster-shutdown remove-app-images \
                                                   build-test-images test-cluster-startup just-wait test

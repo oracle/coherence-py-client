@@ -188,6 +188,7 @@
                   <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
                   <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
                   <jvmFlag>-Dcoherence.cacheconfig=${coherence.cache.config}</jvmFlag>
+                  <jvmFlag>-Dcoherence.distributed.partitioncount=13</jvmFlag>
                 </jvmFlags>
                 <mainClass>com.oracle.coherence.python.testing.RestServer</mainClass>
                 <format>OCI</format>
