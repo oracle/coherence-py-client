@@ -29,7 +29,7 @@ from typing import (
 import grpc
 from pymitter import EventEmitter
 
-from coherence.aggregator import EntryAggregator, SumAggregator, AverageAggregator, PriorityAggregator
+from coherence.aggregator import AverageAggregator, EntryAggregator, PriorityAggregator, SumAggregator
 
 from .comparator import Comparator
 from .event import MapLifecycleEvent, MapListener, SessionLifecycleEvent
@@ -654,7 +654,7 @@ class NamedCacheClient(NamedCache[K, V]):
         elif isinstance(aggregator, AverageAggregator) and isinstance(value, str):
             return cast(R, float(value))
         elif isinstance(aggregator, PriorityAggregator):
-            pri_agg: PriorityAggregator = cast(PriorityAggregator, aggregator)
+            pri_agg: PriorityAggregator[R] = aggregator
             if isinstance(pri_agg.aggregator, SumAggregator) and isinstance(value, str):
                 return cast(R, float(value))
             elif isinstance(pri_agg.aggregator, AverageAggregator) and isinstance(value, str):
