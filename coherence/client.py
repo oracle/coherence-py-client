@@ -29,7 +29,7 @@ from typing import (
 import grpc
 from pymitter import EventEmitter
 
-from coherence.aggregator import EntryAggregator
+from coherence.aggregator import EntryAggregator, SumAggregator, AverageAggregator, PriorityAggregator
 
 from .comparator import Comparator
 from .event import MapLifecycleEvent, MapListener, SessionLifecycleEvent
@@ -648,6 +648,19 @@ class NamedCacheClient(NamedCache[K, V]):
         r = self._request_factory.aggregate_request(aggregator, keys, filter)
         results = await self._client_stub.aggregate(r)
         value: Any = self._request_factory.get_serializer().deserialize(results.value)
+        # for compatibility with 22.06
+        if isinstance(aggregator, SumAggregator) and isinstance(value, str):
+            return cast(R, float(value))
+        elif isinstance(aggregator, AverageAggregator) and isinstance(value, str):
+            return cast(R, float(value))
+        elif isinstance(aggregator, PriorityAggregator):
+            pri_agg: PriorityAggregator = cast(PriorityAggregator, aggregator)
+            if isinstance(pri_agg.aggregator, SumAggregator) and isinstance(value, str):
+                return cast(R, float(value))
+            elif isinstance(pri_agg.aggregator, AverageAggregator) and isinstance(value, str):
+                return cast(R, float(value))
+        # end compatibility with 22.06
+
         return cast(R, value)
 
     @_pre_call_cache
