@@ -27,7 +27,7 @@ async def _insert_large_number_of_entries(cache: NamedCache[str, str]) -> int:
     # insert enough data into the cache to ensure results will be paged
     # by the proxy.
     num_bulk_ops: int = 10
-    num_entries: int = 100000
+    num_entries: int = 50000
     bulk_ops: int = int(num_entries / num_bulk_ops)
     to_send: dict[str, str] = {}
     for i in range(num_bulk_ops):
@@ -257,7 +257,6 @@ async def test_entries_filtered(setup_and_teardown: NamedCache[str, str]) -> Non
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-@pytest.mark.skip
 async def test_entries_paged(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 

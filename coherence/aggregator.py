@@ -38,8 +38,8 @@ class EntryAggregator(ABC, Generic[R]):
         :param extractor_or_property: the extractor that provides values to aggregate or the name of the method that
             could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
             dot-delimited sequence of method names which would result in an aggregator based on the
-            :func:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
-            :func:`coherence.extractor.UniversalExtractor` objects; must not be `None`
+            :class:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
+            :class:`coherence.extractor.UniversalExtractor` objects; must not be `None`
         """
         super().__init__()
         if extractor_or_property is not None:
@@ -50,10 +50,10 @@ class EntryAggregator(ABC, Generic[R]):
 
     def and_then(self, aggregator: EntryAggregator[R]) -> EntryAggregator[List[R]]:
         """
-        Returns a :func:`coherence.aggregator.CompositeAggregator` comprised of this and the provided aggregator.
+        Returns a :class:`coherence.aggregator.CompositeAggregator` comprised of this and the provided aggregator.
 
         :param aggregator: the next aggregator
-        :return: a :func:`coherence.aggregator.CompositeAggregator` comprised of this and the provided aggregator
+        :return: a :class:`coherence.aggregator.CompositeAggregator` comprised of this and the provided aggregator
         """
         return CompositeAggregator[R]([self, aggregator])
 
@@ -64,8 +64,8 @@ class AbstractComparableAggregator(EntryAggregator[R]):
 
     * All the extracted objects must implement the Java Comparable interface, or
 
-    * The AbstractComparableAggregator has to be provided with a :func:`coherence.comparator.Comparator` object.
-      This :func:`coherence.comparator.Comparator` must exist on the server in order to be usable.
+    * The AbstractComparableAggregator has to be provided with a :class:`coherence.comparator.Comparator` object.
+      This :class:`coherence.comparator.Comparator` must exist on the server in order to be usable.
 
     If there are no entries to aggregate, the returned result will be `None`."""
 
@@ -77,8 +77,8 @@ class AbstractComparableAggregator(EntryAggregator[R]):
         :param extractor_or_property: the extractor that provides values to aggregate or the name of the method that
             could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
             dot-delimited sequence of method names which would result in an aggregator based on the
-            :func:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
-            :func:`coherence.extractor.UniversalExtractor` objects; must not be `None`
+            :class:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
+            :class:`coherence.extractor.UniversalExtractor` objects; must not be `None`
         """
         super().__init__(extractor_or_property)
 
@@ -95,8 +95,8 @@ class AbstractDoubleAggregator(EntryAggregator[Decimal]):
         :param extractor_or_property: the extractor that provides values to aggregate or the name of the method that
             could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
             dot-delimited sequence of method names which would result in an aggregator based on the
-            :func:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
-            :func:`coherence.extractor.UniversalExtractor` objects; must not be `None`
+            :class:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
+            :class:`coherence.extractor.UniversalExtractor` objects; must not be `None`
         """
         super().__init__(extractor_or_property)
 
@@ -109,9 +109,9 @@ class CompositeAggregator(EntryAggregator[List[R]]):
 
     def __init__(self, aggregators: list[EntryAggregator[R]]):
         """
-        Construct a CompositeAggregator based on a specified :func:`coherence.aggregator.EntryAggregator` list.
+        Construct a CompositeAggregator based on a specified :class:`coherence.aggregator.EntryAggregator` list.
 
-        :param aggregators: an array of :func:`coherence.aggregator.EntryAggregator` objects; may not be `None`
+        :param aggregators: an array of :class:`coherence.aggregator.EntryAggregator` objects; may not be `None`
         """
         super().__init__()
         if aggregators is not None:
@@ -133,8 +133,8 @@ class MaxAggregator(AbstractComparableAggregator[R]):
         :param extractor_or_property: the extractor that provides values to aggregate or the name of the method that
             could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
             dot-delimited sequence of method names which would result in an aggregator based on the
-            :func:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
-            :func:`coherence.extractor.UniversalExtractor` objects; must not be `None`
+            :class:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
+            :class:`coherence.extractor.UniversalExtractor` objects; must not be `None`
         """
         super().__init__(extractor_or_property)
 
@@ -152,8 +152,8 @@ class MinAggregator(AbstractComparableAggregator[R]):
         :param extractor_or_property: the extractor that provides values to aggregate or the name of the method that
             could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
             dot-delimited sequence of method names which would result in an aggregator based on the
-            :func:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
-            :func:`coherence.extractor.UniversalExtractor` objects; must not be `None`
+            :class:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
+            :class:`coherence.extractor.UniversalExtractor` objects; must not be `None`
         """
         super().__init__(extractor_or_property)
 
@@ -172,8 +172,8 @@ class SumAggregator(AbstractDoubleAggregator):
         :param extractor_or_property: the extractor that provides values to aggregate or the name of the method that
             could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
             dot-delimited sequence of method names which would result in an aggregator based on the
-            :func:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
-            :func:`coherence.extractor.UniversalExtractor` objects; must not be `None`
+            :class:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
+            :class:`coherence.extractor.UniversalExtractor` objects; must not be `None`
         """
         super().__init__(extractor_or_property)
 
@@ -191,8 +191,8 @@ class AverageAggregator(AbstractDoubleAggregator):
         :param extractor_or_property: the extractor that provides values to aggregate or the name of the method that
             could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
             dot-delimited sequence of method names which would result in an aggregator based on the
-            :func:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
-            :func:`coherence.extractor.UniversalExtractor` objects; must not be `None`
+            :class:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
+            :class:`coherence.extractor.UniversalExtractor` objects; must not be `None`
         """
         super().__init__(extractor_or_property)
 
@@ -213,7 +213,7 @@ class DistinctValuesAggregator(EntryAggregator[R]):
     """Return the set of unique values extracted from a set of entries in a Map. If the set of entries is empty,
     an empty array is returned.
 
-    This aggregator could be used in combination with :func:`coherence.extractor.UniversalExtractor` allowing to
+    This aggregator could be used in combination with :class:`coherence.extractor.UniversalExtractor` allowing to
     collect all unique combinations (tuples) of a given set of attributes.
 
     The DistinctValues aggregator covers a simple case of a more generic aggregation pattern implemented by the
@@ -227,8 +227,8 @@ class DistinctValuesAggregator(EntryAggregator[R]):
         :param extractor_or_property: the extractor that provides values to aggregate or the name of the method that
             could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
             dot-delimited sequence of method names which would result in an aggregator based on the
-            :func:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
-            :func:`coherence.extractor.UniversalExtractor` objects; must not be `None`
+            :class:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
+            :class:`coherence.extractor.UniversalExtractor` objects; must not be `None`
         """
         super().__init__(extractor_or_property)
 
@@ -252,8 +252,8 @@ class TopAggregator(Generic[E, R], EntryAggregator[List[R]]):
         :param number: the maximum number of results to include in the aggregation result.
         :param inverse: Result order.  By default, results will be ordered in descending order.
         :param extractor: The extractor to obtain the values to aggregate.  If not explicitly set, this will default
-            to an :func:`coherence.extractor.IdentityExtractor`.
-        :param comparator: The :func:`coherence.comparator.Comparator` to apply against the extracted values.
+            to an :class:`coherence.extractor.IdentityExtractor`.
+        :param comparator: The :class:`coherence.comparator.Comparator` to apply against the extracted values.
         :param property_name:  The property that results will be ordered by.
         """
         super().__init__()
@@ -268,7 +268,7 @@ class TopAggregator(Generic[E, R], EntryAggregator[List[R]]):
         Order the results based on the values of the specified property.
 
         :param property_name: the property name
-        :return: an instance of :func:`coherence.aggregator.TopAggregator`
+        :return: an instance of :class:`coherence.aggregator.TopAggregator`
         """
         self.property = property_name
         self.comparator = InverseComparator(property_name) if self.inverse else SafeComparator(property_name)
@@ -279,7 +279,7 @@ class TopAggregator(Generic[E, R], EntryAggregator[List[R]]):
         """
         Sort the returned values in ascending order.
 
-        :return: an instance of :func:`coherence.aggregator.TopAggregator`
+        :return: an instance of :class:`coherence.aggregator.TopAggregator`
         """
         if self.property is not None:
             self.inverse = True
@@ -291,7 +291,7 @@ class TopAggregator(Generic[E, R], EntryAggregator[List[R]]):
         """
         Sort the returned values in descending order.
 
-        :return: an instance of :func:`coherence.aggregator.TopAggregator`
+        :return: an instance of :class:`coherence.aggregator.TopAggregator`
         """
         if self.property is not None:
             self.inverse = False
@@ -314,12 +314,12 @@ class TopAggregator(Generic[E, R], EntryAggregator[List[R]]):
 class GroupAggregator(EntryAggregator[R]):
     """The `GroupAggregator` provides an ability to split a subset of entries in a Map into a collection of
     non-intersecting subsets and then aggregate them separately and independently. The splitting (grouping) is
-    performed using the results of the underlying :func:`coherence.extractor.UniversalExtractor` in such a way that
+    performed using the results of the underlying :class:`coherence.extractor.UniversalExtractor` in such a way that
     two entries will belong to the same group if and only if the result of the corresponding extract call produces
     the same value or tuple (list of values). After the entries are split into the groups, the underlying aggregator
     is applied separately to each group. The result of the aggregation by the` GroupAggregator` is a Map that has
     distinct values (or tuples) as keys and results of the individual aggregation as values. Additionally,
-    those results could be further reduced using an optional :func:`coherence.filter.Filter` object.
+    those results could be further reduced using an optional :class:`coherence.filter.Filter` object.
 
     Informally speaking, this aggregator is analogous to the SQL `group by` and `having` clauses. Note that the
     `having` Filter is applied independently on each server against the partial aggregation results; this generally
@@ -337,13 +337,13 @@ class GroupAggregator(EntryAggregator[R]):
         filter: Optional[Filter] = None,
     ):
         """
-        Construct a `GroupAggregator` based on a specified :func:`coherence.extractor.ValueExtractor` and underlying
-        :func:`coherence.aggregator.EntryAggregator`.
+        Construct a `GroupAggregator` based on a specified :class:`coherence.extractor.ValueExtractor` and underlying
+        :class:`coherence.aggregator.EntryAggregator`.
 
-        :param extractor_or_property:  a :func:`coherence.extractor.ValueExtractor` object that is used to split
+        :param extractor_or_property:  a :class:`coherence.extractor.ValueExtractor` object that is used to split
          entries into non-intersecting subsets; may not be `None`. This parameter can also be a dot-delimited sequence
-         of method names which would result in an aggregator based on the :func:`coherence.extractor.ChainedExtractor`
-         that is based on an array of corresponding :func:`coherence.extractor.UniversalExtractor` objects; may not be
+         of method names which would result in an aggregator based on the :class:`coherence.extractor.ChainedExtractor`
+         that is based on an array of corresponding :class:`coherence.extractor.UniversalExtractor` objects; may not be
          `NONE`
 
         :param aggregator: an EntryAggregator object; may not be null
@@ -407,7 +407,7 @@ class PriorityAggregator(Generic[R], EntryAggregator[R]):
         """
         Construct a new `PriorityAggregator`.
 
-        :param aggregator: The wrapped :func:`coherence.aggregator.EntryAggregator`.
+        :param aggregator: The wrapped :class:`coherence.aggregator.EntryAggregator`.
         :param execution_timeout: The task execution timeout value.
         :param request_timeout: The request timeout value.
         :param scheduling_priority: The scheduling priority.
@@ -422,7 +422,7 @@ class PriorityAggregator(Generic[R], EntryAggregator[R]):
     def scheduling_priority(self) -> Schedule:
         """
         Return the scheduling priority or, if not explicitly set, the default is
-        :func:`coherence.aggregator.Schedule.STANDARD`
+        :class:`coherence.aggregator.Schedule.STANDARD`
 
         :return: the scheduling priority
         """
@@ -476,15 +476,15 @@ class PriorityAggregator(Generic[R], EntryAggregator[R]):
 
 @proxy("aggregator.ScriptAggregator")
 class ScriptAggregator(Generic[R], EntryAggregator[R]):
-    """ScriptAggregator is a :func:`coherence.aggregator.EntryAggregator` that wraps a script written in one of the
+    """ScriptAggregator is a :class:`coherence.aggregator.EntryAggregator` that wraps a script written in one of the
     languages supported by Graal VM."""
 
     def __init__(self, language: str, script_name: str, characteristics: int = 0, *args: Any):
         """
-        Create a :func:`coherence.aggregator.EntryAggregator` that wraps the specified script.
+        Create a :class:`coherence.aggregator.EntryAggregator` that wraps the specified script.
 
         :param language: The language with which the script is written in.
-        :param script_name: The name of the :func:`coherence.aggregator.EntryAggregator` that needs to be evaluated.
+        :param script_name: The name of the :class:`coherence.aggregator.EntryAggregator` that needs to be evaluated.
         :param characteristics: Present only for serialization purposes.
         :param args: The arguments to be passed to the script for evaluation
         """
@@ -509,7 +509,7 @@ class RecordType(Enum):
 @proxy("aggregator.QueryRecorder")
 class QueryRecorder(EntryAggregator[Any]):
     """This aggregator is used to produce an object that contains an estimated or actual cost of the query execution
-    for a given :func:`coherence.filter.Filter`.
+    for a given :class:`coherence.filter.Filter`.
 
     For example, the following code will print a *QueryRecord*,
     containing the estimated query cost and corresponding execution steps::
@@ -545,9 +545,9 @@ class QueryRecorder(EntryAggregator[Any]):
 
 @proxy("aggregator.ReducerAggregator")
 class ReducerAggregator(EntryAggregator[R]):
-    """The `ReducerAggregator` is used to implement functionality similar to :func:`coherence.client.NamedMap.getAll(
+    """The `ReducerAggregator` is used to implement functionality similar to :class:`coherence.client.NamedMap.getAll(
     )` API.  Instead of returning the complete set of values, it will return a portion of value attributes based on
-    the provided :func:`coherence.extractor.ValueExtractor`.
+    the provided :class:`coherence.extractor.ValueExtractor`.
 
     This aggregator could be used in combination with {@link MultiExtractor} allowing one to collect tuples that are
     a subset of the attributes of each object stored in the cache."""
@@ -559,8 +559,8 @@ class ReducerAggregator(EntryAggregator[R]):
         :param extractor_or_property: the extractor that provides values to aggregate or the name of the method that
             could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
             dot-delimited sequence of method names which would result in an aggregator based on the
-            :func:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
-            :func:`coherence.extractor.UniversalExtractor` objects; must not be `None`
+            :class:`coherence.extractor.ChainedExtractor` that is based on an array of corresponding
+            :class:`coherence.extractor.UniversalExtractor` objects; must not be `None`
         """
         super().__init__(extractor_or_property)
 
@@ -569,9 +569,9 @@ class Aggregators:
     """Simple Aggregator DSL.
 
     The methods in this class are for the most part simple factory methods for various
-    :func:`coherence.aggregator.EntryAggregator`  classes, but in some cases provide additional type safety. They
+    :class:`coherence.aggregator.EntryAggregator`  classes, but in some cases provide additional type safety. They
     also tend to make the code more readable, especially if imported statically, so their use is strongly encouraged
-    in lieu of direct construction of :func:`coherence.aggregator.EntryAggregator`  classes."""
+    in lieu of direct construction of :class:`coherence.aggregator.EntryAggregator`  classes."""
 
     @staticmethod
     def max(extractor_or_property: ExtractorExpression[T, E]) -> EntryAggregator[R]:
@@ -650,15 +650,15 @@ class Aggregators:
         filter: Optional[Filter] = None,
     ) -> EntryAggregator[AggregationResult[G, T]]:
         """
-        Return a :func:`coherence.aggregator.GroupAggregator` based on a specified property or method name(s) and an
-        :func:`coherence.aggregator.EntryAggregator`.
+        Return a :class:`coherence.aggregator.GroupAggregator` based on a specified property or method name(s) and an
+        :class:`coherence.aggregator.EntryAggregator`.
 
         :param extractor_or_property: the extractor or method/property name to provide values for aggregation
-        :param aggregator: the underlying :func:`coherence.aggregator.EntryAggregator`
-        :param filter: an optional :func:`coherence.filter.Filter` object used to filter out results of individual
+        :param aggregator: the underlying :class:`coherence.aggregator.EntryAggregator`
+        :param filter: an optional :class:`coherence.filter.Filter` object used to filter out results of individual
           group aggregation results
-        :return: a :func:`coherence.aggregator.GroupAggregator` based on a specified property or method name(s) and an
-          :func:`coherence.aggregator.EntryAggregator`.
+        :return: a :class:`coherence.aggregator.GroupAggregator` based on a specified property or method name(s) and an
+          :class:`coherence.aggregator.EntryAggregator`.
         """
         return GroupAggregator(extractor_or_property, aggregator, filter)
 
@@ -670,14 +670,14 @@ class Aggregators:
         scheduling_priority: Schedule = Schedule.STANDARD,
     ) -> EntryAggregator[R]:
         """
-        Return a new :func:`coherence.aggregator.PriorityAggregator` to control scheduling priority of an aggregation
+        Return a new :class:`coherence.aggregator.PriorityAggregator` to control scheduling priority of an aggregation
         operation.
 
-        :param aggregator: the underlying :func:`coherence.aggregator.EntryAggregator`
-        :param execution_timeout: the execution :func:`coherence.aggregator.Timeout`
-        :param request_timeout: the request :func:`coherence.aggregator.Timeout`
-        :param scheduling_priority: the :func:`coherence.aggregator.Schedule` priority
-        :return: a new :func:`coherence.aggregator.PriorityAggregator` to control scheduling priority of an aggregation
+        :param aggregator: the underlying :class:`coherence.aggregator.EntryAggregator`
+        :param execution_timeout: the execution :class:`coherence.aggregator.Timeout`
+        :param request_timeout: the request :class:`coherence.aggregator.Timeout`
+        :param scheduling_priority: the :class:`coherence.aggregator.Schedule` priority
+        :return: a new :class:`coherence.aggregator.PriorityAggregator` to control scheduling priority of an aggregation
          operation.
         """
         return PriorityAggregator(aggregator, execution_timeout, request_timeout, scheduling_priority)
@@ -688,7 +688,7 @@ class Aggregators:
         Return an aggregator that is implemented in a script using the specified language.
 
         :param language: The language with which the script is written in.
-        :param script_name: The name of the :func:`coherence.aggregator.EntryAggregator` that needs to be evaluated.
+        :param script_name: The name of the :class:`coherence.aggregator.EntryAggregator` that needs to be evaluated.
         :param characteristics: Present only for serialization purposes.
         :param args: The arguments to be passed to the script for evaluation
         :return: an aggregator that is implemented in a script using the specified language.
@@ -698,14 +698,14 @@ class Aggregators:
     @staticmethod
     def record(query_type: RecordType = RecordType.EXPLAIN) -> EntryAggregator[Any]:
         """
-        Returns a new :func:`coherence.aggregator.QueryRecorder` aggregator which may be used is used to produce an
+        Returns a new :class:`coherence.aggregator.QueryRecorder` aggregator which may be used is used to produce an
         object that contains an estimated or actual cost of the query execution for a given
-        :func:`coherence.filter.Filter`.
+        :class:`coherence.filter.Filter`.
 
-        :param query_type: the :func:`coherence.aggregator.RecordType`
-        :return: a new :func:`coherence.aggregator.QueryRecorder` aggregator which may be used is used to produce an
+        :param query_type: the :class:`coherence.aggregator.RecordType`
+        :return: a new :class:`coherence.aggregator.QueryRecorder` aggregator which may be used is used to produce an
          object that contains an estimated or actual cost of the query execution for a given
-         :func:`coherence.filter.Filter`.
+         :class:`coherence.filter.Filter`.
         """
         return QueryRecorder(query_type)
 

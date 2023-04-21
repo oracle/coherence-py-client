@@ -71,7 +71,7 @@ class ExtractorFilter(Filter):
         """
         Construct an `ExtractorFilter` for the given {@link extractor.ValueExtractor}.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or a
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or a
          method name to make a {@link UniversalExtractor} for; this parameter can also be a dot-delimited sequence of
          method names which would result in an ExtractorFilter based on the {@link ChainedExtractor} that is based on
          an array of corresponding ReflectionExtractor objects
@@ -91,7 +91,7 @@ class ComparisonFilter(ExtractorFilter):
         """
         Construct a `ComparisonFilter`.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
@@ -105,7 +105,7 @@ class EqualsFilter(ComparisonFilter):
         """
         Construct an EqualsFilter for testing equality.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
@@ -118,7 +118,7 @@ class NotEqualsFilter(ComparisonFilter):
         """
         Construct a `NotEqualsFilter` for testing inequality.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
@@ -131,7 +131,7 @@ class GreaterFilter(ComparisonFilter):
         """
         Construct a `GreaterFilter` for testing `Greater` condition.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
@@ -144,7 +144,7 @@ class GreaterEqualsFilter(ComparisonFilter):
         """
         Construct a `GreaterEqualFilter` for testing `Greater or Equal` condition.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
@@ -157,7 +157,7 @@ class LessFilter(ComparisonFilter):
         """
         Construct a LessFilter for testing `Less` condition.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
@@ -170,7 +170,7 @@ class LessEqualsFilter(ComparisonFilter):
         """
         Construct a `LessEqualsFilter` for testing `Less or Equals` condition.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :func:`coherence.filter.Filter` or the
+        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
          name of the method to invoke via reflection
         :param value: the object to compare the result with
         """
@@ -196,7 +196,7 @@ class IsNoneFilter(EqualsFilter):
         Construct a `IsNoneFilter` for testing equality to `None`.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         """
         super().__init__(extractor_or_method, None)
 
@@ -208,7 +208,7 @@ class IsNotNoneFilter(NotEqualsFilter):
         Construct a `IsNotNoneFilter` for testing inequality to `None`.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         """
         super().__init__(extractor_or_method, None)
 
@@ -335,7 +335,7 @@ class BetweenFilter(AndFilter):
         Construct a `BetweenFilter` for testing "Between" condition.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param from_range: the lower bound of the range
         :param to_range: the upper bound of the range
         :param include_lower_bound: a flag indicating whether values matching the lower bound evaluate to true
@@ -364,7 +364,7 @@ class ContainsFilter(ComparisonFilter):
         Construct a `ContainsFilter` for testing containment of the given object.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param value: the object that a collection or array is tested to contain
         """
         super().__init__(extractor_or_method, value)
@@ -380,7 +380,7 @@ class ContainsAnyFilter(ComparisonFilter):
         Construct an `ContainsAllFilter` for testing containment of any value within the given Set.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param values: the Set of values that a Collection or array is tested to contain
         """
         super().__init__(extractor_or_method, values)
@@ -396,7 +396,7 @@ class ContainsAllFilter(ComparisonFilter):
         Construct an `ContainsAllFilter` for testing containment of the given Set of values.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param values: the Set of values that a Collection or array is tested to contain
         """
         super().__init__(extractor_or_method, values)
@@ -411,7 +411,7 @@ class InFilter(ComparisonFilter):
         Construct an `InFilter` for testing `In` condition.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param values: the Set of values that a Collection or array is tested to contain
         """
         super().__init__(extractor_or_method, values)
@@ -437,7 +437,7 @@ class LikeFilter(ComparisonFilter):
         Construct a `LikeFilter` for pattern match.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param pattern: the string pattern to compare the result with
         :param escape_char: the escape character for escaping `%` and `_`
         :param ignore_case: `true` to be case-insensitive
@@ -455,7 +455,7 @@ class RegexFilter(ComparisonFilter):
         implementation is not index aware and will not take advantage of existing indexes.
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param regex: the regular expression to match the result with
         """
         super().__init__(extractor_or_method, regex)
@@ -465,12 +465,12 @@ class RegexFilter(ComparisonFilter):
 class PredicateFilter(ExtractorFilter):
     def __init__(self, extractor_or_method: ExtractorExpression[T, E], predicate: Any):
         """
-        A predicate based :func:`coherence.filter.ExtractorFilter`
+        A predicate based :class:`coherence.filter.ExtractorFilter`
 
-        Constructs a :func:`coherence.filter.PredicateFilter`
+        Constructs a :class:`coherence.filter.PredicateFilter`
 
         :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
-         :func:`coherence.filter.Filter` or the name of the method to invoke via reflection
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param predicate: predicate for testing the value. The object must have an '@class' attribute.
         """
         super().__init__(extractor_or_method)
@@ -486,8 +486,8 @@ class PresentFilter(Filter):
         Filter which returns true for entries that currently exist in a map.
 
         This Filter is intended to be used solely in combination with a
-        :func:`coherence.processor.ConditionalProcessor` and is unnecessary for standard
-        :func:`coherence.client.NamedMap` operations.
+        :class:`coherence.processor.ConditionalProcessor` and is unnecessary for standard
+        :class:`coherence.client.NamedMap` operations.
         """
         super().__init__()
         if PresentFilter._instance is None:
@@ -599,7 +599,7 @@ class Filters:
         """
         Return a filter that tests if the extracted array contains the specified value.
 
-        :param extractor_or_method: the :func:`extractor.ValueExtractor` used by this filter or the name of the
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
                method to invoke via reflection
         :param value: the object that a Collection or Object array is tested to contain
         :return: a filter that tests if the extracted array contains the specified value
@@ -611,7 +611,7 @@ class Filters:
         """
         Return a filter that tests if the extracted array contains `all` of the specified values.
 
-        :param extractor_or_method: the :func:`extractor.ValueExtractor` used by this filter or the name of the
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
                method to invoke via reflection
         :param values: the set of objects that a Collection or Object array is tested to contain
         :return: a filter that tests if the extracted array contains `all` of the specified values
@@ -623,7 +623,7 @@ class Filters:
         """
         Return a filter that tests if the extracted array contains `any` of the specified values.
 
-        :param extractor_or_method: the :func:`extractor.ValueExtractor` used by this filter or the name of the
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
                method to invoke via reflection
         :param values: the set of objects that a Collection or Object array is tested to contain
         :return: a filter that tests if the extracted array contains `any` of the specified values
@@ -656,7 +656,7 @@ class Filters:
         """
         Return a filter that tests if the extracted collection contains the specified value.
 
-        :param extractor_or_method: the :func:`extractor.ValueExtractor` used by this filter or the name of the
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
                method to invoke via reflection
         :param value: the object that a Collection or Object array is tested to contain
         :return: a filter that tests if the extracted collection contains the specified value
@@ -668,7 +668,7 @@ class Filters:
         """
         Return a filter that tests if the extracted collection contains `all` of the specified values.
 
-        :param extractor_or_method: the :func:`extractor.ValueExtractor` used by this filter or the name of the
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
                method to invoke via reflection
         :param values: the set of objects that a Collection or Object array is tested to contain
         :return: a filter that tests if the extracted collection contains `all` of the specified values
@@ -680,7 +680,7 @@ class Filters:
         """
         Return a filter that tests if the extracted collection contains `any` of the specified values.
 
-        :param extractor_or_method: the :func:`extractor.ValueExtractor` used by this filter or the name of the
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
                method to invoke via reflection
         :param values: the set of objects that a Collection or Object array is tested to contain
         :return: a filter that tests if the extracted collection contains `any` of the specified values
@@ -692,7 +692,7 @@ class Filters:
         """
         Return a filter that tests for equality against the extracted value.
 
-        :param extractor_or_method: the :func:`extractor.ValueExtractor` used by this filter or the name of the
+        :param extractor_or_method: the :class:`extractor.ValueExtractor` used by this filter or the name of the
                method to invoke via reflection
         :param value: the value to compare the extracted value with
         :return: a filter that tests for equality
@@ -702,12 +702,12 @@ class Filters:
     @staticmethod
     def event(filter: Filter, mask: int = MapEventFilter.KEY_SET) -> Filter:
         """
-        Returns a filter that may be passed to a :func:`event.MapListener` to restrict the events sent
+        Returns a filter that may be passed to a :class:`event.MapListener` to restrict the events sent
         to the listener to a subset of the notifications emitted by the map.
 
         :param filter: the filter used to evaluate event values
         :param mask: the event mask
-        :return: a filter that may be passed to a :func:`event.MapListener` to restrict the events sent
+        :return: a filter that may be passed to a :class:`event.MapListener` to restrict the events sent
                  to the listener to a subset of the notifications emitted by the map
         """
 

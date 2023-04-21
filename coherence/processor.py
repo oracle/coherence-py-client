@@ -5,14 +5,17 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Any, List, Optional, TypeVar
+from decimal import Decimal
+from typing import Any, List, Optional, TypeAlias, TypeVar
 
 from .extractor import (
     CompositeUpdater,
     ExtractorExpression,
     IdentityExtractor,
+    ManipulatorExpression,
     UniversalExtractor,
     UniversalUpdater,
+    UpdaterExpression,
     ValueExtractor,
     ValueManipulator,
     ValueUpdater,
@@ -26,6 +29,8 @@ K = TypeVar("K")
 R = TypeVar("R")
 T = TypeVar("T")
 V = TypeVar("V")
+
+Numeric: TypeAlias = int | float | Decimal
 
 
 class EntryProcessor(ABC):
@@ -41,22 +46,22 @@ class EntryProcessor(ABC):
 
     def and_then(self, processor: EntryProcessor) -> EntryProcessor:
         """
-        Returns a :func:`coherence.processor.CompositeProcessor` comprised of this and the provided processor.
+        Returns a :class:`coherence.processor.CompositeProcessor` comprised of this and the provided processor.
 
         :param processor: the next processor
-        :return: a :func:`coherence.processor.CompositeProcessor` comprised of this and the provided processor
+        :return: a :class:`coherence.processor.CompositeProcessor` comprised of this and the provided processor
         """
         return CompositeProcessor(self, processor)
 
     def when(self, filter: Filter) -> EntryProcessor:
         """
-        Returns a :func:`coherence.processor.ConditionalProcessor` comprised of this processor and the provided filter.
+        Returns a :class:`coherence.processor.ConditionalProcessor` comprised of this processor and the provided filter.
 
         The specified entry processor gets invoked if and only if the filter
         applied to the entry evaluates to `true`; otherwise the
         result of the invocation will return `None`.
 
-        :param filter: the filter :return: Returns a :func:`coherence.processor.ConditionalProcessor` comprised of
+        :param filter: the filter :return: Returns a :class:`coherence.processor.ConditionalProcessor` comprised of
          this processor and the provided filter.
         """
         return ConditionalProcessor(filter, self)
@@ -65,8 +70,8 @@ class EntryProcessor(ABC):
 @proxy("processor.ExtractorProcessor")
 class ExtractorProcessor(EntryProcessor):
     """
-    `ExtractorProcessor` is an :func:`coherence.processor.EntryProcessor` implementation that extracts a value from
-    an object cached a NamedMap.
+    `ExtractorProcessor` is an :class:`coherence.processor.EntryProcessor` implementation that extracts a value from
+    an object cached within a NamedMap.
 
     :Example:
         A common usage pattern is:
@@ -78,10 +83,11 @@ class ExtractorProcessor(EntryProcessor):
 
     def __init__(self, value_extractor: ExtractorExpression[T, E]):
         """
-        Construct an ExtractorProcessor using the given extractor or method name.
+        Construct an `ExtractorProcessor` using the given extractor or method name.
 
-        :param value_extractor: the extractor.ValueExtractor to use by this filter or the name of the method to
-                          invoke via reflection
+        :param value_extractor: the :class:`coherence.extractor.ValueExtractor` or string expression
+                                to use by this filter or the name of the method to
+                                invoke via java reflection
         """
         super().__init__()
         if value_extractor is None:
@@ -165,7 +171,7 @@ class PropertyProcessor(EntryProcessor):
     `PropertyProcessor` is a base class for EntryProcessor implementations that depend on a ValueManipulator.
     """
 
-    def __init__(self, manipulator: ValueManipulator | str, use_is: bool = False):
+    def __init__(self, manipulator: ManipulatorExpression, use_is: bool = False):
         """
         Construct a PropertyProcessor for the specified property name.
 
@@ -177,7 +183,7 @@ class PropertyProcessor(EntryProcessor):
         """
         super().__init__()
         if type(manipulator) is str:
-            self.manipulator: ValueManipulator | str = PropertyManipulator(manipulator, use_is)
+            self.manipulator: ManipulatorExpression = PropertyManipulator(manipulator, use_is)
         else:
             self.manipulator = manipulator
 
@@ -216,7 +222,9 @@ class NumberMultiplier(PropertyProcessor):
     NumberMultiplier entry processor.
     """
 
-    def __init__(self, name_or_manipulator: ValueManipulator | str, multiplier: int, post_multiplication: bool = False):
+    def __init__(
+        self, name_or_manipulator: ManipulatorExpression, multiplier: Numeric, post_multiplication: bool = False
+    ):
         """
         Construct an NumberMultiplier processor that will multiply a property value by a specified factor,
         returning either the old or the new value as specified.
@@ -243,17 +251,18 @@ class NumberMultiplier(PropertyProcessor):
 @proxy("processor.NumberIncrementor")
 class NumberIncrementor(PropertyProcessor):
     """
-    The NumberIncrementor entry processor is used to increment a property value of a numeric type.
+    The :class:`coherence.processor.NumberIncrementor` :class:`coherence.processor.EntryProcessor` is used to increment
+    a property value of a numeric type.
     """
 
-    def __init__(self, name_or_manipulator: ValueManipulator | str, increment: int, post_increment: bool = False):
+    def __init__(self, name_or_manipulator: ManipulatorExpression, increment: Numeric, post_increment: bool = False):
         """
-        Construct an NumberIncrementor processor that will increment a property value by a specified amount,
-        returning either the old or the new value as specified.
+        Construct an :class:`coherence.processor.NumberIncrementor` processor that will increment a property
+        value by a specified amount, returning either the old or the new value as specified.
 
-        :param name_or_manipulator: the ValueManipulator or property name
-        :param increment: the Number representing the magnitude and sign of the increment
-        :param post_increment: pass `true` to return the value as it was before it was incremented, or `pass` false
+        :param name_or_manipulator: the :class:`coherence.extractor.ValueManipulator` or string expression
+        :param increment: the numeric value representing the magnitude and sign of the increment
+        :param post_increment: pass `True` to return the value as it was before it was incremented, or pass `False`
          to return the value as it is after it is incremented
         """
         if type(name_or_manipulator) == str:
@@ -274,23 +283,25 @@ class NumberIncrementor(PropertyProcessor):
 @mappings({"return_": "return"})
 class ConditionalPut(EntryProcessor):
     """
-    `ConditionalPut` is an EntryProcessor that performs an update operation for an entry that satisfies the specified
-    condition.
+    :class:`coherence.processor.ConditionalPut` is an :class:`coherence.processor.EntryProcessor` that performs
+    an update operation for an entry that satisfies the specified condition.
 
-    While the `ConditionalPut` processing could be implemented via direct key-based NamedMap operations, it is more
-    efficient and enforces concurrency control without explicit locking.
+    While the :class:`coherence.processor.ConditionalPut` processing could be implemented via direct key-based
+    :class:`coherence.client.NamedMap` operations, it is more efficient and enforces concurrency control without
+    explicit locking.
 
-    Obviously, using more specific, fine-tuned filters (rather than ones based on the IdentityExtractor) may provide
-    additional flexibility and efficiency allowing the put operation to be performed conditionally on values of
-    specific attributes (or even calculations) instead of the entire object.
+    Obviously, using more specific, fine-tuned filters (rather than ones based on the
+    :class:`coherence.extractor.IdentityExtractor`) may provide additional flexibility and efficiency allowing
+    the put operation to be performed conditionally on values of specific attributes (or even calculations)
+    instead of the entire object.
     """
 
     def __init__(self, filter: Filter, value: V, return_value: bool = True):
         """
-        Construct a ConditionalPut that updates an entry with a new value if and only if the filter applied to the
-        entry evaluates to true. The result of the invocation does not return any result.
+        Construct a :class:`coherence.processor.ConditionalPut` that updates an entry with a new value if and only
+        if the filter applied to the entry evaluates to `True`.
 
-        :param filter: the filter to evaluate an entry
+        :param filter: the :class:`coherence.filter.Filter` to evaluate an entry
         :param value: a value to update an entry with
         :param return_value: specifies whether the processor should return the current value in case it has
          not been updated
@@ -304,7 +315,7 @@ class ConditionalPut(EntryProcessor):
 @proxy("processor.ConditionalPutAll")
 class ConditionalPutAll(EntryProcessor):
     """
-    ConditionalPutAll is an EntryProcessor that performs an update operation for multiple entries that satisfy the
+    `ConditionalPutAll` is an `EntryProcessor` that performs an update operation for multiple entries that satisfy the
     specified condition.
 
     This allows for concurrent insertion/update of values within the cache.
@@ -328,12 +339,12 @@ class ConditionalPutAll(EntryProcessor):
 
     def __init__(self, filter: Filter, the_map: dict[K, V]):
         """
-        Construct a ConditionalPutAll processor that updates an entry with a new value if and only if the filter
-        applied to the entry evaluates to true. The new value is extracted from the specified map based on the
+        Construct a `ConditionalPutAll` processor that updates an entry with a new value if and only if the filter
+        applied to the entry evaluates to `True`. The new value is extracted from the specified map based on the
         entry's key.
 
         :param filter: the filter to evaluate all supplied entries
-        :param the_map: a map of values to update entries with
+        :param the_map: a dict of values to update entries with
         """
         super().__init__()
         self.filter = filter
@@ -341,19 +352,23 @@ class ConditionalPutAll(EntryProcessor):
 
 
 @proxy("processor.ConditionalRemove")
-@mappings({"return_": "return"})
+@mappings({"return_value": "return"})
 class ConditionalRemove(EntryProcessor):
     """
-    ConditionalRemove is an EntryProcessor that performs n remove operation if the specified condition is satisfied.
+    `ConditionalRemove` is an `EntryProcessor` that performs n remove operation if the specified condition is satisfied.
 
-    While the ConditionalRemove processing could be implemented via direct key-based NamedMap operations, it is more
+    While the `ConditionalRemove` processing could be implemented via direct key-based `NamedMap` operations, it is more
     efficient and enforces concurrency control without explicit locking.
     """
 
     def __init__(self, filter: Filter, return_value: bool = False):
         """
-        Construct a ConditionalRemove processor that removes an NamedMap entry if and only if the filter applied to
-        the entry evaluates to `true`. The result of the invocation does not return any result.
+        Construct a :class:`coherence.processor.ConditionalRemove` processor that removes an
+        :class:`coherence.client.NamedMap` entry if and only if the filter applied to the entry evaluates to `True`.
+
+        This processor may optionally return the current value as a result of
+        the invocation if it has not been removed (the :class:`coherence.filter.Filter` evaluated to
+        `False`).
 
         :param filter: the filter to evaluate an entry
         :param return_value: specifies whether the processor should return the current value if it has not
@@ -361,19 +376,19 @@ class ConditionalRemove(EntryProcessor):
         """
         super().__init__()
         self.filter = filter
-        self.return_ = return_value
+        self.return_value = return_value
 
 
 @proxy("processor.MethodInvocationProcessor")
 class MethodInvocationProcessor(EntryProcessor):
     """
-    An entry processor that invokes the specified method on a value of a cache entry and optionally updates the entry
-    with a modified value.
+    An :class:`coherence.processor.EntryProcessor` that invokes the specified method on a value of a cache entry
+    and optionally updates the entry with a modified value.
     """
 
     def __init__(self, method_name: str, mutator: bool, *args: Any):
         """
-        Construct MethodInvocationProcessor instance.
+        Construct :class:`coherence.processor.MethodInvoctionProcessor` instance.
 
         :param method_name: the name of the method to invoke
         :param mutator: the flag specifying whether the method mutates the state of a target object, which implies
@@ -407,12 +422,12 @@ class ScriptProcessor(EntryProcessor):
 
     def __init__(self, name: str, language: str, *args: Any):
         """
-        Create a :func:`coherence.processor.ScriptProcessor` that wraps a script written in the specified language
+        Create a :class:`coherence.processor.ScriptProcessor` that wraps a script written in the specified language
         and identified by the specified name. The specified args will be passed during execution of the script.
 
-        :param name: the name of the :func:`coherence.processor.EntryProcessor` that needs to be executed
+        :param name: the name of the :class:`coherence.processor.EntryProcessor` that needs to be executed
         :param language: the language the script is written. Currently, only `js` (for JavaScript) is supported
-        :param args: the arguments to be passed to the :func:`coherence.processor.EntryProcessor`
+        :param args: the arguments to be passed to the :class:`coherence.processor.EntryProcessor`
         """
         super().__init__()
         self.name = name
@@ -423,12 +438,13 @@ class ScriptProcessor(EntryProcessor):
 @proxy("processor.PreloadRequest")
 class PreloadRequest(EntryProcessor):
     """
-    PreloadRequest is a simple EntryProcessor that performs a get call. No results are reported back to the caller.
+    `PreloadRequest` is a simple :class:`coherence.processor.EntryProcessor` that performs
+    a get call. No results are reported back to the caller.
 
-    The PreloadRequest process provides a means to "preload" an entry or a collection of entries into the cache
-    using the cache loader without incurring the cost of sending the value(s) over the network. If the corresponding
-    entry (or entries) already exists in the cache, or if the cache does not have a loader, then invoking this
-    EntryProcessor has no effect.
+    The :class:`coherence.processor.PreloadRequest` process provides a means to "preload" an entry or a collection
+    of entries into the cache using the cache loader without incurring the cost of sending the value(s) over the
+    network. If the corresponding entry (or entries) already exists in the cache, or if the cache does not have a
+    loader, then invoking this :class:`coherence.processor.EntryProcessor` has no effect.
     """
 
     def __init__(self) -> None:
@@ -441,15 +457,15 @@ class PreloadRequest(EntryProcessor):
 @proxy("processor.UpdaterProcessor")
 class UpdaterProcessor(EntryProcessor):
     """
-    UpdaterProcessor is an EntryProcessor implementations that updates an attribute of an object cached in an
-    InvocableMap.
+    `UpdaterProcessor` is an :class:`coherence.processor.EntryProcessor` implementations that updates an attribute
+    of an object cached in an InvocableMap.
 
     While it's possible to update a value via standard Map API, using the updater allows for clustered caches using
     the UpdaterProcessor allows avoiding explicit concurrency control and could significantly reduce the amount of
     network traffic.
     """
 
-    def __init__(self, updater_or_property_name: ValueUpdater | str, value: V):
+    def __init__(self, updater_or_property_name: UpdaterExpression, value: V):
         """
         Construct an `UpdaterProcessor` based on the specified ValueUpdater.
 
@@ -460,7 +476,7 @@ class UpdaterProcessor(EntryProcessor):
         super().__init__()
         if type(updater_or_property_name) == str:
             if updater_or_property_name.find(".") == -1:
-                self.updater: ValueUpdater | str = UniversalUpdater(updater_or_property_name)
+                self.updater: UpdaterExpression = UniversalUpdater(updater_or_property_name)
             else:
                 self.updater = CompositeUpdater(updater_or_property_name)
         else:
@@ -469,10 +485,10 @@ class UpdaterProcessor(EntryProcessor):
 
 
 @proxy("processor.VersionedPut")
-@mappings({"return_": "return"})
+@mappings({"return_current": "return"})
 class VersionedPut(EntryProcessor):
     """
-    `VersionedPut` is an :func:`coherence.processor.EntryProcessor` that assumes that entry values are versioned (see
+    `VersionedPut` is an :class:`coherence.processor.EntryProcessor` that assumes that entry values are versioned (see
     Coherence Versionable interface for details) and performs an update/insert operation if and only if the version
     of the specified value matches the version of the corresponding value. `VersionedPutAll` will increment the
     version indicator before each value is updated.
@@ -492,100 +508,256 @@ class VersionedPut(EntryProcessor):
         super().__init__()
         self.value = value
         self.allowInsert = allow_insert
-        self.return_ = return_current
+        self.return_current = return_current
 
 
 @proxy("processor.VersionedPutAll")
-@mappings({"return_": "return"})
+@mappings({"return_current": "return"})
 class VersionedPutAll(EntryProcessor):
     """
-    `VersionedPutAll` is an :func:`coherence.processor.EntryProcessor` that assumes that entry values are versioned (
+    `VersionedPutAll` is an :class:`coherence.processor.EntryProcessor` that assumes that entry values are versioned (
     see Coherence Versionable interface for details) and performs an update/insert operation only for entries whose
     versions match to versions of the corresponding current values. In case of the match, the `VersionedPutAll` will
     increment the version indicator before each value is updated.
     """
 
-    def __init__(self, the_map: dict[K, V], allow_insert: bool = False, return_current: bool = False):
+    def __init__(self, values: dict[K, V], allow_insert: bool = False, return_current: bool = False):
         """
         Construct a VersionedPutAll processor that updates an entry with a new value if and only if the version of
         the new value matches to the version of the current entry's value (which must exist). This processor
         optionally returns a map of entries that have not been updated (the versions did not match).
 
-        :param the_map: a map of values to update entries with
+        :param values: a `dict` of values to update entries with
         :param allow_insert: specifies whether an insert should be allowed (no currently existing value)
         :param return_current: specifies whether the processor should return the current value in case it has
          not been updated
         """
         super().__init__()
-        self.entries = the_map
+        self.entries = values
         self.allowInsert = allow_insert
-        self.return_ = return_current
+        self.return_current = return_current
 
 
 class Processors:
+    """
+    The `Processors` class provides a set of static methods for creating standard Coherence
+    :class:`coherence.processor.EntryProcessor`'s.
+    """
+
+    def __init__(self) -> None:
+        """
+        Raises `NotImplementedError` if called.
+        """
+        raise NotImplementedError()
+
     @staticmethod
-    def conditional_put(filter: Filter, value: V, return_: bool = False) -> EntryProcessor:
-        return ConditionalPut(filter, value, return_)
+    def conditional_put(filter: Filter, value: V, return_value: bool = False) -> EntryProcessor:
+        """
+        Construct a :class:`coherence.processor.ConditionalPut` that updates an entry with a new value if and only
+        if the :class:`coherence.filter.Filter` applied to the entry evaluates to `True`.
+
+         :param filter: the :class:`coherence.filter.Filter` to evaluate an entry
+         :param value: a value to update an entry with
+         :param return_value: specifies whether the processor should return the current value in case it
+                has not been updated
+         :return: a processor that updates an entry with a new value if and only if the filter applied
+                  to the entry evaluates to `True`.
+        """
+        return ConditionalPut(filter, value, return_value)
 
     @staticmethod
     def conditional_put_all(filter: Filter, values: dict[K, V]) -> EntryProcessor:
+        """
+        Construct a :class:`coherence.processor.ConditionalRemove` processor that updates an entry with a new value if
+        and only if the :class:`coherence.filter.Filter` applied to the entry evaluates to `True`. The new value is
+        extracted from the specified map based on the entry's key.
+
+        :param filter: the :class:`coherence.filter.Filter` to evaluate all supplied entries
+        :param values: a `dict` of values to update entries with
+        :return: a processor that updates one or more entries with the provided values if and only if the
+                 filter applied to the entry evaluates to `True`
+        """
         return ConditionalPutAll(filter, values)
 
     @staticmethod
-    def conditional_remove(filter: Filter, return_: bool = False) -> EntryProcessor:
-        return ConditionalRemove(filter, return_)
+    def conditional_remove(filter: Filter, return_value: bool = False) -> EntryProcessor:
+        """
+        Constructs a :class:`coherence.processor.ConditionalRemove` processor that removes an
+        :class:`coherence.client.NamedMap` entry if and only if the :class:`coherence.filter.Filter`
+        applied to the entry evaluates to `True`.
+
+        This processor may optionally return the current value as a result of
+        the invocation if it has not been removed (the :class:`coherence.filter.Filter` evaluated to
+        `False`).
+
+        :param filter: the :class:`coherence.filter.Filter` to evaluate an entry
+        :param return_value: specifies whether the processor should return the current value if it has not
+         been removed
+        """
+        return ConditionalRemove(filter, return_value)
 
     @staticmethod
     def extract(extractor: Optional[ExtractorExpression[T, E]] = None) -> EntryProcessor:
+        """
+        Construct an :class:`coherence.processor.ExtractorProcessor` using the given
+        :class:`coherence.extractor.ValueExtractor` or string expression to extract a value from an object cached
+        within a :class:`coherence.client.NamedMap`.
+
+        For clustered caches using the :class:`coherence.processor.ExtractorProcessor` could significantly reduce
+        the amount of network traffic.
+
+        :param extractor: the :class:`coherence.extractor.ValueExtractor` or string expression to use by this
+                          processor or the name of the method to invoke via java reflection.  If `None`, an
+                          :class:`coherence.extractor.IdentityExtractor` will be used.
+        """
         ext: ExtractorExpression[T, E] = extractor if extractor is not None else IdentityExtractor()
         return ExtractorProcessor(ext)
 
     @staticmethod
     def increment(
-        name_or_manipulator: ValueManipulator | str, increment: int, post_increment: bool = False
+        name_or_manipulator: ManipulatorExpression, increment: Numeric, post_increment: bool = False
     ) -> EntryProcessor:
+        """
+        Construct an :class:`coherence.processor.NumberIncrementor` processor that will increment a property
+        value by a specified amount, returning either the old or the new value as specified.
+
+        :param name_or_manipulator: the :class:`coherence.extractor.ValueManipulator` or string expression
+        :param increment: the numeric value representing the magnitude and sign of the increment
+        :param post_increment: pass `True` to return the value as it was before it was incremented, or pass `False`
+         to return the value as it is after it is incremented
+        :return:
+        """
         return NumberIncrementor(name_or_manipulator, increment, post_increment)
 
     @staticmethod
     def invoke_accessor(method_name: str, *args: Any) -> EntryProcessor:
+        """
+        Constructs a :class:`coherence.processor.MethodInvocationProcessor` that invokes the specified method on
+         a value of a cache entry.
+
+        :param method_name: the name of the method to invoke
+        :param args: the method arguments
+        :return: a :class:`coherence.processor.MethodInvocationProcessor` that invokes the specified method on
+                 a value of a cache entry and optionally updates the entry with a modified value
+        """
         return MethodInvocationProcessor(method_name, False, args)
 
     @staticmethod
     def invoke_mutator(method_name: str, *args: Any) -> EntryProcessor:
+        """
+        Constructs a :class:`coherence.processor.MethodInvocationProcessor` that invokes the specified method on
+        a value of a cache entry updating the entry with a modified value.
+
+        :param method_name: the name of the method to invoke
+        :param args: the method arguments
+        :return: a :class:`coherence.processor.MethodInvocationProcessor` that invokes the specified method on
+                 a value of a cache entry and optionally updates the entry with a modified value
+        """
         return MethodInvocationProcessor(method_name, True, args)
 
     @staticmethod
     def multiply(
-        name_or_manipulator: ValueManipulator | str, multiplier: int, post_multiplication: bool = False
+        name_or_manipulator: ManipulatorExpression, multiplier: Numeric, post_multiplication: bool = False
     ) -> EntryProcessor:
+        """
+        Construct an NumberMultiplier processor that will multiply a property value by a specified factor,
+        returning either the old or the new value as specified.
+
+        :param name_or_manipulator: the ValueManipulator or the property name
+        :param multiplier: the Number representing the magnitude and sign of the multiplier
+        :param post_multiplication: pass `True` to return the value as it was before it was multiplied, or pass `False`
+         to return the value as it is after it is multiplied
+        """
         return NumberMultiplier(name_or_manipulator, multiplier, post_multiplication)
 
     @staticmethod
     def nop() -> EntryProcessor:
+        """
+        Construct an :class:`coherence.processor.EntryProcessor` that does nothing and returns `True`
+        as a result of execution
+        :return: an :class:`coherence.processor.EntryProcessor` that does nothing and returns `True`
+        as a result of execution
+        """
         return NullProcessor()
 
     @staticmethod
     def preload() -> EntryProcessor:
+        """
+        :class:`coherence.processor.PreloadRequest` is a simple :class:`coherence.processor.EntryProcessor` that
+        performs a get call. No results are reported back to the caller.
+
+        The :class:`coherence.processor.PreloadRequest` process provides a means to "preload" an entry or a
+        collection of entries into the cache using the cache loader without incurring the cost of sending the
+        value(s) over the network. If the corresponding entry (or entries) already exists in the cache,
+        or if the cache does not have a loader, then invoking this :class:`coherence.processor.PreloadRequest`
+        has no effect.
+        :return:
+        """
         return PreloadRequest()
 
     @staticmethod
     def script(name: str, language: str, *args: Any) -> EntryProcessor:
+        """
+        Create a :class:`coherence.processor.ScriptProcessor` that wraps a script written in the specified language
+        and identified by the specified name. The specified args will be passed during execution of the script.
+
+        :param name: the name of the :class:`coherence.processor.EntryProcessor` that needs to be executed
+        :param language: the language the script is written. Currently, only `js` (for JavaScript) is supported
+        :param args: the arguments to be passed to the :class:`coherence.processor.EntryProcessor`
+        """
         return ScriptProcessor(name, language, args)
 
     @staticmethod
     def touch() -> EntryProcessor:
+        """
+        Creates an :class:`coherence.processor.EntryProcessor` that touches an entry (if present) in order to
+        trigger interceptor re-evaluation and possibly increment expiry time.
+        :return:
+        """
         return TouchProcessor()
 
     @staticmethod
-    def update(updater_or_property_name: ValueUpdater | str, value: V) -> EntryProcessor:
+    def update(updater_or_property_name: UpdaterExpression, value: V) -> EntryProcessor:
+        """
+        Construct an :class:`coherence.processor.UpdaterProcessor` based on the specified `ValueUpdater`.
+
+        While it's possible to update a value via standard Map API, using the updater allows for clustered caches using
+        the `UpdaterProcessor` allows avoiding explicit concurrency control and could significantly reduce the amount of
+        network traffic.
+
+        :param updater_or_property_name: a ValueUpdater object or the method name; passing null will simpy replace
+         the entry's value with the specified one instead of updating it
+        :param value: the value to update the target entry with
+        """
         return UpdaterProcessor(updater_or_property_name, value)
 
     @staticmethod
     def versioned_put(value: V, allow_insert: bool = False, return_current: bool = False) -> EntryProcessor:
+        """
+        Construct a :class:`coherence.processor.VersionedPut` that updates an entry with a new value if and only
+        if the version of the new value matches to the version of the current entry's value. This processor optionally
+        returns the current value as a result of the invocation if it has not been updated (the versions did not match).
+
+        :param value: a value to update an entry with
+        :param allow_insert: specifies whether an insert should be allowed (no currently existing value)
+        :param return_current: specifies whether the processor should return the current value in case it has
+         not been updated
+        """
         return VersionedPut(value, allow_insert, return_current)
 
     @staticmethod
     def versioned_put_all(
         values: dict[K, V], allow_insert: bool = False, return_current: bool = False
     ) -> EntryProcessor:
+        """
+        Construct a :class:`coherence.processor.VersionedPut` processor that updates an entry with a new value if
+        and only if the version of the new value matches to the version of the current entry's value
+        (which must exist). This processor optionally returns a map of entries that have not been updated
+        (the versions did not match).
+
+        :param values: a `dict` of values to update entries with
+        :param allow_insert: specifies whether an insert should be allowed (no currently existing value)
+        :param return_current: specifies whether the processor should return the current value in case it has
+         not been updated
+        """
         return VersionedPutAll(values, allow_insert, return_current)

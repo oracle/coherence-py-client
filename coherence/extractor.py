@@ -65,7 +65,7 @@ class ValueExtractor(ABC, Generic[T, E]):
 
         :param from_field_or_method: the name of the field or method to extract the value from.
         :param params: the parameters to pass to the method.
-        :return: an instance of :func:`coherence.extractor.UniversalExtractor`
+        :return: an instance of :class:`coherence.extractor.UniversalExtractor`
         """
         return UniversalExtractor(from_field_or_method, params)
 
@@ -96,11 +96,11 @@ class UniversalExtractor(ValueExtractor[T, Any]):
     @classmethod
     def create(cls, name: str, params: Optional[list[Any]] = None) -> UniversalExtractor[T]:
         """
-        Class method to create an instance of :func:`coherence.extractor.UniversalExtractor`
+        Class method to create an instance of :class:`coherence.extractor.UniversalExtractor`
 
         :param name: A method or property name.
         :param params: the parameter array. Must be `null` or `zero length` for a property based extractor.
-        :return: an instance of :func:`coherence.extractor.UniversalExtractor`
+        :return: an instance of :class:`coherence.extractor.UniversalExtractor`
         """
         return cls(name, params)
 
@@ -108,8 +108,8 @@ class UniversalExtractor(ValueExtractor[T, Any]):
 class AbstractCompositeExtractor(ValueExtractor[T, E]):
     def __init__(self, extractors: Sequence[ValueExtractor[T, E]]) -> None:
         """
-        Abstract super class for :func:`coherence.extractor.ValueExtractor` implementations that are based on an
-        underlying array of :func:`coherence.extractor.ValueExtractor` objects.
+        Abstract super class for :class:`coherence.extractor.ValueExtractor` implementations that are based on an
+        underlying array of :class:`coherence.extractor.ValueExtractor` objects.
 
         :param extractors: an array of extractors
         """
@@ -121,13 +121,13 @@ class AbstractCompositeExtractor(ValueExtractor[T, E]):
 class ChainedExtractor(AbstractCompositeExtractor[T, Any]):
     def __init__(self, extractors_or_method: str | Sequence[ValueExtractor[T, Any]]) -> None:
         """
-        Composite :func:`coherence.extractor.ValueExtractor` implementation based on an array of extractors. The
+        Composite :class:`coherence.extractor.ValueExtractor` implementation based on an array of extractors. The
         extractors in the array are applied sequentially left-to-right, so a result of a previous extractor serves as
         a target object for a next one.
 
-        :param extractors_or_method: an array of :func:`coherence.extractor.ValueExtractor`, or a dot-delimited
+        :param extractors_or_method: an array of :class:`coherence.extractor.ValueExtractor`, or a dot-delimited
          sequence of method names which results in a ChainedExtractor that is based on an array of corresponding
-         :func:`coherence.extractor.UniversalExtractor` objects
+         :class:`coherence.extractor.UniversalExtractor` objects
         """
         if type(extractors_or_method) == str:
             e = list()
@@ -144,13 +144,13 @@ class ChainedExtractor(AbstractCompositeExtractor[T, Any]):
 class MultiExtractor(AbstractCompositeExtractor[Any, Any]):
     def __init__(self, extractors_or_method: str | Sequence[ValueExtractor[Any, Any]]) -> None:
         """
-        Composite :func:`coherence.extractor.ValueExtractor` implementation based on an array of extractors. The
+        Composite :class:`coherence.extractor.ValueExtractor` implementation based on an array of extractors. The
         extractors in the array are applied sequentially left-to-right, so a result of a previous extractor serves as
         a target object for a next one.
 
-        :param extractors_or_method: an array of :func:`coherence.extractor.ValueExtractor`, or a dot-delimited
+        :param extractors_or_method: an array of :class:`coherence.extractor.ValueExtractor`, or a dot-delimited
          sequence of method names which results in a ChainedExtractor that is based on an array of corresponding
-         :func:`coherence.extractor.UniversalExtractor` objects
+         :class:`coherence.extractor.UniversalExtractor` objects
         """
         if type(extractors_or_method) == str:
             e = list()
@@ -169,7 +169,7 @@ class IdentityExtractor(ValueExtractor[T, Any]):
 
     def __init__(self) -> None:
         """
-        A Trivial :func:`coherence.extractor.ValueExtractor` implementation that does not actually extract anything
+        A Trivial :class:`coherence.extractor.ValueExtractor` implementation that does not actually extract anything
         from the passed value, but returns the value itself.
 
         Constructs a new `IdentityExtractor` instance.
@@ -188,8 +188,8 @@ class ValueUpdater(ABC):
 
 
 class ValueManipulator(ValueUpdater):
-    """ValueManipulator represents a composition of :func:`coherence.extractor.ValueExtractor` and
-    :func:`coherence.extractor.ValueUpdater` implementations."""
+    """ValueManipulator represents a composition of :class:`coherence.extractor.ValueExtractor` and
+    :class:`coherence.extractor.ValueUpdater` implementations."""
 
     @abstractmethod
     def get_extractor(self) -> ValueExtractor[T, E]:
@@ -271,3 +271,5 @@ def extract(expression: str) -> ValueExtractor[T, E]:
 
 
 ExtractorExpression: TypeAlias = ValueExtractor[T, E] | str
+ManipulatorExpression: TypeAlias = ValueManipulator | str
+UpdaterExpression: TypeAlias = ValueUpdater | str
