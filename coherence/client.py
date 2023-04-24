@@ -833,8 +833,22 @@ class TlsOptions:
 
 
 class Options:
+    """
+    Supported :func:`coherence.client.Session` options.
+    """
+
     ENV_SERVER_ADDRESS = "COHERENCE_SERVER_ADDRESS"
+    """
+    Environment variable to specify the Coherence gRPC server address for the client to connect to. The
+    environment variable is used if address is not passed as an argument in the constructor. If the environment
+    variable is not set and address is not passed as an argument then `DEFAULT_ADDRESS` is used
+    """
     ENV_REQUEST_TIMEOUT = "COHERENCE_CLIENT_REQUEST_TIMEOUT"
+    """
+    Environment variable to specify the request timeout for each remote call. The environment variable is used if
+    request timeout is not passed as an argument in the constructor. If the environment variable is not set and
+    request timeout is not passed as an argument then `DEFAULT_REQUEST_TIMEOUT` of 30 seconds is used
+    """
 
     DEFAULT_ADDRESS: Final[str] = "localhost:1408"
     """The default target address to connect to Coherence gRPC server."""
@@ -854,6 +868,23 @@ class Options:
         channel_options: Optional[Sequence[Tuple[str, Any]]] = None,
         tls_options: Optional[TlsOptions] = None,
     ) -> None:
+        """
+        Construct a new :func:`coherence.client.Options`
+
+        :param address: Address of the target Coherence cluster.  If not explicitly set, this defaults
+          to :func:`coherence.client.Options.DEFAULT_ADDRESS`. See
+          also :func:`coherence.client.Options.ENV_SERVER_ADDRESS`
+        :param scope: scope name used to link this :func:`coherence.client.Options` to the
+          corresponding `ConfigurableCacheFactory` on the server.
+        :param request_timeout_seconds: Defines the request timeout, in `seconds`, that will be applied to each
+          remote call. If not explicitly set, this defaults to :func:`coherence.client.Options.DEFAULT_REQUEST_TIMEOUT`.
+          See also See also :func:`coherence.client.Options.ENV_REQUEST_TIMEOUT`
+        :param ser_format: The serialization format.  Currently, this is always `json`
+        :param channel_options: The `gRPC` `ChannelOptions`. See
+            https://grpc.github.io/grpc/python/glossary.html#term-channel_arguments and
+            https://github.com/grpc/grpc/blob/master/include/grpc/impl/grpc_types.h
+        :param tls_options: Optional TLS configuration.
+        """
         addr = os.getenv(Options.ENV_SERVER_ADDRESS)
         if addr is not None:
             self._address = addr
@@ -882,34 +913,77 @@ class Options:
 
     @property
     def tls_options(self) -> Optional[TlsOptions]:
+        """
+        Returns the TLS-specific configuration options.
+
+        :return: the TLS-specific configuration options.
+        """
         return getattr(self, "_tls_options", None)
 
     @tls_options.setter
     def tls_options(self, tls_options: TlsOptions) -> None:
+        """
+        Sets the TLS-specific configuration options.
+
+        :param tls_options: the TLS-specific configuration options.
+        """
         self._tls_options = tls_options
 
     @property
     def address(self) -> str:
+        """
+        Return the IPv4 host address and port in the format of ``[host]:[port]``.
+
+        :return: the IPv4 host address and port in the format of ``[host]:[port]``.
+        """
         return self._address
 
     @property
     def scope(self) -> str:
+        """
+        Return the scope name used to link this `Session` with to the corresponding `ConfigurableCacheFactory` on the
+        server.
+
+        :return: the scope name used to link this `Session` with to the corresponding `ConfigurableCacheFactory` on the
+         server.
+        """
         return self._scope
 
     @property
     def format(self) -> str:
+        """
+        The serialization format used by this session.  This library currently supports JSON serialization only,
+        thus this always returns 'json'.
+
+        :return: the serialization format used by this session.
+        """
         return self._ser_format
 
     @property
     def request_timeout_seconds(self) -> float:
+        """
+        Returns the request timeout in `seconds`
+
+        :return: the request timeout in `seconds`
+        """
         return self._request_timeout_seconds
 
     @property
     def channel_options(self) -> Optional[Sequence[Tuple[str, Any]]]:
+        """
+        Return the `gRPC` `ChannelOptions`.
+
+        :return: the `gRPC` `ChannelOptions`.
+        """
         return getattr(self, "_channel_options", None)
 
     @channel_options.setter
     def channel_options(self, channel_options: Sequence[Tuple[str, Any]]) -> None:
+        """
+        Set the `gRPC` `ChannelOptions`.
+
+        :param channel_options: the `gRPC` `ChannelOptions`.
+        """
         self._channel_options = channel_options
 
 
@@ -957,8 +1031,9 @@ class Session:
 
     def __init__(self, session_options: Optional[Options] = None):
         """
+        Construct a new `Session` based on the provided :func:`coherence.client.Options`
 
-        :param session_options:
+        :param session_options: the provided :func:`coherence.client.Options`
         """
         self._closed: bool = False
         self._caches: dict[str, NamedCache[Any, Any]] = dict()
@@ -1028,40 +1103,47 @@ class Session:
     @property
     def channel(self) -> grpc.aio.Channel:
         """
+        Return the underlying `gRPC` Channel used by this session.
 
-        :return:
+        :return: the underlying `gRPC` Channel used by this session.
         """
         return self._channel
 
     @property
     def scope(self) -> str:
         """
+        Return the scope name used to link this `Session` with to the corresponding `ConfigurableCacheFactory` on the
+        server.
 
-        :return:
+        :return: the scope name used to link this `Session` with to the corresponding `ConfigurableCacheFactory` on the
+          server.
         """
         return self._session_options.scope
 
     @property
     def format(self) -> str:
         """
+        Returns the default serialization format used by the `Session`
 
-        :return:
+        :return: the default serialization format used by the `Session`
         """
         return self._session_options.format
 
     @property
     def options(self) -> Options:
         """
+        Return the :func:`coherence.client.Options` (read-only) used to configure this session.
 
-        :return:
+        :return: the :func:`coherence.client.Options` (read-only) used to configure this session.
         """
         return self._session_options
 
     @property
     def closed(self) -> bool:
         """
+        Returns `True` if Session is closed else `False`
 
-        :return:
+        :return: `True` if Session is closed else `False`
         """
         return self._closed
 
@@ -1069,10 +1151,12 @@ class Session:
     @_pre_call_session
     async def get_cache(self, name: str, ser_format: str = DEFAULT_FORMAT) -> "NamedCache[K, V]":
         """
+        Returns a :func:`coherence.client.NamedCache` for the specified cache name.
 
-        :param name:
-        :param ser_format:
-        :return:
+        :param name: the cache name
+        :param ser_format: the serialization format for keys and values stored within the cache
+
+        :return: Returns a :func:`coherence.client.NamedCache` for the specified cache name.
         """
         serializer = SerializerRegistry.serializer(ser_format)
         c = self._caches.get(name)
@@ -1086,7 +1170,9 @@ class Session:
 
     # noinspection PyUnresolvedReferences
     async def close(self) -> None:
-        """ """
+        """
+        Close the `Session`
+        """
         if not self._closed:
             self._closed = True
             self._emitter.emit(SessionLifecycleEvent.CLOSED.value)

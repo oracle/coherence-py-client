@@ -15,6 +15,24 @@ Session
     :show-inheritance:
     :members:
 
+    .. automethod:: __init__
+
+Options
+-------
+.. autoclass:: coherence.client.Options
+    :show-inheritance:
+    :members:
+
+    .. automethod:: __init__
+
+TlsOptions
+----------
+.. autoclass:: coherence.client.TlsOptions
+    :show-inheritance:
+    :members:
+
+    .. automethod:: __init__
+
 NamedCache
 ----------
 .. autoclass:: coherence.client.NamedCache
