@@ -10,7 +10,7 @@ from typing import Optional, TypeVar
 from .aggregator import EntryAggregator
 from .comparator import Comparator
 from .filter import Filter, Filters, MapEventFilter
-from .messages_pb2 import (
+from .messages_pb2 import (  # type: ignore
     AggregateRequest,
     ClearRequest,
     ContainsKeyRequest,
