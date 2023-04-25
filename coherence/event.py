@@ -16,7 +16,7 @@ from pymitter import EventEmitter
 
 import coherence.client
 from coherence.filter import Filter, Filters, MapEventFilter
-from coherence.messages_pb2 import MapEventResponse, MapListenerRequest, MapListenerResponse
+from coherence.messages_pb2 import MapEventResponse, MapListenerRequest, MapListenerResponse  # type: ignore
 from coherence.serialization import Serializer
 from coherence.services_pb2_grpc import NamedCacheServiceStub
 from coherence.util import RequestFactory

@@ -34,7 +34,7 @@ from coherence.aggregator import AverageAggregator, EntryAggregator, PriorityAgg
 from .comparator import Comparator
 from .event import MapLifecycleEvent, MapListener, SessionLifecycleEvent
 from .filter import AlwaysFilter, Filter
-from .messages_pb2 import PageRequest
+from .messages_pb2 import PageRequest  # type: ignore
 from .processor import EntryProcessor
 from .serialization import Serializer, SerializerRegistry
 from .services_pb2_grpc import NamedCacheServiceStub

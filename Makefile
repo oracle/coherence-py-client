@@ -106,9 +106,12 @@ build-test-images: ## Build the Test images
 .PHONY: generate-proto
 generate-proto:  ## Generate Proto Files
 	mkdir -p $(PROTO_DIR) || true
-	curl -o $(PROTO_DIR)/services.proto https://raw.githubusercontent.com/oracle/coherence/v21.12/prj/coherence-grpc/src/main/proto/services.proto
-	curl -o $(PROTO_DIR)/messages.proto https://raw.githubusercontent.com/oracle/coherence/v21.12/prj/coherence-grpc/src/main/proto/messages.proto
+	curl -o $(PROTO_DIR)/services.proto https://raw.githubusercontent.com/oracle/coherence/22.06.4/prj/coherence-grpc/src/main/proto/services.proto
+	curl -o $(PROTO_DIR)/messages.proto https://raw.githubusercontent.com/oracle/coherence/22.06.4/prj/coherence-grpc/src/main/proto/messages.proto
 	python -m grpc_tools.protoc --proto_path=$(CURRDIR)/etc/proto --python_out=$(CURRDIR)/coherence --grpc_python_out=$(CURRDIR)/coherence $(CURRDIR)/etc/proto/messages.proto $(CURRDIR)/etc/proto/services.proto
+	sed -e 's/import messages_pb2 as messages__pb2/import coherence.messages_pb2 as messages__pb2/' \
+		< $(CURRDIR)/coherence/services_pb2_grpc.py > $(CURRDIR)/coherence/services_pb2_grpc.py.out
+	mv $(CURRDIR)/coherence/services_pb2_grpc.py.out $(CURRDIR)/coherence/services_pb2_grpc.py
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run tests with code coverage
