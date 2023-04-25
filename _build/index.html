@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coherence Python Client &mdash; Coherence Python Client 1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+    <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> Coherence Python Client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sessions.html">Sessions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basics.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="querying.html">Querying</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aggregation.html">Aggregation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entryprocessing.html">Entry Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="serialization.html">Serialization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Coherence Python Client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Coherence Python Client</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="toctree-wrapper compound">
+</div>
+<section id="coherence-python-client">
+<h1>Coherence Python Client<a class="headerlink" href="#coherence-python-client" title="Permalink to this headline"></a></h1>
+<a class="reference external image-reference" href="https://github.com/oracle/coherence-py-client/actions/workflows/validate.yml/badge.svg"><img alt="CI/CD" src="https://github.com/oracle/coherence-py-client/actions/workflows/validate.yml/badge.svg" /></a>
+<a class="reference external image-reference" href="https://oss.oracle.com/licenses/upl/"><img alt="License" src="http://img.shields.io/badge/license-UPL%201.0-blue.svg" /></a>
+<p><span class="raw-html-m2r"><img src=https://oracle.github.io/coherence/assets/images/logo-red.png width="30%"></span><span class="raw-html-m2r"><img></span></p>
+<p>The Coherence Python Client allows Python applications to act as cache clients to an Oracle Coherence cluster using
+the Google gRPC framework as the network transport.</p>
+<section id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Familiar, dict-like, interface for manipulating dict entries</p></li>
+<li><p>Cluster-side querying and aggregation of dict entries</p></li>
+<li><p>Cluster-side manipulation of map entries using <code class="docutils literal notranslate"><span class="pre">EntryProcessors</span></code></p></li>
+<li><p>Registration of listeners that will be notified of dict entry mutations</p></li>
+</ul>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/oracle/coherence">Coherence CE</a> 22.06 or later (or equivalent non-open source editions) with a configured <a class="reference external" href="https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html">gRPCProxy</a>.</p></li>
+<li><p>Python 3.10.1</p></li>
+</ul>
+</section>
+<section id="starting-a-coherence-cluster">
+<h2>Starting a Coherence Cluster<a class="headerlink" href="#starting-a-coherence-cluster" title="Permalink to this headline"></a></h2>
+<p>Before testing the Python client, you must ensure a Coherence cluster is available.
+For local development, we recommend using the Coherence CE Docker image; it contains
+everything necessary for the client to operate correctly.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">1408</span>:1408<span class="w"> </span>ghcr.io/oracle/coherence-ce:22.06.3
+</pre></div>
+</div>
+<section id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>coherence
+</pre></div>
+</div>
+</section>
+<section id="documentation">
+<h3>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline"></a></h3>
+<p>TBC</p>
+</section>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline"></a></h3>
+<p>The following example connects to a Coherence cluster running gRPC Proxy on default
+port of 1408, creates a new <code class="docutils literal notranslate"><span class="pre">NamedCache</span></code> with key <code class="docutils literal notranslate"><span class="pre">str</span></code> and value of a <code class="docutils literal notranslate"><span class="pre">str|int</span></code> and
+issues <code class="docutils literal notranslate"><span class="pre">put()</span></code>, <code class="docutils literal notranslate"><span class="pre">get()</span></code>, <code class="docutils literal notranslate"><span class="pre">size()</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> operations.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">coherence</span> <span class="kn">import</span> <span class="n">NamedCache</span><span class="p">,</span> <span class="n">Session</span>
+
+<span class="c1"># create a new Session to the Coherence server</span>
+<span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1"># create a new NamedCache with key of string|int and value of string|int</span>
+<span class="n">cache</span><span class="p">:</span> <span class="n">NamedCache</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="o">|</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">get_cache</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+
+<span class="c1"># put a new key/value</span>
+<span class="n">k</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;one&quot;</span>
+<span class="n">v</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;only-one&quot;</span>
+<span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+<span class="c1"># get the value for a key in the cache</span>
+<span class="n">r</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+<span class="c1"># print the value got for a key in the cache</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The value of key </span><span class="se">\&quot;</span><span class="s2">one</span><span class="se">\&quot;</span><span class="s2"> is &quot;</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span>
+
+<span class="n">k1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;two&quot;</span>
+<span class="n">v1</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">v1</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The value of key </span><span class="se">\&quot;</span><span class="s2">two</span><span class="se">\&quot;</span><span class="s2"> is &quot;</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span>
+
+<span class="c1"># print the size of the cache</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Size of the cache test is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">size</span><span class="p">()))</span>
+
+<span class="c1"># remove an entry from the cache</span>
+<span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">k1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="help">
+<h3>Help<a class="headerlink" href="#help" title="Permalink to this headline"></a></h3>
+<p>We have a <strong>public Slack channel</strong> where you can get in touch with us to ask questions about using the Coherence CLI
+or give us feedback or suggestions about what features and improvements you would like to see. We would love
+to hear from you. To join our channel,
+please <a class="reference external" href="https://join.slack.com/t/oraclecoherence/shared_invite/enQtNzcxNTQwMTAzNjE4LTJkZWI5ZDkzNGEzOTllZDgwZDU3NGM2YjY5YWYwMzM3ODdkNTU2NmNmNDFhOWIxMDZlNjg2MzE3NmMxZWMxMWE">visit this site to get an invitation</a>.
+The invitation email will include details of how to access our Slack
+workspace.  After you are logged in, please come to <code class="docutils literal notranslate"><span class="pre">#coherence</span></code> and say, “hello!”</p>
+<p>If you would like to raise an issue please see <a class="reference external" href="https://github.com/oracle/coherence-py-client/issues/new/choose">here</a>.</p>
+</section>
+<section id="contributing">
+<h3>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline"></a></h3>
+<p>This project welcomes contributions from the community. Before submitting a pull request, please <a class="reference external" href="./CONTRIBUTING.md">review our contribution guide</a></p>
+</section>
+<section id="security">
+<h3>Security<a class="headerlink" href="#security" title="Permalink to this headline"></a></h3>
+<p>Please consult the <a class="reference external" href="./SECURITY.md">security guide</a> for our responsible security vulnerability disclosure process</p>
+</section>
+<section id="license">
+<h3>License<a class="headerlink" href="#license" title="Permalink to this headline"></a></h3>
+<p>Copyright (c) 2022, 2023 Oracle and/or its affiliates.</p>
+<p>Released under the Universal Permissive License v1.0 as shown at
+<a class="reference external" href="https://oss.oracle.com/licenses/upl/">https://oss.oracle.com/licenses/upl/</a>.</p>
+</section>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright (c) 2022, 2023, Oracle and/or its affiliates..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

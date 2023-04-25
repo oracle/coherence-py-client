@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coherence.processor &mdash; Coherence Python Client 1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+    <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="coherence.filter" href="filter.html" />
+    <link rel="prev" title="coherence.client" href="client.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Coherence Python Client
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sessions.html">Sessions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basics.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../querying.html">Querying</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../aggregation.html">Aggregation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../entryprocessing.html">Entry Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../serialization.html">Serialization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="client.html">coherence.client</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">coherence.processor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#processors">Processors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#entryprocessor">EntryProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#extractorprocessor">ExtractorProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compositeprocessor">CompositeProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conditionalprocessor">ConditionalProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nullprocessor">NullProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#propertyprocessor">PropertyProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#propertymanipulator">PropertyManipulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#numbermultiplier">NumberMultiplier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#numberincrementor">NumberIncrementor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conditionalput">ConditionalPut</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conditionalputall">ConditionalPutAll</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conditionalremove">ConditionalRemove</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#methodinvocationprocessor">MethodInvocationProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#touchprocessor">TouchProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scriptprocessor">ScriptProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preloadrequest">PreloadRequest</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#updaterprocessor">UpdaterProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#versionedput">VersionedPut</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#versionedputall">VersionedPutAll</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="filter.html">coherence.filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extractor.html">coherence.extractor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aggregator.html">coherence.aggregator</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Coherence Python Client</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../api_reference.html">API Reference</a></li>
+      <li class="breadcrumb-item active">coherence.processor</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api_reference/processor.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="coherence-processor">
+<h1>coherence.processor<a class="headerlink" href="#coherence-processor" title="Permalink to this headline"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<section id="processors">
+<h2>Processors<a class="headerlink" href="#processors" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.Processors">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">Processors</span></span><a class="headerlink" href="#coherence.processor.Processors" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The <cite>Processors</cite> class provides a set of static methods for creating standard Coherence
+<a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a>’s.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.conditional_put">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">conditional_put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">coherence.processor.V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.conditional_put" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a <a class="reference internal" href="#coherence.processor.ConditionalPut" title="coherence.processor.ConditionalPut"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalPut</span></code></a> that updates an entry with a new value if and only
+if the <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> applied to the entry evaluates to <cite>True</cite>.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param filter</dt>
+<dd class="field-odd"><p>the <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> to evaluate an entry</p>
+</dd>
+<dt class="field-even">param value</dt>
+<dd class="field-even"><p>a value to update an entry with</p>
+</dd>
+<dt class="field-odd">param return_value</dt>
+<dd class="field-odd"><p>specifies whether the processor should return the current value in case it
+has not been updated</p>
+</dd>
+<dt class="field-even">return</dt>
+<dd class="field-even"><p>a processor that updates an entry with a new value if and only if the filter applied
+to the entry evaluates to <cite>True</cite>.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.conditional_put_all">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">conditional_put_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">V</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.conditional_put_all" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a <a class="reference internal" href="#coherence.processor.ConditionalRemove" title="coherence.processor.ConditionalRemove"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalRemove</span></code></a> processor that updates an entry with a new value if
+and only if the <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> applied to the entry evaluates to <cite>True</cite>. The new value is
+extracted from the specified map based on the entry’s key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter</strong> – the <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> to evaluate all supplied entries</p></li>
+<li><p><strong>values</strong> – a <cite>dict</cite> of values to update entries with</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a processor that updates one or more entries with the provided values if and only if the
+filter applied to the entry evaluates to <cite>True</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.conditional_remove">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">conditional_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.conditional_remove" title="Permalink to this definition"></a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#coherence.processor.ConditionalRemove" title="coherence.processor.ConditionalRemove"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalRemove</span></code></a> processor that removes an
+<a class="reference internal" href="client.html#coherence.client.NamedMap" title="coherence.client.NamedMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.client.NamedMap</span></code></a> entry if and only if the <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a>
+applied to the entry evaluates to <cite>True</cite>.</p>
+<p>This processor may optionally return the current value as a result of
+the invocation if it has not been removed (the <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> evaluated to
+<cite>False</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter</strong> – the <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> to evaluate an entry</p></li>
+<li><p><strong>return_value</strong> – specifies whether the processor should return the current value if it has not
+been removed</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.extract">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.processor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.processor.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.extract" title="Permalink to this definition"></a></dt>
+<dd><p>Construct an <a class="reference internal" href="#coherence.processor.ExtractorProcessor" title="coherence.processor.ExtractorProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ExtractorProcessor</span></code></a> using the given
+<a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> or string expression to extract a value from an object cached
+within a <a class="reference internal" href="client.html#coherence.client.NamedMap" title="coherence.client.NamedMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.client.NamedMap</span></code></a>.</p>
+<p>For clustered caches using the <a class="reference internal" href="#coherence.processor.ExtractorProcessor" title="coherence.processor.ExtractorProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ExtractorProcessor</span></code></a> could significantly reduce
+the amount of network traffic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>extractor</strong> – the <a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> or string expression to use by this
+processor or the name of the method to invoke via java reflection.  If <cite>None</cite>, an
+<a class="reference internal" href="extractor.html#coherence.extractor.IdentityExtractor" title="coherence.extractor.IdentityExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.IdentityExtractor</span></code></a> will be used.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.increment">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">increment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_or_manipulator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><span class="pre">coherence.extractor.ValueManipulator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">increment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">decimal.Decimal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_increment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.increment" title="Permalink to this definition"></a></dt>
+<dd><p>Construct an <a class="reference internal" href="#coherence.processor.NumberIncrementor" title="coherence.processor.NumberIncrementor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.NumberIncrementor</span></code></a> processor that will increment a property
+value by a specified amount, returning either the old or the new value as specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name_or_manipulator</strong> – the <a class="reference internal" href="extractor.html#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueManipulator</span></code></a> or string expression</p></li>
+<li><p><strong>increment</strong> – the numeric value representing the magnitude and sign of the increment</p></li>
+<li><p><strong>post_increment</strong> – pass <cite>True</cite> to return the value as it was before it was incremented, or pass <cite>False</cite>
+to return the value as it is after it is incremented</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.invoke_accessor">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">invoke_accessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.invoke_accessor" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Constructs a <a class="reference internal" href="#coherence.processor.MethodInvocationProcessor" title="coherence.processor.MethodInvocationProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.MethodInvocationProcessor</span></code></a> that invokes the specified method on</dt><dd><p>a value of a cache entry.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method_name</strong> – the name of the method to invoke</p></li>
+<li><p><strong>args</strong> – the method arguments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a <a class="reference internal" href="#coherence.processor.MethodInvocationProcessor" title="coherence.processor.MethodInvocationProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.MethodInvocationProcessor</span></code></a> that invokes the specified method on
+a value of a cache entry and optionally updates the entry with a modified value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.invoke_mutator">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">invoke_mutator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.invoke_mutator" title="Permalink to this definition"></a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#coherence.processor.MethodInvocationProcessor" title="coherence.processor.MethodInvocationProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.MethodInvocationProcessor</span></code></a> that invokes the specified method on
+a value of a cache entry updating the entry with a modified value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method_name</strong> – the name of the method to invoke</p></li>
+<li><p><strong>args</strong> – the method arguments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a <a class="reference internal" href="#coherence.processor.MethodInvocationProcessor" title="coherence.processor.MethodInvocationProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.MethodInvocationProcessor</span></code></a> that invokes the specified method on
+a value of a cache entry and optionally updates the entry with a modified value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.multiply">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">multiply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_or_manipulator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><span class="pre">coherence.extractor.ValueManipulator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiplier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">decimal.Decimal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_multiplication</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.multiply" title="Permalink to this definition"></a></dt>
+<dd><p>Construct an NumberMultiplier processor that will multiply a property value by a specified factor,
+returning either the old or the new value as specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name_or_manipulator</strong> – the ValueManipulator or the property name</p></li>
+<li><p><strong>multiplier</strong> – the Number representing the magnitude and sign of the multiplier</p></li>
+<li><p><strong>post_multiplication</strong> – pass <cite>True</cite> to return the value as it was before it was multiplied, or pass <cite>False</cite>
+to return the value as it is after it is multiplied</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.nop">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.nop" title="Permalink to this definition"></a></dt>
+<dd><p>Construct an <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> that does nothing and returns <cite>True</cite>
+as a result of execution
+:return: an <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> that does nothing and returns <cite>True</cite>
+as a result of execution</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.preload">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">preload</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.preload" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference internal" href="#coherence.processor.PreloadRequest" title="coherence.processor.PreloadRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.PreloadRequest</span></code></a> is a simple <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> that
+performs a get call. No results are reported back to the caller.</p>
+<p>The <a class="reference internal" href="#coherence.processor.PreloadRequest" title="coherence.processor.PreloadRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.PreloadRequest</span></code></a> process provides a means to “preload” an entry or a
+collection of entries into the cache using the cache loader without incurring the cost of sending the
+value(s) over the network. If the corresponding entry (or entries) already exists in the cache,
+or if the cache does not have a loader, then invoking this <a class="reference internal" href="#coherence.processor.PreloadRequest" title="coherence.processor.PreloadRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.PreloadRequest</span></code></a>
+has no effect.
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.script">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.script" title="Permalink to this definition"></a></dt>
+<dd><p>Create a <a class="reference internal" href="#coherence.processor.ScriptProcessor" title="coherence.processor.ScriptProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ScriptProcessor</span></code></a> that wraps a script written in the specified language
+and identified by the specified name. The specified args will be passed during execution of the script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – the name of the <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> that needs to be executed</p></li>
+<li><p><strong>language</strong> – the language the script is written. Currently, only <cite>js</cite> (for JavaScript) is supported</p></li>
+<li><p><strong>args</strong> – the arguments to be passed to the <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.touch">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">touch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.touch" title="Permalink to this definition"></a></dt>
+<dd><p>Creates an <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> that touches an entry (if present) in order to
+trigger interceptor re-evaluation and possibly increment expiry time.
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.update">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">updater_or_property_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">coherence.processor.V</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.update" title="Permalink to this definition"></a></dt>
+<dd><p>Construct an <a class="reference internal" href="#coherence.processor.UpdaterProcessor" title="coherence.processor.UpdaterProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.UpdaterProcessor</span></code></a> based on the specified <cite>ValueUpdater</cite>.</p>
+<p>While it’s possible to update a value via standard Map API, using the updater allows for clustered caches using
+the <cite>UpdaterProcessor</cite> allows avoiding explicit concurrency control and could significantly reduce the amount of
+network traffic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>updater_or_property_name</strong> – a ValueUpdater object or the method name; passing null will simpy replace
+the entry’s value with the specified one instead of updating it</p></li>
+<li><p><strong>value</strong> – the value to update the target entry with</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.versioned_put">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">versioned_put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">coherence.processor.V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_insert</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_current</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.versioned_put" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a <a class="reference internal" href="#coherence.processor.VersionedPut" title="coherence.processor.VersionedPut"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.VersionedPut</span></code></a> that updates an entry with a new value if and only
+if the version of the new value matches to the version of the current entry’s value. This processor optionally
+returns the current value as a result of the invocation if it has not been updated (the versions did not match).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> – a value to update an entry with</p></li>
+<li><p><strong>allow_insert</strong> – specifies whether an insert should be allowed (no currently existing value)</p></li>
+<li><p><strong>return_current</strong> – specifies whether the processor should return the current value in case it has
+not been updated</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.Processors.versioned_put_all">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">versioned_put_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">V</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_insert</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_current</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.Processors.versioned_put_all" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a <a class="reference internal" href="#coherence.processor.VersionedPut" title="coherence.processor.VersionedPut"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.VersionedPut</span></code></a> processor that updates an entry with a new value if
+and only if the version of the new value matches to the version of the current entry’s value
+(which must exist). This processor optionally returns a map of entries that have not been updated
+(the versions did not match).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> – a <cite>dict</cite> of values to update entries with</p></li>
+<li><p><strong>allow_insert</strong> – specifies whether an insert should be allowed (no currently existing value)</p></li>
+<li><p><strong>return_current</strong> – specifies whether the processor should return the current value in case it has
+not been updated</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="entryprocessor">
+<h2>EntryProcessor<a class="headerlink" href="#entryprocessor" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.EntryProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">EntryProcessor</span></span><a class="headerlink" href="#coherence.processor.EntryProcessor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>An invocable agent that operates against the entries within a NamedMap</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.EntryProcessor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.processor.EntryProcessor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructs a new <cite>EntryProcessor</cite></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.EntryProcessor.and_then">
+<span class="sig-name descname"><span class="pre">and_then</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">processor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.EntryProcessor.and_then" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a <a class="reference internal" href="#coherence.processor.CompositeProcessor" title="coherence.processor.CompositeProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.CompositeProcessor</span></code></a> comprised of this and the provided processor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>processor</strong> – the next processor</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a <a class="reference internal" href="#coherence.processor.CompositeProcessor" title="coherence.processor.CompositeProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.CompositeProcessor</span></code></a> comprised of this and the provided processor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.EntryProcessor.when">
+<span class="sig-name descname"><span class="pre">when</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.EntryProcessor.when" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a <a class="reference internal" href="#coherence.processor.ConditionalProcessor" title="coherence.processor.ConditionalProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalProcessor</span></code></a> comprised of this processor and the provided filter.</p>
+<p>The specified entry processor gets invoked if and only if the filter
+applied to the entry evaluates to <cite>true</cite>; otherwise the
+result of the invocation will return <cite>None</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filter</strong> – the filter :return: Returns a <a class="reference internal" href="#coherence.processor.ConditionalProcessor" title="coherence.processor.ConditionalProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalProcessor</span></code></a> comprised of
+this processor and the provided filter.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="extractorprocessor">
+<h2>ExtractorProcessor<a class="headerlink" href="#extractorprocessor" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.ExtractorProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">ExtractorProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value_extractor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.processor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.processor.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ExtractorProcessor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p><cite>ExtractorProcessor</cite> is an <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> implementation that extracts a value from
+an object cached within a NamedMap.</p>
+<dl class="field-list">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p>A common usage pattern is:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cache</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">aPerson</span><span class="p">,</span><span class="n">ExtractorProcessor</span><span class="p">(</span><span class="s2">&quot;age&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>For clustered caches using the ExtractorProcessor could significantly reduce the amount of network traffic.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.ExtractorProcessor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value_extractor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.processor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.processor.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ExtractorProcessor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct an <cite>ExtractorProcessor</cite> using the given extractor or method name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value_extractor</strong> – the <a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> or string expression
+to use by this filter or the name of the method to
+invoke via java reflection</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="compositeprocessor">
+<h2>CompositeProcessor<a class="headerlink" href="#compositeprocessor" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.CompositeProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">CompositeProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">processors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.CompositeProcessor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p>CompositeProcessor represents a collection of entry processors that are invoked sequentially against the same
+MapEntry.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.CompositeProcessor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">processors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.CompositeProcessor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a <cite>CompositeProcessor</cite> for the specified array of individual entry processors.</p>
+<p>The result of the <cite>CompositeProcessor</cite> execution is an array of results returned by the individual
+EntryProcessor invocations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>processors</strong> – the entry processor array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.CompositeProcessor.and_then">
+<span class="sig-name descname"><span class="pre">and_then</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">processor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.CompositeProcessor" title="coherence.processor.CompositeProcessor"><span class="pre">coherence.processor.CompositeProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.CompositeProcessor.and_then" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a <a class="reference internal" href="#coherence.processor.CompositeProcessor" title="coherence.processor.CompositeProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.CompositeProcessor</span></code></a> comprised of this and the provided processor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>processor</strong> – the next processor</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a <a class="reference internal" href="#coherence.processor.CompositeProcessor" title="coherence.processor.CompositeProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.CompositeProcessor</span></code></a> comprised of this and the provided processor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.CompositeProcessor.when">
+<span class="sig-name descname"><span class="pre">when</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></span><a class="headerlink" href="#coherence.processor.CompositeProcessor.when" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a <a class="reference internal" href="#coherence.processor.ConditionalProcessor" title="coherence.processor.ConditionalProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalProcessor</span></code></a> comprised of this processor and the provided filter.</p>
+<p>The specified entry processor gets invoked if and only if the filter
+applied to the entry evaluates to <cite>true</cite>; otherwise the
+result of the invocation will return <cite>None</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filter</strong> – the filter :return: Returns a <a class="reference internal" href="#coherence.processor.ConditionalProcessor" title="coherence.processor.ConditionalProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalProcessor</span></code></a> comprised of
+this processor and the provided filter.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="conditionalprocessor">
+<h2>ConditionalProcessor<a class="headerlink" href="#conditionalprocessor" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.ConditionalProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">ConditionalProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">processor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ConditionalProcessor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p>ConditionalProcessor represents a processor that is invoked conditionally based on the result of an entry
+evaluation.  A <cite>ConditionalProcessor</cite> is returned from the <cite>when()</cite> function, which takes a filter as its argument.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.ConditionalProcessor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">processor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><span class="pre">coherence.processor.EntryProcessor</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ConditionalProcessor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a ConditionalProcessor for the specified filter and the processor.</p>
+<p>The specified entry processor gets invoked if and only if the filter applied to the cache entry evaluates to
+<cite>true</cite>; otherwise the result of the invocation will return <cite>null</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter</strong> – the filter</p></li>
+<li><p><strong>processor</strong> – the entry processor</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="nullprocessor">
+<h2>NullProcessor<a class="headerlink" href="#nullprocessor" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.NullProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">NullProcessor</span></span><a class="headerlink" href="#coherence.processor.NullProcessor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p>Put entry processor.</p>
+<p>An implementation of an EntryProcessor that does nothing and returns <cite>true</cite> as a result of execution.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.NullProcessor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.processor.NullProcessor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a Null EntryProcessor.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="propertyprocessor">
+<h2>PropertyProcessor<a class="headerlink" href="#propertyprocessor" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.PropertyProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">PropertyProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">manipulator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><span class="pre">coherence.extractor.ValueManipulator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_is</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.PropertyProcessor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p><cite>PropertyProcessor</cite> is a base class for EntryProcessor implementations that depend on a ValueManipulator.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.PropertyProcessor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">manipulator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><span class="pre">coherence.extractor.ValueManipulator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_is</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.PropertyProcessor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a PropertyProcessor for the specified property name.</p>
+<p>This constructor assumes that the corresponding property getter will have a name of (“get” + sName) and the
+corresponding property setter’s name will be (“set” + sName).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>manipulator</strong> – the manipulator or property name</p></li>
+<li><p><strong>use_is</strong> – prefix with <cite>is</cite></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="propertymanipulator">
+<h2>PropertyManipulator<a class="headerlink" href="#propertymanipulator" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.PropertyManipulator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">PropertyManipulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_is</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.PropertyManipulator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="extractor.html#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueManipulator</span></code></a></p>
+<p><cite>PropertyManipulator</cite> is a reflection based ValueManipulator implementation based on the JavaBean property name
+conventions.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.PropertyManipulator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_is</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.PropertyManipulator.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a PropertyManipulator for the specified property name.</p>
+<p>This constructor assumes that the corresponding property getter will have a name of either (“get” + sName) or
+(“is” + sName) and the corresponding property setter’s name will be (“set” + sName).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>property_name</strong> – a property name</p></li>
+<li><p><strong>use_is</strong> – if true, the getter method will be prefixed with “is” rather than “get”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.PropertyManipulator.get_extractor">
+<span class="sig-name descname"><span class="pre">get_extractor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.processor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.processor.E</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.processor.PropertyManipulator.get_extractor" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve the underlying ValueExtractor reference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>the ValueExtractor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.PropertyManipulator.get_updator">
+<span class="sig-name descname"><span class="pre">get_updator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="extractor.html#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a></span></span><a class="headerlink" href="#coherence.processor.PropertyManipulator.get_updator" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve the underlying ValueUpdater reference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>the ValueUpdater</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="numbermultiplier">
+<h2>NumberMultiplier<a class="headerlink" href="#numbermultiplier" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.NumberMultiplier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">NumberMultiplier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_or_manipulator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><span class="pre">coherence.extractor.ValueManipulator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiplier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">decimal.Decimal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_multiplication</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.NumberMultiplier" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.PropertyProcessor" title="coherence.processor.PropertyProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.PropertyProcessor</span></code></a></p>
+<p>NumberMultiplier entry processor.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.NumberMultiplier.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_or_manipulator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><span class="pre">coherence.extractor.ValueManipulator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiplier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">decimal.Decimal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_multiplication</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.NumberMultiplier.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct an NumberMultiplier processor that will multiply a property value by a specified factor,
+returning either the old or the new value as specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name_or_manipulator</strong> – the ValueManipulator or the property name</p></li>
+<li><p><strong>multiplier</strong> – the Number representing the magnitude and sign of the multiplier</p></li>
+<li><p><strong>post_multiplication</strong> – pass true to return the value as it was before it was multiplied, or pass false
+to return the value as it is after it is multiplied</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="numberincrementor">
+<h2>NumberIncrementor<a class="headerlink" href="#numberincrementor" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.NumberIncrementor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">NumberIncrementor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_or_manipulator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><span class="pre">coherence.extractor.ValueManipulator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">increment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">decimal.Decimal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_increment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.NumberIncrementor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.PropertyProcessor" title="coherence.processor.PropertyProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.PropertyProcessor</span></code></a></p>
+<p>The <a class="reference internal" href="#coherence.processor.NumberIncrementor" title="coherence.processor.NumberIncrementor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.NumberIncrementor</span></code></a> <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> is used to increment
+a property value of a numeric type.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.NumberIncrementor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_or_manipulator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><span class="pre">coherence.extractor.ValueManipulator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">increment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">decimal.Decimal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_increment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.NumberIncrementor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct an <a class="reference internal" href="#coherence.processor.NumberIncrementor" title="coherence.processor.NumberIncrementor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.NumberIncrementor</span></code></a> processor that will increment a property
+value by a specified amount, returning either the old or the new value as specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name_or_manipulator</strong> – the <a class="reference internal" href="extractor.html#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueManipulator</span></code></a> or string expression</p></li>
+<li><p><strong>increment</strong> – the numeric value representing the magnitude and sign of the increment</p></li>
+<li><p><strong>post_increment</strong> – pass <cite>True</cite> to return the value as it was before it was incremented, or pass <cite>False</cite>
+to return the value as it is after it is incremented</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="conditionalput">
+<h2>ConditionalPut<a class="headerlink" href="#conditionalput" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.ConditionalPut">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">ConditionalPut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">coherence.processor.V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ConditionalPut" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p><a class="reference internal" href="#coherence.processor.ConditionalPut" title="coherence.processor.ConditionalPut"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalPut</span></code></a> is an <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> that performs
+an update operation for an entry that satisfies the specified condition.</p>
+<p>While the <a class="reference internal" href="#coherence.processor.ConditionalPut" title="coherence.processor.ConditionalPut"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalPut</span></code></a> processing could be implemented via direct key-based
+<a class="reference internal" href="client.html#coherence.client.NamedMap" title="coherence.client.NamedMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.client.NamedMap</span></code></a> operations, it is more efficient and enforces concurrency control without
+explicit locking.</p>
+<p>Obviously, using more specific, fine-tuned filters (rather than ones based on the
+<a class="reference internal" href="extractor.html#coherence.extractor.IdentityExtractor" title="coherence.extractor.IdentityExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.IdentityExtractor</span></code></a>) may provide additional flexibility and efficiency allowing
+the put operation to be performed conditionally on values of specific attributes (or even calculations)
+instead of the entire object.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.ConditionalPut.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">coherence.processor.V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ConditionalPut.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a <a class="reference internal" href="#coherence.processor.ConditionalPut" title="coherence.processor.ConditionalPut"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalPut</span></code></a> that updates an entry with a new value if and only
+if the filter applied to the entry evaluates to <cite>True</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter</strong> – the <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> to evaluate an entry</p></li>
+<li><p><strong>value</strong> – a value to update an entry with</p></li>
+<li><p><strong>return_value</strong> – specifies whether the processor should return the current value in case it has
+not been updated</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="conditionalputall">
+<h2>ConditionalPutAll<a class="headerlink" href="#conditionalputall" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.ConditionalPutAll">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">ConditionalPutAll</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">the_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">V</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ConditionalPutAll" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p><cite>ConditionalPutAll</cite> is an <cite>EntryProcessor</cite> that performs an update operation for multiple entries that satisfy the
+specified condition.</p>
+<p>This allows for concurrent insertion/update of values within the cache.</p>
+<dl class="field-list">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p>For example a concurrent <cite>replaceAll(map)</cite> could be implemented as:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">filter</span> <span class="o">=</span> <span class="n">PresentFilter</span><span class="o">.</span><span class="n">INSTANCE</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cache</span><span class="o">.</span><span class="n">invokeAll</span><span class="p">(</span><span class="nb">map</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">ConditionalPutAll</span><span class="p">(</span><span class="nb">filter</span><span class="p">,</span> <span class="nb">map</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>or <cite>putAllIfAbsent</cite> could be done by inverting the filter:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">filter</span> <span class="o">=</span> <span class="n">NotFilter</span><span class="p">(</span><span class="n">PresentFilter</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Obviously, using more specific, fine-tuned filters may provide additional flexibility and efficiency allowing the
+multi-put operations to be performed conditionally on values of specific attributes (or even calculations)
+instead of a simple existence check.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.ConditionalPutAll.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">the_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">V</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ConditionalPutAll.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a <cite>ConditionalPutAll</cite> processor that updates an entry with a new value if and only if the filter
+applied to the entry evaluates to <cite>True</cite>. The new value is extracted from the specified map based on the
+entry’s key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter</strong> – the filter to evaluate all supplied entries</p></li>
+<li><p><strong>the_map</strong> – a dict of values to update entries with</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="conditionalremove">
+<h2>ConditionalRemove<a class="headerlink" href="#conditionalremove" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.ConditionalRemove">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">ConditionalRemove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ConditionalRemove" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p><cite>ConditionalRemove</cite> is an <cite>EntryProcessor</cite> that performs n remove operation if the specified condition is satisfied.</p>
+<p>While the <cite>ConditionalRemove</cite> processing could be implemented via direct key-based <cite>NamedMap</cite> operations, it is more
+efficient and enforces concurrency control without explicit locking.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.ConditionalRemove.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ConditionalRemove.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a <a class="reference internal" href="#coherence.processor.ConditionalRemove" title="coherence.processor.ConditionalRemove"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalRemove</span></code></a> processor that removes an
+<a class="reference internal" href="client.html#coherence.client.NamedMap" title="coherence.client.NamedMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.client.NamedMap</span></code></a> entry if and only if the filter applied to the entry evaluates to <cite>True</cite>.</p>
+<p>This processor may optionally return the current value as a result of
+the invocation if it has not been removed (the <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> evaluated to
+<cite>False</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filter</strong> – the filter to evaluate an entry</p></li>
+<li><p><strong>return_value</strong> – specifies whether the processor should return the current value if it has not
+been removed</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="methodinvocationprocessor">
+<h2>MethodInvocationProcessor<a class="headerlink" href="#methodinvocationprocessor" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.MethodInvocationProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">MethodInvocationProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.MethodInvocationProcessor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p>An <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> that invokes the specified method on a value of a cache entry
+and optionally updates the entry with a modified value.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.MethodInvocationProcessor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.MethodInvocationProcessor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct <code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.MethodInvoctionProcessor</span></code> instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method_name</strong> – the name of the method to invoke</p></li>
+<li><p><strong>mutator</strong> – the flag specifying whether the method mutates the state of a target object, which implies
+that the entry value should be updated after method invocation</p></li>
+<li><p><strong>args</strong> – the method arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="touchprocessor">
+<h2>TouchProcessor<a class="headerlink" href="#touchprocessor" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.TouchProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">TouchProcessor</span></span><a class="headerlink" href="#coherence.processor.TouchProcessor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p>Touches an entry (if present) in order to trigger interceptor re-evaluation and possibly increment expiry time.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.TouchProcessor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.processor.TouchProcessor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a <cite>TouchProcessor</cite></p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="scriptprocessor">
+<h2>ScriptProcessor<a class="headerlink" href="#scriptprocessor" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.ScriptProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">ScriptProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ScriptProcessor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p>ScriptProcessor wraps a script written in one of the languages supported by Graal VM.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.ScriptProcessor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.ScriptProcessor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Create a <a class="reference internal" href="#coherence.processor.ScriptProcessor" title="coherence.processor.ScriptProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ScriptProcessor</span></code></a> that wraps a script written in the specified language
+and identified by the specified name. The specified args will be passed during execution of the script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – the name of the <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> that needs to be executed</p></li>
+<li><p><strong>language</strong> – the language the script is written. Currently, only <cite>js</cite> (for JavaScript) is supported</p></li>
+<li><p><strong>args</strong> – the arguments to be passed to the <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="preloadrequest">
+<h2>PreloadRequest<a class="headerlink" href="#preloadrequest" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.PreloadRequest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">PreloadRequest</span></span><a class="headerlink" href="#coherence.processor.PreloadRequest" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p><cite>PreloadRequest</cite> is a simple <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> that performs
+a get call. No results are reported back to the caller.</p>
+<p>The <a class="reference internal" href="#coherence.processor.PreloadRequest" title="coherence.processor.PreloadRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.PreloadRequest</span></code></a> process provides a means to “preload” an entry or a collection
+of entries into the cache using the cache loader without incurring the cost of sending the value(s) over the
+network. If the corresponding entry (or entries) already exists in the cache, or if the cache does not have a
+loader, then invoking this <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> has no effect.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.PreloadRequest.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.processor.PreloadRequest.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a PreloadRequest EntryProcessor.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="updaterprocessor">
+<h2>UpdaterProcessor<a class="headerlink" href="#updaterprocessor" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.UpdaterProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">UpdaterProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">updater_or_property_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">coherence.processor.V</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.UpdaterProcessor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p><cite>UpdaterProcessor</cite> is an <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> implementations that updates an attribute
+of an object cached in an InvocableMap.</p>
+<p>While it’s possible to update a value via standard Map API, using the updater allows for clustered caches using
+the UpdaterProcessor allows avoiding explicit concurrency control and could significantly reduce the amount of
+network traffic.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.UpdaterProcessor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">updater_or_property_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">coherence.processor.V</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.UpdaterProcessor.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct an <cite>UpdaterProcessor</cite> based on the specified ValueUpdater.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>updater_or_property_name</strong> – a ValueUpdater object or the method name; passing null will simpy replace
+the entry’s value with the specified one instead of updating it</p></li>
+<li><p><strong>value</strong> – the value to update the target entry with</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="versionedput">
+<h2>VersionedPut<a class="headerlink" href="#versionedput" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.VersionedPut">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">VersionedPut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">coherence.processor.V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_insert</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_current</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.VersionedPut" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p><cite>VersionedPut</cite> is an <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> that assumes that entry values are versioned (see
+Coherence Versionable interface for details) and performs an update/insert operation if and only if the version
+of the specified value matches the version of the corresponding value. <cite>VersionedPutAll</cite> will increment the
+version indicator before each value is updated.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.VersionedPut.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">coherence.processor.V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_insert</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_current</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.VersionedPut.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a <cite>VersionedPut</cite> that updates an entry with a new value if and only if the version of the new value
+matches to the version of the current entry’s value. This processor optionally returns the current value as a
+result of the invocation if it has not been updated (the versions did not match).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> – a value to update an entry with</p></li>
+<li><p><strong>allow_insert</strong> – specifies whether an insert should be allowed (no currently existing value)</p></li>
+<li><p><strong>return_current</strong> – specifies whether the processor should return the current value in case it has
+not been updated</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="versionedputall">
+<h2>VersionedPutAll<a class="headerlink" href="#versionedputall" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.processor.VersionedPutAll">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.processor.</span></span><span class="sig-name descname"><span class="pre">VersionedPutAll</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">V</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_insert</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_current</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.VersionedPutAll" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a></p>
+<p><cite>VersionedPutAll</cite> is an <a class="reference internal" href="#coherence.processor.EntryProcessor" title="coherence.processor.EntryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.EntryProcessor</span></code></a> that assumes that entry values are versioned (
+see Coherence Versionable interface for details) and performs an update/insert operation only for entries whose
+versions match to versions of the corresponding current values. In case of the match, the <cite>VersionedPutAll</cite> will
+increment the version indicator before each value is updated.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.processor.VersionedPutAll.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">V</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_insert</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_current</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.processor.VersionedPutAll.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a VersionedPutAll processor that updates an entry with a new value if and only if the version of
+the new value matches to the version of the current entry’s value (which must exist). This processor
+optionally returns a map of entries that have not been updated (the versions did not match).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> – a <cite>dict</cite> of values to update entries with</p></li>
+<li><p><strong>allow_insert</strong> – specifies whether an insert should be allowed (no currently existing value)</p></li>
+<li><p><strong>return_current</strong> – specifies whether the processor should return the current value in case it has
+not been updated</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="client.html" class="btn btn-neutral float-left" title="coherence.client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="filter.html" class="btn btn-neutral float-right" title="coherence.filter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright (c) 2022, 2023, Oracle and/or its affiliates..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
