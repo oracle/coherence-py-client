@@ -3,7 +3,7 @@
 # https://oss.oracle.com/licenses/upl.
 [tool.poetry]
 name = "coherence"
-version = "0.1.0"
+version = "0.9.0"
 description = """The Coherence Python Client allows Python applications to act as cache clients to a \
 Coherence Cluster using Google's gRPC framework as the network transport."""
 authors = ["Dhiru Pandey <dhiru.pandey@oracle.com>", "Ryan Lubke <ryan.lubke@oracle.com>"]
