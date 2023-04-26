@@ -118,7 +118,7 @@ generate-proto:  ## Generate Proto Files
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test
 test:  ##
-	pytest -W error --cov coherence --cov-report=term --cov-report=html
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run standards validation across project
