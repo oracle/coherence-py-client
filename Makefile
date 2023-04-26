@@ -31,7 +31,7 @@ override ENV_FILE            := tests/utils/.env
 MVN_VERSION ?= 1.0.0
 
 # Coherence CE version to run base tests against
-COHERENCE_VERSION ?= 22.06.2
+COHERENCE_VERSION ?= 22.06.4
 COHERENCE_GROUP_ID ?= com.oracle.coherence.ce
 COHERENCE_WKA1 ?= server1
 COHERENCE_WKA2 ?= server1
@@ -106,19 +106,19 @@ build-test-images: ## Build the Test images
 .PHONY: generate-proto
 generate-proto:  ## Generate Proto Files
 	mkdir -p $(PROTO_DIR) || true
-	curl -o $(PROTO_DIR)/services.proto https://raw.githubusercontent.com/oracle/coherence/22.06.4/prj/coherence-grpc/src/main/proto/services.proto
-	curl -o $(PROTO_DIR)/messages.proto https://raw.githubusercontent.com/oracle/coherence/22.06.4/prj/coherence-grpc/src/main/proto/messages.proto
-	python -m grpc_tools.protoc --proto_path=$(CURRDIR)/etc/proto --python_out=$(CURRDIR)/coherence --grpc_python_out=$(CURRDIR)/coherence $(CURRDIR)/etc/proto/messages.proto $(CURRDIR)/etc/proto/services.proto
+	curl -o $(PROTO_DIR)/services.proto https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/services.proto
+	curl -o $(PROTO_DIR)/messages.proto https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/messages.proto
+	python -m grpc_tools.protoc --proto_path=$(CURRDIR)/etc/proto --python_out=$(CURRDIR)/src/coherence --grpc_python_out=$(CURRDIR)/src/coherence $(CURRDIR)/etc/proto/messages.proto $(CURRDIR)/etc/proto/services.proto
 	sed -e 's/import messages_pb2 as messages__pb2/import coherence.messages_pb2 as messages__pb2/' \
-		< $(CURRDIR)/coherence/services_pb2_grpc.py > $(CURRDIR)/coherence/services_pb2_grpc.py.out
-	mv $(CURRDIR)/coherence/services_pb2_grpc.py.out $(CURRDIR)/coherence/services_pb2_grpc.py
+		< $(CURRDIR)/src/coherence/services_pb2_grpc.py > $(CURRDIR)/src/coherence/services_pb2_grpc.py.out
+	mv $(CURRDIR)/src/coherence/services_pb2_grpc.py.out $(CURRDIR)/src/coherence/services_pb2_grpc.py
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run tests with code coverage
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test
 test:  ##
-	pytest -W error --cov coherence --cov-report=term --cov-report=html
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run standards validation across project

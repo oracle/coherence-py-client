@@ -28,6 +28,9 @@ sphinxcontrib-napoleon = "~0.7"
 m2r = "~0.3"
 third-party-license-file-generator = "~2022.3"
 
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
 [tool.isort]
 multi_line_output = 3
 include_trailing_comma = true
