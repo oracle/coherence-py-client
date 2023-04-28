@@ -31,7 +31,7 @@ docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:22.06.3
 ## Installation
 
 ```bash
-pip install coherence
+python3 -m pip install coherence
 ```
 
 ## Documentation
@@ -46,35 +46,43 @@ issues `put()`, `get()`, `size()` and `remove` operations.
 
 ```python
 from coherence import NamedCache, Session
+import asyncio
 
-# create a new Session to the Coherence server
-session: Session = Session(None)
 
-# create a new NamedCache with key of string|int and value of string|int
-cache: NamedCache[str, str|int] = await session.get_cache("test")
+async def run_test():
 
-# put a new key/value
-k: str = "one"
-v: str = "only-one"
-await cache.put(k, v)
+    # create a new Session to the Coherence server
+    session: Session = Session(None)
 
-# get the value for a key in the cache
-r = await cache.get(k)
+    # create a new NamedCache with key of string|int and value of string|int
+    cache: NamedCache[str, str|int] = await session.get_cache("test")
 
-# print the value got for a key in the cache
-print("The value of key \"one\" is " + r)
+    # put a new key/value
+    k: str = "one"
+    v: str = "only-one"
+    await cache.put(k, v)
 
-k1: str = "two"
-v1: int = 2
-await cache.put(k1, v1)
-r = await cache.get(k1)
-print("The value of key \"two\" is " + r)
+    # get the value for a key in the cache
+    r = await cache.get(k)
 
-# print the size of the cache
-print("Size of the cache test is " + str(await cache.size()))
+    # print the value got for a key in the cache
+    print("The value of key \"one\" is " + r)
 
-# remove an entry from the cache
-await cache.remove(k1)
+    k1: str = "two"
+    v1: int = 2
+    await cache.put(k1, v1)
+    r = await cache.get(k1)
+    print("The value of key \"two\" is " + str(r))
+
+    # print the size of the cache
+    print("Size of the cache test is " + str(await cache.size()))
+
+    # remove an entry from the cache
+    await cache.remove(k1)
+
+
+# run the test
+asyncio.run(run_test())
 ```
 ## Help
 

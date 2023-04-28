@@ -7,6 +7,15 @@ version = "0.9.0"
 description = """The Coherence Python Client allows Python applications to act as cache clients to a \
 Coherence Cluster using Google's gRPC framework as the network transport."""
 authors = ["Dhiru Pandey <dhiru.pandey@oracle.com>", "Ryan Lubke <ryan.lubke@oracle.com>"]
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Universal Permissive License (UPL)",
+    "Operating System :: OS Independent",
+]
+[project.urls]
+"Homepage" = "https://github.com/oracle/coherenc-py-client"
+"Bug Tracker" = "https://github.com/oracle/coherenc-py-client/issues"
 
 [tool.poetry.dependencies]
 python = "~3.10"
