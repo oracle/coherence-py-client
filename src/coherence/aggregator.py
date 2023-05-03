@@ -7,7 +7,7 @@ from __future__ import annotations
 from abc import ABC
 from decimal import Decimal
 from enum import Enum, IntEnum
-from typing import Any, Dict, Generic, List, Optional, Tuple, TypeAlias, TypeVar
+from typing import Any, Dict, Generic, List, Optional, TypeAlias, TypeVar
 
 from .comparator import Comparator, InverseComparator, SafeComparator
 from .extractor import ExtractorExpression, IdentityExtractor, ValueExtractor, extract
@@ -22,7 +22,6 @@ T = TypeVar("T")
 V = TypeVar("V")
 
 ReducerResult: TypeAlias = Dict[K, Any | List[Any]]
-AggregationResult: TypeAlias = List[Tuple[G, T]]
 
 
 class EntryAggregator(ABC, Generic[R]):
@@ -648,7 +647,7 @@ class Aggregators:
         extractor_or_property: ExtractorExpression[T, E],
         aggregator: EntryAggregator[Any],
         filter: Optional[Filter] = None,
-    ) -> EntryAggregator[AggregationResult[G, T]]:
+    ) -> EntryAggregator[Dict[G, T]]:
         """
         Return a :class:`coherence.aggregator.GroupAggregator` based on a specified property or method name(s) and an
         :class:`coherence.aggregator.EntryAggregator`.

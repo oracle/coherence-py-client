@@ -353,7 +353,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def invoke(self, key: K, processor: EntryProcessor) -> R:
+    async def invoke(self, key: K, processor: EntryProcessor[R]) -> R:
         """
         Invoke the passed EntryProcessor against the Entry specified by the
         passed key, returning the result of the invocation.
@@ -365,7 +365,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
 
     @abc.abstractmethod
     def invoke_all(
-        self, processor: EntryProcessor, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
+        self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> AsyncIterator[MapEntry[K, R]]:
         """
         Invoke the passed EntryProcessor against the set of entries that are selected by the given Filter,
@@ -628,14 +628,14 @@ class NamedCacheClient(NamedCache[K, V]):
         return self._request_factory.get_serializer().deserialize(v.value)
 
     @_pre_call_cache
-    async def invoke(self, key: K, processor: EntryProcessor) -> R:
+    async def invoke(self, key: K, processor: EntryProcessor[R]) -> R:
         r = self._request_factory.invoke_request(key, processor)
         v = await self._client_stub.invoke(r)
         return self._request_factory.get_serializer().deserialize(v.value)
 
     @_pre_call_cache
     def invoke_all(
-        self, processor: EntryProcessor, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
+        self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> AsyncIterator[MapEntry[K, R]]:
         r = self._request_factory.invoke_all_request(processor, keys, filter)
         stream = self._client_stub.invokeAll(r)
@@ -1421,9 +1421,7 @@ class _PagedStream(abc.ABC, AsyncIterator[T]):
 
         :return: None
         """
-        print("### DEBUG: __load_next_page() called!")
         request: PageRequest = self._client._request_factory.page_request(self._cookie)
-        print("### DEBUG: __load_next_page() called!")
         self._stream = self._get_stream(request)
         self._new_page = True
 

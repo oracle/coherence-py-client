@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from abc import ABC
 from decimal import Decimal
-from typing import Any, List, Optional, TypeAlias, TypeVar
+from typing import Any, Generic, List, Optional, TypeAlias, TypeVar, cast
 
 from .extractor import (
     CompositeUpdater,
@@ -33,7 +33,7 @@ V = TypeVar("V")
 Numeric: TypeAlias = int | float | Decimal
 
 
-class EntryProcessor(ABC):
+class EntryProcessor(ABC, Generic[R]):
     """
     An invocable agent that operates against the entries within a NamedMap
     """
@@ -44,7 +44,7 @@ class EntryProcessor(ABC):
         """
         super().__init__()
 
-    def and_then(self, processor: EntryProcessor) -> EntryProcessor:
+    def and_then(self, processor: EntryProcessor[Any]) -> EntryProcessor[Any]:
         """
         Returns a :class:`coherence.processor.CompositeProcessor` comprised of this and the provided processor.
 
@@ -53,7 +53,7 @@ class EntryProcessor(ABC):
         """
         return CompositeProcessor(self, processor)
 
-    def when(self, filter: Filter) -> EntryProcessor:
+    def when(self, filter: Filter) -> EntryProcessor[R]:
         """
         Returns a :class:`coherence.processor.ConditionalProcessor` comprised of this processor and the provided filter.
 
@@ -68,7 +68,7 @@ class EntryProcessor(ABC):
 
 
 @proxy("processor.ExtractorProcessor")
-class ExtractorProcessor(EntryProcessor):
+class ExtractorProcessor(EntryProcessor[R]):
     """
     `ExtractorProcessor` is an :class:`coherence.processor.EntryProcessor` implementation that extracts a value from
     an object cached within a NamedMap.
@@ -81,7 +81,7 @@ class ExtractorProcessor(EntryProcessor):
     For clustered caches using the ExtractorProcessor could significantly reduce the amount of network traffic.
     """
 
-    def __init__(self, value_extractor: ExtractorExpression[T, E]):
+    def __init__(self, value_extractor: ExtractorExpression[V, R]):
         """
         Construct an `ExtractorProcessor` using the given extractor or method name.
 
@@ -91,7 +91,7 @@ class ExtractorProcessor(EntryProcessor):
         """
         super().__init__()
         if value_extractor is None:
-            self.extractor: ValueExtractor[T, E] = IdentityExtractor()
+            self.extractor: ValueExtractor[V, R] = IdentityExtractor()
         else:
             if isinstance(value_extractor, ValueExtractor):
                 self.extractor = value_extractor
@@ -102,7 +102,7 @@ class ExtractorProcessor(EntryProcessor):
 
 
 @proxy("processor.CompositeProcessor")
-class CompositeProcessor(EntryProcessor):
+class CompositeProcessor(EntryProcessor[R]):
     """
     CompositeProcessor represents a collection of entry processors that are invoked sequentially against the same
     MapEntry.
@@ -118,23 +118,23 @@ class CompositeProcessor(EntryProcessor):
         :param processors: the entry processor array
         """
         super().__init__()
-        self.processors: list[EntryProcessor] = list()
+        self.processors: list[EntryProcessor[Any]] = list()
         for p in processors:
             self.processors.append(p)
 
-    def and_then(self, processor: EntryProcessor) -> CompositeProcessor:
+    def and_then(self, processor: EntryProcessor[Any]) -> CompositeProcessor[R]:
         self.processors.append(processor)
         return self
 
 
 @proxy("processor.ConditionalProcessor")
-class ConditionalProcessor(EntryProcessor):
+class ConditionalProcessor(EntryProcessor[V]):
     """
     ConditionalProcessor represents a processor that is invoked conditionally based on the result of an entry
     evaluation.  A `ConditionalProcessor` is returned from the `when()` function, which takes a filter as its argument.
     """
 
-    def __init__(self, filter: Filter, processor: EntryProcessor):
+    def __init__(self, filter: Filter, processor: EntryProcessor[V]):
         """
         Construct a ConditionalProcessor for the specified filter and the processor.
 
@@ -150,7 +150,7 @@ class ConditionalProcessor(EntryProcessor):
 
 
 @proxy("util.NullEntryProcessor")
-class NullProcessor(EntryProcessor):
+class NullProcessor(EntryProcessor[bool]):
     """
     Put entry processor.
 
@@ -166,7 +166,7 @@ class NullProcessor(EntryProcessor):
         super().__init__()
 
 
-class PropertyProcessor(EntryProcessor):
+class PropertyProcessor(EntryProcessor[R]):
     """
     `PropertyProcessor` is a base class for EntryProcessor implementations that depend on a ValueManipulator.
     """
@@ -189,7 +189,7 @@ class PropertyProcessor(EntryProcessor):
 
 
 @proxy("processor.PropertyManipulator")
-class PropertyManipulator(ValueManipulator):
+class PropertyManipulator(ValueManipulator[V, R]):
     """
     `PropertyManipulator` is a reflection based ValueManipulator implementation based on the JavaBean property name
     conventions.
@@ -209,15 +209,15 @@ class PropertyManipulator(ValueManipulator):
         self.property_name = property_name
         self.useIsPrefix = use_is
 
-    def get_extractor(self) -> ValueExtractor[T, E]:
+    def get_extractor(self) -> ValueExtractor[V, R]:
         raise Exception("Method not implemented")
 
-    def get_updator(self) -> ValueUpdater:
+    def get_updator(self) -> ValueUpdater[V, R]:
         raise Exception("Method not implemented")
 
 
 @proxy("processor.NumberMultiplier")
-class NumberMultiplier(PropertyProcessor):
+class NumberMultiplier(PropertyProcessor[Numeric]):
     """
     NumberMultiplier entry processor.
     """
@@ -235,7 +235,7 @@ class NumberMultiplier(PropertyProcessor):
          to return the value as it is after it is multiplied
         """
         if type(name_or_manipulator) == str:
-            manipulator = self.create_custom_manipulator(name_or_manipulator)
+            manipulator: ValueManipulator[Any, Numeric] = self.create_custom_manipulator(name_or_manipulator)
             super().__init__(manipulator)
         else:
             super().__init__(name_or_manipulator)
@@ -243,13 +243,15 @@ class NumberMultiplier(PropertyProcessor):
         self.postMultiplication = post_multiplication
 
     @staticmethod
-    def create_custom_manipulator(name_or_manipulator: str) -> ValueManipulator:
-        cu = CompositeUpdater(UniversalExtractor(name_or_manipulator), UniversalUpdater(name_or_manipulator))
+    def create_custom_manipulator(name_or_manipulator: str) -> ValueManipulator[V, Numeric]:
+        cu: CompositeUpdater[V, Numeric] = CompositeUpdater(
+            UniversalExtractor(name_or_manipulator), UniversalUpdater(name_or_manipulator)
+        )
         return cu
 
 
 @proxy("processor.NumberIncrementor")
-class NumberIncrementor(PropertyProcessor):
+class NumberIncrementor(PropertyProcessor[Numeric]):
     """
     The :class:`coherence.processor.NumberIncrementor` :class:`coherence.processor.EntryProcessor` is used to increment
     a property value of a numeric type.
@@ -266,7 +268,7 @@ class NumberIncrementor(PropertyProcessor):
          to return the value as it is after it is incremented
         """
         if type(name_or_manipulator) == str:
-            manipulator = self.create_custom_manipulator(name_or_manipulator)
+            manipulator: ValueManipulator[Any, Numeric] = self.create_custom_manipulator(name_or_manipulator)
             super().__init__(manipulator)
         else:
             super().__init__(name_or_manipulator)
@@ -274,14 +276,16 @@ class NumberIncrementor(PropertyProcessor):
         self.postInc = post_increment
 
     @staticmethod
-    def create_custom_manipulator(name_or_manipulator: str) -> ValueManipulator:
-        cu = CompositeUpdater(UniversalExtractor(name_or_manipulator), UniversalUpdater(name_or_manipulator))
+    def create_custom_manipulator(name_or_manipulator: str) -> ValueManipulator[Any, Numeric]:
+        cu: CompositeUpdater[Any, Numeric] = CompositeUpdater(
+            UniversalExtractor(name_or_manipulator), UniversalUpdater(name_or_manipulator)
+        )
         return cu
 
 
 @proxy("processor.ConditionalPut")
 @mappings({"return_": "return"})
-class ConditionalPut(EntryProcessor):
+class ConditionalPut(EntryProcessor[V]):
     """
     :class:`coherence.processor.ConditionalPut` is an :class:`coherence.processor.EntryProcessor` that performs
     an update operation for an entry that satisfies the specified condition.
@@ -313,7 +317,7 @@ class ConditionalPut(EntryProcessor):
 
 
 @proxy("processor.ConditionalPutAll")
-class ConditionalPutAll(EntryProcessor):
+class ConditionalPutAll(EntryProcessor[V]):
     """
     `ConditionalPutAll` is an `EntryProcessor` that performs an update operation for multiple entries that satisfy the
     specified condition.
@@ -353,7 +357,7 @@ class ConditionalPutAll(EntryProcessor):
 
 @proxy("processor.ConditionalRemove")
 @mappings({"return_value": "return"})
-class ConditionalRemove(EntryProcessor):
+class ConditionalRemove(EntryProcessor[V]):
     """
     `ConditionalRemove` is an `EntryProcessor` that performs n remove operation if the specified condition is satisfied.
 
@@ -380,7 +384,7 @@ class ConditionalRemove(EntryProcessor):
 
 
 @proxy("processor.MethodInvocationProcessor")
-class MethodInvocationProcessor(EntryProcessor):
+class MethodInvocationProcessor(EntryProcessor[R]):
     """
     An :class:`coherence.processor.EntryProcessor` that invokes the specified method on a value of a cache entry
     and optionally updates the entry with a modified value.
@@ -402,7 +406,7 @@ class MethodInvocationProcessor(EntryProcessor):
 
 
 @proxy("processor.TouchProcessor")
-class TouchProcessor(EntryProcessor):
+class TouchProcessor(EntryProcessor[None]):
     """
     Touches an entry (if present) in order to trigger interceptor re-evaluation and possibly increment expiry time.
     """
@@ -415,7 +419,7 @@ class TouchProcessor(EntryProcessor):
 
 
 @proxy("processor.ScriptProcessor")
-class ScriptProcessor(EntryProcessor):
+class ScriptProcessor(EntryProcessor[Any]):
     """
     ScriptProcessor wraps a script written in one of the languages supported by Graal VM.
     """
@@ -436,7 +440,7 @@ class ScriptProcessor(EntryProcessor):
 
 
 @proxy("processor.PreloadRequest")
-class PreloadRequest(EntryProcessor):
+class PreloadRequest(EntryProcessor[None]):
     """
     `PreloadRequest` is a simple :class:`coherence.processor.EntryProcessor` that performs
     a get call. No results are reported back to the caller.
@@ -455,7 +459,7 @@ class PreloadRequest(EntryProcessor):
 
 
 @proxy("processor.UpdaterProcessor")
-class UpdaterProcessor(EntryProcessor):
+class UpdaterProcessor(EntryProcessor[bool]):
     """
     `UpdaterProcessor` is an :class:`coherence.processor.EntryProcessor` implementations that updates an attribute
     of an object cached in an InvocableMap.
@@ -465,7 +469,7 @@ class UpdaterProcessor(EntryProcessor):
     network traffic.
     """
 
-    def __init__(self, updater_or_property_name: UpdaterExpression, value: V):
+    def __init__(self, updater_or_property_name: UpdaterExpression[V, bool], value: V):
         """
         Construct an `UpdaterProcessor` based on the specified ValueUpdater.
 
@@ -475,18 +479,19 @@ class UpdaterProcessor(EntryProcessor):
         """
         super().__init__()
         if type(updater_or_property_name) == str:
+            self.updater: ValueUpdater[V, bool]
             if updater_or_property_name.find(".") == -1:
-                self.updater: UpdaterExpression = UniversalUpdater(updater_or_property_name)
+                self.updater = UniversalUpdater(updater_or_property_name)
             else:
                 self.updater = CompositeUpdater(updater_or_property_name)
         else:
-            self.updater = updater_or_property_name
+            self.updater = cast(ValueUpdater[V, bool], updater_or_property_name)
         self.value = value
 
 
 @proxy("processor.VersionedPut")
 @mappings({"return_current": "return"})
-class VersionedPut(EntryProcessor):
+class VersionedPut(EntryProcessor[V]):
     """
     `VersionedPut` is an :class:`coherence.processor.EntryProcessor` that assumes that entry values are versioned (see
     Coherence Versionable interface for details) and performs an update/insert operation if and only if the version
@@ -513,7 +518,7 @@ class VersionedPut(EntryProcessor):
 
 @proxy("processor.VersionedPutAll")
 @mappings({"return_current": "return"})
-class VersionedPutAll(EntryProcessor):
+class VersionedPutAll(EntryProcessor[V]):
     """
     `VersionedPutAll` is an :class:`coherence.processor.EntryProcessor` that assumes that entry values are versioned (
     see Coherence Versionable interface for details) and performs an update/insert operation only for entries whose
@@ -551,7 +556,7 @@ class Processors:
         raise NotImplementedError()
 
     @staticmethod
-    def conditional_put(filter: Filter, value: V, return_value: bool = False) -> EntryProcessor:
+    def conditional_put(filter: Filter, value: V, return_value: bool = False) -> EntryProcessor[V]:
         """
         Construct a :class:`coherence.processor.ConditionalPut` that updates an entry with a new value if and only
         if the :class:`coherence.filter.Filter` applied to the entry evaluates to `True`.
@@ -566,7 +571,7 @@ class Processors:
         return ConditionalPut(filter, value, return_value)
 
     @staticmethod
-    def conditional_put_all(filter: Filter, values: dict[K, V]) -> EntryProcessor:
+    def conditional_put_all(filter: Filter, values: dict[K, V]) -> EntryProcessor[V]:
         """
         Construct a :class:`coherence.processor.ConditionalRemove` processor that updates an entry with a new value if
         and only if the :class:`coherence.filter.Filter` applied to the entry evaluates to `True`. The new value is
@@ -580,7 +585,7 @@ class Processors:
         return ConditionalPutAll(filter, values)
 
     @staticmethod
-    def conditional_remove(filter: Filter, return_value: bool = False) -> EntryProcessor:
+    def conditional_remove(filter: Filter, return_value: bool = False) -> EntryProcessor[V]:
         """
         Constructs a :class:`coherence.processor.ConditionalRemove` processor that removes an
         :class:`coherence.client.NamedMap` entry if and only if the :class:`coherence.filter.Filter`
@@ -597,7 +602,7 @@ class Processors:
         return ConditionalRemove(filter, return_value)
 
     @staticmethod
-    def extract(extractor: Optional[ExtractorExpression[T, E]] = None) -> EntryProcessor:
+    def extract(extractor: Optional[ExtractorExpression[T, E]] = None) -> EntryProcessor[E]:
         """
         Construct an :class:`coherence.processor.ExtractorProcessor` using the given
         :class:`coherence.extractor.ValueExtractor` or string expression to extract a value from an object cached
@@ -616,7 +621,7 @@ class Processors:
     @staticmethod
     def increment(
         name_or_manipulator: ManipulatorExpression, increment: Numeric, post_increment: bool = False
-    ) -> EntryProcessor:
+    ) -> EntryProcessor[Numeric]:
         """
         Construct an :class:`coherence.processor.NumberIncrementor` processor that will increment a property
         value by a specified amount, returning either the old or the new value as specified.
@@ -630,7 +635,7 @@ class Processors:
         return NumberIncrementor(name_or_manipulator, increment, post_increment)
 
     @staticmethod
-    def invoke_accessor(method_name: str, *args: Any) -> EntryProcessor:
+    def invoke_accessor(method_name: str, *args: Any) -> EntryProcessor[R]:
         """
         Constructs a :class:`coherence.processor.MethodInvocationProcessor` that invokes the specified method on
          a value of a cache entry.
@@ -643,7 +648,7 @@ class Processors:
         return MethodInvocationProcessor(method_name, False, args)
 
     @staticmethod
-    def invoke_mutator(method_name: str, *args: Any) -> EntryProcessor:
+    def invoke_mutator(method_name: str, *args: Any) -> EntryProcessor[R]:
         """
         Constructs a :class:`coherence.processor.MethodInvocationProcessor` that invokes the specified method on
         a value of a cache entry updating the entry with a modified value.
@@ -658,7 +663,7 @@ class Processors:
     @staticmethod
     def multiply(
         name_or_manipulator: ManipulatorExpression, multiplier: Numeric, post_multiplication: bool = False
-    ) -> EntryProcessor:
+    ) -> EntryProcessor[Numeric]:
         """
         Construct an NumberMultiplier processor that will multiply a property value by a specified factor,
         returning either the old or the new value as specified.
@@ -671,7 +676,7 @@ class Processors:
         return NumberMultiplier(name_or_manipulator, multiplier, post_multiplication)
 
     @staticmethod
-    def nop() -> EntryProcessor:
+    def nop() -> EntryProcessor[bool]:
         """
         Construct an :class:`coherence.processor.EntryProcessor` that does nothing and returns `True`
         as a result of execution
@@ -681,7 +686,7 @@ class Processors:
         return NullProcessor()
 
     @staticmethod
-    def preload() -> EntryProcessor:
+    def preload() -> EntryProcessor[None]:
         """
         :class:`coherence.processor.PreloadRequest` is a simple :class:`coherence.processor.EntryProcessor` that
         performs a get call. No results are reported back to the caller.
@@ -696,7 +701,7 @@ class Processors:
         return PreloadRequest()
 
     @staticmethod
-    def script(name: str, language: str, *args: Any) -> EntryProcessor:
+    def script(name: str, language: str, *args: Any) -> EntryProcessor[Any]:
         """
         Create a :class:`coherence.processor.ScriptProcessor` that wraps a script written in the specified language
         and identified by the specified name. The specified args will be passed during execution of the script.
@@ -708,7 +713,7 @@ class Processors:
         return ScriptProcessor(name, language, args)
 
     @staticmethod
-    def touch() -> EntryProcessor:
+    def touch() -> EntryProcessor[None]:
         """
         Creates an :class:`coherence.processor.EntryProcessor` that touches an entry (if present) in order to
         trigger interceptor re-evaluation and possibly increment expiry time.
@@ -717,7 +722,7 @@ class Processors:
         return TouchProcessor()
 
     @staticmethod
-    def update(updater_or_property_name: UpdaterExpression, value: V) -> EntryProcessor:
+    def update(updater_or_property_name: UpdaterExpression[V, bool], value: V) -> EntryProcessor[bool]:
         """
         Construct an :class:`coherence.processor.UpdaterProcessor` based on the specified `ValueUpdater`.
 
@@ -732,7 +737,7 @@ class Processors:
         return UpdaterProcessor(updater_or_property_name, value)
 
     @staticmethod
-    def versioned_put(value: V, allow_insert: bool = False, return_current: bool = False) -> EntryProcessor:
+    def versioned_put(value: V, allow_insert: bool = False, return_current: bool = False) -> EntryProcessor[V]:
         """
         Construct a :class:`coherence.processor.VersionedPut` that updates an entry with a new value if and only
         if the version of the new value matches to the version of the current entry's value. This processor optionally
@@ -748,7 +753,7 @@ class Processors:
     @staticmethod
     def versioned_put_all(
         values: dict[K, V], allow_insert: bool = False, return_current: bool = False
-    ) -> EntryProcessor:
+    ) -> EntryProcessor[V]:
         """
         Construct a :class:`coherence.processor.VersionedPut` processor that updates an entry with a new value if
         and only if the version of the new value matches to the version of the current entry's value

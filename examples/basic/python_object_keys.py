@@ -41,18 +41,18 @@ async def do_run() -> None:
         print(f"Add new account {new_account} with key {new_account_key}")
         await namedMap.put(new_account_key, new_account)
 
-        print("NamedMap size is : ", await namedMap.size())
+        print("NamedMap size is :", await namedMap.size())
 
-        print("Account from get() : ", await namedMap.get(new_account_key))
+        print("Account from get() :", await namedMap.get(new_account_key))
 
         print("Update account balance using processor ...")
         await namedMap.invoke(new_account_key, Processors.update("balance", new_account.balance + 1000))
 
-        print("Updated account is : ", await namedMap.get(new_account_key))
+        print("Updated account is :", await namedMap.get(new_account_key))
 
         await namedMap.remove(new_account_key)
 
-        print("NamedMap size is : ", await namedMap.size())
+        print("NamedMap size is :", await namedMap.size())
     finally:
         await session.close()
 

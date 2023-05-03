@@ -564,7 +564,7 @@ async def test_invoke_all_keys(setup_and_teardown: NamedCache[str, str]) -> None
 
     r: dict[str, int] = {}
     e: MapEntry[str, int]
-    async for e in cache.invoke_all(ExtractorProcessor(UniversalExtractor("length()")), keys={k1, k3}):  # type: ignore
+    async for e in cache.invoke_all(ExtractorProcessor(UniversalExtractor("length()")), keys={k1, k3}):
         r[e.key] = e.value
 
     assert r == {k1: 8, k3: 10}
