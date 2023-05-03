@@ -3,7 +3,6 @@
 # https://oss.oracle.com/licenses/upl.
 
 import asyncio
-
 from dataclasses import dataclass
 
 from coherence import NamedMap, Processors, Session
