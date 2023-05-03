@@ -562,9 +562,9 @@ class NamedCacheClient(NamedCache[K, V]):
         r = self._request_factory.clear_request()
         await self._client_stub.clear(r)
 
-    @_pre_call_cache
     async def destroy(self) -> None:
         self._internal_emitter.once(MapLifecycleEvent.DESTROYED.value)
+        self._internal_emitter.emit(MapLifecycleEvent.DESTROYED.value, self.name)
         r = self._request_factory.destroy_request()
         await self._client_stub.destroy(r)
 
@@ -1211,11 +1211,13 @@ class Session:
         this: Session = self
 
         def on_destroyed(name: str) -> None:
-            del this._caches[name]
+            if name in this._caches:
+                del this._caches[name]
             self._emitter.emit(MapLifecycleEvent.DESTROYED.value, name)
 
         def on_released(name: str) -> None:
-            del this._caches[name]
+            if name in this._caches:
+                del this._caches[name]
             self._emitter.emit(MapLifecycleEvent.RELEASED.value, name)
 
         client.on(MapLifecycleEvent.DESTROYED, on_destroyed)
