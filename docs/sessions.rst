@@ -21,25 +21,23 @@ a serializer configured on the server to match that used by the client.
 A `Session` is constructed using an `Options` instance, or a generic object with the same keys and values.
 
 The currently supported arguments foe `Options` are:
-* `address` - the address of the Coherence gRPC proxy.  This defaults to `localhost:1408`.
-* `request_timeout_seconds` - the gRPC request timeout in seconds.  This defaults to `30.0`.
-* `channel_options` - per-request gRPC channel options.
-* `tls_options` - options related to the configuration of TLS.
-    - `enabled` - determines if TLS is enabled or not.  This defaults to `false` (NOTE: assumes `true` if all three `COHERENCE_TLS_*` (see subsequent bullets) environment variables are defined)
-    - `ca_cert_path` - the path to the CA certificate.  This may be configured using the environment variable `COHERENCE_TLS_CERTS_PATH`
-    - `client_cert_path` - the path to the client certificate. This may be configured with the environment variable `COHERENCE_TLS_CLIENT_CERT`
-    - `client_key_path` - the path to the client certificate key. This may be configured with the environment variable `COHERENCE_TLS_CLIENT_KEY`
+    - `address` - the address of the Coherence gRPC proxy.  This defaults to `localhost:1408`.
+    - `request_timeout_seconds` - the gRPC request timeout in seconds.  This defaults to `30.0`.
+    - `channel_options` - per-request gRPC channel options.
+    - `tls_options` - options related to the configuration of TLS.
 
-*NOTE*: If testing locally generated certificates, set `COHERENCE_IGNORE_INVALID_CERTS` to `true` to disable
-TLS validation of the certificates.
+        - `enabled` - determines if TLS is enabled or not.  This defaults to `false` (NOTE: assumes `true` if all three `COHERENCE_TLS_*` (see subsequent bullets) environment variables are defined)
+        - `ca_cert_path` - the path to the CA certificate.  This may be configured using the environment variable `COHERENCE_TLS_CERTS_PATH`
+        - `client_cert_path` - the path to the client certificate. This may be configured with the environment variable `COHERENCE_TLS_CLIENT_CERT`
+        - `client_key_path` - the path to the client certificate key. This may be configured with the environment variable `COHERENCE_TLS_CLIENT_KEY`
 
 .. code-block::
 
     from coherence import NamedCache, Session
-        import asyncio
+    import asyncio
 
-           # create a new Session to the Coherence server
-            session: Session = Session(None)
+       # create a new Session to the Coherence server
+        session: Session = Session(None)
 
 This is the simplest invocation which assumes the following defaults:
     - `address` is `localhost:1408`
