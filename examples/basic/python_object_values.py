@@ -34,21 +34,21 @@ async def do_run() -> None:
         await namedMap.clear()
 
         person: Person = Person(1, "Bilbo", 111)
-        print("Add new person : " + str(person))
+        print("Add new person : ", person)
         await namedMap.put(person.id, person)
 
-        print("NamedMap size is : " + str(await namedMap.size()))
+        print("NamedMap size is : ", await namedMap.size())
 
-        print("Person from get() : " + str(await namedMap.get(person.id)))
+        print("Person from get() : ", await namedMap.get(person.id))
 
         print("Update person using processor ...")
         await namedMap.invoke(person.id, Processors.update("age", 112))
 
-        print("Updated person is : " + str(await namedMap.get(person.id)))
+        print("Updated person is : ", await namedMap.get(person.id))
 
         await namedMap.remove(person.id)
 
-        print("NamedMap size is : " + str(await namedMap.size()))
+        print("NamedMap size is : ", await namedMap.size())
     finally:
         await session.close()
 

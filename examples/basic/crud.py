@@ -21,17 +21,17 @@ async def do_run() -> None:
         print("Put key 1; value one")
         await namedMap.put(1, "one")
 
-        print("Value for key 1 is : " + str(await namedMap.get(1)))
+        print("Value for key 1 is : ", await namedMap.get(1))
 
-        print("NamedMap size is : " + str(await namedMap.size()))
+        print("NamedMap size is : ", await namedMap.size())
 
-        print("Updating value of key 1 to ONE from " + await namedMap.put(1, "ONE"))
+        print("Updating value of key 1 to ONE from ", await namedMap.put(1, "ONE"))
 
-        print("Value for key 1 is : " + str(await namedMap.get(1)))
+        print("Value for key 1 is : ", await namedMap.get(1))
 
-        print("Removing key 1, current value : " + await namedMap.remove(1))
+        print("Removing key 1, current value : ", await namedMap.remove(1))
 
-        print("NamedMap size is : " + str(await namedMap.size()))
+        print("NamedMap size is : ", await namedMap.size())
     finally:
         await session.close()
 
