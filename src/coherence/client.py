@@ -8,6 +8,7 @@ import abc
 import asyncio
 import os
 from asyncio import Task
+from threading import Lock
 from typing import (
     Any,
     AsyncIterator,
@@ -1037,6 +1038,7 @@ class Session:
         """
         self._closed: bool = False
         self._caches: dict[str, NamedCache[Any, Any]] = dict()
+        self._lock: Lock = Lock()
         if session_options is not None:
             self._session_options = session_options
         else:
@@ -1159,14 +1161,37 @@ class Session:
         :return: Returns a :func:`coherence.client.NamedCache` for the specified cache name.
         """
         serializer = SerializerRegistry.serializer(ser_format)
-        c = self._caches.get(name)
-        if c is None:
-            c = NamedCacheClient(name, self, serializer)
-            # initialize the event stream now to ensure lifecycle listeners will work as expected
-            await c._events_manager._ensure_stream()
-            self._setup_event_handlers(c)
-            self._caches.update({name: c})
-        return c
+        with self._lock:
+            c = self._caches.get(name)
+            if c is None:
+                c = NamedCacheClient(name, self, serializer)
+                # initialize the event stream now to ensure lifecycle listeners will work as expected
+                await c._events_manager._ensure_stream()
+                self._setup_event_handlers(c)
+                self._caches.update({name: c})
+            return c
+
+    # noinspection PyProtectedMember
+    @_pre_call_session
+    async def get_map(self, name: str, ser_format: str = DEFAULT_FORMAT) -> "NamedMap[K, V]":
+        """
+        Returns a :func:`coherence.client.NameMap` for the specified cache name.
+
+        :param name: the map name
+        :param ser_format: the serialization format for keys and values stored within the cache
+
+        :return: Returns a :func:`coherence.client.NamedMap` for the specified cache name.
+        """
+        serializer = SerializerRegistry.serializer(ser_format)
+        with self._lock:
+            c = self._caches.get(name)
+            if c is None:
+                c = NamedCacheClient(name, self, serializer)
+                # initialize the event stream now to ensure lifecycle listeners will work as expected
+                await c._events_manager._ensure_stream()
+                self._setup_event_handlers(c)
+                self._caches.update({name: c})
+            return c
 
     # noinspection PyUnresolvedReferences
     async def close(self) -> None:
