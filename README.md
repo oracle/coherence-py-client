@@ -9,10 +9,15 @@ The Coherence Python Client allows Python applications to act as cache clients t
 the Google gRPC framework as the network transport.
 
 #### Features
-* Familiar, dict-like, interface for manipulating dict entries
-* Cluster-side querying and aggregation of dict entries
-* Cluster-side manipulation of map entries using ``EntryProcessors``
-* Registration of listeners that will be notified of dict entry mutations
+* Familiar Map-like interface for manipulating cache entries including but not limited to:
+    * `put`, `put_if_absent`, `put_all`, `get`, `get_all`, `remove`, `clear`, `get_or_default`, `replace`, `replace_mapping`, `size`, `is_empty`, `contains_key`, `contains_value`
+* Cluster-side querying, aggregation and filtering of map entries
+* Cluster-side manipulation of map entries using EntryProcessors
+* Registration of listeners to be notified of:
+    * mutations such as insert, update and delete on Maps
+    * map lifecycle events such as truncated, released or destroyed
+    * session lifecycle events such as connected, disconnected, reconnected and closed
+* Support for storing Python objects as JSON as well as the ability to serialize to Java objects on the server for access from other Coherence language API's
 
 #### Requirements
 * [Coherence CE](https://github.com/oracle/coherence) 22.06 or later (or equivalent non-open source editions) with a configured [gRPCProxy](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html).
