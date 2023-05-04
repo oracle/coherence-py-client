@@ -4,10 +4,7 @@
 
 from __future__ import annotations
 
-__version__ = "0.1.0"
-
-from decimal import Decimal
-from typing import TypeAlias
+__version__ = "1.0b1"
 
 # expose these symbols in top-level namespace
 from .aggregator import Aggregators as Aggregators
