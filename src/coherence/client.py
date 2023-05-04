@@ -30,8 +30,7 @@ from typing import (
 import grpc
 from pymitter import EventEmitter
 
-from coherence.aggregator import AverageAggregator, EntryAggregator, PriorityAggregator, SumAggregator
-
+from .aggregator import AverageAggregator, EntryAggregator, PriorityAggregator, SumAggregator
 from .comparator import Comparator
 from .event import MapLifecycleEvent, MapListener, SessionLifecycleEvent
 from .filter import AlwaysFilter, Filter
@@ -492,7 +491,7 @@ class NamedCacheClient(NamedCache[K, V]):
         self._internal_emitter: EventEmitter = EventEmitter()
         self._destroyed: bool = False
         self._released: bool = False
-        from coherence.event import _MapEventsManager
+        from .event import _MapEventsManager
 
         self._setup_event_handlers()
 

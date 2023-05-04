@@ -7,7 +7,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Optional, Sequence, TypeAlias, TypeVar, cast
 
-from coherence.serialization import proxy
+from .serialization import proxy
 
 E = TypeVar("E")
 K = TypeVar("K")

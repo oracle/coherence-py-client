@@ -15,11 +15,12 @@ import grpc
 from pymitter import EventEmitter
 
 import coherence.client
-from coherence.filter import Filter, Filters, MapEventFilter
-from coherence.messages_pb2 import MapEventResponse, MapListenerRequest, MapListenerResponse  # type: ignore
-from coherence.serialization import Serializer
-from coherence.services_pb2_grpc import NamedCacheServiceStub
-from coherence.util import RequestFactory
+
+from .filter import Filter, Filters, MapEventFilter
+from .messages_pb2 import MapEventResponse, MapListenerRequest, MapListenerResponse  # type: ignore
+from .serialization import Serializer
+from .services_pb2_grpc import NamedCacheServiceStub
+from .util import RequestFactory
 
 K = TypeVar("K")
 """the type of the map entry keys."""
