@@ -7,8 +7,8 @@ from __future__ import annotations
 from abc import ABC
 from typing import Any
 
-from coherence.extractor import UniversalExtractor
-from coherence.serialization import proxy
+from .extractor import UniversalExtractor
+from .serialization import proxy
 
 
 class Comparator(ABC):
