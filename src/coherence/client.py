@@ -400,7 +400,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    def values(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> AsyncIterator[V]:
+    def values(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False) -> AsyncIterator[V]:
         """
         Return a Set of the values contained in this map that satisfy the criteria expressed by the filter.
         If no filter or comparator is specified, it returns a Set view of the values contained in this map.The
@@ -411,22 +411,26 @@ class NamedMap(abc.ABC, Generic[K, V]):
         :param filter: the Filter object representing the criteria that the entries of this map should satisfy
         :param comparator:  the Comparator object which imposes an ordering on entries in the resulting set; or null
          if the entries' natural ordering should be used
+        :param by_page: returns the keys in pages (transparently to the caller).  This option is only valid
+         if no filter or comparator is provided.
         :return: an AsyncIterator of MapEntry instances resolving to the values that satisfy the specified criteria
         """
 
     @abc.abstractmethod
-    def keys(self, filter: Optional[Filter] = None) -> AsyncIterator[K]:
+    def keys(self, filter: Optional[Filter] = None, by_page: bool = False) -> AsyncIterator[K]:
         """
         Return a set view of the keys contained in this map for entries that satisfy the criteria expressed by the
         filter.
 
         :param filter: the Filter object representing the criteria that the entries of this map should satisfy
+        :param by_page: returns the keys in pages (transparently to the caller).  This option is only valid
+         if no filter is provided.
         :return: an AsyncIterator of keys for entries that satisfy the specified criteria
         """
 
     @abc.abstractmethod
     def entries(
-        self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None
+        self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False
     ) -> AsyncIterator[MapEntry[K, V]]:
         """
         Return a set view of the entries contained in this map that satisfy the criteria expressed by the filter.
@@ -435,6 +439,8 @@ class NamedMap(abc.ABC, Generic[K, V]):
         :param filter: the Filter object representing the criteria that the entries of this map should satisfy
         :param comparator: the Comparator object which imposes an ordering on entries in the resulting set; or `None`
          if the entries' values natural ordering should be used
+        :param by_page: returns the keys in pages (transparently to the caller).  This option is only valid
+         if no filter or comparator is provided.
         :return: an AsyncIterator of MapEntry instances that satisfy the specified criteria
         """
 
@@ -664,10 +670,8 @@ class NamedCacheClient(NamedCache[K, V]):
         return cast(R, value)
 
     @_pre_call_cache
-    def values(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> AsyncIterator[V]:
-        # if there is no filter or no co, or the filter is an AlwaysFilter,
-        # obtain results by-page
-        if (comparator is None and filter is None) or (comparator is None and isinstance(filter, AlwaysFilter)):
+    def values(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False) -> AsyncIterator[V]:
+        if by_page and comparator is None and filter is None:
             return _PagedStream(self, _scalar_deserializer)
         else:
             r = self._request_factory.values_request(filter)
@@ -676,10 +680,8 @@ class NamedCacheClient(NamedCache[K, V]):
             return _Stream(self._request_factory.get_serializer(), stream, _scalar_producer)
 
     @_pre_call_cache
-    def keys(self, filter: Optional[Filter] = None) -> AsyncIterator[K]:
-        # if there is no filter, or the filter is an AlwaysFilter,
-        # obtain results by-page
-        if filter is None or isinstance(filter, AlwaysFilter):
+    def keys(self, filter: Optional[Filter] = None, by_page: bool = False) -> AsyncIterator[K]:
+        if by_page and filter is None:
             return _PagedStream(self, _scalar_deserializer, True)
         else:
             r = self._request_factory.keys_request(filter)
@@ -689,11 +691,9 @@ class NamedCacheClient(NamedCache[K, V]):
 
     @_pre_call_cache
     def entries(
-        self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None
+        self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False
     ) -> AsyncIterator[MapEntry[K, V]]:
-        # if there is no filter and no comparator, or the filter is an AlwaysFilter,
-        # obtain results by-page
-        if (comparator is None and filter is None) or (comparator is None and isinstance(filter, AlwaysFilter)):
+        if by_page and comparator is None and filter is None:
             return _PagedStream(self, _entry_deserializer)
         else:
             r = self._request_factory.entries_request(filter, comparator)
