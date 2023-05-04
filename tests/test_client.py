@@ -225,7 +225,7 @@ async def test_keys_paged(setup_and_teardown: NamedCache[str, str]) -> None:
 
     # Stream the keys and locally cache the results
     local_set: set[str] = set()
-    async for e in cache.keys():
+    async for e in cache.keys(by_page=True):
         local_set.add(e)
 
     assert len(local_set) == num_entries
@@ -268,7 +268,7 @@ async def test_entries_paged(setup_and_teardown: NamedCache[str, str]) -> None:
 
     # Stream the keys and locally cache the results
     local_dict: dict[str, str] = {}
-    async for e in cache.entries():
+    async for e in cache.entries(by_page=True):
         local_dict[e.key] = e.value
 
     assert len(local_dict) == num_entries
@@ -308,7 +308,7 @@ async def test_values_paged(setup_and_teardown: NamedCache[str, str]) -> None:
 
     # Stream the keys and locally cache the results
     local_list: list[str] = []
-    async for e in cache.values():
+    async for e in cache.values(by_page=True):
         local_list.append(e)
 
     assert len(local_list) == num_entries
