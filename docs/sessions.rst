@@ -31,7 +31,7 @@ The currently supported arguments foe `Options` are:
         - `client_cert_path` - the path to the client certificate. This may be configured with the environment variable `COHERENCE_TLS_CLIENT_CERT`
         - `client_key_path` - the path to the client certificate key. This may be configured with the environment variable `COHERENCE_TLS_CLIENT_KEY`
 
-.. code-block::
+.. code-block:: python
 
     from coherence import NamedCache, Session
     import asyncio
@@ -47,7 +47,7 @@ This is the simplest invocation which assumes the following defaults:
 To use values other than the default, create a new `Options` instance, configure as desired,
 and pass it to the constructor of the `Session`:
 
-.. code-block::
+.. code-block:: python
 
     from coherence import NamedCache, Session
     import asyncio

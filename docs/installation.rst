@@ -5,3 +5,9 @@
 
 Installation
 ============
+
+To install the Coherence Python Client one would need to do a pip install of the coherence package as shown below:
+
+.. code-block:: bash
+
+    python3 -m pip install coherence
