@@ -33,7 +33,7 @@ from pymitter import EventEmitter
 from .aggregator import AverageAggregator, EntryAggregator, PriorityAggregator, SumAggregator
 from .comparator import Comparator
 from .event import MapLifecycleEvent, MapListener, SessionLifecycleEvent
-from .filter import AlwaysFilter, Filter
+from .filter import Filter
 from .messages_pb2 import PageRequest  # type: ignore
 from .processor import EntryProcessor
 from .serialization import Serializer, SerializerRegistry
@@ -400,7 +400,9 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    def values(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False) -> AsyncIterator[V]:
+    def values(
+        self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False
+    ) -> AsyncIterator[V]:
         """
         Return a Set of the values contained in this map that satisfy the criteria expressed by the filter.
         If no filter or comparator is specified, it returns a Set view of the values contained in this map.The
@@ -670,7 +672,9 @@ class NamedCacheClient(NamedCache[K, V]):
         return cast(R, value)
 
     @_pre_call_cache
-    def values(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False) -> AsyncIterator[V]:
+    def values(
+        self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False
+    ) -> AsyncIterator[V]:
         if by_page and comparator is None and filter is None:
             return _PagedStream(self, _scalar_deserializer)
         else:
