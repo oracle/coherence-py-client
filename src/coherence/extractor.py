@@ -177,7 +177,7 @@ class IdentityExtractor(ValueExtractor[T, Any]):
         super().__init__()
 
 
-class ValueUpdater(ABC):
+class ValueUpdater(ABC, Generic[T, R]):
     def __init__(self) -> None:
         """
         ValueUpdater is used to update an object's state.
@@ -187,12 +187,12 @@ class ValueUpdater(ABC):
         super().__init__()
 
 
-class ValueManipulator(ValueUpdater):
+class ValueManipulator(Generic[T, R]):
     """ValueManipulator represents a composition of :class:`coherence.extractor.ValueExtractor` and
     :class:`coherence.extractor.ValueUpdater` implementations."""
 
     @abstractmethod
-    def get_extractor(self) -> ValueExtractor[T, E]:
+    def get_extractor(self) -> ValueExtractor[T, R]:
         """
         Retrieve the underlying ValueExtractor reference.
 
@@ -200,7 +200,7 @@ class ValueManipulator(ValueUpdater):
         """
 
     @abstractmethod
-    def get_updator(self) -> ValueUpdater:
+    def get_updator(self) -> ValueUpdater[T, R]:
         """
         Retrieve the underlying ValueUpdater reference.
 
@@ -209,11 +209,13 @@ class ValueManipulator(ValueUpdater):
 
 
 @proxy("extractor.CompositeUpdater")
-class CompositeUpdater(ValueManipulator):
+class CompositeUpdater(ValueManipulator[T, R], ValueUpdater[T, R]):
     """A ValueUpdater implementation based on an extractor-updater pair that could also be used as a
     ValueManipulator."""
 
-    def __init__(self, method_or_extractor: ExtractorExpression[T, E], updater: Optional[ValueUpdater] = None) -> None:
+    def __init__(
+        self, method_or_extractor: ExtractorExpression[T, R], updater: Optional[ValueUpdater[T, R]] = None
+    ) -> None:
         """
         Constructs a new `CompositeUpdater`.
 
@@ -222,7 +224,7 @@ class CompositeUpdater(ValueManipulator):
         """
         super().__init__()
         if updater is not None:  # Two arg constructor
-            self.extractor = cast(ValueExtractor[T, E], method_or_extractor)
+            self.extractor = cast(ValueExtractor[T, R], method_or_extractor)
             self.updater = updater
         else:  # One arg with method name
             last = str(method_or_extractor).rfind(".")
@@ -232,15 +234,15 @@ class CompositeUpdater(ValueManipulator):
                 self.extractor = ChainedExtractor(str(method_or_extractor)[0:last])
             self.updater = UniversalUpdater(str(method_or_extractor)[last + 1 :])
 
-    def get_extractor(self) -> ValueExtractor[T, E]:
+    def get_extractor(self) -> ValueExtractor[T, R]:
         return self.extractor
 
-    def get_updator(self) -> ValueUpdater:
+    def get_updator(self) -> ValueUpdater[T, R]:
         return self.updater
 
 
 @proxy("extractor.UniversalUpdater")
-class UniversalUpdater(ValueUpdater):
+class UniversalUpdater(ValueUpdater[V, R]):
     """Universal ValueUpdater implementation.
 
     Either a property-based and method-based {@link ValueUpdater} based on whether constructor parameter *name*
@@ -272,4 +274,4 @@ def extract(expression: str) -> ValueExtractor[T, E]:
 
 ExtractorExpression: TypeAlias = ValueExtractor[T, E] | str
 ManipulatorExpression: TypeAlias = ValueManipulator | str
-UpdaterExpression: TypeAlias = ValueUpdater | str
+UpdaterExpression: TypeAlias = ValueUpdater[T, R] | str

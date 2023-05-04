@@ -189,7 +189,7 @@ class RequestFactory:
         r = SizeRequest(scope=self._scope, cache=self._cache_name)
         return r
 
-    def invoke_request(self, key: K, processor: EntryProcessor) -> InvokeRequest:
+    def invoke_request(self, key: K, processor: EntryProcessor[R]) -> InvokeRequest:
         r = InvokeRequest(
             scope=self._scope,
             cache=self._cache_name,
@@ -200,7 +200,7 @@ class RequestFactory:
         return r
 
     def invoke_all_request(
-        self, processor: EntryProcessor, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
+        self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> InvokeAllRequest:
         if keys is not None and filter is not None:
             raise ValueError("keys and filter are mutually exclusive")

@@ -8,6 +8,7 @@ import abc
 import asyncio
 import os
 from asyncio import Task
+from threading import Lock
 from typing import (
     Any,
     AsyncIterator,
@@ -352,7 +353,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def invoke(self, key: K, processor: EntryProcessor) -> R:
+    async def invoke(self, key: K, processor: EntryProcessor[R]) -> R:
         """
         Invoke the passed EntryProcessor against the Entry specified by the
         passed key, returning the result of the invocation.
@@ -364,7 +365,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
 
     @abc.abstractmethod
     def invoke_all(
-        self, processor: EntryProcessor, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
+        self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> AsyncIterator[MapEntry[K, R]]:
         """
         Invoke the passed EntryProcessor against the set of entries that are selected by the given Filter,
@@ -561,9 +562,9 @@ class NamedCacheClient(NamedCache[K, V]):
         r = self._request_factory.clear_request()
         await self._client_stub.clear(r)
 
-    @_pre_call_cache
     async def destroy(self) -> None:
         self._internal_emitter.once(MapLifecycleEvent.DESTROYED.value)
+        self._internal_emitter.emit(MapLifecycleEvent.DESTROYED.value, self.name)
         r = self._request_factory.destroy_request()
         await self._client_stub.destroy(r)
 
@@ -627,14 +628,14 @@ class NamedCacheClient(NamedCache[K, V]):
         return self._request_factory.get_serializer().deserialize(v.value)
 
     @_pre_call_cache
-    async def invoke(self, key: K, processor: EntryProcessor) -> R:
+    async def invoke(self, key: K, processor: EntryProcessor[R]) -> R:
         r = self._request_factory.invoke_request(key, processor)
         v = await self._client_stub.invoke(r)
         return self._request_factory.get_serializer().deserialize(v.value)
 
     @_pre_call_cache
     def invoke_all(
-        self, processor: EntryProcessor, keys: Optional[set[K]] = None, filter: Optional[Filter] = None
+        self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> AsyncIterator[MapEntry[K, R]]:
         r = self._request_factory.invoke_all_request(processor, keys, filter)
         stream = self._client_stub.invokeAll(r)
@@ -1037,6 +1038,7 @@ class Session:
         """
         self._closed: bool = False
         self._caches: dict[str, NamedCache[Any, Any]] = dict()
+        self._lock: Lock = Lock()
         if session_options is not None:
             self._session_options = session_options
         else:
@@ -1159,14 +1161,37 @@ class Session:
         :return: Returns a :func:`coherence.client.NamedCache` for the specified cache name.
         """
         serializer = SerializerRegistry.serializer(ser_format)
-        c = self._caches.get(name)
-        if c is None:
-            c = NamedCacheClient(name, self, serializer)
-            # initialize the event stream now to ensure lifecycle listeners will work as expected
-            await c._events_manager._ensure_stream()
-            self._setup_event_handlers(c)
-            self._caches.update({name: c})
-        return c
+        with self._lock:
+            c = self._caches.get(name)
+            if c is None:
+                c = NamedCacheClient(name, self, serializer)
+                # initialize the event stream now to ensure lifecycle listeners will work as expected
+                await c._events_manager._ensure_stream()
+                self._setup_event_handlers(c)
+                self._caches.update({name: c})
+            return c
+
+    # noinspection PyProtectedMember
+    @_pre_call_session
+    async def get_map(self, name: str, ser_format: str = DEFAULT_FORMAT) -> "NamedMap[K, V]":
+        """
+        Returns a :func:`coherence.client.NameMap` for the specified cache name.
+
+        :param name: the map name
+        :param ser_format: the serialization format for keys and values stored within the cache
+
+        :return: Returns a :func:`coherence.client.NamedMap` for the specified cache name.
+        """
+        serializer = SerializerRegistry.serializer(ser_format)
+        with self._lock:
+            c = self._caches.get(name)
+            if c is None:
+                c = NamedCacheClient(name, self, serializer)
+                # initialize the event stream now to ensure lifecycle listeners will work as expected
+                await c._events_manager._ensure_stream()
+                self._setup_event_handlers(c)
+                self._caches.update({name: c})
+            return c
 
     # noinspection PyUnresolvedReferences
     async def close(self) -> None:
@@ -1186,11 +1211,13 @@ class Session:
         this: Session = self
 
         def on_destroyed(name: str) -> None:
-            del this._caches[name]
+            if name in this._caches:
+                del this._caches[name]
             self._emitter.emit(MapLifecycleEvent.DESTROYED.value, name)
 
         def on_released(name: str) -> None:
-            del this._caches[name]
+            if name in this._caches:
+                del this._caches[name]
             self._emitter.emit(MapLifecycleEvent.RELEASED.value, name)
 
         client.on(MapLifecycleEvent.DESTROYED, on_destroyed)
@@ -1396,9 +1423,7 @@ class _PagedStream(abc.ABC, AsyncIterator[T]):
 
         :return: None
         """
-        print("### DEBUG: __load_next_page() called!")
         request: PageRequest = self._client._request_factory.page_request(self._cookie)
-        print("### DEBUG: __load_next_page() called!")
         self._stream = self._get_stream(request)
         self._new_page = True
 

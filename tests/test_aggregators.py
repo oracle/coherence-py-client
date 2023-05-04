@@ -4,14 +4,13 @@
 
 import os
 from decimal import Decimal
-from typing import Any, AsyncGenerator, Final, List, Tuple, cast
+from typing import Any, AsyncGenerator, Final, List, cast
 
 import pytest
 import pytest_asyncio
 
 from coherence import Aggregators, Filters, NamedCache, Options, Session, TlsOptions
 from coherence.aggregator import (
-    AggregationResult,
     EntryAggregator,
     PriorityAggregator,
     RecordType,
@@ -186,11 +185,9 @@ async def test_top(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_group(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    ag: EntryAggregator[AggregationResult[str, int]] = Aggregators.group_by(
-        "gender", Aggregators.min("age"), Filters.always()
-    )
+    ag: EntryAggregator[dict[str, int]] = Aggregators.group_by("gender", Aggregators.min("age"), Filters.always())
 
-    r: list[Tuple[Any, Any]] = await cache.aggregate(ag)
+    r: dict[str, int] = await cache.aggregate(ag)
     print("\n" + str(r))
     assert r == {"Male": 25, "Female": 22}
 

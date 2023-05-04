@@ -10,7 +10,7 @@ import pytest_asyncio
 
 from coherence import MapEntry, NamedCache, Options, Session, TlsOptions
 from coherence.filter import Filter, Filters
-from coherence.processor import EntryProcessor, PreloadRequest, Processors, ScriptProcessor, TouchProcessor
+from coherence.processor import EntryProcessor, Numeric, PreloadRequest, Processors, ScriptProcessor, TouchProcessor
 from coherence.serialization import JSONSerializer
 from tests.address import Address
 from tests.person import Person
@@ -90,13 +90,13 @@ async def test_extractor(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_composite(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
+async def test_composite(setup_and_teardown: NamedCache[str, Any]) -> None:
+    cache: NamedCache[str, Any] = setup_and_teardown
 
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    cp = Processors.extract("id").and_then(Processors.extract("my_str"))
+    cp: EntryProcessor[str] = Processors.extract("id").and_then(Processors.extract("my_str"))
     r: Any = await cache.invoke(k, cp)
     assert r == [123, "123"]
 
@@ -110,31 +110,32 @@ async def test_composite(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_conditional(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
+async def test_conditional(setup_and_teardown: NamedCache[str, Any]) -> None:
+    cache: NamedCache[str, Any] = setup_and_teardown
 
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    cp = Processors.extract("my_str").when(Filters.equals("id", 123))
+    ext: EntryProcessor[str] = Processors.extract("my_str")
+    cp: EntryProcessor[str] = ext.when(Filters.equals("id", 123))
     r: Any = await cache.invoke(k, cp)
     assert r == "123"
 
     await cache.put(k, v)
-    cp = Processors.extract("my_str").when(Filters.equals("id", 1234))
+    cp = ext.when(Filters.equals("id", 1234))
     r = await cache.invoke(k, cp)
     assert r is None
 
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_null(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
+async def test_null(setup_and_teardown: NamedCache[str, Any]) -> None:
+    cache: NamedCache[str, Any] = setup_and_teardown
 
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    cp = Processors.nop()
+    cp: EntryProcessor[bool] = Processors.nop()
     r: Any = await cache.invoke(k, cp)
     assert r is True
 
@@ -147,8 +148,8 @@ async def test_multiplier(setup_and_teardown: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    cp = Processors.multiply("ival", 2)
-    r: Any = await cache.invoke(k, cp)
+    cp: EntryProcessor[Numeric] = Processors.multiply("ival", 2)
+    r: Numeric = await cache.invoke(k, cp)
     assert r == 246
 
 
@@ -221,16 +222,16 @@ async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> 
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_conditional_remove(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
+async def test_conditional_remove(setup_and_teardown: NamedCache[str, str]) -> None:
+    cache: NamedCache[str, str] = setup_and_teardown
 
     k1 = "one"
     v1 = "only-one"
     await cache.put(k1, v1)
 
     f: Filter = Filters.never()  # This will always return False
-    cp = Processors.conditional_remove(f, True)
-    r: Any = await cache.invoke(k1, cp)
+    cp: EntryProcessor[str] = Processors.conditional_remove(f, True)
+    r: str = await cache.invoke(k1, cp)
     assert r == v1
     assert await cache.get(k1) == "only-one"
     cp = Processors.conditional_remove(f)
@@ -247,14 +248,14 @@ async def test_conditional_remove(setup_and_teardown: NamedCache[Any, Any]) -> N
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_method_invocation(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
+async def test_method_invocation(setup_and_teardown: NamedCache[str, Any]) -> None:
+    cache: NamedCache[str, Any] = setup_and_teardown
 
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
-    p = Processors.invoke_accessor("get", "ival")  # Non-mutating form
-    r: Any = await cache.invoke(k, p)
+    p: EntryProcessor[str] = Processors.invoke_accessor("get", "ival")  # Non-mutating form
+    r: str = await cache.invoke(k, p)
     assert r == 123
 
     p = Processors.invoke_accessor("size")  # Non-mutating form
@@ -276,7 +277,7 @@ async def test_touch() -> None:
     tp = Processors.touch()
     serializer = JSONSerializer()
     j = serializer.serialize(tp)
-    json_object: EntryProcessor = serializer.deserialize(j)
+    json_object: EntryProcessor[None] = serializer.deserialize(j)
     assert json_object is not None
     assert isinstance(json_object, TouchProcessor)
 
@@ -287,7 +288,7 @@ async def test_script() -> None:
     sp = Processors.script("test_script.py", "py", "abc", 2, 4.0)
     serializer = JSONSerializer()
     j = serializer.serialize(sp)
-    json_object: EntryProcessor = serializer.deserialize(j)
+    json_object: EntryProcessor[Any] = serializer.deserialize(j)
     assert json_object is not None
     assert isinstance(json_object, ScriptProcessor)
     assert json_object.name == "test_script.py"
@@ -301,7 +302,7 @@ async def test_preload() -> None:
     tp = Processors.preload()
     serializer = JSONSerializer()
     j = serializer.serialize(tp)
-    json_object: EntryProcessor = serializer.deserialize(j)
+    json_object: EntryProcessor[None] = serializer.deserialize(j)
     assert json_object is not None
     assert isinstance(json_object, PreloadRequest)
 
