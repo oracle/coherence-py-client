@@ -4,7 +4,7 @@ All examples in this directory assume that the Coherence Python Client has
 been installed.
 
 ```bash
-python3 -m pip install coherence
+python3 -m pip install coherence-client
 ```
 
 Be sure a Coherence gRPC proxy is available for the examples to work against.

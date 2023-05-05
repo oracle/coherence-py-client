@@ -36,7 +36,7 @@ docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:22.06.4
 ## Installation
 
 ```bash
-python3 -m pip install coherence
+python3 -m pip install coherence-client
 ```
 
 ## Documentation
