@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coherence.event &mdash; Coherence Python Client. v1.0b1 1.0b1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="coherence.extractor" href="extractor.html" />
+    <link rel="prev" title="coherence.filter" href="filter.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Coherence Python Client. v1.0b1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sessions.html">Sessions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basics.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../querying.html">Querying</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../aggregation.html">Aggregation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../entryprocessing.html">Entry Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../serialization.html">Serialization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#aggregators">Aggregators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#filters">Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapentry">MapEntry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapevent">MapEvent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#maplistener">MapListener</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedcache">NamedCache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedmap">NamedMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#processors">Processors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#session">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tlsoptions">TlsOptions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="processor.html">coherence.processor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html">coherence.filter</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">coherence.event</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mapevent">MapEvent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#maplifecycleevent">MapLifecycleEvent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mapeventtype">MapEventType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#maplistener">MapListener</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="extractor.html">coherence.extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aggregator.html">coherence.aggregator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Coherence Python Client. v1.0b1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../api_reference.html">API Reference</a></li>
+      <li class="breadcrumb-item active">coherence.event</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api_reference/event.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="coherence-event">
+<h1>coherence.event<a class="headerlink" href="#coherence-event" title="Permalink to this headline"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<section id="mapevent">
+<h2>MapEvent<a class="headerlink" href="#mapevent" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.event.</span></span><span class="sig-name descname"><span class="pre">MapEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../api_reference.html#coherence.NamedMap" title="coherence.client.NamedMap"><span class="pre">coherence.client.NamedMap</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">messages_pb2.MapEventResponse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serializer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">coherence.serialization.Serializer</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.event.K</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.event.V</span></code>]</p>
+<p>An event which indicates that the content of a map has changed:</p>
+<ul class="simple">
+<li><p>an entry has been added</p></li>
+<li><p>an entry has been removed</p></li>
+<li><p>an entry has been changed</p></li>
+</ul>
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em></dt>
+<dd><p>Returns the event’s description.
+:return: the event’s description</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">coherence.event.K</span></em></dt>
+<dd><p>Return the key for the entry generating the event.
+:return: the key for the entry generating the event</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em></dt>
+<dd><p>The name of the cache from which the event originated.
+:return:  the cache name from which the event originated</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">new</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span></em></dt>
+<dd><p>Return the new value for the entry generating the event.
+:return: the new value, if any, for the entry generating the event</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">old</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span></em></dt>
+<dd><p>Return the old value for the entry generating the event.
+:return:the old value, if any, for the entry generating the event</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../api_reference.html#coherence.NamedMap" title="coherence.client.NamedMap"><span class="pre">coherence.client.NamedMap</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span></em></dt>
+<dd><p>The source of the event.
+:return: the event source</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">coherence.event.MapEventType</span></em></dt>
+<dd><p>The MapEventType.  This may be one of:
+* MapEventType.ENTRY_INSERTED
+* MapEventType.ENTRY_UPDATED
+* MapEventType.ENTRY_DELETED
+:return: the event type</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="maplifecycleevent">
+<h2>MapLifecycleEvent<a class="headerlink" href="#maplifecycleevent" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.event.</span></span><span class="sig-name descname"><span class="pre">MapLifecycleEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>Enum of possible events that may be raised at different
+points of the cache lifecycle.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">DESTROYED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'map_destroyed'</span></em></dt>
+<dd><p>Raised when a storage for a given cache is destroyed
+(usually as a result of a call to NamedMap.destroy()).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">RELEASED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'map_released'</span></em></dt>
+<dd><p>Raised when the local resources for a cache has been
+released as a result of a call to NamedMap.release().
+Entries within the cache remain untouched</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">TRUNCATED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'map_truncated'</span></em></dt>
+<dd><p>Raised when a storage for a given cache is truncated
+as a result of a call to NamedMap.truncate().</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="mapeventtype">
+<h2>MapEventType<a class="headerlink" href="#mapeventtype" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.event.</span></span><span class="sig-name descname"><span class="pre">MapEventType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>Enum of possible events that could raise a MapEvent.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">ENTRY_DELETED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'delete'</span></em></dt>
+<dd><p>This event indicates that an entry has been removed from the cache.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">ENTRY_INSERTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'insert'</span></em></dt>
+<dd><p>This event indicates that an entry has been added to the cache.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">ENTRY_UPDATED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'update'</span></em></dt>
+<dd><p>This event indicates that an entry has been updated in the cache.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="maplistener">
+<h2>MapListener<a class="headerlink" href="#maplistener" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.event.</span></span><span class="sig-name descname"><span class="pre">MapListener</span></span></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.event.K</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.event.V</span></code>]</p>
+<p>A listener interface for receiving MapEvents.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.event.MapListener.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.event.MapListener.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructs a new MapListener.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">on_any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../api_reference.html#coherence.event.MapEvent" title="coherence.event.MapEvent"><span class="pre">coherence.event.MapEvent</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">coherence.event.MapListener</span><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Defines the callback that should be invoked when any entry event has occurred.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>callback</strong> – the callback that will be invoked when a deletion event has occurred</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">on_deleted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../api_reference.html#coherence.event.MapEvent" title="coherence.event.MapEvent"><span class="pre">coherence.event.MapEvent</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">coherence.event.MapListener</span><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Defines the callback that should be invoked when a deletion event has occurred.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>callback</strong> – the callback that will be invoked when a deletion event has occurred</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">on_inserted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../api_reference.html#coherence.event.MapEvent" title="coherence.event.MapEvent"><span class="pre">coherence.event.MapEvent</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">coherence.event.MapListener</span><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Defines the callback that should be invoked when an insertion event has occurred.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>callback</strong> – the callback that will be invoked when an insertion event has occurred</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">on_updated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../api_reference.html#coherence.event.MapEvent" title="coherence.event.MapEvent"><span class="pre">coherence.event.MapEvent</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">coherence.event.MapListener</span><span class="p"><span class="pre">[</span></span><span class="pre">coherence.event.K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.event.V</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Defines the callback that should be invoked when an update event has occurred.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>callback</strong> – the callback that will be invoked when an update event has occurred</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="filter.html" class="btn btn-neutral float-left" title="coherence.filter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="extractor.html" class="btn btn-neutral float-right" title="coherence.extractor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright (c) 2022, 2023, Oracle and/or its affiliates..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
