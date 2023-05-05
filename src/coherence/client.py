@@ -764,9 +764,22 @@ class NamedCacheClient(NamedCache[K, V]):
 
 
 class TlsOptions:
+    """
+    Options specific to the configuration of TLS.
+    """
+
     ENV_CA_CERT = "COHERENCE_TLS_CERTS_PATH"
+    """
+    Environment variable to configure the path to CA certificates
+    """
     ENV_CLIENT_CERT = "COHERENCE_TLS_CLIENT_CERT"
+    """
+    Environment variable to configure the path to client certificates
+    """
     ENV_CLIENT_KEY = "COHERENCE_TLS_CLIENT_KEY"
+    """
+    Environment variable to configure the path to client key
+    """
 
     def __init__(
         self,
@@ -776,6 +789,18 @@ class TlsOptions:
         client_cert_path: str | None = None,
         client_key_path: str | None = None,
     ) -> None:
+        """
+        Construct a new :func:`coherence.client.TlsOptions`
+
+        :param locked: If `true`, prevents further mutations to the options.
+        :param enabled: Enable/disable TLS support.
+        :param ca_cert_path: the path to the CA certificate. If not specified then its configured using the
+            environment variable COHERENCE_TLS_CERTS_PATH
+        :param client_cert_path: the path to the client certificate. If not specified then its configured using the
+            environment variable COHERENCE_TLS_CLIENT_CERT
+        :param client_key_path: the path to the client certificate key. If not specified then its configured using the
+            environment variable COHERENCE_TLS_CLIENT_KEY
+        """
         self._locked = locked
         self._enabled = enabled
 
@@ -787,6 +812,9 @@ class TlsOptions:
 
     @property
     def enabled(self) -> bool:
+        """
+        Property to set/get the boolean state if TLS is enabled(true) or disabled(false)
+        """
         return self._enabled
 
     @enabled.setter
@@ -798,6 +826,9 @@ class TlsOptions:
 
     @property
     def ca_cert_path(self) -> Optional[str]:
+        """
+        Property to set/get the path to the CA certificate
+        """
         return self._ca_cert_path
 
     @ca_cert_path.setter
@@ -809,6 +840,9 @@ class TlsOptions:
 
     @property
     def client_cert_path(self) -> Optional[str]:
+        """
+        Property to set/get the path to the client certificate.
+        """
         return self._client_cert_path
 
     @client_cert_path.setter
@@ -820,6 +854,9 @@ class TlsOptions:
 
     @property
     def client_key_path(self) -> Optional[str]:
+        """
+        Property to set/get the path to the client certificate key.
+        """
         return self._client_key_path
 
     @client_key_path.setter
@@ -830,6 +867,9 @@ class TlsOptions:
             self._client_key_path = client_key_path
 
     def locked(self) -> None:
+        """
+        Once called, no further mutations can be made.
+        """
         self._locked = True
 
     def is_locked(self) -> bool:
