@@ -4,12 +4,12 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>coherence.extractor &mdash; Coherence Python Client 1.0 documentation</title>
+  <title>coherence.extractor &mdash; Coherence Python Client. v1.0b1 1.0b1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
-    <![endif]-->
+  <![endif]-->
   
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
@@ -19,7 +19,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="coherence.aggregator" href="aggregator.html" />
-    <link rel="prev" title="coherence.filter" href="filter.html" /> 
+    <link rel="prev" title="coherence.event" href="event.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -27,7 +27,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> Coherence Python Client
+            <a href="../index.html" class="icon icon-home"> Coherence Python Client. v1.0b1
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -47,22 +47,36 @@
 <li class="toctree-l1"><a class="reference internal" href="../events.html">Events</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../serialization.html">Serialization</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="client.html">coherence.client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="processor.html">coherence.processor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="filter.html">coherence.filter</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">coherence.extractor</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#valueextractor">ValueExtractor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#universalextractor">UniversalExtractor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#abstractcompositeextractor">AbstractCompositeExtractor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#chainedextractor">ChainedExtractor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#identityextractor">IdentityExtractor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#valueupdater">ValueUpdater</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#valuemanipulator">ValueManipulator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#compositeupdater">CompositeUpdater</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#universalupdater">UniversalUpdater</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#aggregators">Aggregators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#filters">Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapentry">MapEntry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapevent">MapEvent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#maplistener">MapListener</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedcache">NamedCache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedmap">NamedMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#processors">Processors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#session">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tlsoptions">TlsOptions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="processor.html">coherence.processor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html">coherence.filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="event.html">coherence.event</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">coherence.extractor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#valueextractor">ValueExtractor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#universalextractor">UniversalExtractor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#abstractcompositeextractor">AbstractCompositeExtractor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#chainedextractor">ChainedExtractor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#identityextractor">IdentityExtractor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#valueupdater">ValueUpdater</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#valuemanipulator">ValueManipulator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compositeupdater">CompositeUpdater</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#universalupdater">UniversalUpdater</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="aggregator.html">coherence.aggregator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aggregator.html">coherence.aggregator</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -73,7 +87,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Coherence Python Client</a>
+          <a href="../index.html">Coherence Python Client. v1.0b1</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -276,7 +290,7 @@ from the passed value, but returns the value itself.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="coherence.extractor.ValueUpdater">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.extractor.</span></span><span class="sig-name descname"><span class="pre">ValueUpdater</span></span><a class="headerlink" href="#coherence.extractor.ValueUpdater" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.extractor.T</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.extractor.R</span></code>]</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.extractor.ValueUpdater.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.extractor.ValueUpdater.__init__" title="Permalink to this definition"></a></dt>
@@ -292,19 +306,17 @@ from the passed value, but returns the value itself.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="coherence.extractor.ValueManipulator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.extractor.</span></span><span class="sig-name descname"><span class="pre">ValueManipulator</span></span><a class="headerlink" href="#coherence.extractor.ValueManipulator" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueUpdater</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.extractor.T</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.extractor.R</span></code>]</p>
 <p>ValueManipulator represents a composition of <a class="reference internal" href="#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> and
 <a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueUpdater</span></code></a> implementations.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.extractor.ValueManipulator.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.extractor.ValueManipulator.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>ValueUpdater is used to update an object’s state.</p>
-<p>Constructs a new <cite>ValueUpdater</cite>.</p>
-</dd></dl>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#coherence.extractor.ValueManipulator.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.extractor.ValueManipulator.get_extractor">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_extractor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.E</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.extractor.ValueManipulator.get_extractor" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_extractor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.R</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.extractor.ValueManipulator.get_extractor" title="Permalink to this definition"></a></dt>
 <dd><p>Retrieve the underlying ValueExtractor reference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -315,7 +327,7 @@ from the passed value, but returns the value itself.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.extractor.ValueManipulator.get_updator">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_updator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a></span></span><a class="headerlink" href="#coherence.extractor.ValueManipulator.get_updator" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_updator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.R</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.extractor.ValueManipulator.get_updator" title="Permalink to this definition"></a></dt>
 <dd><p>Retrieve the underlying ValueUpdater reference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -331,13 +343,13 @@ from the passed value, but returns the value itself.</p>
 <h2>CompositeUpdater<a class="headerlink" href="#compositeupdater" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="coherence.extractor.CompositeUpdater">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.extractor.</span></span><span class="sig-name descname"><span class="pre">CompositeUpdater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_or_extractor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updater</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.extractor.CompositeUpdater" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueManipulator</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.extractor.</span></span><span class="sig-name descname"><span class="pre">CompositeUpdater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_or_extractor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.R</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updater</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.R</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.extractor.CompositeUpdater" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.extractor.ValueManipulator" title="coherence.extractor.ValueManipulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueManipulator</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.extractor.T</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.extractor.R</span></code>], <a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueUpdater</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.extractor.T</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.extractor.R</span></code>]</p>
 <p>A ValueUpdater implementation based on an extractor-updater pair that could also be used as a
 ValueManipulator.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.extractor.CompositeUpdater.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_or_extractor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updater</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.extractor.CompositeUpdater.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_or_extractor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.R</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updater</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.R</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.extractor.CompositeUpdater.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Constructs a new <cite>CompositeUpdater</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -351,7 +363,7 @@ ValueManipulator.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.extractor.CompositeUpdater.get_extractor">
-<span class="sig-name descname"><span class="pre">get_extractor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.E</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.extractor.CompositeUpdater.get_extractor" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_extractor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.R</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.extractor.CompositeUpdater.get_extractor" title="Permalink to this definition"></a></dt>
 <dd><p>Retrieve the underlying ValueExtractor reference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -362,7 +374,7 @@ ValueManipulator.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.extractor.CompositeUpdater.get_updator">
-<span class="sig-name descname"><span class="pre">get_updator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a></span></span><a class="headerlink" href="#coherence.extractor.CompositeUpdater.get_updator" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_updator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><span class="pre">coherence.extractor.ValueUpdater</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.extractor.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.extractor.R</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.extractor.CompositeUpdater.get_updator" title="Permalink to this definition"></a></dt>
 <dd><p>Retrieve the underlying ValueUpdater reference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -379,7 +391,7 @@ ValueManipulator.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="coherence.extractor.UniversalUpdater">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.extractor.</span></span><span class="sig-name descname"><span class="pre">UniversalUpdater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.extractor.UniversalUpdater" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueUpdater</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#coherence.extractor.ValueUpdater" title="coherence.extractor.ValueUpdater"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueUpdater</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.extractor.V</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">coherence.extractor.R</span></code>]</p>
 <p>Universal ValueUpdater implementation.</p>
 <p>Either a property-based and method-based <a class="reference external" href="mailto:{&#37;&#52;&#48;link">{<span>&#64;</span>link</a> ValueUpdater} based on whether constructor parameter <em>name</em>
 is evaluated to be a property or method.</p>
@@ -407,7 +419,7 @@ be used as a key in a Map.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="filter.html" class="btn btn-neutral float-left" title="coherence.filter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="event.html" class="btn btn-neutral float-left" title="coherence.event" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="aggregator.html" class="btn btn-neutral float-right" title="coherence.aggregator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

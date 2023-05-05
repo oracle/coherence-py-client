@@ -18,7 +18,6 @@ Filter
 Filters
 -------
 .. autoclass:: coherence.filter.Filters
-    :show-inheritance:
     :members:
 
 ExtractorFilter

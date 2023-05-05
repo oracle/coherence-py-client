@@ -4,12 +4,12 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Basics &mdash; Coherence Python Client 1.0 documentation</title>
+  <title>The Basics &mdash; Coherence Python Client. v1.0b1 1.0b1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
-    <![endif]-->
+  <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
@@ -27,7 +27,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Coherence Python Client
+            <a href="index.html" class="icon icon-home"> Coherence Python Client. v1.0b1
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -55,7 +55,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Coherence Python Client</a>
+          <a href="index.html">Coherence Python Client. v1.0b1</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -75,6 +75,56 @@
              
   <section id="the-basics">
 <h1>The Basics<a class="headerlink" href="#the-basics" title="Permalink to this headline"></a></h1>
+<p><a class="reference external" href="api_reference.html#namedmap">NamedMap</a> and <a class="reference external" href="api_reference.html#namedcache">NamedCache</a> are <cite>dict</cite>-like structures allowing users
+to store data within a remote <a class="reference external" href="https://coherence.community/">Coherence</a> cluster.</p>
+<p>The following is an example of using a <cite>NamedMap</cite> to <cite>store</cite>, <cite>get</cite>, and
+<cite>remove</cite> simple keys and values:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Copyright (c) 2023, Oracle and/or its affiliates.</span>
+<span class="linenos"> 2</span><span class="c1"># Licensed under the Universal Permissive License v 1.0 as shown at</span>
+<span class="linenos"> 3</span><span class="c1"># https://oss.oracle.com/licenses/upl.</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="kn">from</span> <span class="nn">coherence</span> <span class="kn">import</span> <span class="n">NamedMap</span><span class="p">,</span> <span class="n">Session</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="k">async</span> <span class="k">def</span> <span class="nf">do_run</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">11</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">12</span><span class="sd">    Demonstrates basic CRUD operations against a NamedMap using</span>
+<span class="linenos">13</span><span class="sd">    `int` keys and `str` values.</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="sd">    :return: None</span>
+<span class="linenos">16</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="hll"><span class="linenos">17</span>    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">()</span>
+</span><span class="linenos">18</span>    <span class="k">try</span><span class="p">:</span>
+<span class="hll"><span class="linenos">19</span>        <span class="n">namedMap</span><span class="p">:</span> <span class="n">NamedMap</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">get_map</span><span class="p">(</span><span class="s2">&quot;my-map&quot;</span><span class="p">)</span>
+</span><span class="linenos">20</span>
+<span class="hll"><span class="linenos">21</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Put key 1; value one&quot;</span><span class="p">)</span>
+</span><span class="hll"><span class="linenos">22</span>        <span class="k">await</span> <span class="n">namedMap</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;one&quot;</span><span class="p">)</span>
+</span><span class="hll"><span class="linenos">23</span>
+</span><span class="hll"><span class="linenos">24</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Value for key 1 is :&quot;</span><span class="p">,</span> <span class="k">await</span> <span class="n">namedMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</span><span class="hll"><span class="linenos">25</span>
+</span><span class="hll"><span class="linenos">26</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NamedMap size is :&quot;</span><span class="p">,</span> <span class="k">await</span> <span class="n">namedMap</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+</span><span class="hll"><span class="linenos">27</span>
+</span><span class="hll"><span class="linenos">28</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updating value of key 1 to ONE from &quot;</span><span class="p">,</span> <span class="k">await</span> <span class="n">namedMap</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;ONE&quot;</span><span class="p">))</span>
+</span><span class="hll"><span class="linenos">29</span>
+</span><span class="hll"><span class="linenos">30</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Value for key 1 is :&quot;</span><span class="p">,</span> <span class="k">await</span> <span class="n">namedMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</span><span class="hll"><span class="linenos">31</span>
+</span><span class="hll"><span class="linenos">32</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Removing key 1, current value :&quot;</span><span class="p">,</span> <span class="k">await</span> <span class="n">namedMap</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</span><span class="hll"><span class="linenos">33</span>
+</span><span class="hll"><span class="linenos">34</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NamedMap size is :&quot;</span><span class="p">,</span> <span class="k">await</span> <span class="n">namedMap</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+</span><span class="linenos">35</span>    <span class="k">finally</span><span class="p">:</span>
+<span class="linenos">36</span>        <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span>
+<span class="linenos">39</span><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">do_run</span><span class="p">())</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Line 17 - Create a new <cite>Session</cite> that will connect to <cite>localhost:1408</cite>.  See the <a class="reference internal" href="sessions.html"><span class="doc">Sessions</span></a> documentation for more details.</p></li>
+<li><p>Line 50 - Obtain a <cite>NamedMap</cite> identified by <cite>my-map</cite> from the Session</p></li>
+<li><p>Lines 21-34 - Various CRUD operations against the NamedMap such as <a class="reference external" href="api_reference.html#coherence.NamedMap.get">get()</a>, <a class="reference external" href="api_reference.html#coherence.NamedMap.put">put()</a>, and <a class="reference external" href="api_reference.html#coherence.NamedMap.remove">remote()</a></p></li>
+</ul>
 </section>
 
 

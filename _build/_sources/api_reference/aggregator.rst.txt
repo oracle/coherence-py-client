@@ -144,5 +144,4 @@ ReducerAggregator
 Aggregators
 -----------
 .. autoclass:: coherence.aggregator.Aggregators
-    :show-inheritance:
     :members:

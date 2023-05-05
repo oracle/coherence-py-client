@@ -4,12 +4,12 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coherence Python Client &mdash; Coherence Python Client 1.0 documentation</title>
+  <title>Coherence Python Client &mdash; Coherence Python Client. v1.0b1 1.0b1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
-    <![endif]-->
+  <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
@@ -26,7 +26,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="#" class="icon icon-home"> Coherence Python Client
+            <a href="#" class="icon icon-home"> Coherence Python Client. v1.0b1
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">Coherence Python Client</a>
+          <a href="#">Coherence Python Client. v1.0b1</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -84,10 +84,21 @@ the Google gRPC framework as the network transport.</p>
 <section id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this headline"></a></h2>
 <ul class="simple">
-<li><p>Familiar, dict-like, interface for manipulating dict entries</p></li>
-<li><p>Cluster-side querying and aggregation of dict entries</p></li>
-<li><p>Cluster-side manipulation of map entries using <code class="docutils literal notranslate"><span class="pre">EntryProcessors</span></code></p></li>
-<li><p>Registration of listeners that will be notified of dict entry mutations</p></li>
+<li><p>Familiar Map-like interface for manipulating cache entries including but not limited to:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">put</span></code>, <code class="docutils literal notranslate"><span class="pre">put_if_absent</span></code>, <code class="docutils literal notranslate"><span class="pre">put_all</span></code>, <code class="docutils literal notranslate"><span class="pre">get</span></code>, <code class="docutils literal notranslate"><span class="pre">get_all</span></code>, <code class="docutils literal notranslate"><span class="pre">remove</span></code>, <code class="docutils literal notranslate"><span class="pre">clear</span></code>, <code class="docutils literal notranslate"><span class="pre">get_or_default</span></code>, <code class="docutils literal notranslate"><span class="pre">replace</span></code>, <code class="docutils literal notranslate"><span class="pre">replace_mapping</span></code>, <code class="docutils literal notranslate"><span class="pre">size</span></code>, <code class="docutils literal notranslate"><span class="pre">is_empty</span></code>, <code class="docutils literal notranslate"><span class="pre">contains_key</span></code>, <code class="docutils literal notranslate"><span class="pre">contains_value</span></code></p></li>
+</ul>
+</li>
+<li><p>Cluster-side querying, aggregation and filtering of map entries</p></li>
+<li><p>Cluster-side manipulation of map entries using EntryProcessors</p></li>
+<li><p>Registration of listeners to be notified of:</p>
+<ul>
+<li><p>mutations such as insert, update and delete on Maps</p></li>
+<li><p>map lifecycle events such as truncated, released or destroyed</p></li>
+<li><p>session lifecycle events such as connected, disconnected, reconnected and closed</p></li>
+</ul>
+</li>
+<li><p>Support for storing Python objects as JSON as well as the ability to serialize to Java objects on the server for access from other Coherence language API’s</p></li>
 </ul>
 </section>
 <section id="requirements">
@@ -102,18 +113,18 @@ the Google gRPC framework as the network transport.</p>
 <p>Before testing the Python client, you must ensure a Coherence cluster is available.
 For local development, we recommend using the Coherence CE Docker image; it contains
 everything necessary for the client to operate correctly.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">1408</span>:1408<span class="w"> </span>ghcr.io/oracle/coherence-ce:22.06.3
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">1408</span>:1408<span class="w"> </span>ghcr.io/oracle/coherence-ce:22.06.4
 </pre></div>
 </div>
 <section id="installation">
 <h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>coherence
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>coherence-client
 </pre></div>
 </div>
 </section>
 <section id="documentation">
 <h3>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline"></a></h3>
-<p>TBC</p>
+<p><a class="reference external" href="https://oracle.github.io/coherence-py-client/">https://oracle.github.io/coherence-py-client/</a></p>
 </section>
 <section id="examples">
 <h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline"></a></h3>
@@ -121,35 +132,43 @@ everything necessary for the client to operate correctly.</p>
 port of 1408, creates a new <code class="docutils literal notranslate"><span class="pre">NamedCache</span></code> with key <code class="docutils literal notranslate"><span class="pre">str</span></code> and value of a <code class="docutils literal notranslate"><span class="pre">str|int</span></code> and
 issues <code class="docutils literal notranslate"><span class="pre">put()</span></code>, <code class="docutils literal notranslate"><span class="pre">get()</span></code>, <code class="docutils literal notranslate"><span class="pre">size()</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> operations.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">coherence</span> <span class="kn">import</span> <span class="n">NamedCache</span><span class="p">,</span> <span class="n">Session</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
 
-<span class="c1"># create a new Session to the Coherence server</span>
-<span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
-<span class="c1"># create a new NamedCache with key of string|int and value of string|int</span>
-<span class="n">cache</span><span class="p">:</span> <span class="n">NamedCache</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="o">|</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">get_cache</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">run_test</span><span class="p">():</span>
 
-<span class="c1"># put a new key/value</span>
-<span class="n">k</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;one&quot;</span>
-<span class="n">v</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;only-one&quot;</span>
-<span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+    <span class="c1"># create a new Session to the Coherence server</span>
+    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
-<span class="c1"># get the value for a key in the cache</span>
-<span class="n">r</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="c1"># create a new NamedCache with key of string|int and value of string|int</span>
+    <span class="n">cache</span><span class="p">:</span> <span class="n">NamedCache</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="o">|</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">get_cache</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
 
-<span class="c1"># print the value got for a key in the cache</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The value of key </span><span class="se">\&quot;</span><span class="s2">one</span><span class="se">\&quot;</span><span class="s2"> is &quot;</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span>
+    <span class="c1"># put a new key/value</span>
+    <span class="n">k</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;one&quot;</span>
+    <span class="n">v</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;only-one&quot;</span>
+    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
-<span class="n">k1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;two&quot;</span>
-<span class="n">v1</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">v1</span><span class="p">)</span>
-<span class="n">r</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The value of key </span><span class="se">\&quot;</span><span class="s2">two</span><span class="se">\&quot;</span><span class="s2"> is &quot;</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span>
+    <span class="c1"># get the value for a key in the cache</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
 
-<span class="c1"># print the size of the cache</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Size of the cache test is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">size</span><span class="p">()))</span>
+    <span class="c1"># print the value got for a key in the cache</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The value of key </span><span class="se">\&quot;</span><span class="s2">one</span><span class="se">\&quot;</span><span class="s2"> is &quot;</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span>
 
-<span class="c1"># remove an entry from the cache</span>
-<span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">k1</span><span class="p">)</span>
+    <span class="n">k1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;two&quot;</span>
+    <span class="n">v1</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span> <span class="n">v1</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The value of key </span><span class="se">\&quot;</span><span class="s2">two</span><span class="se">\&quot;</span><span class="s2"> is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
+
+    <span class="c1"># print the size of the cache</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Size of the cache test is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">size</span><span class="p">()))</span>
+
+    <span class="c1"># remove an entry from the cache</span>
+    <span class="k">await</span> <span class="n">cache</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">k1</span><span class="p">)</span>
+
+
+<span class="c1"># run the test</span>
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run_test</span><span class="p">())</span>
 </pre></div>
 </div>
 </section>

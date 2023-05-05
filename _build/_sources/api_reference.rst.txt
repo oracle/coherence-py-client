@@ -6,12 +6,85 @@
 API Reference
 =============
 
+Aggregators
+-----------
+.. autoclass:: coherence.Aggregators
+    :members:
+
+Filters
+-------
+.. autoclass:: coherence.Filters
+    :members:
+
+MapEntry
+--------
+.. autoclass:: coherence.MapEntry
+    :show-inheritance:
+    :members:
+
+MapEvent
+-----------
+.. autoclass:: coherence.event.MapEvent
+    :show-inheritance:
+    :members:
+
+MapListener
+-----------
+.. autoclass:: coherence.event.MapListener
+    :show-inheritance:
+    :members:
+
+    .. automethod:: __init__
+
+NamedCache
+----------
+.. autoclass:: coherence.NamedCache
+    :show-inheritance:
+    :members:
+
+NamedMap
+--------
+.. autoclass:: coherence.NamedMap
+    :show-inheritance:
+    :members:
+
+Options
+-------
+.. autoclass:: coherence.Options
+    :show-inheritance:
+    :members:
+
+    .. automethod:: __init__
+
+Processors
+----------
+.. autoclass:: coherence.Processors
+    :members:
+
+Session
+-------
+.. autoclass:: coherence.Session
+    :show-inheritance:
+    :members:
+
+    .. automethod:: __init__
+
+TlsOptions
+----------
+.. autoclass:: coherence.TlsOptions
+    :show-inheritance:
+    :members:
+
+    .. automethod:: __init__
+
+Modules
+-------
 .. toctree::
    :maxdepth: 3
    :titlesonly:
 
-   api_reference/client.rst
    api_reference/processor.rst
    api_reference/filter.rst
+   api_reference/event.rst
    api_reference/extractor.rst
    api_reference/aggregator.rst

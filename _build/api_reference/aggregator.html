@@ -4,12 +4,12 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>coherence.aggregator &mdash; Coherence Python Client 1.0 documentation</title>
+  <title>coherence.aggregator &mdash; Coherence Python Client. v1.0b1 1.0b1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
-    <![endif]-->
+  <![endif]-->
   
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
@@ -26,7 +26,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> Coherence Python Client
+            <a href="../index.html" class="icon icon-home"> Coherence Python Client. v1.0b1
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -46,29 +46,43 @@
 <li class="toctree-l1"><a class="reference internal" href="../events.html">Events</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../serialization.html">Serialization</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="client.html">coherence.client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="processor.html">coherence.processor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="filter.html">coherence.filter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="extractor.html">coherence.extractor</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">coherence.aggregator</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#entryaggregator">EntryAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#abstractcomparableaggregator">AbstractComparableAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#abstractdoubleaggregator">AbstractDoubleAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#compositeaggregator">CompositeAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#maxaggregator">MaxAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#minaggregator">MinAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sumaggregator">SumAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#averageaggregator">AverageAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#countaggregator">CountAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#distinctvaluesaggregator">DistinctValuesAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#topaggregator">TopAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#groupaggregator">GroupAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#timeout">Timeout</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#schedule">Schedule</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#priorityaggregator">PriorityAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#queryrecorder">QueryRecorder</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reduceraggregator">ReducerAggregator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#aggregators">Aggregators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#aggregators">Aggregators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#filters">Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapentry">MapEntry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapevent">MapEvent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#maplistener">MapListener</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedcache">NamedCache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedmap">NamedMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#processors">Processors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#session">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tlsoptions">TlsOptions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="processor.html">coherence.processor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html">coherence.filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="event.html">coherence.event</a></li>
+<li class="toctree-l3"><a class="reference internal" href="extractor.html">coherence.extractor</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">coherence.aggregator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#entryaggregator">EntryAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#abstractcomparableaggregator">AbstractComparableAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#abstractdoubleaggregator">AbstractDoubleAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compositeaggregator">CompositeAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#maxaggregator">MaxAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#minaggregator">MinAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sumaggregator">SumAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#averageaggregator">AverageAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#countaggregator">CountAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#distinctvaluesaggregator">DistinctValuesAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#topaggregator">TopAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#groupaggregator">GroupAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#timeout">Timeout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#schedule">Schedule</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#priorityaggregator">PriorityAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#queryrecorder">QueryRecorder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reduceraggregator">ReducerAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#aggregators">Aggregators</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -81,7 +95,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Coherence Python Client</a>
+          <a href="../index.html">Coherence Python Client. v1.0b1</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -708,8 +722,7 @@ dot-delimited sequence of method names which would result in an aggregator based
 <dl class="py class">
 <dt class="sig sig-object py" id="coherence.aggregator.Aggregators">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">Aggregators</span></span><a class="headerlink" href="#coherence.aggregator.Aggregators" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Simple Aggregator DSL.</p>
+<dd><p>Simple Aggregator DSL.</p>
 <p>The methods in this class are for the most part simple factory methods for various
 <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a>  classes, but in some cases provide additional type safety. They
 also tend to make the code more readable, especially if imported statically, so their use is strongly encouraged
@@ -756,7 +769,7 @@ set of entries in a Map.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.aggregator.Aggregators.group_by">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">group_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.aggregator.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.aggregator.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">coherence.aggregator.EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">coherence.aggregator.EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">coherence.aggregator.G</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.aggregator.T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.group_by" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">group_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.aggregator.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.aggregator.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">coherence.aggregator.EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">coherence.aggregator.EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">coherence.aggregator.G</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.aggregator.T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.group_by" title="Permalink to this definition"></a></dt>
 <dd><p>Return a <a class="reference internal" href="#coherence.aggregator.GroupAggregator" title="coherence.aggregator.GroupAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.GroupAggregator</span></code></a> based on a specified property or method name(s) and an
 <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a>.</p>
 <dl class="field-list simple">

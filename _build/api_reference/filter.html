@@ -4,12 +4,12 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>coherence.filter &mdash; Coherence Python Client 1.0 documentation</title>
+  <title>coherence.filter &mdash; Coherence Python Client. v1.0b1 1.0b1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
-    <![endif]-->
+  <![endif]-->
   
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
@@ -18,7 +18,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="coherence.extractor" href="extractor.html" />
+    <link rel="next" title="coherence.event" href="event.html" />
     <link rel="prev" title="coherence.processor" href="processor.html" /> 
 </head>
 
@@ -27,7 +27,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> Coherence Python Client
+            <a href="../index.html" class="icon icon-home"> Coherence Python Client. v1.0b1
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -47,43 +47,57 @@
 <li class="toctree-l1"><a class="reference internal" href="../events.html">Events</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../serialization.html">Serialization</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="client.html">coherence.client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="processor.html">coherence.processor</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">coherence.filter</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#filter">Filter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#filters">Filters</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#extractorfilter">ExtractorFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#comparisonfilter">ComparisonFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#equalsfilter">EqualsFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#notequalsfilter">NotEqualsFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#greaterfilter">GreaterFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#greaterequalsfilter">GreaterEqualsFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#lessfilter">LessFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#notfilter">NotFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#isnonefilter">IsNoneFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#isnotnonefilter">IsNotNoneFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#alwaysfilter">AlwaysFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#neverfilter">NeverFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#arrayfilter">ArrayFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#allfilter">AllFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#anyfilter">AnyFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#andfilter">AndFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#orfilter">OrFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#xorfilter">XorFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#betweenfilter">BetweenFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#containsfilter">ContainsFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#containsanyfilter">ContainsAnyFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#containsallfilter">ContainsAllFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#infilter">InFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#likefilter">LikeFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#regexfilter">RegexFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#predicatefilter">PredicateFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#presentfilter">PresentFilter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mapeventfilter">MapEventFilter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#aggregators">Aggregators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#filters">Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapentry">MapEntry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapevent">MapEvent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#maplistener">MapListener</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedcache">NamedCache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedmap">NamedMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#processors">Processors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#session">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tlsoptions">TlsOptions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="processor.html">coherence.processor</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">coherence.filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#filter">Filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#filters">Filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#extractorfilter">ExtractorFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#comparisonfilter">ComparisonFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#equalsfilter">EqualsFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#notequalsfilter">NotEqualsFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#greaterfilter">GreaterFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#greaterequalsfilter">GreaterEqualsFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lessfilter">LessFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#notfilter">NotFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#isnonefilter">IsNoneFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#isnotnonefilter">IsNotNoneFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#alwaysfilter">AlwaysFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#neverfilter">NeverFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arrayfilter">ArrayFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#allfilter">AllFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anyfilter">AnyFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#andfilter">AndFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#orfilter">OrFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#xorfilter">XorFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#betweenfilter">BetweenFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#containsfilter">ContainsFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#containsanyfilter">ContainsAnyFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#containsallfilter">ContainsAllFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#infilter">InFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#likefilter">LikeFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#regexfilter">RegexFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#predicatefilter">PredicateFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#presentfilter">PresentFilter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mapeventfilter">MapEventFilter</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="extractor.html">coherence.extractor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="aggregator.html">coherence.aggregator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="event.html">coherence.event</a></li>
+<li class="toctree-l3"><a class="reference internal" href="extractor.html">coherence.extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aggregator.html">coherence.aggregator</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -94,7 +108,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Coherence Python Client</a>
+          <a href="../index.html">Coherence Python Client. v1.0b1</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -184,8 +198,7 @@ predicate throws an exception, the <em>other</em> predicate will not be evaluate
 <dl class="py class">
 <dt class="sig sig-object py" id="coherence.filter.Filters">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.filter.</span></span><span class="sig-name descname"><span class="pre">Filters</span></span><a class="headerlink" href="#coherence.filter.Filters" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
+<dd><dl class="py method">
 <dt class="sig sig-object py" id="coherence.filter.Filters.all">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.filter.Filters.all" title="Permalink to this definition"></a></dt>
 <dd><p>Return a composite filter representing logical <cite>AND</cite> of all specified filters.</p>
@@ -1215,7 +1228,7 @@ implementation is not index aware and will not take advantage of existing indexe
 <dd><p>Filter which returns true for entries that currently exist in a map.</p>
 <p>This Filter is intended to be used solely in combination with a
 <a class="reference internal" href="processor.html#coherence.processor.ConditionalProcessor" title="coherence.processor.ConditionalProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.processor.ConditionalProcessor</span></code></a> and is unnecessary for standard
-<a class="reference internal" href="client.html#coherence.client.NamedMap" title="coherence.client.NamedMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.client.NamedMap</span></code></a> operations.</p>
+<a class="reference internal" href="../api_reference.html#coherence.NamedMap" title="coherence.client.NamedMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.client.NamedMap</span></code></a> operations.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1330,7 +1343,7 @@ filter result.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="processor.html" class="btn btn-neutral float-left" title="coherence.processor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="extractor.html" class="btn btn-neutral float-right" title="coherence.extractor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="event.html" class="btn btn-neutral float-right" title="coherence.event" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
