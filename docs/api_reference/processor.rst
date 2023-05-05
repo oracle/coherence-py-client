@@ -12,7 +12,6 @@ coherence.processor
 Processors
 ---------------
 .. autoclass:: coherence.processor.Processors
-    :show-inheritance:
     :members:
 
 EntryProcessor

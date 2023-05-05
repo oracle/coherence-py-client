@@ -6,43 +6,25 @@
 Querying
 ========
 
-Coherence provides a rich set of primitives that allow developers to create advanced queries against
-a set of entries returning only those keys and/or values matching the specified criteria.
-See the `documentation <https://oracle.github.io/coherence/23.03/api/java/index.html>`_ for details
-on the Filters provided by this client.
+Being able to store and access data based on a key is great, but sometimes
+you need more than that. Coherence allows you to query on any data attribute
+present in your data model, and even allows you to define your own query
+filter if one of the built-in ones doesn't fit the bill. If you defined an
+index for a given query attribute, it will be used to optimize the query
+execution and avoid unnecessary deserialization.
 
-Let's assume we have a `NamedMap` in which we're storing `string` keys and some objects with the structure of:
+See the utility class `Filters <api_reference.html#filters>`_ for the
+filters supported out-of-the-box by this client.
 
-.. code-block:: javascript
+The following example demonstrates various querying operations
+against a `NamedMap`:
 
-    {
-      "name"    : string,
-      "age"     : number,
-      "hobbies" : [] // of string
-    }
+.. literalinclude:: ../examples/filters.py
+    :language: python
+    :emphasize-lines: 40-41, 46, 50, 55
+    :linenos:
 
-First, let's insert a few objects:
-
-.. code-block:: python
-
-    await map.put("0001", {"name": "Bill Smith", "age": 38, "hobbies": ["gardening", "painting"]})
-    await map.put("0002", {"name": "Fred Jones", "age": 56, "hobbies": ["racing", "golf"]})
-    await map.put("0003", {"name": "Jane Doe", "age": 48, "hobbies": ["gardening", "photography"]})
-
-Using a filter, we can limit the result set returned by the map:
-
-.. code-block:: python
-
-    from coherence import NamedMap, Session, Filters
-    import asyncio
-
-        # ...
-
-        await map.entries(Filters.greater("age", 40))
-        # [{key: "0002", value: {"name": "Fred Jones"...}}, {key: "0002", value: {"name": "Jane Doe"...}}]
-
-        await map.keys(Filters.contains("hobbies", "gardening"))
-        # ["0001", "0003"]
-
-        await map.values(Filters.negate(Filters.array_contains("hobbies", "gardening")))
-        # [{"name": "Fred Jones", "age": 56, "hobbies": ["racing", "golf"]}]
+* Lines 40-41 - insert twenty random Hobbits
+* Line 46 - find all Hobbits, including their associated key, between the age of 17 and 21
+* Line 50 - find all Hobbits, including their associated key, between the age of 17 and 30 that live in Hobbiton
+* Line 55 - find all Hobbits, including their associated key, between the age of 17 and 25 that live in Hobbiton or Frogmorton

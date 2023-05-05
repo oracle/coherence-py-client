@@ -6,59 +6,17 @@
 The Basics
 ==========
 
-he map (`NamedMap`) and cache (`NamedCache`) implementations provide the same basic features as the Map provided
-by Python except for the following differences:
+`NamedMap <api_reference.html#namedmap>`_ and `NamedCache <api_reference.html#namedcache>`_ are `dict`-like structures allowing users
+to store data within a remote `Coherence <https://coherence.community/>`_ cluster.
 
-* key equality isn't restricted to reference equality
-* insertion order is not maintained
-* `set()` calls cannot be chained because of the asynchronous nature of the API
+The following is an example of using a `NamedMap` to `store`, `get`, and
+`remove` simple keys and values:
 
-.. note::
-    The only difference between `NamedCache` and `NamedMap` is that the `NamedCache` allows associating a `time-to-live` on the cache entry, while `NamedMap` does not
+.. literalinclude:: ../examples/basics.py
+    :language: python
+    :emphasize-lines: 17, 19, 21-34
+    :linenos:
 
-For the following examples, let's assume that we have a Map defined in Coherence named `Test`.
-To get access to the map from the client:
-
-.. code-block:: python
-
-    from coherence import NamedMap, Session
-    import asyncio
-
-        # create a new Session to the Coherence server
-        session: Session = Session(None)
-        # create or get a map named Test from the session
-        map: NamedMap = session.get_map("Test")
-
-Once we have a handle to our map, we can invoke the same basic operations in Python:
-
-.. code-block:: python
-
-    await map.size()
-    # returns 0
-
-    await map.put("key1", "value1")
-    await map.put("key2", "value2")
-
-    await map.size()
-    # returns 2
-
-    await map.get("key1")
-    # returns "value1"
-
-    await map.get("key2")
-    # returns "value2"
-
-    await map.contains_key("key2")
-    # returns true
-
-    await map.contains_key("key3")
-    # returns false
-
-    await map.keys()
-    # ["key1", "key2"]
-
-    await map.values()
-    # ["value1", "value2"]
-
-    await map.entries()
-    # [{key: "key1", value: "value1"}, {key: "key2", value: "value2"}]
+* Line 17 - Create a new `Session` that will connect to `localhost:1408`.  See the :doc:`Sessions <sessions>` documentation for more details.
+* Line 50 - Obtain a `NamedMap` identified by `my-map` from the Session
+* Lines 21-34 - Various CRUD operations against the NamedMap such as `get() <api_reference.html#coherence.NamedMap.get>`_, `put() <api_reference.html#coherence.NamedMap.put>`_, and `remote() <api_reference.html#coherence.NamedMap.remove>`_

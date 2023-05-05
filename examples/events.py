@@ -38,7 +38,7 @@ async def do_run() -> None:
         await namedMap.destroy()
         await asyncio.sleep(1)
 
-        print("\n\nNamedMap eventy events")
+        print("\n\nNamedMap entry events")
 
         namedMap = await session.get_map("listeners-map")
 

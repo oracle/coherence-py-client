@@ -6,32 +6,26 @@
 Entry Processing
 ================
 
-An entry processor allows mutation of map entries in-place within the cluster instead of bringing the entire object
-to the client, updating, and pushing the value back.  See the `documentation <https://oracle.github.io/coherence/23.03/api/java/index.html>`_ for the processors provided by this client.
+Entry processors are a defining feature of Coherence and provide the ability
+to send the data modification code into the grid and execute it where
+the data is, against one or more entries.  This can not only significantly
+impact how much data needs to be moved over the wire, but it also takes care
+of cluster-wide concurrency control — each entry processor has the exclusive
+access to the entry it is processing for the duration of its execution.
 
-Assume the same set of keys and values are present from the filtering and aggregation examples:
+See the utility class `Processors <api_reference.html#processors>`_ for the
+entry processors supported out-of-the-box by this client.
 
-.. code-block:: python
+The following example demonstrates various entry processing operations
+against a `NamedMap`:
 
-    from coherence import NamedMap, Session, Filters, Aggregators, Processors
-    import asyncio
+.. literalinclude:: ../examples/processors.py
+    :language: python
+    :emphasize-lines: 37, 44, 51, 57-58, 62
+    :linenos:
 
-        # ...
-
-        # targeting a specific entry
-        await map.invoke("0001", Processors.extract("age"))
-        # returns: 38
-
-        # targeting all entries
-        await map.invoke_all(Processors.extract("age"))
-        # returns: [["0001", 38], ["0002", 56], ["0003", 48]]
-
-        # incrementing a number 'in-place'
-        await map.invoke_all(Filters.greater("age", 40), Processors.increment("age", 1))
-        # returns [["0002", 57], ["0003", 49]]
-
-        # update a value 'in-place'
-        await map.invoke("0001", Processors.update("age", 100))
-        # returns true meaning the value was updated
-        await map.get("0001")
-        # the value will reflect the new age value
+* Line 37 - insert a new Hobbit into the `NamedMap`
+* Line 44 - invoke an entry processor to update the age of the inserted Hobbit
+* Line 51 - insert a second Hobbit into the `NamedMap`
+* Lines 57 - 58 - Increment the ages of all Hobbits in the `NamedMap` by 10.  Store the keys of the updated Hobbits
+* Line 62 - get all of the updated Hobbits to display

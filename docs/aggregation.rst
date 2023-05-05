@@ -6,23 +6,25 @@
 Aggregation
 ===========
 
-Coherence provides developers with the ability to process some subset of the entries in a map, resulting in an
-aggregated result. See the `documentation <https://oracle.github.io/coherence/23.03/api/java/index.html>`_ for aggregators provided by this client.
+Sometimes you don't need the actual data objects that are stored within the
+data grid, but the derived, calculated result based on them. This is where
+Coherence aggregation features come in handy.
 
-Assume the same set of keys and values are present from the filtering example:
+Aggregations can be executed against the whole data set, or they can be
+limited to a subset of the data using a query or a key set.  See the utility
+class `Aggregators <api_reference.html#aggregators>`_ for the aggregators
+supported out-of-the-box by this client.
 
-.. code-block:: python
+The following example demonstrates various aggregation operations against
+a `NamedMap`:
 
-    from coherence import NamedMap, Session, Filters, Aggregators
-    import asyncio
+.. literalinclude:: ../examples/aggregators.py
+    :language: python
+    :emphasize-lines: 47, 50, 53, 56, 60
+    :linenos:
 
-        # ...
-
-        await map.aggregate(Aggregators.average("age"))
-        # 47.3
-
-        await map.aggregate(Aggregators.sum("age"))
-        # 142
-
-        await map.aggregate(Filters.greater("age", 40), Aggregators.count())
-        # 2
+* Line 47 - Returns a list of distinct hobbies across all entries
+* Line 50 - Returns a count of all Hobbits
+* Line 53 - Returns a count of all Hobbits over age 40
+* Line 56 - Returns an average of all Hobbits under the age of 40
+* Line 60 - For each hobby, list the oldest Hobbit for that interest
