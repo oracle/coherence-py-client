@@ -19,4 +19,4 @@ The following is an example of using a `NamedMap` to `store`, `get`, and
 
 * Line 17 - Create a new `Session` that will connect to `localhost:1408`.  See the :doc:`Sessions <sessions>` documentation for more details.
 * Line 50 - Obtain a `NamedMap` identified by `my-map` from the Session
-* Lines 21-34 - Various CRUD operations against the NamedMap such as `get() <api_reference.html#coherence.NamedMap.get>`_, `put() <api_reference.html#coherence.NamedMap.put>`_, and `remote() <api_reference.html#coherence.NamedMap.remove>`_
+* Lines 21-34 - Various CRUD operations against the NamedMap such as `get() <api_reference.html#coherence.NamedMap.get>`_, `put() <api_reference.html#coherence.NamedMap.put>`_, and `remove() <api_reference.html#coherence.NamedMap.remove>`_
