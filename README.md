@@ -5,8 +5,7 @@
 
 <img src=https://oracle.github.io/coherence/assets/images/logo-red.png width="30%"><img>
 
-The Coherence Python Client allows Python applications to act as cache clients to an Oracle Coherence cluster using
-the Google gRPC framework as the network transport.
+The Coherence Python Client allows Python applications to act as cache clients to an Oracle Coherence cluster using gRPC as the network transport.
 
 #### Features
 * Familiar Map-like interface for manipulating cache entries including but not limited to:
@@ -20,8 +19,9 @@ the Google gRPC framework as the network transport.
 * Support for storing Python objects as JSON as well as the ability to serialize to Java objects on the server for access from other Coherence language API's
 
 #### Requirements
-* [Coherence CE](https://github.com/oracle/coherence) 22.06 or later (or equivalent non-open source editions) with a configured [gRPCProxy](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html).
+* [Coherence CE](https://github.com/oracle/coherence) 22.06.4+ or Coherence 14.1.1.2206.4+ Commercial edition with a configured [gRPCProxy](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html).
 * Python 3.11.x
+
 
 #### Starting a Coherence Cluster
 
@@ -36,7 +36,7 @@ docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:22.06.4
 ## Installation
 
 ```bash
-python3 -m pip install coherence
+python3 -m pip install coherence-client
 ```
 
 ## Documentation

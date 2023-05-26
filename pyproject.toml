@@ -2,10 +2,13 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 [tool.poetry]
-name = "coherence"
+name = "coherence-client"
 version = "1.0b1"
 description = """The Coherence Python Client allows Python applications to act as cache clients to a \
 Coherence Cluster using Google's gRPC framework as the network transport."""
+packages = [
+    { include = "coherence", from = "./src"},
+]
 readme = "README.md"
 authors = ["Oracle <dhiru.pandey@oracle.com>"]
 homepage = "https://github.com/oracle/coherenc-py-client"
