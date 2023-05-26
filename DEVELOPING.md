@@ -9,8 +9,8 @@ http://oss.oracle.com/licenses/upl.
 
 ### Pre-Requisites
 * Use `bash` shell
-* [pyenv](https://github.com/pyenv/pyenv) version 2.2.4 or later
-* [poetry](https://github.com/python-poetry/poetry) version 1.1.13 or later
+* [pyenv](https://github.com/pyenv/pyenv) version 2.3.x or later
+* [poetry](https://github.com/python-poetry/poetry) version 1.5.x or later
 
 ### Project Structure
 * `bin` - various shell scripts
@@ -19,18 +19,18 @@ http://oss.oracle.com/licenses/upl.
 * `tests` - contains the library test cases in plain Python
 
 ### Setup working environment
-1. Install Python version 3.10.1
+1. Install Python version 3.11.3
 
-    ```pyenv install 3.10.1```
+    ```pyenv install 3.11.3```
 
 2. Checkout the source from GitHub and change directory to the project root dir
 
-3. Set pyenv local version for this project to 3.10.1
+3. Set pyenv local version for this project to  3.11.3
 
-    ```pyenv local 3.10.1```
-4. Set poetry to use python 3.10.1
+    ```pyenv local  3.11.3```
+4. Set poetry to use python  3.11.3
 
-    ```poetry env use 3.10.1```
+    ```poetry env use 3.11.3```
 5. Install all the required dependencies using poetry
 
     ```poetry install```

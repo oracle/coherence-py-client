@@ -12,7 +12,7 @@ import pytest
 import pytest_asyncio
 
 from coherence import Filters, MapEntry, NamedCache, Options, Session, TlsOptions
-from coherence.event import MapLifecycleEvent, SessionLifecycleEvent
+from coherence.event import MapLifecycleEvent, SessionLifecycleEvent, MapListener, MapEvent
 from coherence.extractor import ChainedExtractor, UniversalExtractor
 from coherence.processor import ExtractorProcessor
 from tests.address import Address
@@ -687,6 +687,35 @@ async def test_session_release_event() -> None:
         assert cache.released
         assert not cache.destroyed
         assert not cache.active
+    finally:
+        await session.close()
+
+@pytest.mark.asyncio
+async def test_session_stuff() -> None:
+    session: Session = get_session()
+    print('Getting cache ...', flush=True)
+    cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
+
+    def callback(event: MapEvent[str, str]):
+        print(event, flush=True)
+
+    listener: MapListener[str, str] = MapListener()
+    listener.on_any(callback)
+
+    print("Adding listener ...", flush=True)
+    await cache.add_map_listener(listener)
+
+    print("Inserting values ...", flush=True)
+    for i in range(10000000):
+        print("Inserting " + str(i) + " ...")
+        try:
+            await cache.put(str(i), str(i))
+        except:
+            print("Failed to put " + str(i))
+            await cache.put(str(i), str(i))
+
+    try:
+        pass
     finally:
         await session.close()
 

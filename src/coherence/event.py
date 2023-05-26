@@ -607,6 +607,7 @@ class _MapEventsManager(Generic[K, V]):
         self._serializer = serializer
         self._emitter = emitter
         self._map_name = named_map.name
+        self._session = session
 
         self._key_map = {}
         self._filter_map = {}
@@ -663,7 +664,8 @@ class _MapEventsManager(Generic[K, V]):
             self._event_stream = event_stream
             read_task: Task[None] = asyncio.create_task(self._handle_response())
             self._background_tasks.add(read_task)
-            await self._stream_waiter.wait()
+            async with asyncio.timeout(self._session.options.request_timeout_seconds):
+                await self._stream_waiter.wait()
 
         return self._event_stream
 

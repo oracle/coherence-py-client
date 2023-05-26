@@ -21,7 +21,7 @@ the Google gRPC framework as the network transport.
 
 #### Requirements
 * [Coherence CE](https://github.com/oracle/coherence) 22.06 or later (or equivalent non-open source editions) with a configured [gRPCProxy](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html).
-* Python 3.10.1
+* Python 3.11.x
 
 #### Starting a Coherence Cluster
 

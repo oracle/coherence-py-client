@@ -1169,7 +1169,10 @@ class Session:
             if c is None:
                 c = NamedCacheClient(name, self, serializer)
                 # initialize the event stream now to ensure lifecycle listeners will work as expected
-                await c._events_manager._ensure_stream()
+                try:
+                    await c._events_manager._ensure_stream()
+                except TimeoutError:
+                    raise TimeoutError('Unable to establish connection to [' + self.options.address + ']')
                 self._setup_event_handlers(c)
                 self._caches.update({name: c})
             return c
