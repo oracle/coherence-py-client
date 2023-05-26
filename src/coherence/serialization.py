@@ -111,7 +111,7 @@ class JavaProxyPickler(jsonpickle.Pickler):
 
         return super()._flatten(obj)
 
-    def _getstate(self, obj, data):
+    def _getstate(self, obj: Any, data: Any) -> Any:
         state = self._flatten(obj)
 
         if state is not None:

@@ -1212,7 +1212,7 @@ class Session:
                 try:
                     await c._events_manager._ensure_stream()
                 except TimeoutError:
-                    raise TimeoutError('Unable to establish connection to [' + self.options.address + ']')
+                    raise TimeoutError("Unable to establish connection to [" + self.options.address + "]")
                 self._setup_event_handlers(c)
                 self._caches.update({name: c})
             return c
