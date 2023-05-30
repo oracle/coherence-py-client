@@ -338,7 +338,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
     @abc.abstractmethod
     async def is_empty(self) -> bool:
         """
-        Returns`true` if this map contains no key-value mappings.
+        Returns `true` if this map contains no key-value mappings.
 
         :return: `true` if this map contains no key-value mappings.
         """

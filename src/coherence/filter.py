@@ -131,8 +131,9 @@ class GreaterFilter(ComparisonFilter):
         """
         Construct a `GreaterFilter` for testing `Greater` condition.
 
-        :param extractor: the {@link extractor.ValueExtractor} to use by this :class:`coherence.filter.Filter` or the
-         name of the method to invoke via reflection
+        :param extractor: the :class:`coherence.extractor.ValueExtractor` to use
+         by this :class:`coherence.filter.Filter` or the name of the method to
+         invoke via reflection
         :param value: the object to compare the result with
         """
         super().__init__(extractor, value)
@@ -436,7 +437,7 @@ class LikeFilter(ComparisonFilter):
 
         Construct a `LikeFilter` for pattern match.
 
-        :param extractor_or_method: the {@link extractor.ValueExtractor} to use by this
+        :param extractor_or_method: the :class:`coherence.extractor.ValueExtractor` to use by this
          :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
         :param pattern: the string pattern to compare the result with
         :param escape_char: the escape character for escaping `%` and `_`
@@ -716,68 +717,96 @@ class Filters:
     @staticmethod
     def greater(extractor_or_method: ExtractorExpression[T, E], value: Any) -> Filter:
         """
+        Returns instance of :class:`coherence.filter.GreaterFilter` to test
+        `Greater` condition
 
-        :param extractor_or_method:
-        :param value:
-        :return:
+        :param extractor_or_method: the :class:`coherence.extractor.ValueExtractor` to use
+         by this :class:`coherence.filter.Filter` or the name of the method to
+         invoke via reflection
+        :param value: the object to compare the result with
+        :return: an instance of :class:`coherence.filter.GreaterFilter`
         """
         return GreaterFilter(extractor_or_method, value)
 
     @staticmethod
     def greater_equals(extractor_or_method: ExtractorExpression[T, E], value: Any) -> Filter:
         """
+        Returns instance of :class:`coherence.filter.GreaterEqualsFilter` to
+        test `Greater or Equal` condition
 
-        :param extractor_or_method:
-        :param value:
-        :return:
+        :param extractor_or_method: the :class:`coherence.extractor.ValueExtractor` to use
+         by this :class:`coherence.filter.Filter` or the name of the method to
+         invoke via reflection
+        :param value: the object to compare the result with
+        :return: an instance of :class:`coherence.filter.GreaterEqualsFilter`
         """
         return GreaterEqualsFilter(extractor_or_method, value)
 
     @staticmethod
     def is_in(extractor_or_method: ExtractorExpression[T, E], values: Set[Any]) -> Filter:
         """
+        Returns instance of :class:`coherence.filter.InFilter` to check whether
+         the result of a method invocation belongs to a predefined set of values.
 
-        :param extractor_or_method:
-        :param values:
-        :return:
+        :param extractor_or_method: the :class:`coherence.extractor.ValueExtractor` to use
+         by this :class:`coherence.filter.Filter` or the name of the method to
+         invoke via reflection
+        :param values: the Set of values that a Collection or array is tested to contain
+        :return: an instance of :class:`coherence.filter.InFilter`
         """
         return InFilter(extractor_or_method, values)
 
     @staticmethod
     def is_not_none(extractor_or_method: ExtractorExpression[T, E]) -> Filter:
         """
+        Returns instance of :class:`coherence.filter.IsNotNoneFilter` for
+        testing inequality to `None`.
 
-        :param extractor_or_method:
-        :return:
+        :param extractor_or_method: the :class:`coherence.extractor.ValueExtractor` to use
+         by this :class:`coherence.filter.Filter` or the name of the method to
+         invoke via reflection
+        :return: an instance of :class:`coherence.filter.IsNotNoneFilter`
         """
         return IsNotNoneFilter(extractor_or_method)
 
     @staticmethod
     def is_none(extractor_or_method: ExtractorExpression[T, E]) -> Filter:
         """
+        Returns instance of :class:`coherence.filter.IsNoneFilter` for
+        testing equality to `None`.
 
-        :param extractor_or_method:
-        :return:
+        :param extractor_or_method: the :class:`coherence.extractor.ValueExtractor` to use
+         by this :class:`coherence.filter.Filter` or the name of the method to
+         invoke via reflection
+        :return: an instance of :class:`coherence.filter.IsNoneFilter`
         """
         return IsNoneFilter(extractor_or_method)
 
     @staticmethod
     def less(extractor_or_method: ExtractorExpression[T, E], value: Any) -> Filter:
         """
+        Returns instance of :class:`coherence.filter.LessFilter` for testing
+        `Less` condition.
 
-        :param extractor_or_method:
-        :param value:
-        :return:
+        :param extractor_or_method: the :class:`coherence.extractor.ValueExtractor` to use
+         by this :class:`coherence.filter.Filter` or the name of the method to
+         invoke via reflection
+        :param value: the object to compare the result with
+        :return: an instance of :class:`coherence.filter.LessFilter`
         """
         return LessFilter(extractor_or_method, value)
 
     @staticmethod
     def less_equals(extractor_or_method: ExtractorExpression[T, E], value: Any) -> Filter:
         """
+        Returns instance of :class:`coherence.filter.LessEqualsFilter` for testing
+        `Less or Equals` condition.
 
-        :param extractor_or_method:
-        :param value:
-        :return:
+        :param extractor_or_method: the :class:`coherence.extractor.ValueExtractor` to use
+         by this :class:`coherence.filter.Filter` or the name of the method to
+         invoke via reflection
+        :param value: the object to compare the result with
+        :return: an instance of :class:`coherence.filter.LessEqualsFilter`
         """
         return LessEqualsFilter(extractor_or_method, value)
 
@@ -786,56 +815,73 @@ class Filters:
         extractor_or_method: ExtractorExpression[T, E], pattern: str, escape: str = "0", ignore_case: bool = False
     ) -> Filter:
         """
+        Returns instance of :class:`coherence.filter.LikeFilter` for for pattern match
 
-        :param extractor_or_method:
-        :param pattern:
-        :param escape:
-        :param ignore_case:
-        :return:
+        :param extractor_or_method: the :class:`coherence.extractor.ValueExtractor` to use by this
+         :class:`coherence.filter.Filter` or the name of the method to invoke via reflection
+        :param pattern: the string pattern to compare the result with
+        :param escape: the escape character for escaping `%` and `_`
+        :param ignore_case: `true` to be case-insensitive
+        :return: an instance of :class:`coherence.filter.LikeFilter`
         """
         return LikeFilter(extractor_or_method, pattern, escape, ignore_case)
 
     @staticmethod
     def negate(filter: Filter) -> Filter:
         """
+        Returns instance of :class:`coherence.filter.NotFilter` which negates
+         the results of another filter.
 
-        :param filter:
-        :return:
+        :param filter: The Filter whose results are negated by this filter.
+        :return: an instance of :class:`coherence.filter.NotFilter`
         """
         return NotFilter(filter)
 
     @staticmethod
     def never() -> Filter:
         """
+        Returns instance of :class:`coherence.filter.NeverFilter` which always
+        evaluates to `false`.
 
-        :return:
+        :return: an instance of :class:`coherence.filter.NeverFilter`
         """
         return NeverFilter()
 
     @staticmethod
     def not_equals(extractor_or_method: ExtractorExpression[T, E], value: Any) -> Filter:
         """
+        Returns instance of :class:`coherence.filter.NotEqualsFilter` for testing
+         inequality.
 
-        :param extractor_or_method:
-        :param value:
-        :return:
+        :param extractor_or_method: the :class:`coherence.extractor.ValueExtractor` to use
+         by this :class:`coherence.filter.Filter` or the name of the method to
+         invoke via reflection
+        :param value: the object to compare the result with
+        :return: an instance of :class:`coherence.filter.NotEqualsFilter`
         """
         return NotEqualsFilter(extractor_or_method, value)
 
     @staticmethod
     def present() -> Filter:
         """
+        Returns instance of :class:`coherence.filter.PresentFilter` which
+         returns true for entries that currently exist in a map.
 
-        :return:
+        :return: an instance of :class:`coherence.filter.PresentFilter`
         """
         return PresentFilter()
 
     @staticmethod
     def regex(extractor_or_method: ExtractorExpression[T, E], regex: str) -> Filter:
         """
+        Returns instance of :class:`coherence.filter.RegexFilter` which uses
+         the regular expression pattern match defined by the Java's
+         `String.matches` contract.
 
-        :param extractor_or_method:
-        :param regex:
-        :return:
+        :param extractor_or_method: the :class:`coherence.extractor.ValueExtractor` to use
+         by this :class:`coherence.filter.Filter` or the name of the method to
+         invoke via reflection
+        :param regex: the regular expression to match the result with
+        :return: an instance of :class:`coherence.filter.RegexFilter`
         """
         return RegexFilter(extractor_or_method, regex)
