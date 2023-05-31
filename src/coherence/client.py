@@ -949,9 +949,10 @@ class Options:
             time_out: float
             try:
                 time_out = float(timeout)
-                self._request_timeout_seconds = time_out
             except ValueError:
                 COH_LOG.warning("The timeout value of [%s] cannot be converted to a float", Options.ENV_REQUEST_TIMEOUT)
+
+            self._request_timeout_seconds = time_out
         else:
             self._request_timeout_seconds = request_timeout_seconds
 
