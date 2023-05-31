@@ -1113,7 +1113,6 @@ class Session:
                     _InterceptorStreamStream(self),
                 ],
             )
-            self._channel.get_state(True)
         else:
             creds: grpc.ChannelCredentials = _get_channel_creds(self._session_options.tls_options)
             self._channel = grpc.aio.secure_channel(
@@ -1133,6 +1132,7 @@ class Session:
         watch_task: Task[None] = asyncio.create_task(watch_channel_state(self))
         self._tasks.add(watch_task)
         self._emitter: EventEmitter = EventEmitter()
+        self._channel.get_state(True)  # trigger connect
 
     @staticmethod
     async def create(session_options: Optional[Options] = None) -> Session:
