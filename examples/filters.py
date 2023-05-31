@@ -28,7 +28,7 @@ async def do_run() -> None:
 
     :return: None
     """
-    session: Session = Session()
+    session: Session = await Session.create()
     try:
         homes: List[str] = ["Hobbiton", "Buckland", "Frogmorton", "Stock"]
         namedMap: NamedMap[int, Hobbit] = await session.get_map("hobbits")

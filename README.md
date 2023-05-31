@@ -57,7 +57,7 @@ import asyncio
 async def run_test():
 
     # create a new Session to the Coherence server
-    session: Session = Session(None)
+    session: Session = await Session.create()
 
     # create a new NamedCache with key of string|int and value of string|int
     cache: NamedCache[str, str|int] = await session.get_cache("test")

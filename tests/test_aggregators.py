@@ -24,14 +24,14 @@ from coherence.serialization import JSONSerializer
 from tests.person import Person
 
 
-def get_session() -> Session:
+async def get_session() -> Session:
     default_address: Final[str] = "localhost:1408"
     default_scope: Final[str] = ""
     default_request_timeout: Final[float] = 30.0
     default_format: Final[str] = "json"
 
     run_secure: Final[str] = "RUN_SECURE"
-    session: Session = Session(None)
+    session: Session = await Session.create()
 
     if run_secure in os.environ:
         # Default TlsOptions constructor will pick up the SSL Certs and
@@ -53,7 +53,7 @@ def get_session() -> Session:
 
 @pytest_asyncio.fixture
 async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
-    session: Session = get_session()
+    session: Session = await get_session()
     cache: NamedCache[Any, Any] = await session.get_cache("test")
 
     await cache.put(Person.Pat().name, Person.Pat())

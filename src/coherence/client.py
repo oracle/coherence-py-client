@@ -6,8 +6,9 @@ from __future__ import annotations
 
 import abc
 import asyncio
+import logging
 import os
-from asyncio import Task
+from asyncio import Condition, Task
 from threading import Lock
 from typing import (
     Any,
@@ -45,6 +46,8 @@ V = TypeVar("V")
 R = TypeVar("R")
 T = TypeVar("T")
 
+COH_LOG = logging.getLogger("coherence")
+
 
 @no_type_check
 def _pre_call_cache(func):
@@ -57,6 +60,9 @@ def _pre_call_cache(func):
     async def inner_async(self, *args, **kwargs):
         if not self.active:
             raise Exception("Cache [{}] has been {}.".format(self.name, "released" if self.released else "destroyed"))
+
+        # noinspection PyProtectedMember
+        await self._session._wait_for_active()
 
         return await func(self, *args, **kwargs)
 
@@ -499,6 +505,7 @@ class NamedCacheClient(NamedCache[K, V]):
         self._internal_emitter: EventEmitter = EventEmitter()
         self._destroyed: bool = False
         self._released: bool = False
+        self._session: Session = session
         from .event import _MapEventsManager
 
         self._setup_event_handlers()
@@ -743,16 +750,18 @@ class NamedCacheClient(NamedCache[K, V]):
         # noinspection PyProtectedMember
         def on_destroyed(name: str) -> None:
             if name == cache_name:
-                this._events_manager._close()
-                this._destroyed = True
-                emitter.emit(MapLifecycleEvent.DESTROYED.value, name)
+                if not this.destroyed:
+                    this._events_manager._close()
+                    this._destroyed = True
+                    emitter.emit(MapLifecycleEvent.DESTROYED.value, name)
 
         # noinspection PyProtectedMember
         def on_released(name: str) -> None:
             if name == cache_name:
-                this._events_manager._close()
-                this._released = True
-                emitter.emit(MapLifecycleEvent.RELEASED.value, name)
+                if not this.released:
+                    this._events_manager._close()
+                    this._released = True
+                    emitter.emit(MapLifecycleEvent.RELEASED.value, name)
 
         def on_truncated(name: str) -> None:
             if name == cache_name:
@@ -922,7 +931,7 @@ class Options:
           corresponding `ConfigurableCacheFactory` on the server.
         :param request_timeout_seconds: Defines the request timeout, in `seconds`, that will be applied to each
           remote call. If not explicitly set, this defaults to :func:`coherence.client.Options.DEFAULT_REQUEST_TIMEOUT`.
-          See also See also :func:`coherence.client.Options.ENV_REQUEST_TIMEOUT`
+          See also :func:`coherence.client.Options.ENV_REQUEST_TIMEOUT`
         :param ser_format: The serialization format.  Currently, this is always `json`
         :param channel_options: The `gRPC` `ChannelOptions`. See
             https://grpc.github.io/grpc/python/glossary.html#term-channel_arguments and
@@ -940,9 +949,9 @@ class Options:
             time_out: float
             try:
                 time_out = float(timeout)
+                self._request_timeout_seconds = time_out
             except ValueError:
-                print(f"The value of {Options.ENV_REQUEST_TIMEOUT} cannot be converted to a float")
-            self._request_timeout_seconds = time_out
+                COH_LOG.warning("The timeout value of [%s] cannot be converted to a float", Options.ENV_REQUEST_TIMEOUT)
         else:
             self._request_timeout_seconds = request_timeout_seconds
 
@@ -1080,6 +1089,8 @@ class Session:
         :param session_options: the provided :func:`coherence.client.Options`
         """
         self._closed: bool = False
+        self._active = False
+        self._active_condition: Condition = Condition()
         self._caches: dict[str, NamedCache[Any, Any]] = dict()
         self._lock: Lock = Lock()
         if session_options is not None:
@@ -1092,7 +1103,7 @@ class Session:
         if self._session_options.tls_options is None:
             self._channel: grpc.aio.Channel = grpc.aio.insecure_channel(
                 self._session_options.address,
-                options=None
+                options=(("grpc.lb_policy_name", "round_robin"),)
                 if self._session_options.channel_options is None
                 else self._session_options.channel_options,
                 interceptors=[
@@ -1102,12 +1113,13 @@ class Session:
                     _InterceptorStreamStream(self),
                 ],
             )
+            self._channel.get_state(True)
         else:
             creds: grpc.ChannelCredentials = _get_channel_creds(self._session_options.tls_options)
             self._channel = grpc.aio.secure_channel(
                 self._session_options.address,
                 creds,
-                options=None
+                options=(("grpc.lb_policy_name", "round_robin"),)
                 if self._session_options.channel_options is None
                 else self._session_options.channel_options,
                 interceptors=[
@@ -1121,6 +1133,12 @@ class Session:
         watch_task: Task[None] = asyncio.create_task(watch_channel_state(self))
         self._tasks.add(watch_task)
         self._emitter: EventEmitter = EventEmitter()
+
+    @staticmethod
+    async def create(session_options: Optional[Options] = None) -> Session:
+        session: Session = Session(session_options)
+        await session._set_active(False)
+        return session
 
     # noinspection PyTypeHints
     @_pre_call_session
@@ -1209,10 +1227,7 @@ class Session:
             if c is None:
                 c = NamedCacheClient(name, self, serializer)
                 # initialize the event stream now to ensure lifecycle listeners will work as expected
-                try:
-                    await c._events_manager._ensure_stream()
-                except TimeoutError:
-                    raise TimeoutError("Unable to establish connection to [" + self.options.address + "]")
+                await c._events_manager._ensure_stream()
                 self._setup_event_handlers(c)
                 self._caches.update({name: c})
             return c
@@ -1239,6 +1254,30 @@ class Session:
                 self._caches.update({name: c})
             return c
 
+    def is_active(self) -> bool:
+        """
+        Returns
+        :return:
+        """
+        return self._active
+
+    async def _set_active(self, active: bool) -> None:
+        self._active = active
+        if self._active:
+            if not self._active_condition.locked():
+                await self._active_condition.acquire()
+            self._active_condition.notify_all()
+            self._active_condition.release()
+        else:
+            await self._active_condition.acquire()
+
+    async def _wait_for_active(self) -> None:
+        if not self.is_active():
+            timeout: float = self._session_options.request_timeout_seconds
+            COH_LOG.debug("Waiting for session to become active; timeout=[%s seconds]", timeout)
+            async with asyncio.timeout(timeout):
+                await self._active_condition.wait()
+
     # noinspection PyUnresolvedReferences
     async def close(self) -> None:
         """
@@ -1250,6 +1289,10 @@ class Session:
             for task in self._tasks:
                 task.cancel()
             self._tasks.clear()
+
+            caches_copy: dict[str, NamedCache[Any, Any]] = self._caches.copy()
+            for cache in caches_copy.values():
+                await cache.destroy()
 
             await self._channel.close()  # TODO: consider grace period?
 
@@ -1345,27 +1388,35 @@ async def watch_channel_state(session: Session) -> None:
     emitter: EventEmitter = session._emitter
     channel: grpc.aio.Channel = session.channel
     first_connect: bool = True
-    connected: bool = False
 
     try:
         while True:
             state: grpc.ChannelConnectivity = channel.get_state(False)
+            COH_LOG.debug("New Channel State [%s]", state)
             match state:
                 case grpc.ChannelConnectivity.SHUTDOWN:
-                    continue  # nothing to do
+                    COH_LOG.info("Session to [%s] terminated", session.options.address)
+                    await session._set_active(False)
                 case grpc.ChannelConnectivity.READY:
-                    if not first_connect and not connected:
-                        await emitter.emit_async(SessionLifecycleEvent.RECONNECTED.value)
-                        connected = True
-                    elif first_connect and not connected:
-                        first_connect = False
-                        connected = True
-                        await emitter.emit_async(SessionLifecycleEvent.CONNECTED.value)
-                case _:
-                    if connected:
-                        await emitter.emit_async(SessionLifecycleEvent.DISCONNECTED.value)
-                        connected = False
+                    if not first_connect and not session.is_active():
+                        COH_LOG.info("Session re-established to [%s]", session.options.address)
 
+                        await emitter.emit_async(SessionLifecycleEvent.RECONNECTED.value)
+                        await session._set_active(True)
+                    elif first_connect and not session.is_active():
+                        COH_LOG.info("Session established to [%s]", session.options.address)
+
+                        first_connect = False
+                        await emitter.emit_async(SessionLifecycleEvent.CONNECTED.value)
+                        await session._set_active(True)
+                case _:
+                    if session.is_active():
+                        COH_LOG.warning("Session to [%s] disconnected; will attempt reconnect", session.options.address)
+
+                        await emitter.emit_async(SessionLifecycleEvent.DISCONNECTED.value)
+                        await session._set_active(False)
+
+            COH_LOG.debug("Waiting for state change ...")
             await channel.wait_for_state_change(state)
     except asyncio.CancelledError:
         return

@@ -11,8 +11,9 @@ import pytest
 import pytest_asyncio
 
 from coherence import Filters, NamedCache, Options, Session, TlsOptions
-from coherence.event import MapEvent, MapEventType, MapListener
+from coherence.event import MapEvent, MapEventType
 from coherence.filter import Filter, LessFilter, MapEventFilter
+from tests import CountingMapListener
 from tests.person import Person
 
 K = TypeVar("K")
@@ -20,175 +21,6 @@ K = TypeVar("K")
 
 V = TypeVar("V")
 """Generic type for cache values"""
-
-
-class CountingMapListener(MapListener[K, V]):
-    """Listener for capturing and storing events for test evaluation."""
-
-    _name: str
-    """The logical name for this listener."""
-
-    _counter: int
-    """The number of events captured between resets."""
-
-    _inserted: List[MapEvent[K, V]]
-    """The captured insert events."""
-
-    _updated: List[MapEvent[K, V]]
-    """The captured update events."""
-
-    _deleted: List[MapEvent[K, V]]
-    """The captured delete events."""
-
-    _order: List[MapEvent[K, V]]
-    """The expected order of events."""
-
-    _debug: bool
-    """Configured via the environment variable DEBUG.  If `true`, verbose listener
-     logging will be enabled."""
-
-    def __init__(self, name: str):
-        """
-        Constructs a new CountingMapListener.
-        This listener will record the number of insert, update, and delete events
-        as well as maintaining the order of received events.
-        :param name:  the logical name of this listener (used for debug display purposes)
-        """
-        super().__init__()
-        self._name = name
-        self._inserted = []
-        self._updated = []
-        self._deleted = []
-        self._order = []
-        self._debug = bool(os.getenv("DEBUG", True))
-        self._counter = 0
-
-        self.on_inserted(self._handle_inserted)
-        self.on_updated(self._handle_updated)
-        self.on_deleted(self._handle_deleted)
-
-    async def wait_for(self, event_count: int, timeout: float = 10.0) -> None:
-        """
-        Wait for the specified number of events to occur.
-        :param event_count:  the expected number of events
-        :param timeout:      the maximum time to wait for all events (defaults to 10.0)
-        """
-        await asyncio.wait_for(asyncio.create_task(self._wait_counter(event_count)), timeout)
-
-    def reset(self) -> None:
-        """Resets the listener to its initial state."""
-        self._counter = 0
-        self._inserted = []
-        self._updated = []
-        self._deleted = []
-        self._order = []
-
-    @property
-    def inserted(self) -> List[MapEvent[K, V]]:
-        """
-        Returns the list of captured insert MapEvents.
-        :return: the list of captured insert MapEvents
-        """
-        return self._inserted
-
-    @property
-    def updated(self) -> List[MapEvent[K, V]]:
-        """
-        Returns the list of captured update MapEvents.
-        :return: the list of captured update MapEvents
-        """
-        return self._updated
-
-    @property
-    def deleted(self) -> List[MapEvent[K, V]]:
-        """
-        Returns the list of captured delete MapEvents.
-        :return: the list of captured delete MapEvents
-        """
-        return self._deleted
-
-    @property
-    def order(self) -> List[MapEvent[K, V]]:
-        """
-        Returns the list of all captured MapEvents in the order received.
-        :return: the list of all captured MapEvents in the order received
-        """
-        return self._order
-
-    @property
-    def count(self) -> int:
-        """
-        Returns the total number of events captured.
-        :return: the total number of events captured
-        """
-        return self._counter
-
-    @property
-    def name(self) -> str:
-        """
-        Returns the logical name of this listener.
-        :return:  the logical name of this listener
-        """
-        return self._name
-
-    @property
-    def debug(self) -> bool:
-        """
-        Returns `True` if debug  is enabled, otherwise `False`
-        :return: `True` if debug  is enabled, otherwise `False`
-        """
-        return self._debug
-
-    def _handle_inserted(self, event: MapEvent[K, V]) -> None:
-        """
-        Records the insert event.
-        :param event:  the insert event
-        """
-        self._handle_common(event)
-        self.inserted.append(event)
-
-    def _handle_updated(self, event: MapEvent[K, V]) -> None:
-        """
-        Records the update event.
-        :param event:  the update event
-        """
-        self._handle_common(event)
-        self.updated.append(event)
-
-    def _handle_deleted(self, event: MapEvent[K, V]) -> None:
-        """
-        Records the delete event.
-        :param event:  the delete event
-        """
-        self._handle_common(event)
-        self.deleted.append(event)
-
-    def _handle_common(self, event: MapEvent[K, V]) -> None:
-        """
-        Common logic for all events.
-        :param event:  the event
-        """
-        self.order.append(event)
-        self._counter += 1
-        self._log(event)
-
-    def _log(self, event: MapEvent[K, V]) -> None:
-        """
-        Logs the event if debug logging is enabled.
-        :param event:  the event to log
-        """
-        if self.debug:
-            print(f"[{self.name}] Received event [{event}]")
-
-    async def _wait_counter(self, event_count: int) -> None:
-        """
-        Loops waiting for the internal counter to equal `event_count`.
-        :param event_count:  the number of expected events
-        """
-        while True:
-            if self.count == event_count:
-                return
-            await asyncio.sleep(0)
 
 
 class ValidateEvent(Generic[K, V]):
@@ -458,14 +290,14 @@ async def _run_basic_test(
     expected2.validate(listener)
 
 
-def get_session() -> Session:
+async def get_session() -> Session:
     default_address: Final[str] = "localhost:1408"
     default_scope: Final[str] = ""
     default_request_timeout: Final[float] = 30.0
     default_format: Final[str] = "json"
 
     run_secure: Final[str] = "RUN_SECURE"
-    session: Session = Session(None)
+    session: Session = await Session.create()
 
     if run_secure in os.environ:
         # Default TlsOptions constructor will pick up the SSL Certs and
@@ -480,7 +312,7 @@ def get_session() -> Session:
         options: Options = Options(default_address, default_scope, default_request_timeout, default_format)
         options.tls_options = tls_options
         options.channel_options = (("grpc.ssl_target_name_override", "Star-Lord"),)
-        session = Session(options)
+        session = await Session.create(options)
 
     return session
 
@@ -490,7 +322,7 @@ async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
     """
     Fixture for test setup/teardown.
     """
-    session: Session = get_session()
+    session: Session = await get_session()
     cache: NamedCache[Any, Any] = await session.get_cache("test-" + str(time.time_ns()))
 
     yield cache
