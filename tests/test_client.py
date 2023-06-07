@@ -4,6 +4,7 @@
 
 import asyncio
 import logging
+import logging.config
 import os
 import urllib
 import urllib.request
@@ -54,7 +55,7 @@ async def get_session() -> Session:
     default_format: Final[str] = "json"
 
     run_secure: Final[str] = "RUN_SECURE"
-    session: Session = await Session.create(None)
+    session: Session
 
     if run_secure in os.environ:
         # Default TlsOptions constructor will pick up the SSL Certs and
@@ -69,6 +70,8 @@ async def get_session() -> Session:
         options: Options = Options(default_address, default_scope, default_request_timeout, default_format)
         options.tls_options = tls_options
         options.channel_options = (("grpc.ssl_target_name_override", "Star-Lord"),)
+        session = await Session.create(options)
+    else:
         session = await Session.create()
 
     return session

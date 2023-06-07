@@ -6,6 +6,8 @@ import logging.config
 import os
 from typing import List, TypeVar
 
+import pytest
+
 from coherence.event import MapEvent, MapListener
 
 K = TypeVar("K")
@@ -15,9 +17,8 @@ V = TypeVar("V")
 """Generic type for cache values"""
 
 # logging configuration for tests
-# logging.config.fileConfig(fname='logging.conf')
-
-COH_LOG = logging.getLogger("coherence-test")
+logging.config.fileConfig(fname='tests/logging.conf', disable_existing_loggers=False)
+COH_TEST_LOG = logging.getLogger("coherence-test")
 
 
 class CountingMapListener(MapListener[K, V]):
@@ -156,7 +157,7 @@ class CountingMapListener(MapListener[K, V]):
         """
         self.order.append(event)
         self._counter += 1
-        COH_LOG.debug("[%s] Received event [%s]", self.name, event)
+        COH_TEST_LOG.debug("[%s] Received event [%s]", self.name, event)
 
     async def _wait_counter(self, event_count: int) -> None:
         """

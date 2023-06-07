@@ -1104,7 +1104,7 @@ class Session:
         if self._session_options.tls_options is None:
             self._channel: grpc.aio.Channel = grpc.aio.insecure_channel(
                 self._session_options.address,
-                options=(("grpc.lb_policy_name", "round_robin"),)
+                options=None
                 if self._session_options.channel_options is None
                 else self._session_options.channel_options,
                 interceptors=[
@@ -1119,7 +1119,7 @@ class Session:
             self._channel = grpc.aio.secure_channel(
                 self._session_options.address,
                 creds,
-                options=(("grpc.lb_policy_name", "round_robin"),)
+                options=None
                 if self._session_options.channel_options is None
                 else self._session_options.channel_options,
                 interceptors=[
@@ -1389,11 +1389,12 @@ async def watch_channel_state(session: Session) -> None:
     emitter: EventEmitter = session._emitter
     channel: grpc.aio.Channel = session.channel
     first_connect: bool = True
+    last_state: grpc.ChannelConnectivity = grpc.ChannelConnectivity.IDLE
 
     try:
         while True:
             state: grpc.ChannelConnectivity = channel.get_state(False)
-            COH_LOG.debug("New Channel State [%s]", state)
+            COH_LOG.debug("New Channel State: transitioning from [%s] to [%s]", last_state, state)
             match state:
                 case grpc.ChannelConnectivity.SHUTDOWN:
                     COH_LOG.info("Session to [%s] terminated", session.options.address)
@@ -1417,8 +1418,8 @@ async def watch_channel_state(session: Session) -> None:
                         await emitter.emit_async(SessionLifecycleEvent.DISCONNECTED.value)
                         await session._set_active(False)
 
-            COH_LOG.debug("Waiting for state change ...")
-            await channel.wait_for_state_change(state)
+            COH_LOG.debug("Waiting for state change from [%s]", state)
+            await channel.wait_for_state_change(channel.get_state(True))
     except asyncio.CancelledError:
         return
 
