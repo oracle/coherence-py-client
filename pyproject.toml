@@ -21,24 +21,24 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "~3.10"
-protobuf = "~4.21"
-grpcio = "~1.51"
-grpcio-tools = "~1.51"
-jsonpickle = "~2.2"
+python = "~3.11"
+protobuf = "~4.23"
+grpcio = "~1.54"
+grpcio-tools = "~1.54"
+jsonpickle = "~3.0"
 pymitter = "~0.4"
 
 [tool.poetry.dev-dependencies]
-pytest = "~7.2"
-pytest-asyncio = "~0.19"
-pytest-cov = "~4.0"
+pytest = "~7.3"
+pytest-asyncio = "~0.21"
+pytest-cov = "~4.1"
 pytest-unordered = "~0.5"
-pre-commit = "~2.20"
+pre-commit = "~3.3"
 Sphinx = "~4.5"
-sphinx-rtd-theme = "~1.1"
+sphinx-rtd-theme = "~1.2"
 sphinxcontrib-napoleon = "~0.7"
 m2r = "~0.3"
-third-party-license-file-generator = "~2022.3"
+third-party-license-file-generator = "~2023.2"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

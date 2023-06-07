@@ -14,7 +14,7 @@ async def do_run() -> None:
 
     :return: None
     """
-    session: Session = Session()
+    session: Session = await Session.create()
     try:
         namedMap: NamedMap[int, str] = await session.get_map("my-map")
 

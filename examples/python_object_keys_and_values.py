@@ -29,7 +29,7 @@ async def do_run() -> None:
 
     :return: None
     """
-    session: Session = Session()
+    session: Session = await Session.create()
     try:
         namedMap: NamedMap[AccountKey, Account] = await session.get_map("accounts")
 

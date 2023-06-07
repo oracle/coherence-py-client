@@ -36,7 +36,7 @@ async def do_run() -> None:
         5: Hobbit(3, "Peregrin", 28, "Side Kick"),
     }
 
-    session: Session = Session()
+    session: Session = await Session.create()
     try:
         namedMap: NamedMap[int, Hobbit] = await session.get_map("aggregation-test")
 

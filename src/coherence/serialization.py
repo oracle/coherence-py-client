@@ -111,6 +111,14 @@ class JavaProxyPickler(jsonpickle.Pickler):
 
         return super()._flatten(obj)
 
+    def _getstate(self, obj: Any, data: Any) -> Any:
+        state = self._flatten(obj)
+
+        if state is not None:
+            data.update(state)
+
+        return data
+
     def _flatten_obj(self, obj: Any) -> dict[str, str | dict[str, list[dict[str, Any]]]] | None:
         result = super()._flatten_obj(obj)
         object_type = type(obj)
