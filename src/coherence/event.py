@@ -664,8 +664,11 @@ class _MapEventsManager(Generic[K, V]):
                 async with asyncio.timeout(self._session.options.request_timeout_seconds):
                     await self._stream_waiter.wait()
             except TimeoutError:
-                raise TimeoutError("Unable to establish session with [{0}] within [{1}] seconds)".format(
-                        self._session.options.address, str(self._session.options.request_timeout_seconds)))
+                raise TimeoutError(
+                    "Unable to establish session with [{0}] within [{1}] seconds)".format(
+                        self._session.options.address, str(self._session.options.request_timeout_seconds)
+                    )
+                )
 
         return self._event_stream
 

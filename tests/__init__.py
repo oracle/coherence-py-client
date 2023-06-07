@@ -17,7 +17,7 @@ V = TypeVar("V")
 """Generic type for cache values"""
 
 # logging configuration for tests
-logging.config.fileConfig(fname='tests/logging.conf', disable_existing_loggers=False)
+logging.config.fileConfig(fname="tests/logging.conf", disable_existing_loggers=False)
 COH_TEST_LOG = logging.getLogger("coherence-test")
 
 
