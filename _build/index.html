@@ -26,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="#" class="icon icon-home"> Coherence Python Client. v1.0b1
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Coherence Python Client. v1.0b1
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -61,7 +65,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home"></a></li>
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Coherence Python Client</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
@@ -79,8 +83,7 @@
 <a class="reference external image-reference" href="https://github.com/oracle/coherence-py-client/actions/workflows/validate.yml/badge.svg"><img alt="CI/CD" src="https://github.com/oracle/coherence-py-client/actions/workflows/validate.yml/badge.svg" /></a>
 <a class="reference external image-reference" href="https://oss.oracle.com/licenses/upl/"><img alt="License" src="http://img.shields.io/badge/license-UPL%201.0-blue.svg" /></a>
 <p><span class="raw-html-m2r"><img src=https://oracle.github.io/coherence/assets/images/logo-red.png width="30%"></span><span class="raw-html-m2r"><img></span></p>
-<p>The Coherence Python Client allows Python applications to act as cache clients to an Oracle Coherence cluster using
-the Google gRPC framework as the network transport.</p>
+<p>The Coherence Python Client allows Python applications to act as cache clients to an Oracle Coherence cluster using gRPC as the network transport.</p>
 <section id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this headline"></a></h2>
 <ul class="simple">
@@ -104,8 +107,8 @@ the Google gRPC framework as the network transport.</p>
 <section id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline"></a></h2>
 <ul class="simple">
-<li><p><a class="reference external" href="https://github.com/oracle/coherence">Coherence CE</a> 22.06 or later (or equivalent non-open source editions) with a configured <a class="reference external" href="https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html">gRPCProxy</a>.</p></li>
-<li><p>Python 3.10.1</p></li>
+<li><p><a class="reference external" href="https://github.com/oracle/coherence">Coherence CE</a> 22.06.4+ or Coherence 14.1.1.2206.4+ Commercial edition with a configured <a class="reference external" href="https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html">gRPCProxy</a>.</p></li>
+<li><p>Python 3.11.x</p></li>
 </ul>
 </section>
 <section id="starting-a-coherence-cluster">
@@ -138,7 +141,7 @@ issues <code class="docutils literal notranslate"><span class="pre">put()</span>
 <span class="k">async</span> <span class="k">def</span> <span class="nf">run_test</span><span class="p">():</span>
 
     <span class="c1"># create a new Session to the Coherence server</span>
-    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Session</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
 
     <span class="c1"># create a new NamedCache with key of string|int and value of string|int</span>
     <span class="n">cache</span><span class="p">:</span> <span class="n">NamedCache</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="o">|</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">get_cache</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
@@ -192,7 +195,7 @@ workspace.  After you are logged in, please come to <code class="docutils litera
 </section>
 <section id="license">
 <h3>License<a class="headerlink" href="#license" title="Permalink to this headline"></a></h3>
-<p>Copyright (c) 2022, 2023 Oracle and/or its affiliates.</p>
+<p>Copyright (c) 2023 Oracle and/or its affiliates.</p>
 <p>Released under the Universal Permissive License v1.0 as shown at
 <a class="reference external" href="https://oss.oracle.com/licenses/upl/">https://oss.oracle.com/licenses/upl/</a>.</p>
 </section>

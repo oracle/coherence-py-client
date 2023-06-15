@@ -27,11 +27,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Coherence Python Client. v1.0b1
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Coherence Python Client. v1.0b1
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -83,7 +87,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">API Reference</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/api_reference.rst.txt" rel="nofollow"> View page source</a>
@@ -511,15 +515,19 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.greater">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">greater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.filter.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.filter.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.greater" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.GreaterFilter" title="coherence.filter.GreaterFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.GreaterFilter</span></code></a> to test
+<cite>Greater</cite> condition</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>extractor_or_method</strong> – </p></li>
-<li><p><strong>value</strong> – </p></li>
+<li><p><strong>extractor_or_method</strong> – the <a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> to use
+by this <a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> or the name of the method to
+invoke via reflection</p></li>
+<li><p><strong>value</strong> – the object to compare the result with</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.GreaterFilter" title="coherence.filter.GreaterFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.GreaterFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -527,15 +535,19 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.greater_equals">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">greater_equals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.filter.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.filter.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.greater_equals" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.GreaterEqualsFilter" title="coherence.filter.GreaterEqualsFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.GreaterEqualsFilter</span></code></a> to
+test <cite>Greater or Equal</cite> condition</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>extractor_or_method</strong> – </p></li>
-<li><p><strong>value</strong> – </p></li>
+<li><p><strong>extractor_or_method</strong> – the <a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> to use
+by this <a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> or the name of the method to
+invoke via reflection</p></li>
+<li><p><strong>value</strong> – the object to compare the result with</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.GreaterEqualsFilter" title="coherence.filter.GreaterEqualsFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.GreaterEqualsFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -543,15 +555,21 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.is_in">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_in</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.filter.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.filter.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.is_in" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><dl class="simple">
+<dt>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.InFilter" title="coherence.filter.InFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.InFilter</span></code></a> to check whether</dt><dd><p>the result of a method invocation belongs to a predefined set of values.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>extractor_or_method</strong> – </p></li>
-<li><p><strong>values</strong> – </p></li>
+<li><p><strong>extractor_or_method</strong> – the <a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> to use
+by this <a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> or the name of the method to
+invoke via reflection</p></li>
+<li><p><strong>values</strong> – the Set of values that a Collection or array is tested to contain</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.InFilter" title="coherence.filter.InFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.InFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -559,12 +577,16 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.is_none">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_none</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.filter.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.filter.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.is_none" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.IsNoneFilter" title="coherence.filter.IsNoneFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.IsNoneFilter</span></code></a> for
+testing equality to <cite>None</cite>.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>extractor_or_method</strong> – </p>
+<dd class="field-odd"><p><strong>extractor_or_method</strong> – the <a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> to use
+by this <a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> or the name of the method to
+invoke via reflection</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.IsNoneFilter" title="coherence.filter.IsNoneFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.IsNoneFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -572,12 +594,16 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.is_not_none">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_not_none</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.filter.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.filter.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.is_not_none" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.IsNotNoneFilter" title="coherence.filter.IsNotNoneFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.IsNotNoneFilter</span></code></a> for
+testing inequality to <cite>None</cite>.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>extractor_or_method</strong> – </p>
+<dd class="field-odd"><p><strong>extractor_or_method</strong> – the <a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> to use
+by this <a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> or the name of the method to
+invoke via reflection</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.IsNotNoneFilter" title="coherence.filter.IsNotNoneFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.IsNotNoneFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -585,15 +611,19 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.less">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">less</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.filter.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.filter.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.less" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.LessFilter" title="coherence.filter.LessFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.LessFilter</span></code></a> for testing
+<cite>Less</cite> condition.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>extractor_or_method</strong> – </p></li>
-<li><p><strong>value</strong> – </p></li>
+<li><p><strong>extractor_or_method</strong> – the <a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> to use
+by this <a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> or the name of the method to
+invoke via reflection</p></li>
+<li><p><strong>value</strong> – the object to compare the result with</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.LessFilter" title="coherence.filter.LessFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.LessFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -601,15 +631,19 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.less_equals">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">less_equals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.filter.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.filter.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.less_equals" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.LessEqualsFilter</span></code> for testing
+<cite>Less or Equals</cite> condition.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>extractor_or_method</strong> – </p></li>
-<li><p><strong>value</strong> – </p></li>
+<li><p><strong>extractor_or_method</strong> – the <a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> to use
+by this <a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> or the name of the method to
+invoke via reflection</p></li>
+<li><p><strong>value</strong> – the object to compare the result with</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.LessEqualsFilter</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -617,17 +651,19 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.like">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.filter.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.filter.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">escape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.like" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.LikeFilter" title="coherence.filter.LikeFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.LikeFilter</span></code></a> for for pattern match</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>extractor_or_method</strong> – </p></li>
-<li><p><strong>pattern</strong> – </p></li>
-<li><p><strong>escape</strong> – </p></li>
-<li><p><strong>ignore_case</strong> – </p></li>
+<li><p><strong>extractor_or_method</strong> – the <a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> to use by this
+<a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> or the name of the method to invoke via reflection</p></li>
+<li><p><strong>pattern</strong> – the string pattern to compare the result with</p></li>
+<li><p><strong>escape</strong> – the escape character for escaping <cite>%</cite> and <cite>_</cite></p></li>
+<li><p><strong>ignore_case</strong> – <cite>true</cite> to be case-insensitive</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.LikeFilter" title="coherence.filter.LikeFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.LikeFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -635,12 +671,16 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.negate">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">negate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.negate" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><dl class="simple">
+<dt>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.NotFilter" title="coherence.filter.NotFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.NotFilter</span></code></a> which negates</dt><dd><p>the results of another filter.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>filter</strong> – </p>
+<dd class="field-odd"><p><strong>filter</strong> – The Filter whose results are negated by this filter.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.NotFilter" title="coherence.filter.NotFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.NotFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -648,9 +688,11 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.never">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">never</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.never" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.NeverFilter" title="coherence.filter.NeverFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.NeverFilter</span></code></a> which always
+evaluates to <cite>false</cite>.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
+<dd class="field-odd"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.NeverFilter" title="coherence.filter.NeverFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.NeverFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -658,15 +700,21 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.not_equals">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">not_equals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.filter.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.filter.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.not_equals" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><dl class="simple">
+<dt>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.NotEqualsFilter" title="coherence.filter.NotEqualsFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.NotEqualsFilter</span></code></a> for testing</dt><dd><p>inequality.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>extractor_or_method</strong> – </p></li>
-<li><p><strong>value</strong> – </p></li>
+<li><p><strong>extractor_or_method</strong> – the <a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> to use
+by this <a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> or the name of the method to
+invoke via reflection</p></li>
+<li><p><strong>value</strong> – the object to compare the result with</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.NotEqualsFilter" title="coherence.filter.NotEqualsFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.NotEqualsFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -674,9 +722,13 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.present">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">present</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.present" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><dl class="simple">
+<dt>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.PresentFilter" title="coherence.filter.PresentFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.PresentFilter</span></code></a> which</dt><dd><p>returns true for entries that currently exist in a map.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
+<dd class="field-odd"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.PresentFilter" title="coherence.filter.PresentFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.PresentFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -684,15 +736,22 @@ to the listener to a subset of the notifications emitted by the map</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.Filters.regex">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">regex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">coherence.extractor.ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">coherence.filter.T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">coherence.filter.E</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">coherence.filter.Filter</span></a></span></span><a class="headerlink" href="#coherence.Filters.regex" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dd><dl class="simple">
+<dt>Returns instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.RegexFilter" title="coherence.filter.RegexFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.RegexFilter</span></code></a> which uses</dt><dd><p>the regular expression pattern match defined by the Java’s
+<cite>String.matches</cite> contract.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>extractor_or_method</strong> – </p></li>
-<li><p><strong>regex</strong> – </p></li>
+<li><p><strong>extractor_or_method</strong> – the <a class="reference internal" href="api_reference/extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> to use
+by this <a class="reference internal" href="api_reference/filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> or the name of the method to
+invoke via reflection</p></li>
+<li><p><strong>regex</strong> – the regular expression to match the result with</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>an instance of <a class="reference internal" href="api_reference/filter.html#coherence.filter.RegexFilter" title="coherence.filter.RegexFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.RegexFilter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1138,7 +1197,7 @@ each of the specified keys</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.NamedMap.is_empty">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#coherence.NamedMap.is_empty" title="Permalink to this definition"></a></dt>
-<dd><p>Returns`true` if this map contains no key-value mappings.</p>
+<dd><p>Returns <cite>true</cite> if this map contains no key-value mappings.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><cite>true</cite> if this map contains no key-value mappings.</p>
@@ -1380,7 +1439,7 @@ also <code class="xref py py-func docutils literal notranslate"><span class="pre
 corresponding <cite>ConfigurableCacheFactory</cite> on the server.</p></li>
 <li><p><strong>request_timeout_seconds</strong> – Defines the request timeout, in <cite>seconds</cite>, that will be applied to each
 remote call. If not explicitly set, this defaults to <code class="xref py py-func docutils literal notranslate"><span class="pre">coherence.client.Options.DEFAULT_REQUEST_TIMEOUT()</span></code>.
-See also See also <code class="xref py py-func docutils literal notranslate"><span class="pre">coherence.client.Options.ENV_REQUEST_TIMEOUT()</span></code></p></li>
+See also <code class="xref py py-func docutils literal notranslate"><span class="pre">coherence.client.Options.ENV_REQUEST_TIMEOUT()</span></code></p></li>
 <li><p><strong>ser_format</strong> – The serialization format.  Currently, this is always <cite>json</cite></p></li>
 <li><p><strong>channel_options</strong> – The <cite>gRPC</cite> <cite>ChannelOptions</cite>. See
 <a class="reference external" href="https://grpc.github.io/grpc/python/glossary.html#term-channel_arguments">https://grpc.github.io/grpc/python/glossary.html#term-channel_arguments</a> and
@@ -1860,6 +1919,13 @@ not been updated</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.Session.is_active">
+<span class="sig-name descname"><span class="pre">is_active</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#coherence.Session.is_active" title="Permalink to this definition"></a></dt>
+<dd><p>Returns
+:return:</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="coherence.Session.options">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#coherence.Options" title="coherence.client.Options"><span class="pre">coherence.client.Options</span></a></em><a class="headerlink" href="#coherence.Session.options" title="Permalink to this definition"></a></dt>
@@ -1891,12 +1957,12 @@ server.</p>
 <h2>TlsOptions<a class="headerlink" href="#tlsoptions" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="coherence.TlsOptions">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.</span></span><span class="sig-name descname"><span class="pre">TlsOptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locked</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca_cert_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_cert_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_key_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.TlsOptions" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.</span></span><span class="sig-name descname"><span class="pre">TlsOptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locked</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca_cert_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_cert_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_key_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.TlsOptions" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Options specific to the configuration of TLS.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="coherence.TlsOptions.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locked</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca_cert_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_cert_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_key_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.TlsOptions.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locked</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca_cert_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_cert_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_key_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.TlsOptions.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Construct a new <a class="reference internal" href="#coherence.TlsOptions" title="coherence.client.TlsOptions"><code class="xref py py-func docutils literal notranslate"><span class="pre">coherence.client.TlsOptions()</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

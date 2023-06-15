@@ -27,11 +27,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Coherence Python Client. v1.0b1
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Coherence Python Client. v1.0b1
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -62,7 +66,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Aggregation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/aggregation.rst.txt" rel="nofollow"> View page source</a>
@@ -122,7 +126,7 @@ a <cite>NamedMap</cite>:</p>
 <span class="linenos">36</span>        <span class="mi">5</span><span class="p">:</span> <span class="n">Hobbit</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Peregrin&quot;</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="s2">&quot;Side Kick&quot;</span><span class="p">),</span>
 <span class="linenos">37</span>    <span class="p">}</span>
 <span class="linenos">38</span>
-<span class="linenos">39</span>    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">()</span>
+<span class="linenos">39</span>    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Session</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
 <span class="linenos">40</span>    <span class="k">try</span><span class="p">:</span>
 <span class="linenos">41</span>        <span class="n">namedMap</span><span class="p">:</span> <span class="n">NamedMap</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Hobbit</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">get_map</span><span class="p">(</span><span class="s2">&quot;aggregation-test&quot;</span><span class="p">)</span>
 <span class="linenos">42</span>

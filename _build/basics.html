@@ -27,11 +27,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Coherence Python Client. v1.0b1
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Coherence Python Client. v1.0b1
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -62,7 +66,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">The Basics</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/basics.rst.txt" rel="nofollow"> View page source</a>
@@ -95,7 +99,7 @@ to store data within a remote <a class="reference external" href="https://cohere
 <span class="linenos">14</span>
 <span class="linenos">15</span><span class="sd">    :return: None</span>
 <span class="linenos">16</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="hll"><span class="linenos">17</span>    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">()</span>
+<span class="hll"><span class="linenos">17</span>    <span class="n">session</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Session</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
 </span><span class="linenos">18</span>    <span class="k">try</span><span class="p">:</span>
 <span class="hll"><span class="linenos">19</span>        <span class="n">namedMap</span><span class="p">:</span> <span class="n">NamedMap</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">get_map</span><span class="p">(</span><span class="s2">&quot;my-map&quot;</span><span class="p">)</span>
 </span><span class="linenos">20</span>
@@ -123,7 +127,7 @@ to store data within a remote <a class="reference external" href="https://cohere
 <ul class="simple">
 <li><p>Line 17 - Create a new <cite>Session</cite> that will connect to <cite>localhost:1408</cite>.  See the <a class="reference internal" href="sessions.html"><span class="doc">Sessions</span></a> documentation for more details.</p></li>
 <li><p>Line 50 - Obtain a <cite>NamedMap</cite> identified by <cite>my-map</cite> from the Session</p></li>
-<li><p>Lines 21-34 - Various CRUD operations against the NamedMap such as <a class="reference external" href="api_reference.html#coherence.NamedMap.get">get()</a>, <a class="reference external" href="api_reference.html#coherence.NamedMap.put">put()</a>, and <a class="reference external" href="api_reference.html#coherence.NamedMap.remove">remote()</a></p></li>
+<li><p>Lines 21-34 - Various CRUD operations against the NamedMap such as <a class="reference external" href="api_reference.html#coherence.NamedMap.get">get()</a>, <a class="reference external" href="api_reference.html#coherence.NamedMap.put">put()</a>, and <a class="reference external" href="api_reference.html#coherence.NamedMap.remove">remove()</a></p></li>
 </ul>
 </section>
 

@@ -7,8 +7,7 @@ Events
 ======
 
 Coherence provides the ability to subscribe to notifications pertaining to
-a particular map/cache. Registration works similarly to event registration
-with Node, with some key differences. In addition to listening for specific
+a particular map/cache. In addition to listening for specific
 events, it is possible to listen to events for changes made to a specific
 key, or using a Filter, it's possible to limit the events raised to be
 for a subset of the map entries.
