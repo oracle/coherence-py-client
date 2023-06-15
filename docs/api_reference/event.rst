@@ -36,5 +36,3 @@ MapListener
     :show-inheritance:
     :members:
     :noindex:
-
-    .. automethod:: __init__
