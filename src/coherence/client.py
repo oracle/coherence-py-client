@@ -1293,7 +1293,9 @@ class Session:
 
             caches_copy: dict[str, NamedCache[Any, Any]] = self._caches.copy()
             for cache in caches_copy.values():
-                await cache.destroy()
+                cache.release()
+
+            self._caches.clear()
 
             await self._channel.close()  # TODO: consider grace period?
 
