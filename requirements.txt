@@ -1,4 +1,4 @@
-grpcio-tools==1.51.1; python_version >= "3.7"
+grpcio-tools==1.54.2; python_version >= "3.7"
 grpcio==1.51.1; python_version >= "3.7"
 jsonpickle==2.2.0; python_version >= "2.7"
 protobuf==4.21.11; python_version >= "3.7"
