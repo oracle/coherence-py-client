@@ -38,7 +38,7 @@ COHERENCE_WKA2 ?= server1
 CLUSTER_PORT ?= 7574
 # Profiles to include for building
 PROFILES ?=
-COHERENCE_BASE_IMAGE ?= gcr.io/distroless/java:11
+COHERENCE_BASE_IMAGE ?= gcr.io/distroless/java17-debian11
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Set the location of various build tools
