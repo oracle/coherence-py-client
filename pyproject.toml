@@ -11,8 +11,8 @@ packages = [
 ]
 readme = "README.md"
 authors = ["Oracle <dhiru.pandey@oracle.com>"]
-homepage = "https://github.com/oracle/coherenc-py-client"
-repository = "https://github.com/oracle/coherenc-py-client"
+homepage = "https://github.com/oracle/coherence-py-client"
+repository = "https://github.com/oracle/coherence-py-client"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Universal Permissive License (UPL)",
