@@ -73,7 +73,7 @@ jobs:
           git stash drop || true
           git checkout --track origin/gh-pages-test
           git pull --rebase
-          # copy the generated docs 
+          # copy the generated docs
           pwd
           rm -rf ./_build
           cp -R ${PY_CLIENT_DOC}/_build .
@@ -92,4 +92,3 @@ jobs:
           python -m poetry run python3 -m build
           ls -la ./dist
           twine upload --repository testpypi dist/*
-          
