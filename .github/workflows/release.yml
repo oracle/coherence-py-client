@@ -1,0 +1,95 @@
+# Copyright 2023, Oracle Corporation and/or its affiliates.  All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence Python Client GitHub Release Actions build.
+# ---------------------------------------------------------------------------
+
+
+name: Pypi publish CD workflow
+
+on:
+  release:
+    # This specifies that the build will be triggered when we publish a release
+    types: [published]
+
+jobs:
+  build:
+    matrix:
+      python-version: ["3.11.x"]
+      poetry-version: ["1.5.0"]
+      os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Get Docker Images
+        shell: bash
+        run: |
+          docker pull gcr.io/distroless/java17-debian11
+          uname -a
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Install Poetry
+        shell: bash
+        run: |
+          pip install poetry==${{ matrix.poetry-version }}
+
+      - name: Install Dependencies
+        run: python -m poetry install
+
+      - name: Generate docs
+        shell: bash
+        run: |
+          python -m poetry run make docs
+          # copy generated docs to temp directory
+          PY_CLIENT_DOC=/tmp/docs/
+          mkdir -p ${PY_CLIENT_DOC}
+          cp -R ./docs/_build ${PY_CLIENT_DOC}
+
+      - name: Release GitHub Pages
+        shell: bash
+        run: |
+          git config --local user.name "Github Action"
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git stash save --keep-index --include-untracked || true
+          git stash drop || true
+          git checkout --track origin/gh-pages-test
+          git pull --rebase
+          # copy the generated docs 
+          pwd
+          rm -rf ./_build
+          cp -R ${PY_CLIENT_DOC}/_build .
+          git add -A _build/*
+          git commit -m "Updating docs for Coherence Python Client"
+          git push origin gh-pages-test
+
+      - name: Publish to PyPi
+        shell: bash
+        env:
+          TWINE_USERNAME: ${{ secrets.TEST_PYPI_USER }}
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+        run: |
+          pip install --upgrade pip
+          pip install build twine
+          python -m poetry run python3 -m build
+          ls -la ./dist
+          twine upload --repository testpypi dist/*
+          
