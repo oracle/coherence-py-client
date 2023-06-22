@@ -19,7 +19,7 @@ V = TypeVar("V")
 # logging configuration for tests
 logging_config: str = "tests/logging.conf"  # executing from project root
 if not os.path.exists(logging_config):
-    logging_config = "logging.conf"         # executing from tests directory (most likely IntelliJ)
+    logging_config = "logging.conf"  # executing from tests directory (most likely IntelliJ)
 
 logging.config.fileConfig(fname=logging_config, disable_existing_loggers=False)
 COH_TEST_LOG = logging.getLogger("coherence-test")
