@@ -19,29 +19,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get Docker Images
-        shell: bash
-        run: |
-          docker pull gcr.io/distroless/java17-debian11
-          uname -a
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'zulu'
-
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: "3.11.x"
-
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
 
       - name: Install Poetry
         shell: bash
@@ -65,9 +46,7 @@ jobs:
         run: |
           git config --local user.name "Github Action"
           git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git stash save --keep-index --include-untracked || true
-          git stash drop || true
-          git checkout --track origin/gh-pages-test
+          git checkout gh-pages-test
           git pull --rebase
           # copy the generated docs
           pwd
