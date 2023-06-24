@@ -1118,6 +1118,7 @@ class Options:
             except ValueError:
                 COH_LOG.warning(
                     "The timeout value of [%s] specified by environment variable [%s] cannot be converted to a float",
+                    timeout,
                     variable_name,
                 )
 
