@@ -14,7 +14,7 @@ from typing import Final
 import pytest
 
 import tests
-from coherence import NamedCache, Session, Options, TlsOptions
+from coherence import NamedCache, Options, Session, TlsOptions
 from coherence.event import MapLifecycleEvent, SessionLifecycleEvent
 from tests import CountingMapListener
 
@@ -48,7 +48,7 @@ async def test_basics() -> None:
     assert session.options.session_disconnect_timeout_seconds == Options.DEFAULT_SESSION_DISCONNECT_TIMEOUT
 
     if Options.ENV_REQUEST_TIMEOUT in os.environ:
-        assert session.options.request_timeout_seconds == float(os.environ.get(Options.ENV_REQUEST_TIMEOUT))
+        assert session.options.request_timeout_seconds == float(os.environ.get(Options.ENV_REQUEST_TIMEOUT, "-1"))
     else:
         assert session.options.request_timeout_seconds == Options.DEFAULT_REQUEST_TIMEOUT
 
@@ -60,7 +60,7 @@ async def test_basics() -> None:
     assert not session.closed
 
     await session.close()
-    await asyncio.sleep(.1)
+    await asyncio.sleep(0.1)
 
     assert session.channel is None
     assert session.scope == ""
@@ -79,7 +79,7 @@ async def test_basics() -> None:
     assert session.options.session_disconnect_timeout_seconds == Options.DEFAULT_SESSION_DISCONNECT_TIMEOUT
 
     if Options.ENV_REQUEST_TIMEOUT in os.environ:
-        assert session.options.request_timeout_seconds == float(os.environ.get(Options.ENV_REQUEST_TIMEOUT))
+        assert session.options.request_timeout_seconds == float(os.environ.get(Options.ENV_REQUEST_TIMEOUT, "-1"))
     else:
         assert session.options.request_timeout_seconds == Options.DEFAULT_REQUEST_TIMEOUT
 

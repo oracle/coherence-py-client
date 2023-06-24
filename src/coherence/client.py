@@ -1415,7 +1415,7 @@ class Session:
 
             self._caches.clear()
 
-            await self._channel.close() # TODO: consider grace period?
+            await self._channel.close()  # TODO: consider grace period?
             self._channel = None
 
     def _setup_event_handlers(self, client: NamedCacheClient[K, V]) -> None:
