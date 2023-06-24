@@ -29,64 +29,44 @@ async def test_basics() -> None:
     run_secure: str = "RUN_SECURE"
     session: Session = await tests.get_session()
 
+    def check_basics() -> None:
+        assert session.scope == Options.DEFAULT_SCOPE
+        assert session.format == Options.DEFAULT_FORMAT
+        assert session.session_id is not None
+        assert session.options is not None
+
+        if run_secure in os.environ:
+            assert session.options.tls_options is not None
+            assert session.options.tls_options.enabled
+            assert session.options.tls_options.client_key_path == os.environ.get(TlsOptions.ENV_CLIENT_KEY)
+            assert session.options.tls_options.ca_cert_path == os.environ.get(TlsOptions.ENV_CA_CERT)
+            assert session.options.tls_options.client_cert_path == os.environ.get(TlsOptions.ENV_CLIENT_CERT)
+        else:
+            assert session.options.tls_options is None
+            assert session.options.channel_options is None
+
+        assert session.options.session_disconnect_timeout_seconds == Options.DEFAULT_SESSION_DISCONNECT_TIMEOUT
+
+        if Options.ENV_REQUEST_TIMEOUT in os.environ:
+            assert session.options.request_timeout_seconds == float(os.environ.get(Options.ENV_REQUEST_TIMEOUT, "-1"))
+        else:
+            assert session.options.request_timeout_seconds == Options.DEFAULT_REQUEST_TIMEOUT
+
+        assert session.options.ready_timeout_seconds == Options.DEFAULT_READY_TIMEOUT
+        assert session.options.format == Options.DEFAULT_FORMAT
+        assert session.options.scope == Options.DEFAULT_SCOPE
+        assert session.options.address == Options.DEFAULT_ADDRESS
+
+    check_basics()
     assert session.channel is not None
-    assert session.scope == Options.DEFAULT_SCOPE
-    assert session.format == Options.DEFAULT_FORMAT
-    assert session.session_id is not None
-    assert session.options is not None
-
-    if run_secure in os.environ:
-        assert session.options.tls_options is not None
-        assert session.options.tls_options.enabled
-        assert session.options.tls_options.client_key_path == os.environ.get(TlsOptions.ENV_CLIENT_KEY)
-        assert session.options.tls_options.ca_cert_path == os.environ.get(TlsOptions.ENV_CA_CERT)
-        assert session.options.tls_options.client_cert_path == os.environ.get(TlsOptions.ENV_CLIENT_CERT)
-    else:
-        assert session.options.tls_options is None
-        assert session.options.channel_options is None
-
-    assert session.options.session_disconnect_timeout_seconds == Options.DEFAULT_SESSION_DISCONNECT_TIMEOUT
-
-    if Options.ENV_REQUEST_TIMEOUT in os.environ:
-        assert session.options.request_timeout_seconds == float(os.environ.get(Options.ENV_REQUEST_TIMEOUT, "-1"))
-    else:
-        assert session.options.request_timeout_seconds == Options.DEFAULT_REQUEST_TIMEOUT
-
-    assert session.options.ready_timeout_seconds == Options.DEFAULT_READY_TIMEOUT
-    assert session.options.format == Options.DEFAULT_FORMAT
-    assert session.options.scope == Options.DEFAULT_SCOPE
-    assert session.options.address == Options.DEFAULT_ADDRESS
     assert session.is_ready()
     assert not session.closed
 
     await session.close()
     await asyncio.sleep(0.1)
 
+    check_basics()
     assert session.channel is None
-    assert session.scope == ""
-    assert session.options is not None
-
-    if run_secure in os.environ:
-        assert session.options.tls_options is not None
-        assert session.options.tls_options.enabled
-        assert session.options.tls_options.client_key_path == os.environ.get(TlsOptions.ENV_CLIENT_KEY)
-        assert session.options.tls_options.ca_cert_path == os.environ.get(TlsOptions.ENV_CA_CERT)
-        assert session.options.tls_options.client_cert_path == os.environ.get(TlsOptions.ENV_CLIENT_CERT)
-    else:
-        assert session.options.tls_options is None
-        assert session.options.channel_options is None
-
-    assert session.options.session_disconnect_timeout_seconds == Options.DEFAULT_SESSION_DISCONNECT_TIMEOUT
-
-    if Options.ENV_REQUEST_TIMEOUT in os.environ:
-        assert session.options.request_timeout_seconds == float(os.environ.get(Options.ENV_REQUEST_TIMEOUT, "-1"))
-    else:
-        assert session.options.request_timeout_seconds == Options.DEFAULT_REQUEST_TIMEOUT
-
-    assert session.options.ready_timeout_seconds == Options.DEFAULT_READY_TIMEOUT
-    assert session.options.format == Options.DEFAULT_FORMAT
-    assert session.options.scope == Options.DEFAULT_SCOPE
-    assert session.options.address == Options.DEFAULT_ADDRESS
     assert not session.is_ready()
     assert session.closed
 
