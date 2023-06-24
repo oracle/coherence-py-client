@@ -3,14 +3,14 @@
 # https://oss.oracle.com/licenses/upl.
 
 import asyncio
-import os
 import time
-from typing import Any, AsyncGenerator, Final, Generic, List, TypeVar, cast
+from typing import Any, AsyncGenerator, Generic, List, TypeVar, cast
 
 import pytest
 import pytest_asyncio
 
-from coherence import Filters, NamedCache, Options, Session, TlsOptions
+import tests
+from coherence import Filters, NamedCache, Session
 from coherence.event import MapEvent, MapEventType
 from coherence.filter import Filter, LessFilter, MapEventFilter
 from tests import CountingMapListener
@@ -290,41 +290,12 @@ async def _run_basic_test(
     expected2.validate(listener)
 
 
-async def get_session() -> Session:
-    default_address: Final[str] = "localhost:1408"
-    default_scope: Final[str] = ""
-    default_request_timeout: Final[float] = 30.0
-    default_format: Final[str] = "json"
-
-    run_secure: Final[str] = "RUN_SECURE"
-    session: Session
-
-    if run_secure in os.environ:
-        # Default TlsOptions constructor will pick up the SSL Certs and
-        # Key values from these environment variables:
-        # COHERENCE_TLS_CERTS_PATH
-        # COHERENCE_TLS_CLIENT_CERT
-        # COHERENCE_TLS_CLIENT_KEY
-        tls_options: TlsOptions = TlsOptions()
-        tls_options.enabled = True
-        tls_options.locked()
-
-        options: Options = Options(default_address, default_scope, default_request_timeout, default_format)
-        options.tls_options = tls_options
-        options.channel_options = (("grpc.ssl_target_name_override", "Star-Lord"),)
-        session = await Session.create(options)
-    else:
-        session = await Session.create()
-
-    return session
-
-
 @pytest_asyncio.fixture
 async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
     """
     Fixture for test setup/teardown.
     """
-    session: Session = await get_session()
+    session: Session = await tests.get_session()
     cache: NamedCache[Any, Any] = await session.get_cache("test-" + str(time.time_ns()))
 
     yield cache

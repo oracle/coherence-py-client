@@ -36,11 +36,15 @@ class Serializer(ABC):
     def deserialize(self, value: bytes) -> T:  # type: ignore
         """documentation"""
 
+    @property
     def format(self) -> str:
         return self._ser_format
 
     def __init__(self, ser_format: str):
         self._ser_format = ser_format
+
+    def __str__(self) -> str:
+        return f"Serializer(format={self.format})"
 
 
 class JSONSerializer(Serializer):

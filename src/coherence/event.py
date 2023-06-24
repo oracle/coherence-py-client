@@ -660,13 +660,15 @@ class _MapEventsManager(Generic[K, V]):
             self._event_stream = event_stream
             read_task: Task[None] = asyncio.create_task(self._handle_response())
             self._background_tasks.add(read_task)
+            # we use asyncio.timeout here instead of using the gRPC timeout
+            # as any deadline set on the stream will result in a loss of events
             try:
                 async with asyncio.timeout(self._session.options.request_timeout_seconds):
                     await self._stream_waiter.wait()
             except TimeoutError:
                 raise TimeoutError(
-                    "Unable to establish session with [{0}] within [{1}] seconds)".format(
-                        self._session.options.address, str(self._session.options.request_timeout_seconds)
+                    "Deadline [{0} seconds] exceeded waiting for event stream to become ready)".format(
+                        str(self._session.options.request_timeout_seconds)
                     )
                 )
 

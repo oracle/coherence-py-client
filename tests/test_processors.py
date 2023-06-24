@@ -2,13 +2,13 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
-import os
-from typing import Any, AsyncGenerator, Final
+from typing import Any, AsyncGenerator
 
 import pytest
 import pytest_asyncio
 
-from coherence import MapEntry, NamedCache, Options, Session, TlsOptions
+import tests
+from coherence import MapEntry, NamedCache, Session
 from coherence.filter import Filter, Filters
 from coherence.processor import EntryProcessor, Numeric, PreloadRequest, Processors, ScriptProcessor, TouchProcessor
 from coherence.serialization import JSONSerializer
@@ -16,38 +16,9 @@ from tests.address import Address
 from tests.person import Person
 
 
-async def get_session() -> Session:
-    default_address: Final[str] = "localhost:1408"
-    default_scope: Final[str] = ""
-    default_request_timeout: Final[float] = 30.0
-    default_format: Final[str] = "json"
-
-    run_secure: Final[str] = "RUN_SECURE"
-    session: Session
-
-    if run_secure in os.environ:
-        # Default TlsOptions constructor will pick up the SSL Certs and
-        # Key values from these environment variables:
-        # COHERENCE_TLS_CERTS_PATH
-        # COHERENCE_TLS_CLIENT_CERT
-        # COHERENCE_TLS_CLIENT_KEY
-        tls_options: TlsOptions = TlsOptions()
-        tls_options.enabled = True
-        tls_options.locked()
-
-        options: Options = Options(default_address, default_scope, default_request_timeout, default_format)
-        options.tls_options = tls_options
-        options.channel_options = (("grpc.ssl_target_name_override", "Star-Lord"),)
-        session = await Session.create(options)
-    else:
-        session = await Session.create()
-
-    return session
-
-
 @pytest_asyncio.fixture
 async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
-    session: Session = await get_session()
+    session: Session = await tests.get_session()
     cache: NamedCache[Any, Any] = await session.get_cache("test")
 
     yield cache
