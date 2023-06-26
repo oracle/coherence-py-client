@@ -175,7 +175,7 @@ class CountingMapListener(MapListener[K, V]):
             await asyncio.sleep(0)
 
 
-async def get_session(wait_for_ready: float = -1.0) -> Session:
+async def get_session(wait_for_ready: float = 0) -> Session:
     default_address: Final[str] = "localhost:1408"
     default_scope: Final[str] = ""
     default_request_timeout: Final[float] = 30.0

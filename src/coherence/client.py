@@ -935,9 +935,9 @@ class Options:
     """The default scope."""
     DEFAULT_REQUEST_TIMEOUT: Final[float] = 30.0
     """The default request timeout."""
-    DEFAULT_READY_TIMEOUT: Final[float] = -1.0
+    DEFAULT_READY_TIMEOUT: Final[float] = 0
     """
-    The default ready timeout is -1.0 which disables the feature by default.  Explicit configure the ready timeout
+    The default ready timeout is 0 which disables the feature by default.  Explicitly configure the ready timeout
     session option or use the environment variable to specify a positive value indicating how many seconds an RPC will
     wait for the underlying channel to be ready before failing.
     """
@@ -972,7 +972,7 @@ class Options:
           See also :func:`coherence.client.Options.ENV_REQUEST_TIMEOUT`
         :param ready_timeout_seconds: Defines the ready timeout, in `seconds`.  If this is a positive
           float value, remote calls will not fail immediately if no connection is available.  If this is a value of zero
-          or less, then remote calls will fail-fast.  If not explicitly configured, the default of -1 is assumed.
+          or less, then remote calls will fail-fast.  If not explicitly configured, the default of 0 is assumed.
 
           See also :class:`coherence.client.Options.ENV_READY_TIMEOUT`
         :param session_disconnect_seconds: Defines the maximum time, in `seconds`, that a session may remain in
