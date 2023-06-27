@@ -4,6 +4,7 @@
 import asyncio
 import logging.config
 import os
+from asyncio import Event
 from typing import Final, List, TypeVar
 
 import pytest
@@ -204,3 +205,7 @@ async def get_session(wait_for_ready: float = 0) -> Session:
         session = await Session.create()
 
     return session
+
+
+async def wait_for(event: Event, timeout: float) -> None:
+    await asyncio.wait_for(event.wait(), timeout)

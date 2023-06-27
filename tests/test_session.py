@@ -120,20 +120,20 @@ async def test_session_lifecycle() -> None:
     session.on(SessionLifecycleEvent.RECONNECTED, reconn_callback)
     session.on(SessionLifecycleEvent.CLOSED, close_callback)
 
-    await asyncio.wait_for(_waiter(conn_event), EVENT_TIMEOUT)
+    await tests.wait_for(conn_event, EVENT_TIMEOUT)
     assert session.is_ready()
 
     await _shutdown_proxy()
 
-    await asyncio.wait_for(_waiter(disconn_event), EVENT_TIMEOUT)
+    await tests.wait_for(disconn_event, EVENT_TIMEOUT)
     assert session.is_ready()
-    await asyncio.wait_for(_waiter(reconn_event), EVENT_TIMEOUT)
+    await tests.wait_for(reconn_event, EVENT_TIMEOUT)
     assert session.is_ready()
 
     await session.close()
     assert not session.is_ready()
 
-    await asyncio.wait_for(_waiter(close_event), EVENT_TIMEOUT)
+    await tests.wait_for(close_event, EVENT_TIMEOUT)
     assert not session.is_ready()
 
 
@@ -288,7 +288,7 @@ async def _validate_cache_event(lifecycle_event: MapLifecycleEvent) -> None:
         else:
             await cache.destroy()
 
-        await asyncio.wait_for(_waiter(event), EVENT_TIMEOUT)
+        await tests.wait_for(event, EVENT_TIMEOUT)
 
         assert name == cache.name
         assert cache.released
@@ -301,10 +301,6 @@ async def _validate_cache_event(lifecycle_event: MapLifecycleEvent) -> None:
         assert not cache.active
     finally:
         await session.close()
-
-
-async def _waiter(event: Event) -> None:
-    await event.wait()
 
 
 async def _shutdown_proxy() -> None:

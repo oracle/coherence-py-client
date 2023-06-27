@@ -2,7 +2,6 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
-import asyncio
 from asyncio import Event
 from time import time
 from typing import Any, AsyncGenerator, Final, Optional, TypeVar
@@ -528,7 +527,7 @@ async def test_cache_truncate_event(setup_and_teardown: NamedCache[str, str]) ->
     assert await cache.size() == 2
 
     await cache.truncate()
-    await asyncio.wait_for(_waiter(event), EVENT_TIMEOUT)
+    await tests.wait_for(event, EVENT_TIMEOUT)
 
     assert name == cache.name
     assert await cache.size() == 0
@@ -555,7 +554,7 @@ async def test_cache_release_event() -> None:
         assert await cache.size() == 2
 
         cache.release()
-        await asyncio.wait_for(_waiter(event), EVENT_TIMEOUT)
+        await tests.wait_for(event, EVENT_TIMEOUT)
 
         assert name == cache.name
         assert cache.released
@@ -563,7 +562,3 @@ async def test_cache_release_event() -> None:
         assert not cache.active
     finally:
         await session.close()
-
-
-async def _waiter(event: Event) -> None:
-    await event.wait()
