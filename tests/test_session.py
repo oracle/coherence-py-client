@@ -147,21 +147,9 @@ async def test_wait_for_ready() -> None:
     try:
         count: int = 50
         cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
-
         listener: CountingMapListener[str, str] = CountingMapListener("Test")
 
-        COH_LOG.debug("Adding MapListener ...")
-        await cache.add_map_listener(listener)
-
-        COH_LOG.debug("Inserting values ...")
-        for i in range(count):
-            await cache.put(str(i), str(i))
-
-        COH_LOG.debug("Waiting for [%s] MapEvents ...", count)
-        await listener.wait_for(count, 15)
-        COH_LOG.debug("All events received!")
-
-        listener.reset()
+        await _run_pre_shutdown_logic(cache, listener, count)
 
         disc_event: Event = Event()
 
@@ -201,21 +189,9 @@ async def test_fail_fast() -> None:
     try:
         count: int = 10
         cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
-
         listener: CountingMapListener[str, str] = CountingMapListener("Test")
 
-        COH_LOG.debug("Adding MapListener ...")
-        await cache.add_map_listener(listener)
-
-        COH_LOG.debug("Inserting values ...")
-        for i in range(count):
-            await cache.put(str(i), str(i))
-
-        COH_LOG.debug("Waiting for [%s] MapEvents ...", count)
-        await listener.wait_for(count, 15)
-        COH_LOG.debug("All events received!")
-
-        listener.reset()
+        await _run_pre_shutdown_logic(cache, listener, count)
 
         disc_event: Event = Event()
         reconn_event: Event = Event()
@@ -233,12 +209,7 @@ async def test_fail_fast() -> None:
         session.on(SessionLifecycleEvent.DISCONNECTED, disc)
         session.on(SessionLifecycleEvent.RECONNECTED, reconn)
 
-        COH_LOG.debug("Shutting down the gRPC Proxy ...")
-        req: urllib.request.Request = urllib.request.Request(
-            "http://127.0.0.1:30000/management/coherence/cluster/services/$GRPC:GrpcProxy/members/1/stop", method="POST"
-        )
-        with urllib.request.urlopen(req) as response:
-            response.read()
+        await _shutdown_proxy()
 
         COH_LOG.debug("Waiting for session disconnect ...")
         async with asyncio.timeout(10):
@@ -261,6 +232,23 @@ async def test_fail_fast() -> None:
 
     finally:
         await session.close()
+
+
+async def _run_pre_shutdown_logic(
+    cache: NamedCache[str, str], listener: CountingMapListener[str, str], count: int
+) -> None:
+    COH_LOG.debug("Adding MapListener ...")
+    await cache.add_map_listener(listener)
+
+    COH_LOG.debug("Inserting values ...")
+    for i in range(count):
+        await cache.put(str(i), str(i))
+
+    COH_LOG.debug("Waiting for [%s] MapEvents ...", count)
+    await listener.wait_for(count, 15)
+    COH_LOG.debug("All events received!")
+
+    listener.reset()
 
 
 async def _validate_cache_event(lifecycle_event: MapLifecycleEvent) -> None:
