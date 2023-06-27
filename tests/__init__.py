@@ -202,7 +202,7 @@ async def get_session(wait_for_ready: float = 0) -> Session:
         options.channel_options = (("grpc.ssl_target_name_override", "Star-Lord"),)
         session = await Session.create(options)
     else:
-        session = await Session.create()
+        session = await Session.create(Options(ready_timeout_seconds=wait_for_ready))
 
     return session
 

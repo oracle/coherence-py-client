@@ -147,8 +147,6 @@ async def test_wait_for_ready() -> None:
     try:
         count: int = 50
         cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
-        print(f"Cache -> {cache}")
-        return
 
         listener: CountingMapListener[str, str] = CountingMapListener("Test")
 
