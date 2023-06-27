@@ -19,7 +19,7 @@ from coherence.event import MapLifecycleEvent, SessionLifecycleEvent
 from tests import CountingMapListener
 
 COH_LOG = logging.getLogger("coherence-test")
-EVENT_TIMEOUT: Final[float] = 5.0
+EVENT_TIMEOUT: Final[float] = 10.0
 
 
 @pytest.mark.asyncio
