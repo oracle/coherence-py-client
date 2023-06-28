@@ -122,6 +122,7 @@ test:  ##
 		tests/test_serialization.py \
 		tests/test_session.py \
 		tests/test_client.py \
+		tests/test_events.py \
 		tests/test_filters.py \
 		tests/test_processors.py \
 		tests/test_aggregators.py \
