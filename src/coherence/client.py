@@ -8,6 +8,8 @@ import abc
 import asyncio
 import logging
 import os
+import time
+import uuid
 from asyncio import Condition, Task
 from threading import Lock
 from typing import (
@@ -62,7 +64,7 @@ def _pre_call_cache(func):
             raise Exception("Cache [{}] has been {}.".format(self.name, "released" if self.released else "destroyed"))
 
         # noinspection PyProtectedMember
-        await self._session._wait_for_active()
+        await self._session._wait_for_ready()
 
         return await func(self, *args, **kwargs)
 
@@ -577,6 +579,7 @@ class NamedCacheClient(NamedCache[K, V]):
         await self._client_stub.clear(r)
 
     async def destroy(self) -> None:
+        self.release()
         self._internal_emitter.once(MapLifecycleEvent.DESTROYED.value)
         self._internal_emitter.emit(MapLifecycleEvent.DESTROYED.value, self.name)
         r = self._request_factory.destroy_request()
@@ -771,6 +774,12 @@ class NamedCacheClient(NamedCache[K, V]):
         internal_emitter.on(MapLifecycleEvent.RELEASED.value, on_released)
         internal_emitter.on(MapLifecycleEvent.TRUNCATED.value, on_truncated)
 
+    def __str__(self) -> str:
+        return (
+            f"NamedCache(name={self.name}, session={self._session.session_id}, serializer={self._serializer},"
+            f" released={self.released}, destroyed={self.destroyed})"
+        )
+
 
 class TlsOptions:
     """
@@ -884,6 +893,12 @@ class TlsOptions:
     def is_locked(self) -> bool:
         return self._locked
 
+    def __str__(self) -> str:
+        return (
+            f"TlsOptions(enabled={self.enabled}, ca-cert-path={self.ca_cert_path}, "
+            f"client-cert-path={self.client_cert_path}, client-key-path={self.client_key_path})"
+        )
+
 
 class Options:
     """
@@ -902,6 +917,17 @@ class Options:
     request timeout is not passed as an argument in the constructor. If the environment variable is not set and
     request timeout is not passed as an argument then `DEFAULT_REQUEST_TIMEOUT` of 30 seconds is used
     """
+    ENV_READY_TIMEOUT = "COHERENCE_READY_TIMEOUT"
+    """
+    Environment variable to specify the maximum amount of time an NamedMap or NamedCache operations may wait for the
+    underlying gRPC channel to be ready.  This is independent of the request timeout which sets a deadline on how
+    long the call may take after being dispatched.
+    """
+    ENV_SESSION_DISCONNECT_TIMEOUT = "COHERENCE_SESSION_DISCONNECT_TIMEOUT"
+    """
+    Environment variable to specify the maximum amount of time, in seconds, a Session may remain in a disconnected
+    state without successfully reconnecting.
+    """
 
     DEFAULT_ADDRESS: Final[str] = "localhost:1408"
     """The default target address to connect to Coherence gRPC server."""
@@ -909,6 +935,16 @@ class Options:
     """The default scope."""
     DEFAULT_REQUEST_TIMEOUT: Final[float] = 30.0
     """The default request timeout."""
+    DEFAULT_READY_TIMEOUT: Final[float] = 0
+    """
+    The default ready timeout is 0 which disables the feature by default.  Explicitly configure the ready timeout
+    session option or use the environment variable to specify a positive value indicating how many seconds an RPC will
+    wait for the underlying channel to be ready before failing.
+    """
+    DEFAULT_SESSION_DISCONNECT_TIMEOUT: Final[float] = 30.0
+    """
+    The default maximum time a session may be in a disconnected state without having successfully reconnected.
+    """
     DEFAULT_FORMAT: Final[str] = "json"
     """The default serialization format"""
 
@@ -917,6 +953,8 @@ class Options:
         address: str = DEFAULT_ADDRESS,
         scope: str = DEFAULT_SCOPE,
         request_timeout_seconds: float = DEFAULT_REQUEST_TIMEOUT,
+        ready_timeout_seconds: float = DEFAULT_READY_TIMEOUT,
+        session_disconnect_seconds: float = DEFAULT_SESSION_DISCONNECT_TIMEOUT,
         ser_format: str = DEFAULT_FORMAT,
         channel_options: Optional[Sequence[Tuple[str, Any]]] = None,
         tls_options: Optional[TlsOptions] = None,
@@ -932,6 +970,13 @@ class Options:
         :param request_timeout_seconds: Defines the request timeout, in `seconds`, that will be applied to each
           remote call. If not explicitly set, this defaults to :func:`coherence.client.Options.DEFAULT_REQUEST_TIMEOUT`.
           See also :func:`coherence.client.Options.ENV_REQUEST_TIMEOUT`
+        :param ready_timeout_seconds: Defines the ready timeout, in `seconds`.  If this is a positive
+          float value, remote calls will not fail immediately if no connection is available.  If this is a value of zero
+          or less, then remote calls will fail-fast.  If not explicitly configured, the default of 0 is assumed.
+
+          See also :class:`coherence.client.Options.ENV_READY_TIMEOUT`
+        :param session_disconnect_seconds: Defines the maximum time, in `seconds`, that a session may remain in
+          a disconnected state without successfully reconnecting.
         :param ser_format: The serialization format.  Currently, this is always `json`
         :param channel_options: The `gRPC` `ChannelOptions`. See
             https://grpc.github.io/grpc/python/glossary.html#term-channel_arguments and
@@ -944,17 +989,13 @@ class Options:
         else:
             self._address = address
 
-        timeout = os.getenv(Options.ENV_REQUEST_TIMEOUT)
-        if timeout is not None:
-            time_out: float
-            try:
-                time_out = float(timeout)
-            except ValueError:
-                COH_LOG.warning("The timeout value of [%s] cannot be converted to a float", Options.ENV_REQUEST_TIMEOUT)
-
-            self._request_timeout_seconds = time_out
-        else:
-            self._request_timeout_seconds = request_timeout_seconds
+        self._request_timeout_seconds = Options._get_float_from_env(
+            Options.ENV_REQUEST_TIMEOUT, request_timeout_seconds
+        )
+        self._ready_timeout_seconds = Options._get_float_from_env(Options.ENV_READY_TIMEOUT, ready_timeout_seconds)
+        self._session_disconnect_timeout_seconds = Options._get_float_from_env(
+            Options.ENV_READY_TIMEOUT, session_disconnect_seconds
+        )
 
         self._scope = scope
         self._ser_format = ser_format
@@ -1023,6 +1064,24 @@ class Options:
         return self._request_timeout_seconds
 
     @property
+    def ready_timeout_seconds(self) -> float:
+        """
+        Returns the ready timeout in `seconds`.
+
+        :return: the ready timeout in `seconds`
+        """
+        return self._ready_timeout_seconds
+
+    @property
+    def session_disconnect_timeout_seconds(self) -> float:
+        """
+        Returns the ready timeout in `seconds`.
+
+        :return: the ready timeout in `seconds`
+        """
+        return self._session_disconnect_timeout_seconds
+
+    @property
     def channel_options(self) -> Optional[Sequence[Tuple[str, Any]]]:
         """
         Return the `gRPC` `ChannelOptions`.
@@ -1039,6 +1098,43 @@ class Options:
         :param channel_options: the `gRPC` `ChannelOptions`.
         """
         self._channel_options = channel_options
+
+    @staticmethod
+    def _get_float_from_env(variable_name: str, default_value: float) -> float:
+        """
+        Return a float value parsed from the provided environment variable name.
+
+        :param variable_name: the environment variable name
+        :param default_value: the value to use if the environment variable is not set
+
+        :return: the float value from the environment or the default if the value can't be parsed
+          or the environment variable is not set
+        """
+        timeout = os.getenv(variable_name)
+        if timeout is not None:
+            time_out: float = default_value
+            try:
+                time_out = float(timeout)
+            except ValueError:
+                COH_LOG.warning(
+                    "The timeout value of [%s] specified by environment variable [%s] cannot be converted to a float",
+                    timeout,
+                    variable_name,
+                )
+
+            return time_out
+        else:
+            return default_value
+
+    def __str__(self) -> str:
+        return (
+            f"Options(address={self.address}, scope={self.scope}, format={self.format},"
+            f" request-timeout-seconds={self.request_timeout_seconds}, "
+            f"ready-timeout-seconds={self.ready_timeout_seconds}, "
+            f"session-disconnect-timeout-seconds={self.session_disconnect_timeout_seconds}, "
+            f"tls-options={self.tls_options}, "
+            f"channel-options={self.channel_options})"
+        )
 
 
 def _get_channel_creds(tls_options: TlsOptions) -> grpc.ChannelCredentials:
@@ -1090,14 +1186,29 @@ class Session:
         :param session_options: the provided :func:`coherence.client.Options`
         """
         self._closed: bool = False
-        self._active = False
-        self._active_condition: Condition = Condition()
+        self._session_id: str = str(uuid.uuid4())
+        self._ready = False
+        self._ready_condition: Condition = Condition()
         self._caches: dict[str, NamedCache[Any, Any]] = dict()
         self._lock: Lock = Lock()
         if session_options is not None:
             self._session_options = session_options
         else:
             self._session_options = Options()
+
+        self._ready_timeout_seconds: float = self._session_options.ready_timeout_seconds
+        self._ready_enabled: bool = self._ready_timeout_seconds > 0
+
+        interceptors = [
+            _InterceptorUnaryUnary(self),
+            _InterceptorUnaryStream(self),
+            _InterceptorStreamUnary(self),
+        ]
+
+        # only add the StreamStream interceptor if ready support is enabled as
+        # when added in the non-ready case, the call will not fail-fast
+        if self._ready_enabled:
+            interceptors.append(_InterceptorStreamStream(self))
 
         self._tasks: Set[Task[None]] = set()
 
@@ -1107,12 +1218,7 @@ class Session:
                 options=None
                 if self._session_options.channel_options is None
                 else self._session_options.channel_options,
-                interceptors=[
-                    _InterceptorUnaryUnary(self),
-                    _InterceptorUnaryStream(self),
-                    _InterceptorStreamUnary(self),
-                    _InterceptorStreamStream(self),
-                ],
+                interceptors=interceptors,
             )
         else:
             creds: grpc.ChannelCredentials = _get_channel_creds(self._session_options.tls_options)
@@ -1122,12 +1228,7 @@ class Session:
                 options=None
                 if self._session_options.channel_options is None
                 else self._session_options.channel_options,
-                interceptors=[
-                    _InterceptorUnaryUnary(self),
-                    _InterceptorUnaryStream(self),
-                    _InterceptorStreamUnary(self),
-                    _InterceptorStreamStream(self),
-                ],
+                interceptors=interceptors,
             )
 
         watch_task: Task[None] = asyncio.create_task(watch_channel_state(self))
@@ -1138,7 +1239,7 @@ class Session:
     @staticmethod
     async def create(session_options: Optional[Options] = None) -> Session:
         session: Session = Session(session_options)
-        await session._set_active(False)
+        await session._set_ready(False)
         return session
 
     # noinspection PyTypeHints
@@ -1205,11 +1306,26 @@ class Session:
     @property
     def closed(self) -> bool:
         """
-        Returns `True` if Session is closed else `False`
+        Returns `True` if Session is closed else `False`.
 
         :return: `True` if Session is closed else `False`
         """
         return self._closed
+
+    @property
+    def session_id(self) -> str:
+        """
+        Returns this Session's ID.
+
+        :return: this Session's ID
+        """
+        return self._session_id
+
+    def __str__(self) -> str:
+        return (
+            f"Session(id={self.session_id}, closed={self.closed}, state={self._channel.get_state(False)},"
+            f" caches/maps={len(self._caches)}, options={self.options})"
+        )
 
     # noinspection PyProtectedMember
     @_pre_call_session
@@ -1255,29 +1371,32 @@ class Session:
                 self._caches.update({name: c})
             return c
 
-    def is_active(self) -> bool:
+    def is_ready(self) -> bool:
         """
         Returns
         :return:
         """
-        return self._active
+        if self._closed:
+            return False
 
-    async def _set_active(self, active: bool) -> None:
-        self._active = active
-        if self._active:
-            if not self._active_condition.locked():
-                await self._active_condition.acquire()
-            self._active_condition.notify_all()
-            self._active_condition.release()
+        return True if not self._ready_enabled else self._ready
+
+    async def _set_ready(self, ready: bool) -> None:
+        self._ready = ready
+        if self._ready:
+            if not self._ready_condition.locked():
+                await self._ready_condition.acquire()
+            self._ready_condition.notify_all()
+            self._ready_condition.release()
         else:
-            await self._active_condition.acquire()
+            await self._ready_condition.acquire()
 
-    async def _wait_for_active(self) -> None:
-        if not self.is_active():
-            timeout: float = self._session_options.request_timeout_seconds
-            COH_LOG.debug("Waiting for session to become active; timeout=[%s seconds]", timeout)
+    async def _wait_for_ready(self) -> None:
+        if self._ready_enabled and not self.is_ready():
+            timeout: float = self._ready_timeout_seconds
+            COH_LOG.debug(f"Waiting for session {self.session_id} to become active; timeout=[{timeout} seconds]")
             async with asyncio.timeout(timeout):
-                await self._active_condition.wait()
+                await self._ready_condition.wait()
 
     # noinspection PyUnresolvedReferences
     async def close(self) -> None:
@@ -1298,6 +1417,7 @@ class Session:
             self._caches.clear()
 
             await self._channel.close()  # TODO: consider grace period?
+            self._channel = None
 
     def _setup_event_handlers(self, client: NamedCacheClient[K, V]) -> None:
         this: Session = self
@@ -1340,7 +1460,7 @@ class _BaseInterceptor:
             self._session.options.request_timeout_seconds,
             client_call_details.metadata,
             client_call_details.credentials,
-            True,
+            True if self._session._ready_enabled else None,
         )
         return await continuation(new_details, request)
 
@@ -1391,37 +1511,73 @@ async def watch_channel_state(session: Session) -> None:
     emitter: EventEmitter = session._emitter
     channel: grpc.aio.Channel = session.channel
     first_connect: bool = True
+    connected: bool = False
     last_state: grpc.ChannelConnectivity = grpc.ChannelConnectivity.IDLE
+    disconnect_time: float = 0
+
+    def current_milli_time() -> float:
+        return round(time.time() * 1000)
 
     try:
         while True:
-            state: grpc.ChannelConnectivity = channel.get_state(False)
-            COH_LOG.debug("New Channel State: transitioning from [%s] to [%s]", last_state, state)
+            state: grpc.ChannelConnectivity = channel.get_state(True)
+            if COH_LOG.isEnabledFor(logging.DEBUG):
+                COH_LOG.debug(f"New Channel State: transitioning from [{last_state}] to [{state}].")
             match state:
                 case grpc.ChannelConnectivity.SHUTDOWN:
-                    COH_LOG.info("Session to [%s] terminated", session.options.address)
-                    await session._set_active(False)
+                    COH_LOG.info(f"Session [{session.session_id}] terminated.")
+                    await session._set_ready(False)
+                    await session.close()
+                    return
                 case grpc.ChannelConnectivity.READY:
-                    if not first_connect and not session.is_active():
-                        COH_LOG.info("Session re-established to [%s]", session.options.address)
-
+                    if not first_connect and not connected:
+                        connected = True
+                        disconnect_time = 0
+                        COH_LOG.info(f"Session [{session.session_id} re-connected to [{session.options.address}].")
                         await emitter.emit_async(SessionLifecycleEvent.RECONNECTED.value)
-                        await session._set_active(True)
-                    elif first_connect and not session.is_active():
-                        COH_LOG.info("Session established to [%s]", session.options.address)
+                        await session._set_ready(True)
+                    elif first_connect and not connected:
+                        connected = True
+                        COH_LOG.info(f"Session [{session.session_id}] connected to [{session.options.address}].")
 
                         first_connect = False
                         await emitter.emit_async(SessionLifecycleEvent.CONNECTED.value)
-                        await session._set_active(True)
+                        await session._set_ready(True)
                 case _:
-                    if session.is_active():
-                        COH_LOG.warning("Session to [%s] disconnected; will attempt reconnect", session.options.address)
+                    if connected:
+                        connected = False
+                        disconnect_time = -1
+                        COH_LOG.warning(
+                            f"Session [{session.session_id}] disconnected from [{session.options.address}];"
+                            f" will attempt reconnect."
+                        )
 
                         await emitter.emit_async(SessionLifecycleEvent.DISCONNECTED.value)
-                        await session._set_active(False)
+                        await session._set_ready(False)
 
-            COH_LOG.debug("Waiting for state change from [%s]", state)
-            await channel.wait_for_state_change(channel.get_state(True))
+                    if disconnect_time != 0:
+                        if disconnect_time == -1:
+                            disconnect_time = current_milli_time()
+                        else:
+                            waited: float = current_milli_time() - disconnect_time
+                            timeout = session.options.session_disconnect_timeout_seconds
+                            if COH_LOG.isEnabledFor(logging.DEBUG):
+                                COH_LOG.debug(
+                                    f"Waited [{waited / 1000} seconds] for session [{session.session_id}] to reconnect."
+                                    f" [~{(round(timeout - (waited / 1000)))} seconds] remaining to reconnect."
+                                )
+                            if waited >= timeout:
+                                COH_LOG.error(
+                                    f"session [{session.session_id}] unable to reconnect within [{timeout} seconds."
+                                    f"  Closing session."
+                                )
+                                await session.close()
+                                return
+
+            state = channel.get_state(True)
+            if COH_LOG.isEnabledFor(logging.DEBUG):
+                COH_LOG.debug(f"Waiting for state change from [{state}]")
+            await channel.wait_for_state_change(state)
     except asyncio.CancelledError:
         return
 

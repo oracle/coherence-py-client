@@ -4,10 +4,12 @@
 import asyncio
 import logging.config
 import os
-from typing import List, TypeVar
+from asyncio import Event
+from typing import Final, List, TypeVar
 
 import pytest
 
+from coherence import Options, Session, TlsOptions
 from coherence.event import MapEvent, MapListener
 
 K = TypeVar("K")
@@ -172,3 +174,38 @@ class CountingMapListener(MapListener[K, V]):
             if self.count == event_count:
                 return
             await asyncio.sleep(0)
+
+
+async def get_session(wait_for_ready: float = 0) -> Session:
+    default_address: Final[str] = "localhost:1408"
+    default_scope: Final[str] = ""
+    default_request_timeout: Final[float] = 30.0
+    default_format: Final[str] = "json"
+
+    run_secure: Final[str] = "RUN_SECURE"
+    session: Session
+
+    if run_secure in os.environ:
+        # Default TlsOptions constructor will pick up the SSL Certs and
+        # Key values from these environment variables:
+        # COHERENCE_TLS_CERTS_PATH
+        # COHERENCE_TLS_CLIENT_CERT
+        # COHERENCE_TLS_CLIENT_KEY
+        tls_options: TlsOptions = TlsOptions()
+        tls_options.enabled = True
+        tls_options.locked()
+
+        options: Options = Options(
+            default_address, default_scope, default_request_timeout, wait_for_ready, ser_format=default_format
+        )
+        options.tls_options = tls_options
+        options.channel_options = (("grpc.ssl_target_name_override", "Star-Lord"),)
+        session = await Session.create(options)
+    else:
+        session = await Session.create(Options(ready_timeout_seconds=wait_for_ready))
+
+    return session
+
+
+async def wait_for(event: Event, timeout: float) -> None:
+    await asyncio.wait_for(event.wait(), timeout)

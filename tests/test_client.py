@@ -2,12 +2,6 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
-import asyncio
-import logging
-import logging.config
-import os
-import urllib
-import urllib.request
 from asyncio import Event
 from time import time
 from typing import Any, AsyncGenerator, Final, Optional, TypeVar
@@ -15,19 +9,17 @@ from typing import Any, AsyncGenerator, Final, Optional, TypeVar
 import pytest
 import pytest_asyncio
 
-from coherence import Filters, MapEntry, NamedCache, Options, Session, TlsOptions
-from coherence.event import MapLifecycleEvent, SessionLifecycleEvent
+import tests
+from coherence import Filters, MapEntry, NamedCache, Session
+from coherence.event import MapLifecycleEvent
 from coherence.extractor import ChainedExtractor, UniversalExtractor
 from coherence.processor import ExtractorProcessor
-from tests import CountingMapListener
 from tests.address import Address
 from tests.person import Person
 
 K = TypeVar("K")
 V = TypeVar("V")
 R = TypeVar("R")
-
-COH_LOG = logging.getLogger("coherence-test")
 
 
 async def _insert_large_number_of_entries(cache: NamedCache[str, str]) -> int:
@@ -48,38 +40,9 @@ async def _insert_large_number_of_entries(cache: NamedCache[str, str]) -> int:
     return num_entries
 
 
-async def get_session() -> Session:
-    default_address: Final[str] = "localhost:1408"
-    default_scope: Final[str] = ""
-    default_request_timeout: Final[float] = 30.0
-    default_format: Final[str] = "json"
-
-    run_secure: Final[str] = "RUN_SECURE"
-    session: Session
-
-    if run_secure in os.environ:
-        # Default TlsOptions constructor will pick up the SSL Certs and
-        # Key values from these environment variables:
-        # COHERENCE_TLS_CERTS_PATH
-        # COHERENCE_TLS_CLIENT_CERT
-        # COHERENCE_TLS_CLIENT_KEY
-        tls_options: TlsOptions = TlsOptions()
-        tls_options.enabled = True
-        tls_options.locked()
-
-        options: Options = Options(default_address, default_scope, default_request_timeout, default_format)
-        options.tls_options = tls_options
-        options.channel_options = (("grpc.ssl_target_name_override", "Star-Lord"),)
-        session = await Session.create(options)
-    else:
-        session = await Session.create()
-
-    return session
-
-
 @pytest_asyncio.fixture
 async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
-    session: Session = await get_session()
+    session: Session = await tests.get_session()
 
     cache: NamedCache[Any, Any] = await session.get_cache("test")
 
@@ -92,7 +55,7 @@ async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
 
 @pytest_asyncio.fixture
 async def setup_and_teardown_person_cache() -> AsyncGenerator[NamedCache[str, Person], None]:
-    session: Session = await get_session()
+    session: Session = await tests.get_session()
 
     cache: NamedCache[str, Person] = await session.get_cache("test")
 
@@ -116,43 +79,6 @@ async def setup_and_teardown_person_cache() -> AsyncGenerator[NamedCache[str, Pe
     await cache.truncate()
     await cache.destroy()
     await session.close()
-
-
-@pytest.mark.asyncio
-async def test_session_basics() -> None:
-    """Test initial session state; CLOSED lifecycle event; and post-close invocations raise error"""
-
-    session: Session = await get_session()
-
-    assert session.channel is not None
-    assert session.scope == ""
-    assert session.options is not None
-    assert session.format == "json"
-    assert not session.closed
-
-    event: Event = Event()
-    session.on(SessionLifecycleEvent.CLOSED, lambda: event.set())
-    await session.close()
-    await asyncio.wait_for(_waiter(event), 0.5)
-
-    # ensure close is idempotent
-    event.clear()
-    await session.close()
-
-    with pytest.raises(asyncio.TimeoutError):
-        await asyncio.wait_for(_waiter(event), 0.5)
-
-    assert session.channel is not None
-    assert session.scope == ""
-    assert session.options is not None
-    assert session.format == "json"
-    assert session.closed
-
-    with pytest.raises(Exception):
-        await session.get_cache("test")
-
-    with pytest.raises(Exception):
-        session.on(SessionLifecycleEvent.CLOSED, lambda: None)
 
 
 # noinspection PyShadowingNames
@@ -387,7 +313,7 @@ async def test_get_all_no_keys_raises_error(setup_and_teardown: NamedCache[str, 
 
     with pytest.raises(ValueError):
         # noinspection PyTypeChecker
-        await cache.get_all(None)  # type: ignore
+        await cache.get_all(None)
 
 
 # noinspection PyShadowingNames
@@ -601,7 +527,7 @@ async def test_cache_truncate_event(setup_and_teardown: NamedCache[str, str]) ->
     assert await cache.size() == 2
 
     await cache.truncate()
-    await asyncio.wait_for(_waiter(event), EVENT_TIMEOUT)
+    await tests.wait_for(event, EVENT_TIMEOUT)
 
     assert name == cache.name
     assert await cache.size() == 0
@@ -610,7 +536,7 @@ async def test_cache_truncate_event(setup_and_teardown: NamedCache[str, str]) ->
 # noinspection PyShadowingNames,DuplicatedCode
 @pytest.mark.asyncio
 async def test_cache_release_event() -> None:
-    session: Session = await get_session()
+    session: Session = await tests.get_session()
     cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
     name: str = "UNSET"
     event: Event = Event()
@@ -628,7 +554,7 @@ async def test_cache_release_event() -> None:
         assert await cache.size() == 2
 
         cache.release()
-        await asyncio.wait_for(_waiter(event), EVENT_TIMEOUT)
+        await tests.wait_for(event, EVENT_TIMEOUT)
 
         assert name == cache.name
         assert cache.released
@@ -636,159 +562,3 @@ async def test_cache_release_event() -> None:
         assert not cache.active
     finally:
         await session.close()
-
-
-# noinspection PyShadowingNames
-@pytest.mark.asyncio
-async def test_cache_destroy_event() -> None:
-    session: Session = await get_session()
-    cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
-    name: str = "UNSET"
-    event: Event = Event()
-
-    def callback(n: str) -> None:
-        nonlocal name
-        name = n
-        event.set()
-
-    cache.on(MapLifecycleEvent.DESTROYED, callback)
-
-    try:
-        await cache.put("A", "B")
-        await cache.put("C", "D")
-        assert await cache.size() == 2
-
-        await cache.destroy()
-        await asyncio.wait_for(_waiter(event), EVENT_TIMEOUT)
-
-        assert name == cache.name
-        assert not cache.released
-        assert cache.destroyed
-        assert not cache.active
-    finally:
-        await session.close()
-
-
-# noinspection PyShadowingNames,DuplicatedCode
-@pytest.mark.asyncio
-async def test_session_release_event() -> None:
-    session: Session = await get_session()
-    cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
-    name: str = "UNSET"
-    event: Event = Event()
-
-    def callback(n: str) -> None:
-        nonlocal name
-        name = n
-        event.set()
-
-    session.on(MapLifecycleEvent.RELEASED, callback)
-
-    try:
-        await cache.put("A", "B")
-        await cache.put("C", "D")
-        assert await cache.size() == 2
-
-        cache.release()
-        await asyncio.wait_for(_waiter(event), EVENT_TIMEOUT)
-
-        assert name == cache.name
-        assert cache.released
-        assert not cache.destroyed
-        assert not cache.active
-    finally:
-        await session.close()
-
-
-@pytest.mark.asyncio
-async def test_session_reconnect() -> None:
-    session: Session = await get_session()
-    logging.debug("Getting cache ...")
-
-    try:
-        count: int = 50
-        cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
-
-        listener: CountingMapListener[str, str] = CountingMapListener("Test")
-
-        COH_LOG.debug("Adding MapListener ...")
-        await cache.add_map_listener(listener)
-
-        COH_LOG.debug("Inserting values ...")
-        for i in range(count):
-            await cache.put(str(i), str(i))
-
-        COH_LOG.debug("Waiting for [%s] MapEvents ...", count)
-        await listener.wait_for(count, 15)
-        COH_LOG.debug("All events received!")
-
-        listener.reset()
-
-        disc_event: Event = Event()
-
-        def disc() -> None:
-            COH_LOG.debug("Detected session disconnect!")
-            nonlocal disc_event
-            disc_event.set()
-
-        session.on(SessionLifecycleEvent.DISCONNECTED, disc)
-
-        COH_LOG.debug("Shutting down the gRPC Proxy ...")
-        req: urllib.request.Request = urllib.request.Request(
-            "http://127.0.0.1:30000/management/coherence/cluster/services/$GRPC:GrpcProxy/members/1/stop", method="POST"
-        )
-        with urllib.request.urlopen(req) as response:
-            response.read()
-
-        COH_LOG.debug("Waiting for session disconnect ...")
-        async with asyncio.timeout(10):
-            await disc_event.wait()
-
-        # start inserting values as soon as disconnect occurs to ensure
-        # that we properly wait for the session to reconnect before
-        # issuing RPC
-        COH_LOG.debug("Inserting second set of values ...")
-        for i in range(count):
-            await cache.put(str(i), str(i))
-
-        COH_LOG.debug("Waiting for [%s] MapEvents ...", count)
-        await listener.wait_for(count, 15)
-        COH_LOG.debug("All events received!")
-
-    finally:
-        await session.close()
-
-
-# noinspection PyShadowingNames
-@pytest.mark.asyncio
-async def test_session_destroy_event() -> None:
-    session: Session = await get_session()
-    cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
-    name: str = "UNSET"
-    event: Event = Event()
-
-    def callback(n: str) -> None:
-        nonlocal name
-        name = n
-        event.set()
-
-    session.on(MapLifecycleEvent.DESTROYED, callback)
-
-    try:
-        await cache.put("A", "B")
-        await cache.put("C", "D")
-        assert await cache.size() == 2
-
-        await cache.destroy()
-        await asyncio.wait_for(_waiter(event), EVENT_TIMEOUT)
-
-        assert name == cache.name
-        assert not cache.released
-        assert cache.destroyed
-        assert not cache.active
-    finally:
-        await session.close()
-
-
-async def _waiter(event: Event) -> None:
-    await event.wait()

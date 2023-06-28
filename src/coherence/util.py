@@ -63,7 +63,7 @@ class RequestFactory:
         p = PutRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             key=self._serializer.serialize(key),
             value=self._serializer.serialize(value),
             ttl=ttl,
@@ -74,7 +74,7 @@ class RequestFactory:
         g = GetRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             key=self._serializer.serialize(key),
         )
         return g
@@ -83,7 +83,7 @@ class RequestFactory:
         if keys is None:
             raise ValueError("Must specify a set of keys")
 
-        g: GetAllRequest = GetAllRequest(scope=self._scope, cache=self._cache_name, format=self._serializer.format())
+        g: GetAllRequest = GetAllRequest(scope=self._scope, cache=self._cache_name, format=self._serializer.format)
 
         for key in keys:
             g.key.append(self._serializer.serialize(key))
@@ -94,7 +94,7 @@ class RequestFactory:
         p = PutIfAbsentRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             key=self._serializer.serialize(key),
             value=self._serializer.serialize(value),
             ttl=ttl,
@@ -108,7 +108,7 @@ class RequestFactory:
             v = self._serializer.serialize(value)
             e = Entry(key=k, value=v)
             entry_list.append(e)
-        p = PutAllRequest(scope=self._scope, cache=self._cache_name, format=self._serializer.format(), entry=entry_list)
+        p = PutAllRequest(scope=self._scope, cache=self._cache_name, format=self._serializer.format, entry=entry_list)
         return p
 
     def clear_request(self) -> ClearRequest:
@@ -127,7 +127,7 @@ class RequestFactory:
         r = RemoveRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             key=self._serializer.serialize(key),
         )
         return r
@@ -136,7 +136,7 @@ class RequestFactory:
         r = RemoveMappingRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             key=self._serializer.serialize(key),
             value=self._serializer.serialize(value),
         )
@@ -146,7 +146,7 @@ class RequestFactory:
         r = ReplaceRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             key=self._serializer.serialize(key),
             value=self._serializer.serialize(value),
         )
@@ -156,7 +156,7 @@ class RequestFactory:
         r = ReplaceMappingRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             key=self._serializer.serialize(key),
             previousValue=self._serializer.serialize(old_value),
             newValue=self._serializer.serialize(new_value),
@@ -167,7 +167,7 @@ class RequestFactory:
         r = ContainsKeyRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             key=self._serializer.serialize(key),
         )
         return r
@@ -176,7 +176,7 @@ class RequestFactory:
         r = ContainsValueRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             value=self._serializer.serialize(value),
         )
         return r
@@ -193,7 +193,7 @@ class RequestFactory:
         r = InvokeRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             processor=self._serializer.serialize(processor),
             key=self._serializer.serialize(key),
         )
@@ -208,7 +208,7 @@ class RequestFactory:
         r = InvokeAllRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             processor=self._serializer.serialize(processor),
         )
 
@@ -229,7 +229,7 @@ class RequestFactory:
         r: AggregateRequest = AggregateRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
             aggregator=self._serializer.serialize(aggregator),
         )
 
@@ -248,7 +248,7 @@ class RequestFactory:
         r: ValuesRequest = ValuesRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
         )
 
         if filter is not None:
@@ -263,7 +263,7 @@ class RequestFactory:
         r: KeySetRequest = KeySetRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
         )
 
         if filter is not None:
@@ -280,7 +280,7 @@ class RequestFactory:
         r: EntrySetRequest = EntrySetRequest(
             scope=self._scope,
             cache=self._cache_name,
-            format=self._serializer.format(),
+            format=self._serializer.format,
         )
 
         if filter is not None:
@@ -300,7 +300,7 @@ class RequestFactory:
         """
 
         r: PageRequest = PageRequest(
-            scope=self._scope, cache=self._cache_name, format=self._serializer.format(), cookie=cookie
+            scope=self._scope, cache=self._cache_name, format=self._serializer.format, cookie=cookie
         )
 
         return r
@@ -314,7 +314,7 @@ class RequestFactory:
             raise AssertionError("Must specify a key or a filter")
 
         request: MapListenerRequest = MapListenerRequest(
-            cache=self._cache_name, scope=self._scope, format=self._serializer.format()
+            cache=self._cache_name, scope=self._scope, format=self._serializer.format
         )
 
         request.lite = lite
@@ -340,7 +340,7 @@ class RequestFactory:
 
     def map_event_subscribe(self) -> MapListenerRequest:
         request: MapListenerRequest = MapListenerRequest(
-            cache=self._cache_name, scope=self._scope, format=self._serializer.format()
+            cache=self._cache_name, scope=self._scope, format=self._serializer.format
         )
         request.uid = self.__generate_next_request_id("init")
         request.subscribe = True
