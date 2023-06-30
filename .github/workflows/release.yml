@@ -1,0 +1,132 @@
+# Copyright 2023, Oracle Corporation and/or its affiliates.  All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence Python Client GitHub Release Actions build.
+# ---------------------------------------------------------------------------
+
+
+name: Publish on Pypi and GitHub Pages
+
+on:
+  release:
+    # This specifies that the build will be triggered when we publish a release
+    types: [published]
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11.x"
+
+      - name: Install Poetry
+        shell: bash
+        run: |
+          pip install poetry=="1.5.0"
+
+      - name: Install Dependencies
+        run: python -m poetry install
+
+      - name: Generate docs
+        shell: bash
+        run: |
+          python -m poetry run make docs
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          name: "github-pages"
+          path: ./docs/_build
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: github-pages
+          path: .
+
+      - name: Publish to PyPi
+        shell: bash
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USER }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          pip install --upgrade pip
+          pip install build twine
+          python3 -m build
+          ls -la ./dist
+          twine upload --repository testpypi dist/*
+      - name: Get release version
+        id: get-version
+        run: |
+          version=$(echo ${{github.event.release.tag_name}} | sed 's/v//')
+          echo "get_release_ver=$version" >> "$GITHUB_ENV"
+      - name: Print version
+        run: |
+          echo "${{ env.get_release_ver }}"
+      - name: Attach whl artifact to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+            upload_url: ${{ github.event.release.upload_url }}
+            asset_path: ./dist/${{ format('coherence_client-{0}-py3-none-any.whl', env.get_release_ver) }}
+            asset_name: ${{ format('coherence_client-{0}-py3-none-any.whl', env.get_release_ver ) }}
+            asset_content_type: application/gzip
+      - name: Attach tar.gz artifact to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/${{ format('coherence_client-{0}.tar.gz', env.get_release_ver) }}
+          asset_name: ${{ format('coherence_client-{0}.tar.gz', env.get_release_ver) }}
+          asset_content_type: application/gzip
+      - name: Attach doc zip to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./artifact.tar
+          asset_name: ${{ format('coherence_client-{0}-doc.tar', env.get_release_ver) }}
+          asset_content_type: application/gzip
+
+  # Deploy job
+  deploy:
+    # Add a dependency to the build job
+    needs: build
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2 # or the latest "vX.X.X" version tag for this action
+        with:
+          artifact_name: github-pages
