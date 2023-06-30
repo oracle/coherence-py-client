@@ -16,22 +16,22 @@ async def do_run() -> None:
     """
     session: Session = await Session.create()
     try:
-        namedMap: NamedMap[int, str] = await session.get_map("my-map")
+        named_map: NamedMap[int, str] = await session.get_map("my-map")
 
         print("Put key 1; value one")
-        await namedMap.put(1, "one")
+        await named_map.put(1, "one")
 
-        print("Value for key 1 is :", await namedMap.get(1))
+        print("Value for key 1 is :", await named_map.get(1))
 
-        print("NamedMap size is :", await namedMap.size())
+        print("NamedMap size is :", await named_map.size())
 
-        print("Updating value of key 1 to ONE from ", await namedMap.put(1, "ONE"))
+        print("Updating value of key 1 to ONE from ", await named_map.put(1, "ONE"))
 
-        print("Value for key 1 is :", await namedMap.get(1))
+        print("Value for key 1 is :", await named_map.get(1))
 
-        print("Removing key 1, current value :", await namedMap.remove(1))
+        print("Removing key 1, current value :", await named_map.remove(1))
 
-        print("NamedMap size is :", await namedMap.size())
+        print("NamedMap size is :", await named_map.size())
     finally:
         await session.close()
 

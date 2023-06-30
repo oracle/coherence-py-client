@@ -446,9 +446,9 @@ async def test_custom_filter_listener(setup_and_teardown: NamedCache[str, Person
     cache: NamedCache[str, Person] = setup_and_teardown
     name: str = cache.name
 
-    fred: Person = Person.Fred()
-    fiona: Person = Person.Fiona()
-    pat: Person = Person.Pat()
+    fred: Person = Person.fred()
+    fiona: Person = Person.fiona()
+    pat: Person = Person.pat()
 
     expected: ExpectedEvents[str, Person] = ExpectedEvents(
         [ValidateEvent(name, cache, "C", None, fiona, MapEventType.ENTRY_INSERTED)],
@@ -457,10 +457,10 @@ async def test_custom_filter_listener(setup_and_teardown: NamedCache[str, Person
     )
 
     listener: CountingMapListener[str, Person] = CountingMapListener("basic")
-    filter: Filter = LessFilter("age", 30)
+    less_filter: Filter = LessFilter("age", 30)
     no_events: ExpectedEvents[str, Person] = ExpectedEvents([], [], [])
 
-    await cache.add_map_listener(listener, filter)
+    await cache.add_map_listener(listener, less_filter)
 
     await cache.put("A", fred)
     await asyncio.sleep(1)
@@ -483,9 +483,9 @@ async def test_key_listener(setup_and_teardown: NamedCache[str, Person]) -> None
     cache: NamedCache[str, Person] = setup_and_teardown
     name: str = cache.name
 
-    fred: Person = Person.Fred()
-    fiona: Person = Person.Fiona()
-    pat: Person = Person.Pat()
+    fred: Person = Person.fred()
+    fiona: Person = Person.fiona()
+    pat: Person = Person.pat()
 
     expected: ExpectedEvents[str, Person] = ExpectedEvents(
         [ValidateEvent(name, cache, "C", None, fiona, MapEventType.ENTRY_INSERTED)],
@@ -529,7 +529,7 @@ async def test_lite_listeners(setup_and_teardown: NamedCache[str, Person]) -> No
     await cache.add_map_listener(key_listener_lite, "A", True)
     await cache.add_map_listener(filter_listener_lite, always, True)
 
-    fiona: Person = Person.Fiona()
+    fiona: Person = Person.fiona()
 
     expected_lite: ExpectedEvents[str, Person] = ExpectedEvents(
         [ValidateEvent(name, cache, "A", None, None, MapEventType.ENTRY_INSERTED)],

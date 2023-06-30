@@ -28,40 +28,40 @@ class Person:
         return hash(self.name)
 
     @classmethod
-    def person(cls, name: str, gender: str, age: int, weight: float, address: Address, sports: list[str]) -> Person:
+    def create_person(cls, name: str, gender: str, age: int, weight: float, address: Address, sports: list[str]) -> Person:
         return Person(name, gender, age, weight, address, sports)
 
     @classmethod
-    def Fred(cls) -> Person:
+    def fred(cls) -> Person:
         addr = Address.address("1597 Olive Street", "San Francisco", "CA", 94102, "USA")
-        return cls.person("Fred", "Male", 58, 185.5, addr, ["soccer", "tennis", "cricket"])
+        return cls.create_person("Fred", "Male", 58, 185.5, addr, ["soccer", "tennis", "cricket"])
 
     @classmethod
-    def Fiona(cls) -> Person:
+    def fiona(cls) -> Person:
         addr = Address.address("2382 Palm Ave", "Daly City", "CA", 94014, "USA")
-        return cls.person("Fiona", "Female", 29, 118.5, addr, ["tennis", "hiking"])
+        return cls.create_person("Fiona", "Female", 29, 118.5, addr, ["tennis", "hiking"])
 
     @classmethod
-    def Pat(cls) -> Person:
+    def pat(cls) -> Person:
         addr = Address.address("2038 Helford Lane", "Carmel", "IN", 46032, "USA")
-        return cls.person("Pat", "Male", 62, 205.0, addr, ["golf", "pool", "curling"])
+        return cls.create_person("Pat", "Male", 62, 205.0, addr, ["golf", "pool", "curling"])
 
     @classmethod
-    def Paula(cls) -> Person:
+    def paula(cls) -> Person:
         addr = Address.address("4218 Daniel St", "Champaign", "IL", 61820, "USA")
-        return cls.person("Paula", "Female", 35, 125.0, addr, ["swimming", "golf", "skiing"])
+        return cls.create_person("Paula", "Female", 35, 125.0, addr, ["swimming", "golf", "skiing"])
 
     @classmethod
-    def Andy(cls) -> Person:
+    def andy(cls) -> Person:
         addr = Address.address("1228 West Ave", "Miami", "FL", 33139, "USA")
-        return cls.person("Andy", "Male", 25, 155.0, addr, ["soccer", "triathlon", "tennis"])
+        return cls.create_person("Andy", "Male", 25, 155.0, addr, ["soccer", "triathlon", "tennis"])
 
     @classmethod
-    def Alice(cls) -> Person:
+    def alice(cls) -> Person:
         addr = Address.address("2208 4th Ave", "Phoenix", "AZ", 85003, "USA")
-        return cls.person("Alice", "Female", 22, 110.0, addr, ["golf", "running", "tennis"])
+        return cls.create_person("Alice", "Female", 22, 110.0, addr, ["golf", "running", "tennis"])
 
     @classmethod
-    def Jim(cls) -> Person:
+    def jim(cls) -> Person:
         addr = Address.address("37 Bowdoin St", "Boston", "MA", 2114, "USA")
-        return cls.person("Jim", "Male", 36, 175.5, addr, ["golf", "football", "badminton"])
+        return cls.create_person("Jim", "Male", 36, 175.5, addr, ["golf", "football", "badminton"])

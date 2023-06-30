@@ -12,6 +12,19 @@ import jsonpickle
 
 T = TypeVar("T", covariant=True)
 
+_BIG_DEC_ALIAS: str = Final["math.BigDec"]
+_BIG_INT_ALIAS: str = Final["math.BigInt"]
+
+_META_CLASS: str = Final["@class"]
+_META_VERSION: str = Final["@version"]
+_META_ENUM: str = Final["enum"]
+
+_JSON_KEY = "key"
+_JSON_VALUE = "value"
+_JSON_ENTRIES = "entries"
+
+_JSON_PICKLE_OBJ = "py/object"
+
 MAGIC_BYTE: Final[bytes] = b"\x15"
 
 _type_to_alias: Final[Dict[Type[Any], str]] = dict()
@@ -95,7 +108,7 @@ class SerializerRegistry:
         if s is not None:
             return s
         else:
-            raise Exception("No serializer registered for format: " + ser_format)
+            raise ValueError("No serializer registered for format: " + ser_format)
 
 
 class JavaProxyPickler(jsonpickle.Pickler):
@@ -108,7 +121,7 @@ class JavaProxyPickler(jsonpickle.Pickler):
     def _flatten(self, obj: Any) -> dict[str, str] | None | dict[str, Any] | Decimal:
         if isinstance(obj, int):
             if obj > self.MAX_NUMERIC or obj < self.MIN_NUMERIC:
-                return {"@class": "math.BigInt", "value": str(obj)}
+                return {_META_CLASS: _BIG_INT_ALIAS, "value": str(obj)}
 
         if isinstance(obj, set):
             return super()._flatten(list(obj))
@@ -128,13 +141,13 @@ class JavaProxyPickler(jsonpickle.Pickler):
         object_type = type(obj)
         alias: Optional[str] = _alias_for(object_type)
         if alias is not None:
-            marker = result.get("py/object", None)
+            marker = result.get(_JSON_PICKLE_OBJ, None)
             if marker is not None:
                 actual: dict[str, Any] = dict()
-                actual["@class"] = alias
+                actual[_META_CLASS] = alias
                 for key, value in result.items():
                     # ignore jsonpickle specific content as well as protected keys
-                    if key == "py/object" or str(key).startswith("_"):
+                    if key == _JSON_PICKLE_OBJ or str(key).startswith("_"):
                         continue
 
                     # store the original key/value pair as logic below may change them
@@ -151,13 +164,13 @@ class JavaProxyPickler(jsonpickle.Pickler):
                     # if the value being serialized is a dict, serialize it as a list of key/value pairs
                     if (
                         isinstance(value_, dict)
-                        and "@class" not in value_
-                        and "@version" not in value_
-                        and "enum" not in value_
+                        and _META_CLASS not in value_
+                        and _META_VERSION not in value_
+                        and _META_ENUM not in value_
                     ):
                         entries = list()
                         for key_inner, value_inner in value.items():
-                            entries.append({"key": key_inner, "value": value_inner})
+                            entries.append({_JSON_KEY: key_inner, _JSON_VALUE: value_inner})
 
                         padding: dict[str, Any] = dict()
                         padding["entries"] = entries
@@ -173,41 +186,41 @@ class JavaProxyPickler(jsonpickle.Pickler):
 @jsonpickle.handlers.register(Decimal)
 class DecimalHandler(jsonpickle.handlers.BaseHandler):
     def flatten(self, obj: object, data: dict[str, Any]) -> dict[str, Any]:
-        return {"@class": "math.BigDec", "value": str(obj)}
+        return {_META_CLASS: _BIG_DEC_ALIAS, _JSON_VALUE: str(obj)}
 
     def restore(self, obj: dict[str, Any]) -> Decimal:
-        return Decimal(obj["value"])
+        return Decimal(obj[_JSON_VALUE])
 
 
 @jsonpickle.handlers.register(int)
 class LargeIntHandler(jsonpickle.handlers.BaseHandler):
     def flatten(self, obj: object, data: dict[str, Any]) -> dict[str, Any]:
-        return {"@class": "math.BigInt", "value": str(obj)}
+        return {_META_CLASS: _BIG_INT_ALIAS, _JSON_VALUE: str(obj)}
 
     def restore(self, obj: dict[str, Any]) -> int:
-        return int(obj["value"])
+        return int(obj[_JSON_VALUE])
 
 
 class JavaProxyUnpickler(jsonpickle.Unpickler):
     # noinspection PyUnresolvedReferences
     def _restore(self, obj: Any) -> Any:
         if isinstance(obj, dict):
-            metadata: str = obj.get("@class", None)
+            metadata: str = obj.get(_META_CLASS, None)
             if metadata is not None:
                 type_: Optional[Type[Any]] = _type_for(metadata)
                 actual: dict[str, Any] = dict()
                 if type_ is None:
                     if "map" in metadata.lower():
-                        for entry in obj["entries"]:
-                            actual[entry["key"]] = entry["value"]
+                        for entry in obj[_JSON_ENTRIES]:
+                            actual[entry[_JSON_KEY]] = entry[_JSON_VALUE]
                     else:
                         return obj
                 else:
                     type_name = jsonpickle.util.importable_name(type_)
-                    actual["py/object"] = type_name
+                    actual[_JSON_PICKLE_OBJ] = type_name
                     rev_map = _attribute_mappings_rev.get(type_name, None)
                     for key, value in obj.items():
-                        if key == "@class":
+                        if key == _META_CLASS:
                             continue
 
                         key_ = rev_map.get(key, None) if rev_map is not None else None
@@ -291,5 +304,5 @@ def proxy(alias: str) -> Callable[[Type[Any]], Type[Any]]:
     return _do_register
 
 
-_register(Decimal, "math.BigDec")
-_register(int, "math.BigInt")
+_register(Decimal, _BIG_DEC_ALIAS)
+_register(int, _BIG_INT_ALIAS)

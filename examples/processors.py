@@ -28,42 +28,42 @@ async def do_run() -> None:
     """
     session: Session = await Session.create()
     try:
-        namedMap: NamedMap[int, Hobbit] = await session.get_map("hobbits")
+        named_map: NamedMap[int, Hobbit] = await session.get_map("hobbits")
 
-        await namedMap.clear()
+        await named_map.clear()
 
         hobbit: Hobbit = Hobbit(1, "Bilbo", 111)
         print("Add new hobbit :", hobbit)
-        await namedMap.put(hobbit.id, hobbit)
+        await named_map.put(hobbit.id, hobbit)
 
-        print("NamedMap size is :", await namedMap.size())
+        print("NamedMap size is :", await named_map.size())
 
-        print("Hobbit from get() :", await namedMap.get(hobbit.id))
+        print("Hobbit from get() :", await named_map.get(hobbit.id))
 
         print("Update Hobbit using processor ...")
-        await namedMap.invoke(hobbit.id, Processors.update("age", 112))
+        await named_map.invoke(hobbit.id, Processors.update("age", 112))
 
-        print("Updated Hobbit is :", await namedMap.get(hobbit.id))
+        print("Updated Hobbit is :", await named_map.get(hobbit.id))
 
         hobbit2: Hobbit = Hobbit(2, "Frodo", 50)
 
         print("Add new hobbit :", hobbit2)
-        await namedMap.put(hobbit2.id, hobbit2)
+        await named_map.put(hobbit2.id, hobbit2)
 
-        print("NamedMap size is :", await namedMap.size())
+        print("NamedMap size is :", await named_map.size())
 
         print("Sending all Hobbits ten years into the future!")
         keys: List[int] = []
-        async for entry in namedMap.invoke_all(Processors.increment("age", 10)):
+        async for entry in named_map.invoke_all(Processors.increment("age", 10)):
             keys.append(entry.key)
             print("Updated age of Hobbit with id ", entry.key, "to", entry.value)
 
         print("Displaying all updated Hobbits ...")
-        async for result in namedMap.get_all(set(keys)):
+        async for result in named_map.get_all(set(keys)):
             print(result.value)
 
-        await namedMap.remove(hobbit.id)
-        await namedMap.remove(hobbit2.id)
+        await named_map.remove(hobbit.id)
+        await named_map.remove(hobbit2.id)
     finally:
         await session.close()
 

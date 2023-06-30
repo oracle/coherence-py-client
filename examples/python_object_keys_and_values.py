@@ -10,14 +10,14 @@ from coherence import NamedMap, Processors, Session
 
 @dataclass
 class AccountKey:
-    accountId: int
-    accountType: str
+    account_id: int
+    account_type: str
 
 
 @dataclass
 class Account:
-    accountId: int
-    accountType: str
+    account_id: int
+    account_type: str
     name: str
     balance: float
 
@@ -36,7 +36,7 @@ async def do_run() -> None:
         await namedMap.clear()
 
         new_account_key: AccountKey = AccountKey(100, "savings")
-        new_account: Account = Account(new_account_key.accountId, new_account_key.accountType, "John Doe", 100000.00)
+        new_account: Account = Account(new_account_key.account_id, new_account_key.account_type, "John Doe", 100000.00)
 
         print(f"Add new account {new_account} with key {new_account_key}")
         await namedMap.put(new_account_key, new_account)

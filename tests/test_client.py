@@ -59,21 +59,21 @@ async def setup_and_teardown_person_cache() -> AsyncGenerator[NamedCache[str, Pe
 
     cache: NamedCache[str, Person] = await session.get_cache("test")
 
-    await cache.put(Person.Pat().name, Person.Pat())
-    await cache.put(Person.Paula().name, Person.Paula())
-    await cache.put(Person.Andy().name, Person.Andy())
-    await cache.put(Person.Alice().name, Person.Alice())
-    await cache.put(Person.Jim().name, Person.Jim())
-    await cache.put(Person.Fred().name, Person.Fred())
-    await cache.put(Person.Fiona().name, Person.Fiona())
+    await cache.put(Person.pat().name, Person.pat())
+    await cache.put(Person.paula().name, Person.paula())
+    await cache.put(Person.andy().name, Person.andy())
+    await cache.put(Person.alice().name, Person.alice())
+    await cache.put(Person.jim().name, Person.jim())
+    await cache.put(Person.fred().name, Person.fred())
+    await cache.put(Person.fiona().name, Person.fiona())
     print("\n")
-    print(Person.Pat())
-    print(Person.Paula())
-    print(Person.Andy())
-    print(Person.Alice())
-    print(Person.Jim())
-    print(Person.Fred())
-    print(Person.Fiona())
+    print(Person.pat())
+    print(Person.paula())
+    print(Person.andy())
+    print(Person.alice())
+    print(Person.jim())
+    print(Person.fred())
+    print(Person.fiona())
     yield cache
 
     await cache.truncate()
@@ -99,13 +99,13 @@ async def test_get_and_put(setup_and_teardown: NamedCache[str, str | int | Perso
     r = await cache.get(k1)
     assert r == v1
 
-    k2: str = Person.Andy().name
-    v2: Person = Person.Andy()
+    k2: str = Person.andy().name
+    v2: Person = Person.andy()
     await cache.put(k2, v2)
     r = await cache.get(k2)
     assert type(r) == Person
     assert r.name == k2
-    assert r.address.city == Person.Andy().address.city
+    assert r.address.city == Person.andy().address.city
 
 
 # noinspection PyShadowingNames
@@ -468,8 +468,8 @@ async def test_invoke(setup_and_teardown: NamedCache[str, str | Person]) -> None
     r3: str = await cache.invoke(k2, ExtractorProcessor(UniversalExtractor("toUpperCase()")))
     assert r3 == v2.upper()
 
-    k3: str = Person.Andy().name
-    v3: Person = Person.Andy()
+    k3: str = Person.andy().name
+    v3: Person = Person.andy()
     await cache.put(k3, v3)
     r4: str = await cache.invoke(k3, ExtractorProcessor(UniversalExtractor("name")))
     assert r4 == k3
