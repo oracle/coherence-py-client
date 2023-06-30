@@ -312,6 +312,13 @@ class Extractors:
 
     @classmethod
     def identity(cls) -> IdentityExtractor[Any]:
+        """
+        Returns an extractor that does not actually extract anything
+        from the passed value, but returns the value itself.
+
+        :return: an extractor that does not actually extract anything
+          from the passed value, but returns the value itself
+        """
         return IdentityExtractor()
 
 
