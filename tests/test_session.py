@@ -66,9 +66,9 @@ async def test_basics() -> None:
     assert cache is not None
     assert isinstance(cache, NamedCache)
 
-    map = await session.get_map("map")
-    assert map is not None
-    assert isinstance(map, NamedMap)
+    map_local = await session.get_map("map")
+    assert map_local is not None
+    assert isinstance(map_local, NamedMap)
 
     await session.close()
     await asyncio.sleep(0.1)
@@ -82,7 +82,7 @@ async def test_basics() -> None:
         await cache.size()
 
     with pytest.raises(RuntimeError):
-        await map.size()
+        await map_local.size()
 
     with pytest.raises(RuntimeError):
         await session.get_cache("cache")
