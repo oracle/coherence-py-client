@@ -17,69 +17,69 @@ async def do_run() -> None:
     """
     session: Session = await Session.create()
     try:
-        namedMap: NamedMap[int, str] = await session.get_map("listeners-map")
-        await namedMap.put(1, "1")
+        named_map: NamedMap[int, str] = await session.get_map("listeners-map")
+        await named_map.put(1, "1")
 
         print("NamedMap lifecycle events")
 
-        namedMap.on(MapLifecycleEvent.RELEASED, lambda x: print("RELEASED", x))
-        namedMap.on(MapLifecycleEvent.TRUNCATED, lambda x: print("TRUNCATE", x))
-        namedMap.on(MapLifecycleEvent.DESTROYED, lambda x: print("DESTROYED", x))
+        named_map.on(MapLifecycleEvent.RELEASED, lambda x: print("RELEASED", x))
+        named_map.on(MapLifecycleEvent.TRUNCATED, lambda x: print("TRUNCATE", x))
+        named_map.on(MapLifecycleEvent.DESTROYED, lambda x: print("DESTROYED", x))
 
         print("Truncating the NamedMap; this should generate an event ...")
-        await namedMap.truncate()
+        await named_map.truncate()
         await asyncio.sleep(1)
 
         print("Releasing the NamedMap; this should generate an event ...")
-        namedMap.release()
+        named_map.release()
         await asyncio.sleep(1)
 
         print("Destroying the NamedMap; this should generate an event ...")
-        await namedMap.destroy()
+        await named_map.destroy()
         await asyncio.sleep(1)
 
         print("\n\nNamedMap entry events")
 
-        namedMap = await session.get_map("listeners-map")
+        named_map = await session.get_map("listeners-map")
 
         listener1: MapListener[int, str] = MapListener()
         listener1.on_any(lambda e: print(e))
 
         print("Added listener for all events")
         print("Events will be generated when an entry is inserted, updated, and removed")
-        await namedMap.add_map_listener(listener1)
+        await named_map.add_map_listener(listener1)
 
-        await namedMap.put(1, "1")
-        await namedMap.put(1, "2")
-        await namedMap.remove(1)
+        await named_map.put(1, "1")
+        await named_map.put(1, "2")
+        await named_map.remove(1)
         await asyncio.sleep(1)
 
-        await namedMap.remove_map_listener(listener1)
+        await named_map.remove_map_listener(listener1)
 
         print("\nAdded listener for all entries, but only when they are inserted")
-        filter = Filters.event(Filters.always(), MapEventFilter.INSERTED)
-        await namedMap.add_map_listener(listener1, filter)
+        ins_filter = Filters.event(Filters.always(), MapEventFilter.INSERTED)
+        await named_map.add_map_listener(listener1, ins_filter)
 
-        await namedMap.put(1, "1")
-        await namedMap.put(1, "2")
-        await namedMap.remove(1)
+        await named_map.put(1, "1")
+        await named_map.put(1, "2")
+        await named_map.remove(1)
         await asyncio.sleep(1)
 
-        await namedMap.remove_map_listener(listener1, filter)
+        await named_map.remove_map_listener(listener1, ins_filter)
 
         print("\nAdded listener for entries with a length larger than one, but only when they are updated or removed")
-        filter = Filters.event(Filters.greater("length()", 1), MapEventFilter.UPDATED | MapEventFilter.DELETED)
-        await namedMap.add_map_listener(listener1, filter)
+        upd_del_filter = Filters.event(Filters.greater("length()", 1), MapEventFilter.UPDATED | MapEventFilter.DELETED)
+        await named_map.add_map_listener(listener1, upd_del_filter)
 
         for i in range(12):
-            await namedMap.put(i, str(i))
-            await namedMap.put(i, str(i + 1))
-            await namedMap.remove(i)
+            await named_map.put(i, str(i))
+            await named_map.put(i, str(i + 1))
+            await named_map.remove(i)
 
         await asyncio.sleep(1)
 
-        await namedMap.remove_map_listener(listener1, filter)
-        await namedMap.clear()
+        await named_map.remove_map_listener(listener1, upd_del_filter)
+        await named_map.clear()
     finally:
         await session.close()
 

@@ -210,10 +210,10 @@ class PropertyManipulator(ValueManipulator[V, R]):
         self.useIsPrefix = use_is
 
     def get_extractor(self) -> ValueExtractor[V, R]:
-        raise Exception("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def get_updator(self) -> ValueUpdater[V, R]:
-        raise Exception("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
 
 @proxy("processor.NumberMultiplier")

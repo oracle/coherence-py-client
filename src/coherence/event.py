@@ -214,7 +214,7 @@ class MapEvent(Generic[K, V]):
             case 3:
                 return MapEventType.ENTRY_DELETED
             case _:
-                raise Exception("Unhandled MapEventType [" + str(_id) + "]")
+                raise RuntimeError("Unhandled MapEventType [" + str(_id) + "]")
 
 
 MapListenerCallback = Callable[[MapEvent[K, V]], None]
@@ -230,7 +230,6 @@ class MapListener(Generic[K, V]):
     def __init__(self) -> None:
         """Constructs a new MapListener."""
         self._emitter = EventEmitter()
-        pass
 
     def _on(self, event: MapEventType, callback: MapListenerCallback[K, V]) -> MapListener[K, V]:
         """
@@ -467,7 +466,7 @@ class _ListenerGroup(Generic[K, V], metaclass=ABCMeta):
         Custom actions that implementations may need to make after a subscription has been completed.
         :param request:  the request that was used to subscribe
         """
-        return
+        pass
 
     @abstractmethod
     def _post_unsubscribe(self, request: MapListenerRequest) -> None:
@@ -475,7 +474,7 @@ class _ListenerGroup(Generic[K, V], metaclass=ABCMeta):
         Custom actions that implementations may need to make after an unsubscription has been completed.
         :param request:  the request that was used to unsubscribe
         """
-        return
+        pass
 
 
 class _KeyListenerGroup(_ListenerGroup[K, V]):
@@ -488,7 +487,6 @@ class _KeyListenerGroup(_ListenerGroup[K, V]):
         :param key:      the group key
         """
         super()._init_(manager, key)
-        pass
 
     # noinspection PyProtectedMember
     def _post_subscribe(self, request: MapListenerRequest) -> None:
@@ -513,7 +511,6 @@ class _FilterListenerGroup(_ListenerGroup[K, V]):
         :param filter:   the group Filter
         """
         super()._init_(manager, filter)
-        pass
 
     # noinspection PyProtectedMember
     def _post_subscribe(self, request: MapListenerRequest) -> None:

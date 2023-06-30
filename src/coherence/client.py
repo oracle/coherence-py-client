@@ -55,13 +55,15 @@ COH_LOG = logging.getLogger("coherence")
 def _pre_call_cache(func):
     def inner(self, *args, **kwargs):
         if not self.active:
-            raise Exception("Cache [] has been " + "released" if self.released else "destroyed")
+            raise RuntimeError("Cache [] has been " + "released" if self.released else "destroyed")
 
         return func(self, *args, **kwargs)
 
     async def inner_async(self, *args, **kwargs):
         if not self.active:
-            raise Exception("Cache [{}] has been {}.".format(self.name, "released" if self.released else "destroyed"))
+            raise RuntimeError(
+                "Cache [{}] has been {}.".format(self.name, "released" if self.released else "destroyed")
+            )
 
         # noinspection PyProtectedMember
         await self._session._wait_for_ready()
@@ -77,13 +79,13 @@ def _pre_call_cache(func):
 def _pre_call_session(func):
     def inner(self, *args, **kwargs):
         if self._closed:
-            raise Exception("Session has been closed.")
+            raise RuntimeError("Session has been closed.")
 
         return func(self, *args, **kwargs)
 
     async def inner_async(self, *args, **kwargs):
         if self._closed:
-            raise Exception("Session has been closed.")
+            raise RuntimeError("Session has been closed.")
 
         return await func(self, *args, **kwargs)
 
@@ -673,9 +675,9 @@ class NamedCacheClient(NamedCache[K, V]):
             return cast(R, float(value))
         elif isinstance(aggregator, PriorityAggregator):
             pri_agg: PriorityAggregator[R] = aggregator
-            if isinstance(pri_agg.aggregator, SumAggregator) and isinstance(value, str):
-                return cast(R, float(value))
-            elif isinstance(pri_agg.aggregator, AverageAggregator) and isinstance(value, str):
+            if (
+                isinstance(pri_agg.aggregator, AverageAggregator) or isinstance(pri_agg.aggregator, SumAggregator)
+            ) and isinstance(value, str):
                 return cast(R, float(value))
         # end compatibility with 22.06
 
@@ -752,19 +754,17 @@ class NamedCacheClient(NamedCache[K, V]):
 
         # noinspection PyProtectedMember
         def on_destroyed(name: str) -> None:
-            if name == cache_name:
-                if not this.destroyed:
-                    this._events_manager._close()
-                    this._destroyed = True
-                    emitter.emit(MapLifecycleEvent.DESTROYED.value, name)
+            if name == cache_name and not this.destroyed:
+                this._events_manager._close()
+                this._destroyed = True
+                emitter.emit(MapLifecycleEvent.DESTROYED.value, name)
 
         # noinspection PyProtectedMember
         def on_released(name: str) -> None:
-            if name == cache_name:
-                if not this.released:
-                    this._events_manager._close()
-                    this._released = True
-                    emitter.emit(MapLifecycleEvent.RELEASED.value, name)
+            if name == cache_name and not this.released:
+                this._events_manager._close()
+                this._released = True
+                emitter.emit(MapLifecycleEvent.RELEASED.value, name)
 
         def on_truncated(name: str) -> None:
             if name == cache_name:
@@ -1665,7 +1665,6 @@ class _PagedStream(abc.ABC, AsyncIterator[T]):
                     self._cookie = item.value if self._keys else item.cookie
                     if self._cookie == b"":
                         self._exhausted = True  # processing the last page
-                    continue
                 else:
                     return self._result_handler(self._serializer, item)
 

@@ -29,21 +29,8 @@ async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
     session: Session = await tests.get_session()
     cache: NamedCache[Any, Any] = await session.get_cache("test")
 
-    await cache.put(Person.Pat().name, Person.Pat())
-    await cache.put(Person.Paula().name, Person.Paula())
-    await cache.put(Person.Andy().name, Person.Andy())
-    await cache.put(Person.Alice().name, Person.Alice())
-    await cache.put(Person.Jim().name, Person.Jim())
-    await cache.put(Person.Fred().name, Person.Fred())
-    await cache.put(Person.Fiona().name, Person.Fiona())
-    print("\n")
-    print(Person.Pat())
-    print(Person.Paula())
-    print(Person.Andy())
-    print(Person.Alice())
-    print(Person.Jim())
-    print(Person.Fred())
-    print(Person.Fiona())
+    await Person.populate_named_map(cache)
+
     yield cache
 
     await cache.clear()
@@ -58,7 +45,7 @@ async def test_max(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
     ag: EntryAggregator[int] = Aggregators.max("age")
     r: int = await cache.aggregate(ag)
-    assert r == Person.Pat().age
+    assert r == Person.pat().age
 
 
 # noinspection PyShadowingNames
@@ -68,7 +55,7 @@ async def test_min(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
     ag: EntryAggregator[int] = Aggregators.min("age")
     r: int = await cache.aggregate(ag)
-    assert r == Person.Alice().age
+    assert r == Person.alice().age
 
 
 # noinspection PyShadowingNames
@@ -79,13 +66,13 @@ async def test_sum(setup_and_teardown: NamedCache[Any, Any]) -> None:
     ag = Aggregators.sum("age")
     r = await cache.aggregate(ag)
     assert r == (
-        Person.Andy().age
-        + Person.Alice().age
-        + Person.Pat().age
-        + Person.Paula().age
-        + Person.Fred().age
-        + Person.Fiona().age
-        + Person.Jim().age
+        Person.andy().age
+        + Person.alice().age
+        + Person.pat().age
+        + Person.paula().age
+        + Person.fred().age
+        + Person.fiona().age
+        + Person.jim().age
     )
 
 
@@ -98,13 +85,13 @@ async def test_average(setup_and_teardown: NamedCache[Any, Any]) -> None:
     r: Decimal = await cache.aggregate(ag)
     assert float(r) == round(
         (
-            Person.Andy().age
-            + Person.Alice().age
-            + Person.Pat().age
-            + Person.Paula().age
-            + Person.Fred().age
-            + Person.Fiona().age
-            + Person.Jim().age
+            Person.andy().age
+            + Person.alice().age
+            + Person.pat().age
+            + Person.paula().age
+            + Person.fred().age
+            + Person.fiona().age
+            + Person.jim().age
         )
         / 7,
         8,
@@ -138,19 +125,19 @@ async def test_top(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
     ag: TopAggregator[int, Person] = Aggregators.top(2).order_by("age").ascending
     r: list[Person] = await cache.aggregate(ag)
-    assert r == [Person.Alice(), Person.Andy()]
+    assert r == [Person.alice(), Person.andy()]
 
     ag = Aggregators.top(2).order_by("age").ascending
     r = await cache.aggregate(ag, None, Filters.between("age", 30, 40))
-    assert r == [Person.Paula(), Person.Jim()]
+    assert r == [Person.paula(), Person.jim()]
 
     ag = Aggregators.top(2).order_by("age").descending
     r = await cache.aggregate(ag)
-    assert r == [Person.Pat(), Person.Fred()]
+    assert r == [Person.pat(), Person.fred()]
 
     ag = Aggregators.top(2).order_by("age").descending
     r = await cache.aggregate(ag, None, Filters.between("age", 20, 30))
-    assert r == [Person.Fiona(), Person.Andy()]
+    assert r == [Person.fiona(), Person.andy()]
 
 
 # noinspection PyShadowingNames
@@ -187,13 +174,13 @@ async def test_priority(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
     r = await cache.aggregate(agg)
     assert r == (
-        Person.Andy().age
-        + Person.Alice().age
-        + Person.Pat().age
-        + Person.Paula().age
-        + Person.Fred().age
-        + Person.Fiona().age
-        + Person.Jim().age
+        Person.andy().age
+        + Person.alice().age
+        + Person.pat().age
+        + Person.paula().age
+        + Person.fred().age
+        + Person.fiona().age
+        + Person.jim().age
     )
 
     agg2: EntryAggregator[Decimal] = Aggregators.priority(
@@ -207,12 +194,12 @@ async def test_priority(setup_and_teardown: NamedCache[Any, Any]) -> None:
     assert agg2_actual.request_timeout_in_millis == Timeout.NONE
     assert agg2_actual.scheduling_priority == Schedule.IMMEDIATE
 
-    filter = Filters.equals("gender", "Male")
-    r = await cache.aggregate(agg, None, filter)
-    assert r == (Person.Andy().age + Person.Pat().age + Person.Fred().age + Person.Jim().age)
+    eq_filter = Filters.equals("gender", "Male")
+    r = await cache.aggregate(agg, None, eq_filter)
+    assert r == (Person.andy().age + Person.pat().age + Person.fred().age + Person.jim().age)
 
     r = await cache.aggregate(agg, {"Alice", "Paula", "Fiona"})
-    assert r == (Person.Alice().age + Person.Paula().age + Person.Fiona().age)
+    assert r == (Person.alice().age + Person.paula().age + Person.fiona().age)
 
 
 # noinspection PyShadowingNames

@@ -38,26 +38,26 @@ async def do_run() -> None:
 
     session: Session = await Session.create()
     try:
-        namedMap: NamedMap[int, Hobbit] = await session.get_map("aggregation-test")
+        named_map: NamedMap[int, Hobbit] = await session.get_map("aggregation-test")
 
-        await namedMap.clear()
+        await named_map.clear()
 
-        await namedMap.put_all(person_data)
+        await named_map.put_all(person_data)
 
-        distinct_hobbies: List[str] = await namedMap.aggregate(Aggregators.distinct("hobbies"))
+        distinct_hobbies: List[str] = await named_map.aggregate(Aggregators.distinct("hobbies"))
         print("Distinct hobbies :", distinct_hobbies)
 
-        count: int = await namedMap.aggregate(Aggregators.count())
+        count: int = await named_map.aggregate(Aggregators.count())
         print("Number of Hobbits :", count)
 
-        over_forty: int = await namedMap.aggregate(Aggregators.count(), filter=Filters.greater("age", 40))
+        over_forty: int = await named_map.aggregate(Aggregators.count(), filter=Filters.greater("age", 40))
         print("Number of Hobbits older than 40 :", over_forty)
 
-        avg_under_forty: Decimal = await namedMap.aggregate(Aggregators.average("age"), filter=Filters.less("age", 40))
+        avg_under_forty: Decimal = await named_map.aggregate(Aggregators.average("age"), filter=Filters.less("age", 40))
         print("Average age of Hobbits under 40 :", int(avg_under_forty))
 
         print("The oldest Hobbit for each hobby ...")
-        results: dict[str, int] = await namedMap.aggregate(Aggregators.group_by("hobbies", Aggregators.max("age")))
+        results: dict[str, int] = await named_map.aggregate(Aggregators.group_by("hobbies", Aggregators.max("age")))
         for hobby, age in results.items():
             print("Hobby: ", hobby, "Max age: ", age)
     finally:

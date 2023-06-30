@@ -8,10 +8,10 @@ import pytest
 import pytest_asyncio
 
 import tests
-from coherence import MapEntry, NamedCache, Session
+from coherence import NamedCache, Session
 from coherence.filter import Filter, Filters
 from coherence.processor import EntryProcessor, Numeric, PreloadRequest, Processors, ScriptProcessor, TouchProcessor
-from coherence.serialization import JSONSerializer
+from coherence.serialization import _META_VERSION, JSONSerializer
 from tests.address import Address
 from tests.person import Person
 
@@ -49,8 +49,8 @@ async def test_extractor(setup_and_teardown: NamedCache[Any, Any]) -> None:
     r = await cache.invoke(k2, Processors.extract("toUpperCase()"))
     assert r == v2.upper()
 
-    k3 = Person.Andy().name
-    v3 = Person.Andy()
+    k3 = Person.andy().name
+    v3 = Person.andy()
     await cache.put(k3, v3)
     r = await cache.invoke(k3, Processors.extract("name"))
     assert r == k3
@@ -73,12 +73,12 @@ async def test_composite(setup_and_teardown: NamedCache[str, Any]) -> None:
     r: Any = await cache.invoke(k, cp)
     assert r == [123, "123"]
 
-    k3 = Person.Pat().name
-    v3 = Person.Pat()
+    k3 = Person.pat().name
+    v3 = Person.pat()
     await cache.put(k3, v3)
     cp = Processors.extract("weight").and_then(Processors.extract("address.zipcode"))
     r = await cache.invoke(k3, cp)
-    assert r == [Person.Pat().weight, Person.Pat().address.zipcode]
+    assert r == [Person.pat().weight, Person.pat().address.zipcode]
 
 
 # noinspection PyShadowingNames
@@ -300,7 +300,7 @@ async def test_versioned_put(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
     k = "123"
     versioned123 = {
-        "@version": 1,
+        _META_VERSION: 1,
         "id": 123,
         "my_str": "123",
         "ival": 123,
@@ -309,7 +309,7 @@ async def test_versioned_put(setup_and_teardown: NamedCache[Any, Any]) -> None:
         "group:": 1,
     }
     versioned123_update = {
-        "@version": 1,
+        _META_VERSION: 1,
         "id": 123,
         "my_str": "123-update",
         "ival": 123,
@@ -319,7 +319,7 @@ async def test_versioned_put(setup_and_teardown: NamedCache[Any, Any]) -> None:
     }
 
     expected_result = {
-        "@version": 2,
+        _META_VERSION: 2,
         "id": 123,
         "my_str": "123-update",
         "ival": 123,
@@ -342,7 +342,7 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
     cache: NamedCache[Any, Any] = setup_and_teardown
     k1 = "123"
     versioned123 = {
-        "@version": 1,
+        _META_VERSION: 1,
         "id": 123,
         "my_str": "123",
         "ival": 123,
@@ -352,7 +352,7 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
     }
 
     versioned123_update = {
-        "@version": 1,
+        _META_VERSION: 1,
         "id": 123,
         "my_str": "123-update",
         "ival": 123,
@@ -362,7 +362,7 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
     }
 
     expected_versioned123_update = {
-        "@version": 2,
+        _META_VERSION: 2,
         "id": 123,
         "my_str": "123-update",
         "ival": 123,
@@ -373,7 +373,7 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
 
     k2 = "234"
     versioned234 = {
-        "@version": 2,
+        _META_VERSION: 2,
         "id": 234,
         "my_str": "234",
         "ival": 234,
@@ -383,7 +383,7 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
     }
 
     versioned234_update = {
-        "@version": 2,
+        _META_VERSION: 2,
         "id": 234,
         "my_str": "234_update",
         "ival": 234,
@@ -393,7 +393,7 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
     }
 
     expected_versioned234_update = {
-        "@version": 3,
+        _META_VERSION: 3,
         "id": 234,
         "my_str": "234_update",
         "ival": 234,
@@ -406,8 +406,8 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
     await cache.put(k2, versioned234)
 
     vpa = Processors.versioned_put_all(dict([(k1, versioned123_update), (k2, versioned234_update)]))
-    e: MapEntry[Any, Any]
-    async for e in cache.invoke_all(vpa):
+
+    async for _ in cache.invoke_all(vpa):
         break
 
     assert await cache.get(k1) == expected_versioned123_update
