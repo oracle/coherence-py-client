@@ -16,6 +16,7 @@ from .client import NamedMap as NamedMap
 from .client import Options as Options
 from .client import Session as Session
 from .client import TlsOptions as TlsOptions
+from .extractor import Extractors as Extractors
 from .filter import Filters as Filters
 from .processor import Processors as Processors
 

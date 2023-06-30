@@ -14,7 +14,7 @@ from typing import Final
 import pytest
 
 import tests
-from coherence import NamedCache, Options, Session, TlsOptions
+from coherence import NamedCache, NamedMap, Options, Session, TlsOptions
 from coherence.event import MapLifecycleEvent, SessionLifecycleEvent
 from tests import CountingMapListener
 
@@ -62,6 +62,14 @@ async def test_basics() -> None:
     assert session.is_ready()
     assert not session.closed
 
+    cache = await session.get_cache("cache")
+    assert cache is not None
+    assert isinstance(cache, NamedCache)
+
+    map_local = await session.get_map("map")
+    assert map_local is not None
+    assert isinstance(map_local, NamedMap)
+
     await session.close()
     await asyncio.sleep(0.1)
 
@@ -70,10 +78,19 @@ async def test_basics() -> None:
     assert not session.is_ready()
     assert session.closed
 
-    with pytest.raises(Exception):
-        await session.get_cache("test")
+    with pytest.raises(RuntimeError):
+        await cache.size()
 
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
+        await map_local.size()
+
+    with pytest.raises(RuntimeError):
+        await session.get_cache("cache")
+
+    with pytest.raises(RuntimeError):
+        await session.get_map("map")
+
+    with pytest.raises(RuntimeError):
         session.on(SessionLifecycleEvent.CLOSED, lambda: None)
 
 

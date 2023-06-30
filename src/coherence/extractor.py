@@ -263,13 +263,63 @@ class UniversalUpdater(ValueUpdater[V, R]):
         self.name = method
 
 
-def extract(expression: str) -> ValueExtractor[T, E]:
-    if "." in expression:
-        return ChainedExtractor(expression)
-    elif "," in expression:
-        return MultiExtractor(expression)
-    else:
-        return UniversalExtractor(expression)
+class Extractors:
+    """
+    A Utility class for creating extractors.
+    """
+
+    @classmethod
+    def extract(cls, expression: str, params: Optional[list[Any]] = None) -> ValueExtractor[T, E]:
+        """
+        If providing only an expression, the following rules apply:
+          - if the expression contains multiple values separated by a period,
+            the expression will be treated as a chained expression.  E.g.,
+            the expression 'a.b.c' would be treated as extract the 'a'
+            property, from that result, extract the 'b' property, and finally
+            from that result, extract the 'c' property.
+          - if the expression contains multiple values separated by a comma,
+            the expression will be treated as a multi expression.  E.g.,
+            the expression 'a,b,c' would be treated as extract the 'a', 'b',
+            and 'c' properties from the same object.
+          - for either case, the params argument is ignored.
+
+        It is also possible to invoke, and pass arguments to, arbitrary methods.
+        For example, if the target object of the extraction is a String, it's
+        possible to call the length() function by passing an expression of
+        "length()".  If the target method accepts arguments, provide a list
+        of one or more arguments to be passed.
+
+        :param expression: the extractor expression
+        :param params:  the params to pass to the method invocation
+        :return: a ValueExtractor based on the provided inputs
+        """
+        if expression is None:
+            raise ValueError("An expression must be provided")
+
+        if params is None or len(params) == 0:
+            if "." in expression:
+                return ChainedExtractor(expression)
+            elif "," in expression:
+                return MultiExtractor(expression)
+            else:
+                return UniversalExtractor(expression)
+
+        expr: str = expression
+        if not expr.endswith("()"):
+            expr = expr + "()"
+
+        return UniversalExtractor(expr, params)
+
+    @classmethod
+    def identity(cls) -> IdentityExtractor[Any]:
+        """
+        Returns an extractor that does not actually extract anything
+        from the passed value, but returns the value itself.
+
+        :return: an extractor that does not actually extract anything
+          from the passed value, but returns the value itself
+        """
+        return IdentityExtractor()
 
 
 ExtractorExpression: TypeAlias = ValueExtractor[T, E] | str
