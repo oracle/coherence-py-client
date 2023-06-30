@@ -12,12 +12,12 @@ import jsonpickle
 
 T = TypeVar("T", covariant=True)
 
-_BIG_DEC_ALIAS: str = Final["math.BigDec"]
-_BIG_INT_ALIAS: str = Final["math.BigInt"]
+_BIG_DEC_ALIAS: Final[str] = "math.BigDec"
+_BIG_INT_ALIAS: Final[str] = "math.BigInt"
 
-_META_CLASS: str = Final["@class"]
-_META_VERSION: str = Final["@version"]
-_META_ENUM: str = Final["enum"]
+_META_CLASS: Final[str] = "@class"
+_META_VERSION: Final[str] = "@version"
+_META_ENUM: Final[str] = "enum"
 
 _JSON_KEY = "key"
 _JSON_VALUE = "value"

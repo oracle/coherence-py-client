@@ -61,7 +61,9 @@ def _pre_call_cache(func):
 
     async def inner_async(self, *args, **kwargs):
         if not self.active:
-            raise RuntimeError("Cache [{}] has been {}.".format(self.name, "released" if self.released else "destroyed"))
+            raise RuntimeError(
+                "Cache [{}] has been {}.".format(self.name, "released" if self.released else "destroyed")
+            )
 
         # noinspection PyProtectedMember
         await self._session._wait_for_ready()
@@ -673,7 +675,9 @@ class NamedCacheClient(NamedCache[K, V]):
             return cast(R, float(value))
         elif isinstance(aggregator, PriorityAggregator):
             pri_agg: PriorityAggregator[R] = aggregator
-            if (isinstance(pri_agg.aggregator, AverageAggregator) or isinstance(pri_agg.aggregator, SumAggregator)) and isinstance(value, str):
+            if (
+                isinstance(pri_agg.aggregator, AverageAggregator) or isinstance(pri_agg.aggregator, SumAggregator)
+            ) and isinstance(value, str):
                 return cast(R, float(value))
         # end compatibility with 22.06
 

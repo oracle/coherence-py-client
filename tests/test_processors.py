@@ -8,10 +8,10 @@ import pytest
 import pytest_asyncio
 
 import tests
-from coherence import MapEntry, NamedCache, Session
+from coherence import NamedCache, Session
 from coherence.filter import Filter, Filters
 from coherence.processor import EntryProcessor, Numeric, PreloadRequest, Processors, ScriptProcessor, TouchProcessor
-from coherence.serialization import JSONSerializer, _META_VERSION
+from coherence.serialization import _META_VERSION, JSONSerializer
 from tests.address import Address
 from tests.person import Person
 
@@ -406,7 +406,7 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
     await cache.put(k2, versioned234)
 
     vpa = Processors.versioned_put_all(dict([(k1, versioned123_update), (k2, versioned234_update)]))
-    e: MapEntry[Any, Any]
+
     async for _ in cache.invoke_all(vpa):
         break
 

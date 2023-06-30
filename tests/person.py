@@ -28,7 +28,9 @@ class Person:
         return hash(self.name)
 
     @classmethod
-    def create_person(cls, name: str, gender: str, age: int, weight: float, address: Address, sports: list[str]) -> Person:
+    def create_person(
+        cls, name: str, gender: str, age: int, weight: float, address: Address, sports: list[str]
+    ) -> Person:
         return Person(name, gender, age, weight, address, sports)
 
     @classmethod
