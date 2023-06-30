@@ -29,21 +29,8 @@ async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
     session: Session = await tests.get_session()
     cache: NamedCache[Any, Any] = await session.get_cache("test")
 
-    await cache.put(Person.pat().name, Person.pat())
-    await cache.put(Person.paula().name, Person.paula())
-    await cache.put(Person.andy().name, Person.andy())
-    await cache.put(Person.alice().name, Person.alice())
-    await cache.put(Person.jim().name, Person.jim())
-    await cache.put(Person.fred().name, Person.fred())
-    await cache.put(Person.fiona().name, Person.fiona())
-    print("\n")
-    print(Person.pat())
-    print(Person.paula())
-    print(Person.andy())
-    print(Person.alice())
-    print(Person.jim())
-    print(Person.fred())
-    print(Person.fiona())
+    await Person.populate_named_map(cache)
+
     yield cache
 
     await cache.clear()

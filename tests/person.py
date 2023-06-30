@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+from coherence import NamedMap
 from tests.address import Address
 
 
@@ -26,6 +27,16 @@ class Person:
 
     def __hash__(self) -> int:
         return hash(self.name)
+
+    @classmethod
+    async def populate_named_map(cls, cache: NamedMap[str, Person]) -> None:
+        await cache.put(Person.pat().name, Person.pat())
+        await cache.put(Person.paula().name, Person.paula())
+        await cache.put(Person.andy().name, Person.andy())
+        await cache.put(Person.alice().name, Person.alice())
+        await cache.put(Person.jim().name, Person.jim())
+        await cache.put(Person.fred().name, Person.fred())
+        await cache.put(Person.fiona().name, Person.fiona())
 
     @classmethod
     def create_person(
