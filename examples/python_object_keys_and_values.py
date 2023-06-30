@@ -31,28 +31,28 @@ async def do_run() -> None:
     """
     session: Session = await Session.create()
     try:
-        namedMap: NamedMap[AccountKey, Account] = await session.get_map("accounts")
+        named_map: NamedMap[AccountKey, Account] = await session.get_map("accounts")
 
-        await namedMap.clear()
+        await named_map.clear()
 
         new_account_key: AccountKey = AccountKey(100, "savings")
         new_account: Account = Account(new_account_key.account_id, new_account_key.account_type, "John Doe", 100000.00)
 
         print(f"Add new account {new_account} with key {new_account_key}")
-        await namedMap.put(new_account_key, new_account)
+        await named_map.put(new_account_key, new_account)
 
-        print("NamedMap size is :", await namedMap.size())
+        print("NamedMap size is :", await named_map.size())
 
-        print("Account from get() :", await namedMap.get(new_account_key))
+        print("Account from get() :", await named_map.get(new_account_key))
 
         print("Update account balance using processor ...")
-        await namedMap.invoke(new_account_key, Processors.update("balance", new_account.balance + 1000))
+        await named_map.invoke(new_account_key, Processors.update("balance", new_account.balance + 1000))
 
-        print("Updated account is :", await namedMap.get(new_account_key))
+        print("Updated account is :", await named_map.get(new_account_key))
 
-        await namedMap.remove(new_account_key)
+        await named_map.remove(new_account_key)
 
-        print("NamedMap size is :", await namedMap.size())
+        print("NamedMap size is :", await named_map.size())
     finally:
         await session.close()
 
