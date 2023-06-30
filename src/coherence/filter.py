@@ -7,7 +7,7 @@ from __future__ import annotations
 from abc import ABC
 from typing import Any, Generic, Set, TypeVar
 
-from .extractor import ExtractorExpression, ValueExtractor, extract
+from .extractor import ExtractorExpression, Extractors, ValueExtractor
 from .serialization import proxy
 
 E = TypeVar("E")
@@ -80,7 +80,7 @@ class ExtractorFilter(Filter):
         if isinstance(extractor, ValueExtractor):
             self.extractor = extractor
         elif type(extractor) == str:
-            self.extractor = extract(extractor)
+            self.extractor = Extractors.extract(extractor)
         else:
             raise ValueError("extractor cannot be any other type")
 

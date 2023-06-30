@@ -118,8 +118,9 @@ generate-proto:  ## Generate Proto Files
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test
 test:  ##
-	pytest -W error --cov src/coherence --capture=tee-sys --cov-report=term --cov-report=html \
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html \
 		tests/test_serialization.py \
+		tests/test_extractors.py \
 		tests/test_session.py \
 		tests/test_client.py \
 		tests/test_events.py \

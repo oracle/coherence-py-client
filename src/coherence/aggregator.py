@@ -10,7 +10,7 @@ from enum import Enum, IntEnum
 from typing import Any, Dict, Generic, List, Optional, TypeAlias, TypeVar
 
 from .comparator import Comparator, InverseComparator, SafeComparator
-from .extractor import ExtractorExpression, IdentityExtractor, ValueExtractor, extract
+from .extractor import ExtractorExpression, Extractors, ValueExtractor
 from .filter import Filter
 from .serialization import proxy
 
@@ -45,7 +45,7 @@ class EntryAggregator(ABC, Generic[R]):
             if isinstance(extractor_or_property, ValueExtractor):
                 self.extractor = extractor_or_property
             else:
-                self.extractor = extract(extractor_or_property)
+                self.extractor = Extractors.extract(extractor_or_property)
 
     def and_then(self, aggregator: EntryAggregator[R]) -> EntryAggregator[List[R]]:
         """
@@ -241,7 +241,7 @@ class TopAggregator(Generic[E, R], EntryAggregator[List[R]]):
         self,
         number: int = 0,
         inverse: bool = False,
-        extractor: ValueExtractor[Any, Any] = IdentityExtractor(),
+        extractor: ValueExtractor[Any, Any] = Extractors.identity(),
         comparator: Optional[Comparator] = None,
         property_name: Optional[str] = None,
     ):
@@ -304,8 +304,7 @@ class TopAggregator(Generic[E, R], EntryAggregator[List[R]]):
         :param property_name: the property name
         :return:
         """
-        self.inverse = True  # TODO why is this True?
-        self.extractor = ValueExtractor.extract(property_name)
+        self.extractor = Extractors.extract(property_name)
         return self
 
 

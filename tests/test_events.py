@@ -308,6 +308,22 @@ async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
 # ----- test functions ------------------------------------------------------
 
 
+@pytest.mark.asyncio
+async def test_add_no_listener(setup_and_teardown: NamedCache[str, str]) -> None:
+    cache: NamedCache[str, str] = setup_and_teardown
+
+    with pytest.raises(ValueError):
+        await cache.add_map_listener(None)
+
+
+@pytest.mark.asyncio
+async def test_remove_no_listener(setup_and_teardown: NamedCache[str, str]) -> None:
+    cache: NamedCache[str, str] = setup_and_teardown
+
+    with pytest.raises(ValueError):
+        await cache.remove_map_listener(None)
+
+
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
 async def test_all(setup_and_teardown: NamedCache[str, str]) -> None:

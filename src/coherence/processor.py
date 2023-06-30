@@ -11,7 +11,7 @@ from typing import Any, Generic, List, Optional, TypeAlias, TypeVar, cast
 from .extractor import (
     CompositeUpdater,
     ExtractorExpression,
-    IdentityExtractor,
+    Extractors,
     ManipulatorExpression,
     UniversalExtractor,
     UniversalUpdater,
@@ -19,7 +19,6 @@ from .extractor import (
     ValueExtractor,
     ValueManipulator,
     ValueUpdater,
-    extract,
 )
 from .filter import Filter
 from .serialization import mappings, proxy
@@ -91,12 +90,12 @@ class ExtractorProcessor(EntryProcessor[R]):
         """
         super().__init__()
         if value_extractor is None:
-            self.extractor: ValueExtractor[V, R] = IdentityExtractor()
+            self.extractor: ValueExtractor[V, R] = Extractors.identity()
         else:
             if isinstance(value_extractor, ValueExtractor):
                 self.extractor = value_extractor
             elif type(value_extractor) == str:
-                self.extractor = extract(value_extractor)
+                self.extractor = Extractors.extract(value_extractor)
             else:
                 raise ValueError("value_extractor cannot be any other type")
 
@@ -615,7 +614,7 @@ class Processors:
                           processor or the name of the method to invoke via java reflection.  If `None`, an
                           :class:`coherence.extractor.IdentityExtractor` will be used.
         """
-        ext: ExtractorExpression[T, E] = extractor if extractor is not None else IdentityExtractor()
+        ext: ExtractorExpression[T, E] = extractor if extractor is not None else Extractors.identity()
         return ExtractorProcessor(ext)
 
     @staticmethod
