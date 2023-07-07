@@ -1,0 +1,38 @@
+# Copyright 2023 Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence Go Client GitHub Actions Scheduled Trivy Scan
+# ---------------------------------------------------------------------------
+name: Scheduled Trivy Scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every day at midnight
+    - cron: '0 0 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/aquasecurity/trivy:latest
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - $GITHUB_WORKSPACE:/repo
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11.x"
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+
+      - name: Trivy Scan
+        run: ghcr.io/aquasecurity/trivy:latest fs --scanners vuln,secret,config /repo
