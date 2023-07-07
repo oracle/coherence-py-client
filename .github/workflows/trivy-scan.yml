@@ -20,7 +20,7 @@ jobs:
       image: ghcr.io/aquasecurity/trivy:latest
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
-        - $GITHUB_WORKSPACE:/repo
+        - /home/runner/work/coherence-py-client/coherence-py-client:/repo
 
     steps:
       - uses: actions/checkout@v3
