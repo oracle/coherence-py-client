@@ -35,4 +35,4 @@ jobs:
           distribution: 'zulu'
 
       - name: Trivy Scan
-        run: ghcr.io/aquasecurity/trivy:latest fs --scanners vuln,secret,config /repo
+        run: trivy fs --scanners vuln,secret,config /repo
