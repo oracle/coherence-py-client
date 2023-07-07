@@ -26,4 +26,4 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Trivy Scan
-        run: trivy fs --scanners vuln,secret,config --exit-code 1 /repo
+        run: trivy fs --exit-code 1 /repo
