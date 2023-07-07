@@ -24,15 +24,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.11.x"
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'zulu'
+#      - uses: actions/setup-python@v4
+#        with:
+#          python-version: "3.11.x"
+#
+#      - name: Set up JDK
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: '11'
+#          distribution: 'zulu'
 
       - name: Trivy Scan
         run: trivy fs --scanners vuln,secret,config --exit-code 1 /repo
