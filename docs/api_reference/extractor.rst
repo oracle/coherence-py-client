@@ -9,6 +9,11 @@ coherence.extractor
 .. toctree::
    :maxdepth: 4
 
+Extractors
+----------
+.. autoclass:: coherence.extractor.Extractors
+    :members:
+
 ValueExtractor
 ---------------
 .. autoclass:: coherence.extractor.ValueExtractor
