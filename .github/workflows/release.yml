@@ -75,7 +75,7 @@ jobs:
           pip install build twine
           python3 -m build
           ls -la ./dist
-          twine upload --repository testpypi dist/*
+          twine upload --repository dist/*
       - name: Get release version
         id: get-version
         run: |
