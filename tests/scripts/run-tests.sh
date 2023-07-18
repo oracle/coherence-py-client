@@ -23,4 +23,4 @@ RUN_SECURE=true COHERENCE_IGNORE_INVALID_CERTS=true \
   COHERENCE_TLS_CLIENT_KEY=$(pwd)/tests/utils/certs/star-lord.pem \
   COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
   PROFILES=,secure make clean certs test-cluster-shutdown remove-app-images \
-                                build-test-images test-cluster-startup just-wait test test-cluster-shutdown
+                                                  build-test-images test-cluster-startup just-wait test
