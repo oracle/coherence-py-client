@@ -26,6 +26,12 @@ fi
 
 mkdir -p ${CERTS_DIR}
 
+OPENSSL_CNF_FILE=/etc/ssl/openssl.cnf
+if [ ! -f ${OPENSSL_CNF_FILE} ] ; then
+  # Location in OEL, RHEL
+  OPENSSL_CNF_FILE=/etc/pki/tls/openssl.cnf
+fi
+
 # Generate random passwords for each run
 PASS="${RANDOM}_${RANDOM}"
 KEYPASS="${PASS}"
@@ -40,7 +46,7 @@ echo "${CAPASS}" | openssl genrsa -passout stdin -aes256 \
 echo Generate Guardians CA certificate:
 echo "${CAPASS}" | openssl req -passin stdin -new -x509 -days 3650 \
     -reqexts SAN \
-    -config <(cat /etc/ssl/openssl.cnf \
+    -config <(cat ${OPENSSL_CNF_FILE} \
         <(printf "\n[SAN]\nsubjectAltName=DNS:localhost,DNS:127.0.0.1")) \
     -key ${CERTS_DIR}/guardians-ca.key \
     -out ${CERTS_DIR}/guardians-ca.crt \
@@ -53,7 +59,7 @@ echo "${CAPASS}" | openssl genrsa -passout stdin -aes256 \
 echo Generate Ravagers CA certificate:
 echo "${CAPASS}" | openssl req -passin stdin -new -x509 -days 3650 \
     -reqexts SAN \
-    -config <(cat /etc/ssl/openssl.cnf \
+    -config <(cat ${OPENSSL_CNF_FILE} \
         <(printf "\n[SAN]\nsubjectAltName=DNS:localhost,DNS:127.0.0.1")) \
     -key ${CERTS_DIR}/ravagers-ca.key \
     -out ${CERTS_DIR}/ravagers-ca.crt \
