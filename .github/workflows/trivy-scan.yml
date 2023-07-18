@@ -3,7 +3,7 @@
 # https://oss.oracle.com/licenses/upl.
 
 # ---------------------------------------------------------------------------
-# Coherence Go Client GitHub Actions Scheduled Trivy Scan
+# Coherence Python Client GitHub Actions Scheduled Trivy Scan
 # ---------------------------------------------------------------------------
 name: Scheduled Trivy Scan
 
