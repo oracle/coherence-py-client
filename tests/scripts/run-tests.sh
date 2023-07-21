@@ -12,11 +12,11 @@ set -e
 # Set the following to include long running streaming tests
 # INCLUDE_LONG_RUNNING=true
 
-echo "Coherence CE 22.06.2"
+echo "Coherence CE 22.06.5"
 COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
   make clean test-cluster-shutdown remove-app-images build-test-images test-cluster-startup just-wait test
 
-echo "Coherence CE 22.06.2 with SSL"
+echo "Coherence CE 22.06.5 with SSL"
 RUN_SECURE=true COHERENCE_IGNORE_INVALID_CERTS=true \
   COHERENCE_TLS_CERTS_PATH=$(pwd)/tests/utils/certs/guardians-ca.crt \
   COHERENCE_TLS_CLIENT_CERT=$(pwd)/tests/utils/certs/star-lord.crt \
