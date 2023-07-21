@@ -9,7 +9,7 @@ set -e
 
 declare -r ROOT="${PWD}"
 declare -r CONTAINER_NAME="coherence-py-test-container"
-declare -r IMAGE_NAME="ghcr.io/oracle/coherence-ce:22.06.2"
+declare -r IMAGE_NAME="ghcr.io/oracle/coherence-ce:22.06.5"
 
 function coh_up() {
   declare -r CONTAINER_ID=$(docker ps -a -q -f name="${CONTAINER_NAME}")
