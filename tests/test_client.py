@@ -89,7 +89,7 @@ async def test_get_and_put(setup_and_teardown: NamedCache[str, str | int | Perso
     v2: Person = Person.andy()
     await cache.put(k2, v2)
     r = await cache.get(k2)
-    assert type(r) == Person
+    assert isinstance(r, Person)
     assert r.name == k2
     assert r.address.city == Person.andy().address.city
 
@@ -460,7 +460,7 @@ async def test_invoke(setup_and_teardown: NamedCache[str, str | Person]) -> None
     r4: str = await cache.invoke(k3, ExtractorProcessor(UniversalExtractor("name")))
     assert r4 == k3
     r5: Address = await cache.invoke(k3, ExtractorProcessor(UniversalExtractor("address")))
-    assert type(r5) == Address
+    assert isinstance(r5, Address)
     assert r5.zipcode == v3.address.zipcode
     r6: int = await cache.invoke(k3, ExtractorProcessor(ChainedExtractor("address.zipcode")))
     assert r6 == v3.address.zipcode

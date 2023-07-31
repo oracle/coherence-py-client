@@ -74,7 +74,7 @@ class JSONSerializer(Serializer):
         return b
 
     def deserialize(self, value: bytes) -> T:  # type: ignore
-        if type(value) == bytes:
+        if isinstance(value, bytes):
             s = value.decode()
             if value.__len__() == 0:  # empty string
                 return cast(T, None)
