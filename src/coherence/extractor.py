@@ -37,7 +37,7 @@ class ValueExtractor(ABC, Generic[T, E]):
         """
         if before is None:
             raise ValueError("before cannot be null")
-        if type(before) == ValueExtractor:
+        if type(before) == ValueExtractor:  # noqa: E721
             return before.and_then(self)
         else:
             return ChainedExtractor([before, self])
@@ -53,7 +53,7 @@ class ValueExtractor(ABC, Generic[T, E]):
         """
         if after is None:
             raise ValueError("after cannot be null")
-        if type(after) == ChainedExtractor:
+        if type(after) == ChainedExtractor:  # noqa: E721
             return ChainedExtractor([self, after])
         else:
             return after.compose(self)
@@ -129,7 +129,7 @@ class ChainedExtractor(AbstractCompositeExtractor[T, Any]):
          sequence of method names which results in a ChainedExtractor that is based on an array of corresponding
          :class:`coherence.extractor.UniversalExtractor` objects
         """
-        if type(extractors_or_method) == str:
+        if type(extractors_or_method) == str:  # noqa: E721
             e = list()
             names = extractors_or_method.split(".")
             for name in names:
@@ -152,7 +152,7 @@ class MultiExtractor(AbstractCompositeExtractor[Any, Any]):
          sequence of method names which results in a ChainedExtractor that is based on an array of corresponding
          :class:`coherence.extractor.UniversalExtractor` objects
         """
-        if type(extractors_or_method) == str:
+        if type(extractors_or_method) == str:  # noqa: E721
             e = list()
             names = extractors_or_method.split(",")
             for name in names:

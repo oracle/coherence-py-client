@@ -79,7 +79,7 @@ class ExtractorFilter(Filter):
         super().__init__()
         if isinstance(extractor, ValueExtractor):
             self.extractor = extractor
-        elif type(extractor) == str:
+        elif isinstance(extractor, str):
             self.extractor = Extractors.extract(extractor)
         else:
             raise ValueError("extractor cannot be any other type")

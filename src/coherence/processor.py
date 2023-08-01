@@ -94,7 +94,7 @@ class ExtractorProcessor(EntryProcessor[R]):
         else:
             if isinstance(value_extractor, ValueExtractor):
                 self.extractor = value_extractor
-            elif type(value_extractor) == str:
+            elif isinstance(value_extractor, str):
                 self.extractor = Extractors.extract(value_extractor)
             else:
                 raise ValueError("value_extractor cannot be any other type")
@@ -233,7 +233,7 @@ class NumberMultiplier(PropertyProcessor[Numeric]):
         :param post_multiplication: pass true to return the value as it was before it was multiplied, or pass false
          to return the value as it is after it is multiplied
         """
-        if type(name_or_manipulator) == str:
+        if isinstance(name_or_manipulator, str):
             manipulator: ValueManipulator[Any, Numeric] = self.create_custom_manipulator(name_or_manipulator)
             super().__init__(manipulator)
         else:
@@ -266,7 +266,7 @@ class NumberIncrementor(PropertyProcessor[Numeric]):
         :param post_increment: pass `True` to return the value as it was before it was incremented, or pass `False`
          to return the value as it is after it is incremented
         """
-        if type(name_or_manipulator) == str:
+        if isinstance(name_or_manipulator, str):
             manipulator: ValueManipulator[Any, Numeric] = self.create_custom_manipulator(name_or_manipulator)
             super().__init__(manipulator)
         else:
@@ -477,7 +477,7 @@ class UpdaterProcessor(EntryProcessor[bool]):
         :param value: the value to update the target entry with
         """
         super().__init__()
-        if type(updater_or_property_name) == str:
+        if type(updater_or_property_name) == str:  # noqa: E721
             self.updater: ValueUpdater[V, bool]
             if updater_or_property_name.find(".") == -1:
                 self.updater = UniversalUpdater(updater_or_property_name)

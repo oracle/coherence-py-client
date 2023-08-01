@@ -55,7 +55,7 @@ async def test_extractor(setup_and_teardown: NamedCache[Any, Any]) -> None:
     r = await cache.invoke(k3, Processors.extract("name"))
     assert r == k3
     r = await cache.invoke(k3, Processors.extract("address"))
-    assert type(r) == Address
+    assert isinstance(r, Address)
     assert r.zipcode == v3.address.zipcode
     r = await cache.invoke(k3, Processors.extract("address.zipcode"))
     assert r == v3.address.zipcode
