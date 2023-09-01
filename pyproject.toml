@@ -22,7 +22,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "~3.11"
-protobuf = "~4.23"
+protobuf = ">=4.23,<4.25"
 grpcio = ">=1.54,<1.58"
 grpcio-tools = ">=1.54,<1.58"
 jsonpickle = "~3.0"
