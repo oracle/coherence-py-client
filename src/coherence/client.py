@@ -1212,10 +1212,16 @@ class Session:
 
         self._tasks: Set[Task[None]] = set()
 
+        options: Sequence[tuple[str, Any]] = [
+            ('grpc.min_reconnect_backoff_ms', 1100),
+            ('grpc.max_reconnect_backoff_ms', 3000),
+            ('grpc.lb_policy_name', 'round_robin')
+        ]
+
         if self._session_options.tls_options is None:
             self._channel: grpc.aio.Channel = grpc.aio.insecure_channel(
                 self._session_options.address,
-                options=None
+                options=options
                 if self._session_options.channel_options is None
                 else self._session_options.channel_options,
                 interceptors=interceptors,
@@ -1225,7 +1231,7 @@ class Session:
             self._channel = grpc.aio.secure_channel(
                 self._session_options.address,
                 creds,
-                options=None
+                options=options
                 if self._session_options.channel_options is None
                 else self._session_options.channel_options,
                 interceptors=interceptors,
