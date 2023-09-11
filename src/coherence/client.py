@@ -1213,9 +1213,9 @@ class Session:
         self._tasks: Set[Task[None]] = set()
 
         options: Sequence[tuple[str, Any]] = [
-            ('grpc.min_reconnect_backoff_ms', 1100),
-            ('grpc.max_reconnect_backoff_ms', 3000),
-            ('grpc.lb_policy_name', 'round_robin')
+            ("grpc.min_reconnect_backoff_ms", 1100),
+            ("grpc.max_reconnect_backoff_ms", 3000),
+            ("grpc.lb_policy_name", "round_robin"),
         ]
 
         if self._session_options.tls_options is None:
