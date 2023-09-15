@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2022 Oracle and/or its affiliates.
+    Copyright (c) 2022, 2023 Oracle and/or its affiliates.
     Licensed under the Universal Permissive License v 1.0 as shown at
     https://oss.oracle.com/licenses/upl.
 
@@ -18,7 +18,7 @@
   <packaging>pom</packaging>
   <version>1.0.0</version>
 
-  <description>Oracle Coherence Go Client Test</description>
+  <description>Oracle Coherence Python Client Test</description>
   <name>coherence-python-parent</name>
 
   <modules>
@@ -30,27 +30,27 @@
     <operator.version>${project.version}</operator.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>8</maven.compiler.source>
-    <maven.compiler.target>8</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
 
     <coherence.group.id>com.oracle.coherence.ce</coherence.group.id>
-    <coherence.version>22.06.5</coherence.version>
+    <coherence.version>22.06.4</coherence.version>
 
     <!-- The version of Coherence to use in the test images -->
     <coherence.test.groupId>com.oracle.coherence.ce</coherence.test.groupId>
     <coherence.test.version>${coherence.version}</coherence.test.version>
 
-    <coherence.test.base.image>gcr.io/distroless/java17-debian11</coherence.test.base.image>
+    <coherence.test.base.image>gcr.io/distroless/java:11</coherence.test.base.image>
 
     <!-- library dependency versions -->
     <version.lib.asciidoctor.diagram>2.2.1</version.lib.asciidoctor.diagram>
     <version.lib.commonjava.directory>1.0</version.lib.commonjava.directory>
     <version.plugin.helidon-build-tools>2.0.0-M3</version.plugin.helidon-build-tools>
-    <version.plugin.jib>3.3.2</version.plugin.jib>
-    <version.plugin.maven.assembly>3.6.0</version.plugin.maven.assembly>
-    <version.plugin.maven.compiler>3.11.0</version.plugin.maven.compiler>
-    <version.plugin.maven.dependency>3.6.0</version.plugin.maven.dependency>
-    <version.plugin.maven.jar>3.3.0</version.plugin.maven.jar>
+    <version.plugin.jib>3.3.0</version.plugin.jib>
+    <version.plugin.maven.assembly>3.3.0</version.plugin.maven.assembly>
+    <version.plugin.maven.compiler>3.7.0</version.plugin.maven.compiler>
+    <version.plugin.maven.dependency>3.2.0</version.plugin.maven.dependency>
+    <version.plugin.maven.jar>3.2.0</version.plugin.maven.jar>
     <version.plugin.maven.shade>3.2.4</version.plugin.maven.shade>
     <version.plugin.maven.resource>3.1.0</version.plugin.maven.resource>
 
@@ -69,6 +69,7 @@
     <coherence.security.key></coherence.security.key>
     <coherence.security.cert></coherence.security.cert>
     <coherence.security.ca.cert></coherence.security.ca.cert>
+    <coherence.scope></coherence.scope>
   </properties>
 
   <dependencyManagement>
@@ -142,6 +143,29 @@
   </build>
 
   <profiles>
+    <profile>
+      <id>jakarta</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>coherence-python-client-data-jakarta</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>javax</id>
+      <activation>
+        <!-- This is a work-around for the fact that activeByDefault does not do what you'd think it should -->
+        <file>
+          <exists>.</exists>
+        </file>
+      </activation>
+      <modules>
+        <module>coherence-python-client-data-javax</module>
+      </modules>
+    </profile>
+
     <!-- secure grpc with tls -->
     <profile>
       <id>secure</id>
@@ -150,6 +174,14 @@
         <coherence.security.key>/certs/star-lord.pem</coherence.security.key>
         <coherence.security.cert>/certs/star-lord.crt</coherence.security.cert>
         <coherence.security.ca.cert>/certs/guardians-ca.crt</coherence.security.ca.cert>
+      </properties>
+    </profile>
+
+    <!-- enable testing with scope -->
+    <profile>
+      <id>scope</id>
+      <properties>
+        <coherence.scope>test</coherence.scope>
       </properties>
     </profile>
 
@@ -168,6 +200,7 @@
               </from>
               <container>
                 <jvmFlags>
+                  <jvmFlag>-Dcoherence.scope=${coherence.scope}</jvmFlag>
                   <jvmFlag>-Dcoherence.wka=server1</jvmFlag>
                   <jvmFlag>-Dcoherence.cluster=cluster1</jvmFlag>
                   <jvmFlag>-Dcoherence.member=member1</jvmFlag>
@@ -188,7 +221,6 @@
                   <jvmFlag>-Dcoherence.distributed.localstorage=true</jvmFlag>
                   <jvmFlag>-Dcoherence.management.refresh.expiry=1s</jvmFlag>
                   <jvmFlag>-Dcoherence.cacheconfig=${coherence.cache.config}</jvmFlag>
-                  <jvmFlag>-Dcoherence.distributed.partitioncount=13</jvmFlag>
                 </jvmFlags>
                 <mainClass>com.oracle.coherence.python.testing.RestServer</mainClass>
                 <format>OCI</format>
@@ -214,6 +246,7 @@
               </from>
               <container>
                 <jvmFlags>
+                  <jvmFlag>-Dcoherence.scope=${coherence.scope}</jvmFlag>
                   <jvmFlag>-Dcoherence.wka=server1</jvmFlag>
                   <jvmFlag>-Dcoherence.cluster=cluster1</jvmFlag>
                   <jvmFlag>-Dcoherence.member=member2</jvmFlag>
@@ -237,4 +270,29 @@
       </build>
     </profile>
   </profiles>
+
+  <repositories>
+    <repository>
+      <id>ossrh-staging</id>
+      <name>OSS Sonatype Staging</name>
+      <url>https://oss.sonatype.org/content/groups/staging/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+
+    <repository>
+      <id>snapshots-repo</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>

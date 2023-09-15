@@ -36,6 +36,39 @@
   <description>Oracle Coherence Python Client Test</description>
   <name>coherence-python-test</name>
 
+  <profiles>
+    <profile>
+      <id>jakarta</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.oracle.coherence.python</groupId>
+          <artifactId>coherence-python-client-data-jakarta</artifactId>
+          <version>1.0.0</version>
+        </dependency>
+      </dependencies>
+    </profile>
+
+    <profile>
+      <id>javax</id>
+      <activation>
+        <!-- This is a work-around for the fact that activeByDefault does not do what you'd think it should -->
+        <file>
+          <exists>.</exists>
+        </file>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.oracle.coherence.python</groupId>
+          <artifactId>coherence-python-client-data-javax</artifactId>
+          <version>1.0.0</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+
   <dependencies>
     <dependency>
       <groupId>${coherence.group.id}</groupId>

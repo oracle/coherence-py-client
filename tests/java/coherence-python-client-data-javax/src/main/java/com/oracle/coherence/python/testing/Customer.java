@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Oracle and/or its affiliates.
+ * Copyright (c) 2023 Oracle and/or its affiliates.
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * https://oss.oracle.com/licenses/upl.
  */
@@ -36,9 +36,9 @@ public class Customer
     @JsonbProperty("outstandingBalance")
     private double outstandingBalance;
 
-    public static String BRONZE = "BRONZE";
-    public static String SILVER = "SILVER";
-    public static String GOLD = "GOLD";
+    public static final String BRONZE = "BRONZE";
+    public static final String SILVER = "SILVER";
+    public static final String GOLD = "GOLD";
 
     public Customer() {}
 
