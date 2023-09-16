@@ -34,7 +34,7 @@ echo "Coherence CE 22.06.5"
 COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
   COHERENCE_VERSION=$COH_VER \
   COHERENCE_BASE_IMAGE=$BASE_IMAGE \
-  PROFILES=,$PROFILE_STR \
+  PROFILES=$PROFILE_STR \
   make clean test-cluster-shutdown remove-app-images build-test-images test-cluster-startup just-wait test
 
 echo "Coherence CE 22.06.5 with SSL"
@@ -45,6 +45,6 @@ RUN_SECURE=true COHERENCE_IGNORE_INVALID_CERTS=true \
   COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
   COHERENCE_VERSION=$COH_VER \
   COHERENCE_BASE_IMAGE=$BASE_IMAGE \
-  PROFILES=,secure,$PROFILE_STR \
+  PROFILES=$PROFILE_STR,secure \
   make clean certs test-cluster-shutdown remove-app-images \
                                                   build-test-images test-cluster-startup just-wait test

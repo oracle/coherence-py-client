@@ -25,13 +25,13 @@ jobs:
         base-image:
           - gcr.io/distroless/java17-debian11
         profile:
-          - ,-jakarta,javax
-          - ,jakarta,-javax
+          - ",-jakarta,javax"
+          - ",jakarta,-javax"
         exclude:
           - coherenceVersion: 23.03.1
-            profile: ,-jakarta,javax
+            profile: ",-jakarta,javax"
           - coherenceVersion: 22.06.5
-            profile: ,jakarta,-javax
+            profile: ",jakarta,-javax"
 
     runs-on: ${{ matrix.os }}
     steps:
