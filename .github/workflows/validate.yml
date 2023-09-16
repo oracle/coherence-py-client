@@ -76,4 +76,7 @@ jobs:
       - name: Run test
         shell: bash
         run: |
-          python -m poetry run ./tests/scripts/run-tests.sh ${{ matrix.coherenceVersion }} ${{ matrix.base-image }}
+          python -m poetry run ./tests/scripts/run-tests.sh \
+                  ${{ matrix.coherenceVersion }} \
+                  ${{ matrix.base-image }} \
+                  ${{ matrix.profile }}
