@@ -24,11 +24,17 @@ if [ -z "${BASE_IMAGE}" ] ; then
   exit 1
 fi
 
+PROFILE_STR=$3
+if [ -z "${PROFILE_STR}" ] ; then
+  echo "Please provide Profile string"
+  exit 1
+fi
+
 echo "Coherence CE 22.06.5"
 COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
   COHERENCE_VERSION=$COH_VER \
   COHERENCE_BASE_IMAGE=$BASE_IMAGE \
-  PROFILES=,-jakarta,javax \
+  PROFILES=,$PROFILE_STR \
   make clean test-cluster-shutdown remove-app-images build-test-images test-cluster-startup just-wait test
 
 echo "Coherence CE 22.06.5 with SSL"
@@ -39,5 +45,6 @@ RUN_SECURE=true COHERENCE_IGNORE_INVALID_CERTS=true \
   COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
   COHERENCE_VERSION=$COH_VER \
   COHERENCE_BASE_IMAGE=$BASE_IMAGE \
-  PROFILES=,secure make clean certs test-cluster-shutdown remove-app-images \
+  PROFILES=,secure,$PROFILE_STR \
+  make clean certs test-cluster-shutdown remove-app-images \
                                                   build-test-images test-cluster-startup just-wait test
