@@ -19,18 +19,32 @@ jobs:
         python-version: ["3.11.x"]
         poetry-version: ["1.5.0"]
         os: [ubuntu-latest]
+        coherenceVersion:
+          - 23.03.1
+          - 22.06.5
+        base-image:
+          - gcr.io/distroless/java17-debian11
+        profile:
+          - ",-jakarta,javax"
+          - ",jakarta,-javax"
+        exclude:
+          - coherenceVersion: 23.03.1
+            profile: ",-jakarta,javax"
+          - coherenceVersion: 22.06.5
+            profile: ",jakarta,-javax"
+
     runs-on: ${{ matrix.os }}
     steps:
       - name: Get Docker Images
         shell: bash
         run: |
-          docker pull gcr.io/distroless/java17-debian11
+          docker pull ${{ matrix.base-image }}
           uname -a
 
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'zulu'
 
       - uses: actions/checkout@v4
@@ -62,4 +76,7 @@ jobs:
       - name: Run test
         shell: bash
         run: |
-          python -m poetry run ./tests/scripts/run-tests.sh
+          python -m poetry run ./tests/scripts/run-tests.sh \
+                  ${{ matrix.coherenceVersion }} \
+                  ${{ matrix.base-image }} \
+                  ${{ matrix.profile }}
