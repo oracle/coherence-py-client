@@ -47,7 +47,7 @@
     <version.lib.commonjava.directory>1.0</version.lib.commonjava.directory>
     <version.plugin.helidon-build-tools>2.0.0-M3</version.plugin.helidon-build-tools>
     <version.plugin.jib>3.3.2</version.plugin.jib>
-    <version.plugin.maven.assembly>3.3.0</version.plugin.maven.assembly>
+    <version.plugin.maven.assembly>3.6.0</version.plugin.maven.assembly>
     <version.plugin.maven.compiler>3.11.0</version.plugin.maven.compiler>
     <version.plugin.maven.dependency>3.2.0</version.plugin.maven.dependency>
     <version.plugin.maven.jar>3.2.0</version.plugin.maven.jar>
