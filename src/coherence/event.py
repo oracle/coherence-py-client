@@ -663,11 +663,13 @@ class _MapEventsManager(Generic[K, V]):
                 async with asyncio.timeout(self._session.options.request_timeout_seconds):
                     await self._stream_waiter.wait()
             except TimeoutError:
-                raise TimeoutError(
-                    "Deadline [{0} seconds] exceeded waiting for event stream to become ready)".format(
-                        str(self._session.options.request_timeout_seconds)
+                s = (
+                    "Deadline [{0} seconds] exceeded waiting for event stream"
+                    " to become ready. Server address - {1})".format(
+                        str(self._session.options.request_timeout_seconds), self._session.options.address
                     )
                 )
+                raise TimeoutError(s)
 
         return self._event_stream
 
