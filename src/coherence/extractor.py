@@ -323,5 +323,5 @@ class Extractors:
 
 
 ExtractorExpression: TypeAlias = ValueExtractor[T, E] | str
-ManipulatorExpression: TypeAlias = ValueManipulator | str
+ManipulatorExpression: TypeAlias = ValueManipulator[T, E] | str
 UpdaterExpression: TypeAlias = ValueUpdater[T, R] | str
