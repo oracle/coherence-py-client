@@ -170,7 +170,7 @@ class PropertyProcessor(EntryProcessor[R]):
     `PropertyProcessor` is a base class for EntryProcessor implementations that depend on a ValueManipulator.
     """
 
-    def __init__(self, manipulator: ManipulatorExpression, use_is: bool = False):
+    def __init__(self, manipulator: ManipulatorExpression[T, E], use_is: bool = False):
         """
         Construct a PropertyProcessor for the specified property name.
 
@@ -182,7 +182,7 @@ class PropertyProcessor(EntryProcessor[R]):
         """
         super().__init__()
         if type(manipulator) is str:
-            self.manipulator: ManipulatorExpression = PropertyManipulator(manipulator, use_is)
+            self.manipulator: ManipulatorExpression[T, E] = PropertyManipulator(manipulator, use_is)
         else:
             self.manipulator = manipulator
 
@@ -222,7 +222,7 @@ class NumberMultiplier(PropertyProcessor[Numeric]):
     """
 
     def __init__(
-        self, name_or_manipulator: ManipulatorExpression, multiplier: Numeric, post_multiplication: bool = False
+        self, name_or_manipulator: ManipulatorExpression[T, E], multiplier: Numeric, post_multiplication: bool = False
     ):
         """
         Construct an NumberMultiplier processor that will multiply a property value by a specified factor,
@@ -256,7 +256,9 @@ class NumberIncrementor(PropertyProcessor[Numeric]):
     a property value of a numeric type.
     """
 
-    def __init__(self, name_or_manipulator: ManipulatorExpression, increment: Numeric, post_increment: bool = False):
+    def __init__(
+        self, name_or_manipulator: ManipulatorExpression[T, E], increment: Numeric, post_increment: bool = False
+    ):
         """
         Construct an :class:`coherence.processor.NumberIncrementor` processor that will increment a property
         value by a specified amount, returning either the old or the new value as specified.
@@ -619,7 +621,7 @@ class Processors:
 
     @staticmethod
     def increment(
-        name_or_manipulator: ManipulatorExpression, increment: Numeric, post_increment: bool = False
+        name_or_manipulator: ManipulatorExpression[T, E], increment: Numeric, post_increment: bool = False
     ) -> EntryProcessor[Numeric]:
         """
         Construct an :class:`coherence.processor.NumberIncrementor` processor that will increment a property
@@ -661,7 +663,7 @@ class Processors:
 
     @staticmethod
     def multiply(
-        name_or_manipulator: ManipulatorExpression, multiplier: Numeric, post_multiplication: bool = False
+        name_or_manipulator: ManipulatorExpression[T, E], multiplier: Numeric, post_multiplication: bool = False
     ) -> EntryProcessor[Numeric]:
         """
         Construct an NumberMultiplier processor that will multiply a property value by a specified factor,
