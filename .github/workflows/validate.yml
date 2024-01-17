@@ -20,17 +20,17 @@ jobs:
         poetry-version: ["1.5.0"]
         os: [ubuntu-latest]
         coherenceVersion:
-          - 23.09
-          - 22.06.5
+          - 23.09.1
+          - 22.06.7
         base-image:
           - gcr.io/distroless/java17-debian11
         profile:
           - ",-jakarta,javax"
           - ",jakarta,-javax"
         exclude:
-          - coherenceVersion: 23.09
+          - coherenceVersion: 23.09.1
             profile: ",-jakarta,javax"
-          - coherenceVersion: 22.06.5
+          - coherenceVersion: 22.06.7
             profile: ",jakarta,-javax"
 
     runs-on: ${{ matrix.os }}
