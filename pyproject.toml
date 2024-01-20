@@ -21,7 +21,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.11"
+python = "~3.11"
 protobuf = ">=4.23,<4.26"
 grpcio = ">=1.54,<1.61"
 grpcio-tools = ">=1.54,<1.61"
