@@ -3,7 +3,7 @@
 # https://oss.oracle.com/licenses/upl.
 
 from asyncio import Event
-from time import time
+from time import sleep, time
 from typing import Any, AsyncGenerator, Final, Optional, TypeVar
 
 import pytest
@@ -92,6 +92,22 @@ async def test_get_and_put(setup_and_teardown: NamedCache[str, str | int | Perso
     assert isinstance(r, Person)
     assert r.name == k2
     assert r.address.city == Person.andy().address.city
+
+
+# noinspection PyShadowingNames
+@pytest.mark.asyncio
+async def test_put_with_ttl(setup_and_teardown: NamedCache[str, str | int]) -> None:
+    cache: NamedCache[str, str | int | Person] = setup_and_teardown
+
+    k: str = "one"
+    v: str = "only-one"
+    await cache.put(k, v, 5000)  # TTL of 5 seconds
+    r = await cache.get(k)
+    assert r == v
+
+    sleep(5)  # sleep for 5 seconds
+    r = await cache.get(k)
+    assert r is None
 
 
 # noinspection PyShadowingNames
