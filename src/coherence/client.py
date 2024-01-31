@@ -1221,9 +1221,9 @@ class Session:
         if self._session_options.tls_options is None:
             self._channel: grpc.aio.Channel = grpc.aio.insecure_channel(
                 self._session_options.address,
-                options=options
-                if self._session_options.channel_options is None
-                else self._session_options.channel_options,
+                options=(
+                    options if self._session_options.channel_options is None else self._session_options.channel_options
+                ),
                 interceptors=interceptors,
             )
         else:
@@ -1231,9 +1231,9 @@ class Session:
             self._channel = grpc.aio.secure_channel(
                 self._session_options.address,
                 creds,
-                options=options
-                if self._session_options.channel_options is None
-                else self._session_options.channel_options,
+                options=(
+                    options if self._session_options.channel_options is None else self._session_options.channel_options
+                ),
                 interceptors=interceptors,
             )
 
