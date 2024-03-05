@@ -29,7 +29,7 @@ jsonpickle = "~3.0"
 pymitter = ">=0.4,<0.6"
 
 [tool.poetry.dev-dependencies]
-pytest = "~8.1"
+pytest = "~8.0"
 pytest-asyncio = "~0.23"
 pytest-cov = "~4.1"
 pytest-unordered = "~0.5"
