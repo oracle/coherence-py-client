@@ -31,7 +31,7 @@ For local development, we recommend using the Coherence CE Docker image; it cont
 everything necessary for the client to operate correctly.
 
 ```bash
-docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:22.06.5
+docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:24.03
 ```
 
 ## Installation
@@ -92,7 +92,7 @@ asyncio.run(run_test())
 ```
 ## Help
 
-We have a **public Slack channel** where you can get in touch with us to ask questions about using the Coherence CLI
+We have a **public Slack channel** where you can get in touch with us to ask questions about using the Coherence Python Client
 or give us feedback or suggestions about what features and improvements you would like to see. We would love
 to hear from you. To join our channel,
 please [visit this site to get an invitation](https://join.slack.com/t/oraclecoherence/shared_invite/enQtNzcxNTQwMTAzNjE4LTJkZWI5ZDkzNGEzOTllZDgwZDU3NGM2YjY5YWYwMzM3ODdkNTU2NmNmNDFhOWIxMDZlNjg2MzE3NmMxZWMxMWE).
