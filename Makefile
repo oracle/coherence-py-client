@@ -7,6 +7,7 @@
 # This is the Makefile to build the Coherence Python Client
 # ----------------------------------------------------------------------------------------------------------------------
 
+SHELL := /bin/bash
 VERSION ?=0.9.0
 CURRDIR := $(shell pwd)
 USER_ID := $(shell echo "`id -u`:`id -g`")
@@ -61,6 +62,9 @@ MAVEN_OPTIONS ?= -Dmaven.wagon.httpconnectionManager.ttlSeconds=25 -Dmaven.wagon
 MAVEN_BUILD_OPTS :=$(USE_MAVEN_SETTINGS) -Drevision=$(MVN_VERSION) -Dcoherence.version=$(COHERENCE_VERSION) -Dcoherence.group.id=$(COHERENCE_GROUP_ID) $(MAVEN_OPTIONS)
 
 CURRDIR := $(shell pwd)
+
+COMPOSE:=$(shell type -p docker-compose || echo docker compose)
+$(info COMPOSE = $(COMPOSE))
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Clean-up all of the build artifacts
@@ -167,14 +171,14 @@ docs:  ## Generate doc
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-cluster-startup
 test-cluster-startup: $(BUILD_PROPS) ## Startup any test cluster members using docker-compose
-	cd tests/utils && docker-compose -f docker-compose-2-members.yaml up -d
+	cd tests/utils && ${COMPOSE} -f docker-compose-2-members.yaml up -d
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Shutdown any cluster members via docker compose
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-cluster-shutdown
 test-cluster-shutdown: ## Shutdown any test cluster members using docker-compose
-	cd tests/utils && docker-compose -f docker-compose-2-members.yaml down || true
+	cd tests/utils && ${COMPOSE} -f docker-compose-2-members.yaml down || true
 
 
 # ----------------------------------------------------------------------------------------------------------------------
