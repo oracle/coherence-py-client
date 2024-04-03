@@ -7,6 +7,7 @@
 # This is the Makefile to build the Coherence Python Client
 # ----------------------------------------------------------------------------------------------------------------------
 
+SHELL := /bin/bash
 VERSION ?=0.9.0
 CURRDIR := $(shell pwd)
 USER_ID := $(shell echo "`id -u`:`id -g`")
