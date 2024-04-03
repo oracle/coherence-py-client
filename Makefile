@@ -64,6 +64,7 @@ MAVEN_BUILD_OPTS :=$(USE_MAVEN_SETTINGS) -Drevision=$(MVN_VERSION) -Dcoherence.v
 CURRDIR := $(shell pwd)
 
 COMPOSE:=$(shell type -p docker-compose || echo docker compose)
+$(info COMPOSE = $(COMPOSE))
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Clean-up all of the build artifacts
@@ -170,7 +171,6 @@ docs:  ## Generate doc
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-cluster-startup
 test-cluster-startup: $(BUILD_PROPS) ## Startup any test cluster members using docker-compose
-	@echo ${COMPOSE}
 	cd tests/utils && ${COMPOSE} -f docker-compose-2-members.yaml up -d
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -178,7 +178,6 @@ test-cluster-startup: $(BUILD_PROPS) ## Startup any test cluster members using d
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-cluster-shutdown
 test-cluster-shutdown: ## Shutdown any test cluster members using docker-compose
-	@echo ${COMPOSE}
 	cd tests/utils && ${COMPOSE} -f docker-compose-2-members.yaml down || true
 
 
