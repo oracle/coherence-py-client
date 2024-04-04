@@ -80,3 +80,8 @@ jobs:
                   ${{ matrix.coherenceVersion }} \
                   ${{ matrix.base-image }} \
                   ${{ matrix.profile }}
+      - name: Archive server logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-logs
+          path: ./tests/utils/*.txt
