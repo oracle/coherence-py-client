@@ -85,3 +85,4 @@ jobs:
         with:
           name: server-logs-${{ matrix.coherenceVersion }}
           path: ./tests/utils/*.txt
+          retention-days: 10
