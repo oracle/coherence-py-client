@@ -172,6 +172,11 @@ docs:  ## Generate doc
 .PHONY: test-cluster-startup
 test-cluster-startup: $(BUILD_PROPS) ## Startup any test cluster members using docker-compose
 	cd tests/utils && ${COMPOSE} -f docker-compose-2-members.yaml up -d
+	$(eval LOGFILE_NAME=log-clear-tests-$(COHERENCE_VERSION).txt)
+ifeq ($(RUN_SECURE), true)
+	$(eval LOGFILE_NAME=log-ssl-tests-$(COHERENCE_VERSION).txt)
+endif
+	cd tests/utils && ${COMPOSE} -f docker-compose-2-members.yaml logs -f --no-color > $(LOGFILE_NAME) &
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Shutdown any cluster members via docker compose
