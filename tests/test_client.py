@@ -49,7 +49,6 @@ async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
     yield cache  # this is what is returned to the test functions
 
     await cache.truncate()
-    await cache.destroy()
     await session.close()
 
 
@@ -63,7 +62,6 @@ async def setup_and_teardown_person_cache() -> AsyncGenerator[NamedCache[str, Pe
     yield cache
 
     await cache.truncate()
-    await cache.destroy()
     await session.close()
 
 
