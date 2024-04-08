@@ -301,7 +301,6 @@ async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
     yield cache
 
     await cache.clear()
-    await cache.destroy()
     await session.close()
 
 
