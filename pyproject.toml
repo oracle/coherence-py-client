@@ -37,8 +37,8 @@ pytest-unordered = "~0.6"
 #Sphinx = "~7.2"
 #sphinx-rtd-theme = "~2.0"
 #sphinxcontrib-napoleon = "~0.7"
-m2r = "~0.3"
-third-party-license-file-generator = "~2023.2"
+#m2r = "~0.3"
+#third-party-license-file-generator = "~2023.2"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
