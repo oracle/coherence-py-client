@@ -27,6 +27,7 @@ grpcio = ">=1.54,<1.63"
 grpcio-tools = ">=1.54,<1.63"
 jsonpickle = "~3.0"
 pymitter = ">=0.4,<0.6"
+typing-extensions = ">=4.11"
 
 [tool.poetry.dev-dependencies]
 pytest = "~8.1"

@@ -657,8 +657,7 @@ class _MapEventsManager(Generic[K, V]):
             # we use asyncio.timeout here instead of using the gRPC timeout
             # as any deadline set on the stream will result in a loss of events
             try:
-                async with asyncio.timeout(self._session.options.request_timeout_seconds):
-                    await self._stream_waiter.wait()
+                await asyncio.wait_for(self._stream_waiter.wait(), self._session.options.request_timeout_seconds)
             except TimeoutError:
                 s = (
                     "Deadline [{0} seconds] exceeded waiting for event stream"

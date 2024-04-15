@@ -2,7 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
-from typing import Any, Optional, cast
+from typing import Any, Optional, cast, List
 
 import pytest
 
@@ -88,7 +88,8 @@ def test_and_then() -> None:
     _validate_universal(result.extractors[1], "prop2")
 
 
-def _validate_universal(extractor: ValueExtractor[Any, Any], expr: str, params: Optional[list[Any]] = None) -> None:
+def _validate_universal(extractor: ValueExtractor[Any, Any], expr: str, params: Optional[
+    List[Any]] = None) -> None:
     assert extractor is not None
     assert isinstance(extractor, UniversalExtractor)
 

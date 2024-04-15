@@ -6,7 +6,8 @@ from __future__ import annotations
 
 from abc import ABC
 from decimal import Decimal
-from typing import Any, Generic, List, Optional, TypeAlias, TypeVar, cast
+from typing import Any, Generic, List, Optional, TypeVar, cast, Union
+from typing_extensions import TypeAlias
 
 from .extractor import (
     CompositeUpdater,
@@ -29,7 +30,7 @@ R = TypeVar("R")
 T = TypeVar("T")
 V = TypeVar("V")
 
-Numeric: TypeAlias = int | float | Decimal
+Numeric: TypeAlias = Union[int, float, Decimal]
 
 
 class EntryProcessor(ABC, Generic[R]):

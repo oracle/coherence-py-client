@@ -4,7 +4,7 @@
 
 from asyncio import Event
 from time import sleep, time
-from typing import Any, AsyncGenerator, Final, Optional, TypeVar
+from typing import Any, AsyncGenerator, Final, Optional, TypeVar, Union
 
 import pytest
 import pytest_asyncio
@@ -67,8 +67,8 @@ async def setup_and_teardown_person_cache() -> AsyncGenerator[NamedCache[str, Pe
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_get_and_put(setup_and_teardown: NamedCache[str, str | int | Person]) -> None:
-    cache: NamedCache[str, str | int | Person] = setup_and_teardown
+async def test_get_and_put(setup_and_teardown: NamedCache[str, Union[str, int, Person]]) -> None:
+    cache: NamedCache[str, Union[str, int, Person]] = setup_and_teardown
 
     k: str = "one"
     v: str = "only-one"
@@ -94,8 +94,8 @@ async def test_get_and_put(setup_and_teardown: NamedCache[str, str | int | Perso
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_put_with_ttl(setup_and_teardown: NamedCache[str, str | int]) -> None:
-    cache: NamedCache[str, str | int | Person] = setup_and_teardown
+async def test_put_with_ttl(setup_and_teardown: NamedCache[str, Union[str, int]]) -> None:
+    cache: NamedCache[str, Union[str, int, Person]] = setup_and_teardown
 
     k: str = "one"
     v: str = "only-one"
@@ -449,8 +449,8 @@ async def test_size(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_invoke(setup_and_teardown: NamedCache[str, str | Person]) -> None:
-    cache: NamedCache[str, str | Person] = setup_and_teardown
+async def test_invoke(setup_and_teardown: NamedCache[str, Union[str, Person]]) -> None:
+    cache: NamedCache[str, Union[str, Person]] = setup_and_teardown
 
     k1: str = "one"
     v1: str = "only-one"

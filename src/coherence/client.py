@@ -1401,8 +1401,16 @@ class Session:
         if self._ready_enabled and not self.is_ready():
             timeout: float = self._ready_timeout_seconds
             COH_LOG.debug(f"Waiting for session {self.session_id} to become active; timeout=[{timeout} seconds]")
-            async with asyncio.timeout(timeout):
-                await self._ready_condition.wait()
+            try:
+                await asyncio.wait_for(self._ready_condition.wait(), timeout)
+            except TimeoutError:
+                s = (
+                    "Deadline [{0} seconds] exceeded "
+                    "waiting for session {1} to become active".format(
+                        str(timeout), self.session_id
+                    )
+                )
+                raise TimeoutError(s)
 
     # noinspection PyUnresolvedReferences
     async def close(self) -> None:
