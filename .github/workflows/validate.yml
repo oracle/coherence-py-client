@@ -8,7 +8,7 @@ on:
   schedule:
     - cron: "0 5 * * *"
   push:
-    branches: [ main ]
+    branches: [ * ]
   pull_request:
     branches: [ main ]
 jobs:
@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11.x"]
+        python-version: ["3.8.x"]
         poetry-version: ["1.5.0"]
         os: [ubuntu-latest]
         coherenceVersion:
