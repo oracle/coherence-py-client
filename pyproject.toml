@@ -36,7 +36,7 @@ pytest-unordered = "~0.6"
 #pre-commit = "~3.7"
 #Sphinx = "~7.2"
 #sphinx-rtd-theme = "~2.0"
-sphinxcontrib-napoleon = "~0.7"
+#sphinxcontrib-napoleon = "~0.7"
 m2r = "~0.3"
 third-party-license-file-generator = "~2023.2"
 
