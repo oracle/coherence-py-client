@@ -534,11 +534,10 @@ class QueryRecorder(EntryAggregator[Any]):
 
     @classmethod
     def get_type(cls, query_type: RecordType) -> dict[str, str]:
-        match query_type:
-            case RecordType.EXPLAIN:
-                return {"enum": cls.EXPLAIN}
-            case RecordType.TRACE:
-                return {"enum": cls.TRACE}
+        if query_type == RecordType.EXPLAIN:
+            return {"enum": cls.EXPLAIN}
+        elif query_type == RecordType.TRACE:
+            return {"enum": cls.TRACE}
 
 
 @proxy("aggregator.ReducerAggregator")

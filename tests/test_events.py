@@ -98,15 +98,14 @@ class ValidateEvent(Generic[K, V]):
         Returns the event's description.
         :return: the event's description
         """
-        match self.type:
-            case MapEventType.ENTRY_INSERTED:
-                return "insert"
-            case MapEventType.ENTRY_UPDATED:
-                return "update"
-            case MapEventType.ENTRY_DELETED:
-                return "delete"
-            case _:
-                return "unknown"
+        if self.type == MapEventType.ENTRY_INSERTED:
+            return "insert"
+        elif self.type == MapEventType.ENTRY_UPDATED:
+            return "update"
+        elif self.type == MapEventType.ENTRY_DELETED:
+            return "delete"
+        else:
+            return "unknown"
 
     @property
     def source(self) -> NamedCache[K, V]:
