@@ -1,4 +1,4 @@
-# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -8,7 +8,6 @@ from abc import ABC
 from decimal import Decimal
 from enum import Enum, IntEnum
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
-
 from typing_extensions import TypeAlias
 
 from .comparator import Comparator, InverseComparator, SafeComparator
