@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Optional, Sequence, TypeVar, Union, cast
+
 from typing_extensions import TypeAlias
 
 from .serialization import proxy
