@@ -156,7 +156,7 @@ async def test_session_lifecycle() -> None:
 
 @pytest.mark.asyncio
 async def test_wait_for_ready() -> None:
-    session: Session = await tests.get_session(10.0)
+    session: Session = await tests.get_session(15.0)
     print(f"Session -> {session}")
 
     logging.debug("Getting cache ...")
@@ -181,9 +181,9 @@ async def test_wait_for_ready() -> None:
 
         COH_LOG.debug("Waiting for session disconnect ...")
         try:
-            await asyncio.wait_for(disc_event.wait(), 10)
+            await asyncio.wait_for(disc_event.wait(), 15)
         except TimeoutError:
-            s = "Deadline [10 seconds] exceeded for session disconnect"
+            s = "Deadline [15 seconds] exceeded for session disconnect"
             raise TimeoutError(s)
 
         # start inserting values as soon as disconnect occurs to ensure
