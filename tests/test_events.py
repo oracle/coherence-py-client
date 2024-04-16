@@ -4,7 +4,7 @@
 
 import asyncio
 import time
-from typing import Any, AsyncGenerator, Generic, List, TypeVar, cast, Union
+from typing import Any, AsyncGenerator, Generic, List, TypeVar, Union, cast
 
 import pytest
 import pytest_asyncio
@@ -26,7 +26,9 @@ V = TypeVar("V")
 class ValidateEvent(Generic[K, V]):
     """Simple class to validate expected values against a MapEvent."""
 
-    def __init__(self, name: str, source: NamedCache[K, V], key: K, old: Union[V, None], new: Union[V, None], _type: MapEventType):
+    def __init__(
+        self, name: str, source: NamedCache[K, V], key: K, old: Union[V, None], new: Union[V, None], _type: MapEventType
+    ):
         """
         Constructs a new ValidateEvent.
         :param name:    the expected cache name
@@ -124,7 +126,7 @@ class ValidateEvent(Generic[K, V]):
         return self._key
 
     @property
-    def old(self) -> Union[V , None]:
+    def old(self) -> Union[V, None]:
         """
         Returns the expected old value.
         :return: the expected old value
@@ -132,7 +134,7 @@ class ValidateEvent(Generic[K, V]):
         return self._old
 
     @property
-    def new(self) -> Union[V , None]:
+    def new(self) -> Union[V, None]:
         """
         Returns the expected new value.
         :return: the expected new value

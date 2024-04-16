@@ -68,11 +68,11 @@ jobs:
       - name: Install Dependencies
         run: python -m poetry install
 
-#      - name: Configure Validation
-#        run: python -m poetry run make validate-setup
-#
-#      - name: Validate Sources
-#        run: python -m poetry run make validate
+      - name: Configure Validation
+        run: python -m poetry run make validate-setup
+
+      - name: Validate Sources
+        run: python -m poetry run make validate
 
       - name: Run test
         shell: bash

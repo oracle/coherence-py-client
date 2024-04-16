@@ -6,7 +6,8 @@ from __future__ import annotations
 
 from abc import ABC
 from decimal import Decimal
-from typing import Any, Generic, List, Optional, TypeVar, cast, Union
+from typing import Any, Generic, List, Optional, TypeVar, Union, cast
+
 from typing_extensions import TypeAlias
 
 from .extractor import (

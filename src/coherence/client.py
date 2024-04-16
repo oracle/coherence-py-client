@@ -1404,11 +1404,8 @@ class Session:
             try:
                 await asyncio.wait_for(self._ready_condition.wait(), timeout)
             except TimeoutError:
-                s = (
-                    "Deadline [{0} seconds] exceeded "
-                    "waiting for session {1} to become active".format(
-                        str(timeout), self.session_id
-                    )
+                s = "Deadline [{0} seconds] exceeded " "waiting for session {1} to become active".format(
+                    str(timeout), self.session_id
                 )
                 raise TimeoutError(s)
 
@@ -1546,19 +1543,15 @@ async def watch_channel_state(session: Session) -> None:
                 if not first_connect and not connected:
                     connected = True
                     disconnect_time = 0
-                    COH_LOG.info(
-                        f"Session [{session.session_id} re-connected to [{session.options.address}].")
-                    await emitter.emit_async(
-                        SessionLifecycleEvent.RECONNECTED.value)
+                    COH_LOG.info(f"Session [{session.session_id} re-connected to [{session.options.address}].")
+                    await emitter.emit_async(SessionLifecycleEvent.RECONNECTED.value)
                     await session._set_ready(True)
                 elif first_connect and not connected:
                     connected = True
-                    COH_LOG.info(
-                        f"Session [{session.session_id}] connected to [{session.options.address}].")
+                    COH_LOG.info(f"Session [{session.session_id}] connected to [{session.options.address}].")
 
                     first_connect = False
-                    await emitter.emit_async(
-                        SessionLifecycleEvent.CONNECTED.value)
+                    await emitter.emit_async(SessionLifecycleEvent.CONNECTED.value)
                     await session._set_ready(True)
             else:
                 if connected:
@@ -1569,8 +1562,7 @@ async def watch_channel_state(session: Session) -> None:
                         f" will attempt reconnect."
                     )
 
-                    await emitter.emit_async(
-                        SessionLifecycleEvent.DISCONNECTED.value)
+                    await emitter.emit_async(SessionLifecycleEvent.DISCONNECTED.value)
                     await session._set_ready(False)
 
                 if disconnect_time != 0:

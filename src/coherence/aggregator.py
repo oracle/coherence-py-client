@@ -8,6 +8,7 @@ from abc import ABC
 from decimal import Decimal
 from enum import Enum, IntEnum
 from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
+
 from typing_extensions import TypeAlias
 
 from .comparator import Comparator, InverseComparator, SafeComparator
