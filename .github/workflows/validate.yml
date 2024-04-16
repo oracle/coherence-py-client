@@ -84,6 +84,6 @@ jobs:
       - name: Archive server logs
         uses: actions/upload-artifact@v4
         with:
-          name: server-logs-${{ matrix.coherenceVersion }}
+          name: server-logs-${{matrix.python-version}}-${{ matrix.coherenceVersion }}
           path: ./tests/utils/*.txt
           retention-days: 10
