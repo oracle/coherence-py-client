@@ -75,7 +75,6 @@ jobs:
         run: python -m poetry run make validate
 
       - name: Run test
-        continue-on-error: true
         shell: bash
         run: |
           python -m poetry run ./tests/scripts/run-tests.sh \
@@ -83,6 +82,7 @@ jobs:
                   ${{ matrix.base-image }} \
                   ${{ matrix.profile }}
       - name: Archive server logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: server-logs-${{matrix.python-version}}-${{ matrix.coherenceVersion }}
