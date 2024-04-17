@@ -1,4 +1,4 @@
-# Copyright 2022 Oracle Corporation and/or its affiliates.
+# Copyright 2022, 2024, Oracle Corporation and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -8,7 +8,8 @@ on:
   schedule:
     - cron: "0 5 * * *"
   push:
-    branches: [ main ]
+    branches:
+      - '*'
   pull_request:
     branches: [ main ]
 jobs:
@@ -16,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11.x"]
+        python-version: ["3.8.x", "3.9.x", "3.10.x", "3.11.x"]
         poetry-version: ["1.5.0"]
         os: [ubuntu-latest]
         coherenceVersion:
@@ -81,8 +82,9 @@ jobs:
                   ${{ matrix.base-image }} \
                   ${{ matrix.profile }}
       - name: Archive server logs
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: server-logs-${{ matrix.coherenceVersion }}
+          name: server-logs-${{matrix.python-version}}-${{ matrix.coherenceVersion }}
           path: ./tests/utils/*.txt
           retention-days: 10

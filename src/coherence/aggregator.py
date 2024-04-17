@@ -1,4 +1,4 @@
-# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -7,7 +7,9 @@ from __future__ import annotations
 from abc import ABC
 from decimal import Decimal
 from enum import Enum, IntEnum
-from typing import Any, Dict, Generic, List, Optional, TypeAlias, TypeVar
+from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
+
+from typing_extensions import TypeAlias
 
 from .comparator import Comparator, InverseComparator, SafeComparator
 from .extractor import ExtractorExpression, Extractors, ValueExtractor
@@ -21,7 +23,7 @@ R = TypeVar("R")
 T = TypeVar("T")
 V = TypeVar("V")
 
-ReducerResult: TypeAlias = Dict[K, Any | List[Any]]
+ReducerResult: TypeAlias = Dict[K, Union[Any, List[Any]]]
 
 
 class EntryAggregator(ABC, Generic[R]):
@@ -534,11 +536,10 @@ class QueryRecorder(EntryAggregator[Any]):
 
     @classmethod
     def get_type(cls, query_type: RecordType) -> dict[str, str]:
-        match query_type:
-            case RecordType.EXPLAIN:
-                return {"enum": cls.EXPLAIN}
-            case RecordType.TRACE:
-                return {"enum": cls.TRACE}
+        if query_type == RecordType.EXPLAIN:
+            return {"enum": cls.EXPLAIN}
+        elif query_type == RecordType.TRACE:
+            return {"enum": cls.TRACE}
 
 
 @proxy("aggregator.ReducerAggregator")

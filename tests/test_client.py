@@ -1,10 +1,10 @@
-# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 from asyncio import Event
 from time import sleep, time
-from typing import Any, AsyncGenerator, Final, Optional, TypeVar
+from typing import Any, AsyncGenerator, Dict, Final, List, Optional, Set, TypeVar, Union
 
 import pytest
 import pytest_asyncio
@@ -28,7 +28,7 @@ async def _insert_large_number_of_entries(cache: NamedCache[str, str]) -> int:
     num_bulk_ops: int = 10
     num_entries: int = 40000
     bulk_ops: int = int(num_entries / num_bulk_ops)
-    to_send: dict[str, str] = {}
+    to_send: Dict[str, str] = {}
     for i in range(num_bulk_ops):
         offset: int = i * bulk_ops
         for n in range(bulk_ops):
@@ -67,8 +67,8 @@ async def setup_and_teardown_person_cache() -> AsyncGenerator[NamedCache[str, Pe
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_get_and_put(setup_and_teardown: NamedCache[str, str | int | Person]) -> None:
-    cache: NamedCache[str, str | int | Person] = setup_and_teardown
+async def test_get_and_put(setup_and_teardown: NamedCache[str, Union[str, int, Person]]) -> None:
+    cache: NamedCache[str, Union[str, int, Person]] = setup_and_teardown
 
     k: str = "one"
     v: str = "only-one"
@@ -94,8 +94,8 @@ async def test_get_and_put(setup_and_teardown: NamedCache[str, str | int | Perso
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_put_with_ttl(setup_and_teardown: NamedCache[str, str | int]) -> None:
-    cache: NamedCache[str, str | int | Person] = setup_and_teardown
+async def test_put_with_ttl(setup_and_teardown: NamedCache[str, Union[str, int]]) -> None:
+    cache: NamedCache[str, Union[str, int, Person]] = setup_and_teardown
 
     k: str = "one"
     v: str = "only-one"
@@ -140,7 +140,7 @@ async def test_keys_filtered(setup_and_teardown: NamedCache[str, str]) -> None:
     v2: str = "only-three"
     await cache.put(k2, v2)
 
-    local_set: set[str] = set()
+    local_set: Set[str] = set()
     async for e in cache.keys(Filters.equals("length()", 8)):
         local_set.add(e)
 
@@ -159,7 +159,7 @@ async def test_keys_paged(setup_and_teardown: NamedCache[str, str]) -> None:
     num_entries: int = await _insert_large_number_of_entries(cache)
 
     # Stream the keys and locally cache the results
-    local_set: set[str] = set()
+    local_set: Set[str] = set()
     async for e in cache.keys(by_page=True):
         local_set.add(e)
 
@@ -181,7 +181,7 @@ async def test_entries_filtered(setup_and_teardown: NamedCache[str, str]) -> Non
     v2: str = "only-three"
     await cache.put(k2, v2)
 
-    local_dict: dict[str, str] = {}
+    local_dict: Dict[str, str] = {}
     async for e in cache.entries(Filters.equals("length()", 8)):
         local_dict[e.key] = e.value
 
@@ -202,7 +202,7 @@ async def test_entries_paged(setup_and_teardown: NamedCache[str, str]) -> None:
     assert await cache.size() == num_entries
 
     # Stream the keys and locally cache the results
-    local_dict: dict[str, str] = {}
+    local_dict: Dict[str, str] = {}
     async for e in cache.entries(by_page=True):
         local_dict[e.key] = e.value
 
@@ -223,7 +223,7 @@ async def test_values_filtered(setup_and_teardown: NamedCache[str, str]) -> None
     v2: str = "only-three"
     await cache.put(k2, v2)
 
-    local_list: list[str] = []
+    local_list: List[str] = []
     async for e in cache.values(Filters.equals("length()", 8)):
         local_list.append(e)
 
@@ -242,7 +242,7 @@ async def test_values_paged(setup_and_teardown: NamedCache[str, str]) -> None:
     num_entries: int = await _insert_large_number_of_entries(cache)
 
     # Stream the keys and locally cache the results
-    local_list: list[str] = []
+    local_list: List[str] = []
     async for e in cache.values(by_page=True):
         local_list.append(e)
 
@@ -258,7 +258,7 @@ async def test_put_all(setup_and_teardown: NamedCache[str, str]) -> None:
     v1: str = "only-three"
     k2: str = "four"
     v2: str = "only-four"
-    my_map: dict[str, str] = {k1: v1, k2: v2}
+    my_map: Dict[str, str] = {k1: v1, k2: v2}
     await cache.put_all(my_map)
     r1 = await cache.get(k1)
     r2 = await cache.get(k2)
@@ -299,7 +299,7 @@ async def test_get_all(setup_and_teardown: NamedCache[str, str]) -> None:
     v3: str = "only-three"
     await cache.put(k3, v3)
 
-    r: dict[str, str] = {}
+    r: Dict[str, str] = {}
     async for e in cache.get_all({k1, k3}):
         r[e.key] = e.value
 
@@ -449,8 +449,8 @@ async def test_size(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_invoke(setup_and_teardown: NamedCache[str, str | Person]) -> None:
-    cache: NamedCache[str, str | Person] = setup_and_teardown
+async def test_invoke(setup_and_teardown: NamedCache[str, Union[str, Person]]) -> None:
+    cache: NamedCache[str, Union[str, Person]] = setup_and_teardown
 
     k1: str = "one"
     v1: str = "only-one"
@@ -497,7 +497,7 @@ async def test_invoke_all_keys(setup_and_teardown: NamedCache[str, str]) -> None
     v3: str = "only-three"
     await cache.put(k3, v3)
 
-    r: dict[str, int] = {}
+    r: Dict[str, int] = {}
     e: MapEntry[str, int]
     async for e in cache.invoke_all(ExtractorProcessor(UniversalExtractor("length()")), keys={k1, k3}):
         r[e.key] = e.value

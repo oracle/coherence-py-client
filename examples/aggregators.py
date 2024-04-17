@@ -1,11 +1,11 @@
-# Copyright (c) 2023, Oracle and/or its affiliates.
+# Copyright (c) 2023, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 import asyncio
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import List
+from typing import Dict, List
 
 from coherence import Aggregators, Filters, NamedMap, Session
 
@@ -57,7 +57,7 @@ async def do_run() -> None:
         print("Average age of Hobbits under 40 :", int(avg_under_forty))
 
         print("The oldest Hobbit for each hobby ...")
-        results: dict[str, int] = await named_map.aggregate(Aggregators.group_by("hobbies", Aggregators.max("age")))
+        results: Dict[str, int] = await named_map.aggregate(Aggregators.group_by("hobbies", Aggregators.max("age")))
         for hobby, age in results.items():
             print("Hobby: ", hobby, "Max age: ", age)
     finally:

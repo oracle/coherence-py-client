@@ -1,4 +1,4 @@
-# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -1401,8 +1401,13 @@ class Session:
         if self._ready_enabled and not self.is_ready():
             timeout: float = self._ready_timeout_seconds
             COH_LOG.debug(f"Waiting for session {self.session_id} to become active; timeout=[{timeout} seconds]")
-            async with asyncio.timeout(timeout):
-                await self._ready_condition.wait()
+            try:
+                await asyncio.wait_for(self._ready_condition.wait(), timeout)
+            except TimeoutError:
+                s = "Deadline [{0} seconds] exceeded " "waiting for session {1} to become active".format(
+                    str(timeout), self.session_id
+                )
+                raise TimeoutError(s)
 
     # noinspection PyUnresolvedReferences
     async def close(self) -> None:
@@ -1529,56 +1534,55 @@ async def watch_channel_state(session: Session) -> None:
             state: grpc.ChannelConnectivity = channel.get_state(True)
             if COH_LOG.isEnabledFor(logging.DEBUG):
                 COH_LOG.debug(f"New Channel State: transitioning from [{last_state}] to [{state}].")
-            match state:
-                case grpc.ChannelConnectivity.SHUTDOWN:
-                    COH_LOG.info(f"Session [{session.session_id}] terminated.")
+            if state == grpc.ChannelConnectivity.SHUTDOWN:
+                COH_LOG.info(f"Session [{session.session_id}] terminated.")
+                await session._set_ready(False)
+                await session.close()
+                return
+            elif state == grpc.ChannelConnectivity.READY:
+                if not first_connect and not connected:
+                    connected = True
+                    disconnect_time = 0
+                    COH_LOG.info(f"Session [{session.session_id} re-connected to [{session.options.address}].")
+                    await emitter.emit_async(SessionLifecycleEvent.RECONNECTED.value)
+                    await session._set_ready(True)
+                elif first_connect and not connected:
+                    connected = True
+                    COH_LOG.info(f"Session [{session.session_id}] connected to [{session.options.address}].")
+
+                    first_connect = False
+                    await emitter.emit_async(SessionLifecycleEvent.CONNECTED.value)
+                    await session._set_ready(True)
+            else:
+                if connected:
+                    connected = False
+                    disconnect_time = -1
+                    COH_LOG.warning(
+                        f"Session [{session.session_id}] disconnected from [{session.options.address}];"
+                        f" will attempt reconnect."
+                    )
+
+                    await emitter.emit_async(SessionLifecycleEvent.DISCONNECTED.value)
                     await session._set_ready(False)
-                    await session.close()
-                    return
-                case grpc.ChannelConnectivity.READY:
-                    if not first_connect and not connected:
-                        connected = True
-                        disconnect_time = 0
-                        COH_LOG.info(f"Session [{session.session_id} re-connected to [{session.options.address}].")
-                        await emitter.emit_async(SessionLifecycleEvent.RECONNECTED.value)
-                        await session._set_ready(True)
-                    elif first_connect and not connected:
-                        connected = True
-                        COH_LOG.info(f"Session [{session.session_id}] connected to [{session.options.address}].")
 
-                        first_connect = False
-                        await emitter.emit_async(SessionLifecycleEvent.CONNECTED.value)
-                        await session._set_ready(True)
-                case _:
-                    if connected:
-                        connected = False
-                        disconnect_time = -1
-                        COH_LOG.warning(
-                            f"Session [{session.session_id}] disconnected from [{session.options.address}];"
-                            f" will attempt reconnect."
-                        )
-
-                        await emitter.emit_async(SessionLifecycleEvent.DISCONNECTED.value)
-                        await session._set_ready(False)
-
-                    if disconnect_time != 0:
-                        if disconnect_time == -1:
-                            disconnect_time = current_milli_time()
-                        else:
-                            waited: float = current_milli_time() - disconnect_time
-                            timeout = session.options.session_disconnect_timeout_seconds
-                            if COH_LOG.isEnabledFor(logging.DEBUG):
-                                COH_LOG.debug(
-                                    f"Waited [{waited / 1000} seconds] for session [{session.session_id}] to reconnect."
-                                    f" [~{(round(timeout - (waited / 1000)))} seconds] remaining to reconnect."
-                                )
-                            if waited >= timeout:
-                                COH_LOG.error(
-                                    f"session [{session.session_id}] unable to reconnect within [{timeout} seconds."
-                                    f"  Closing session."
-                                )
-                                await session.close()
-                                return
+                if disconnect_time != 0:
+                    if disconnect_time == -1:
+                        disconnect_time = current_milli_time()
+                    else:
+                        waited: float = current_milli_time() - disconnect_time
+                        timeout = session.options.session_disconnect_timeout_seconds
+                        if COH_LOG.isEnabledFor(logging.DEBUG):
+                            COH_LOG.debug(
+                                f"Waited [{waited / 1000} seconds] for session [{session.session_id}] to reconnect."
+                                f" [~{(round(timeout - (waited / 1000)))} seconds] remaining to reconnect."
+                            )
+                        if waited >= timeout:
+                            COH_LOG.error(
+                                f"session [{session.session_id}] unable to reconnect within [{timeout} seconds."
+                                f"  Closing session."
+                            )
+                            await session.close()
+                            return
 
             state = channel.get_state(True)
             if COH_LOG.isEnabledFor(logging.DEBUG):

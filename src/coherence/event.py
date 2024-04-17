@@ -1,4 +1,4 @@
-# Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -130,15 +130,14 @@ class MapEvent(Generic[K, V]):
         Returns the event's description.
         :return: the event's description
         """
-        match self.type:
-            case MapEventType.ENTRY_INSERTED:
-                return "insert"
-            case MapEventType.ENTRY_UPDATED:
-                return "update"
-            case MapEventType.ENTRY_DELETED:
-                return "delete"
-            case _:
-                return "unknown"
+        if self.type == MapEventType.ENTRY_INSERTED:
+            return "insert"
+        elif self.type == MapEventType.ENTRY_UPDATED:
+            return "update"
+        elif self.type == MapEventType.ENTRY_DELETED:
+            return "delete"
+        else:
+            return "unknown"
 
     @property
     def type(self) -> MapEventType:
@@ -206,15 +205,14 @@ class MapEvent(Generic[K, V]):
     @staticmethod
     def _from_event_id(_id: int) -> MapEventType:
         """Return the MapEventType based on the on-wire value for the event."""
-        match _id:
-            case 1:
-                return MapEventType.ENTRY_INSERTED
-            case 2:
-                return MapEventType.ENTRY_UPDATED
-            case 3:
-                return MapEventType.ENTRY_DELETED
-            case _:
-                raise RuntimeError("Unhandled MapEventType [" + str(_id) + "]")
+        if _id == 1:
+            return MapEventType.ENTRY_INSERTED
+        elif _id == 2:
+            return MapEventType.ENTRY_UPDATED
+        elif _id == 3:
+            return MapEventType.ENTRY_DELETED
+        else:
+            raise RuntimeError("Unhandled MapEventType [" + str(_id) + "]")
 
 
 MapListenerCallback = Callable[[MapEvent[K, V]], None]
@@ -450,15 +448,14 @@ class _ListenerGroup(Generic[K, V], metaclass=ABCMeta):
         :param event:  the MapEvent whose label will be generated
         :return: the emitter-friendly event label
         """
-        match event.type:
-            case MapEventType.ENTRY_DELETED:
-                return MapEventType.ENTRY_DELETED.value
-            case MapEventType.ENTRY_INSERTED:
-                return MapEventType.ENTRY_INSERTED.value
-            case MapEventType.ENTRY_UPDATED:
-                return MapEventType.ENTRY_UPDATED.value
-            case _:
-                raise AssertionError(f"Unknown EventType [{event}]")
+        if event.type == MapEventType.ENTRY_DELETED:
+            return MapEventType.ENTRY_DELETED.value
+        elif event.type == MapEventType.ENTRY_INSERTED:
+            return MapEventType.ENTRY_INSERTED.value
+        elif event.type == MapEventType.ENTRY_UPDATED:
+            return MapEventType.ENTRY_UPDATED.value
+        else:
+            raise AssertionError(f"Unknown EventType [{event}]")
 
     @abstractmethod
     def _post_subscribe(self, request: MapListenerRequest) -> None:
@@ -660,8 +657,7 @@ class _MapEventsManager(Generic[K, V]):
             # we use asyncio.timeout here instead of using the gRPC timeout
             # as any deadline set on the stream will result in a loss of events
             try:
-                async with asyncio.timeout(self._session.options.request_timeout_seconds):
-                    await self._stream_waiter.wait()
+                await asyncio.wait_for(self._stream_waiter.wait(), self._session.options.request_timeout_seconds)
             except TimeoutError:
                 s = (
                     "Deadline [{0} seconds] exceeded waiting for event stream"

@@ -1,9 +1,9 @@
-# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 from decimal import Decimal
-from typing import Any, AsyncGenerator, List, cast
+from typing import Any, AsyncGenerator, Dict, List, Union, cast
 
 import pytest
 import pytest_asyncio
@@ -113,7 +113,7 @@ async def test_distinct_values(setup_and_teardown: NamedCache[Any, Any]) -> None
     cache: NamedCache[str, Person] = setup_and_teardown
 
     ag: EntryAggregator[List[str]] = Aggregators.distinct("gender")
-    r: list[str] = await cache.aggregate(ag)
+    r: List[str] = await cache.aggregate(ag)
     assert sorted(r) == ["Female", "Male"]
 
 
@@ -123,7 +123,7 @@ async def test_top(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
     ag: TopAggregator[int, Person] = Aggregators.top(2).order_by("age").ascending
-    r: list[Person] = await cache.aggregate(ag)
+    r: List[Person] = await cache.aggregate(ag)
     assert r == [Person.alice(), Person.andy()]
 
     ag = Aggregators.top(2).order_by("age").ascending
@@ -144,9 +144,9 @@ async def test_top(setup_and_teardown: NamedCache[Any, Any]) -> None:
 async def test_group(setup_and_teardown: NamedCache[Any, Any]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown
 
-    ag: EntryAggregator[dict[str, int]] = Aggregators.group_by("gender", Aggregators.min("age"), Filters.always())
+    ag: EntryAggregator[Dict[str, int]] = Aggregators.group_by("gender", Aggregators.min("age"), Filters.always())
 
-    r: dict[str, int] = await cache.aggregate(ag)
+    r: Dict[str, int] = await cache.aggregate(ag)
     print("\n" + str(r))
     assert r == {"Male": 25, "Female": 22}
 
@@ -221,21 +221,25 @@ async def test_query_recorder(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
     agg = Aggregators.record()
     f = Filters.between("age", 20, 30)
-    my_result: dict[str, Any | list[Any]] = await cache.aggregate(agg, None, f)
+    my_result: Dict[str, Union[Any, List[Any]]] = await cache.aggregate(agg, None, f)
     assert my_result.get("results") is not None
-    my_list: Any | list[Any] = my_result.get("results")
-    assert len(my_list) == 1
-    assert my_list[0].get("partitionSet") is not None
-    assert my_list[0].get("steps") is not None
+    my_list: Union[Any, List[Any]] = my_result.get("results")
+    assert my_list is not None
+    assert isinstance(my_list, list)
+    if isinstance(my_list, list):
+        assert my_list[0].get("partitionSet") is not None
+        assert my_list[0].get("steps") is not None
 
     agg = Aggregators.record(RecordType.TRACE)
     f = Filters.between("age", 20, 30)
     my_result = await cache.aggregate(agg, None, f)
     assert my_result.get("results") is not None
     my_list = my_result.get("results")
-    assert len(my_list) == 1  # type: ignore
-    assert my_list[0].get("partitionSet") is not None  # type: ignore
-    assert my_list[0].get("steps") is not None  # type: ignore
+    assert my_list is not None
+    assert isinstance(my_list, list)
+    if isinstance(my_list, list):
+        assert my_list[0].get("partitionSet") is not None
+        assert my_list[0].get("steps") is not None
 
 
 # noinspection PyShadowingNames

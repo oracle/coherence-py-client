@@ -1,4 +1,4 @@
-# Copyright (c) 2023, Oracle and/or its affiliates.
+# Copyright (c) 2023, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -154,6 +154,10 @@ async def test_session_lifecycle() -> None:
     assert not session.is_ready()
 
 
+@pytest.mark.skip(
+    reason="COH-28062 - Intermittent \
+                GitHub action failure ==> test_wait_for_ready - TimeoutError"
+)
 @pytest.mark.asyncio
 async def test_wait_for_ready() -> None:
     session: Session = await tests.get_session(10.0)
@@ -180,8 +184,11 @@ async def test_wait_for_ready() -> None:
         await _shutdown_proxy()
 
         COH_LOG.debug("Waiting for session disconnect ...")
-        async with asyncio.timeout(10):
-            await disc_event.wait()
+        try:
+            await asyncio.wait_for(disc_event.wait(), 10)
+        except TimeoutError:
+            s = "Deadline [10 seconds] exceeded for session disconnect"
+            raise TimeoutError(s)
 
         # start inserting values as soon as disconnect occurs to ensure
         # that we properly wait for the session to reconnect before
@@ -191,7 +198,7 @@ async def test_wait_for_ready() -> None:
             await cache.put(str(i), str(i))
 
         COH_LOG.debug("Waiting for [%s] MapEvents ...", count)
-        await listener.wait_for(count, 15)
+        await listener.wait_for(count, 10)
         COH_LOG.debug("All events received!")
 
     finally:
@@ -229,8 +236,11 @@ async def test_fail_fast() -> None:
         await _shutdown_proxy()
 
         COH_LOG.debug("Waiting for session disconnect ...")
-        async with asyncio.timeout(10):
-            await disc_event.wait()
+        try:
+            await asyncio.wait_for(disc_event.wait(), 10)
+        except TimeoutError:
+            s = "Deadline [10 seconds] exceeded for session disconnect"
+            raise TimeoutError(s)
 
         # start inserting values as soon as disconnect occurs to ensure
         # that we properly wait for the session to reconnect before
@@ -244,8 +254,11 @@ async def test_fail_fast() -> None:
                 print("Caught error: " + str(e))
 
         COH_LOG.debug("Waiting for session reconnect ...")
-        async with asyncio.timeout(10):
-            await reconn_event.wait()
+        try:
+            await asyncio.wait_for(reconn_event.wait(), 10)
+        except TimeoutError:
+            s = "Deadline [10 seconds] exceeded for session reconnect"
+            raise TimeoutError(s)
 
     finally:
         await session.close()

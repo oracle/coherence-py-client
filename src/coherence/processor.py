@@ -1,4 +1,4 @@
-# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -6,7 +6,9 @@ from __future__ import annotations
 
 from abc import ABC
 from decimal import Decimal
-from typing import Any, Generic, List, Optional, TypeAlias, TypeVar, cast
+from typing import Any, Generic, List, Optional, TypeVar, Union, cast
+
+from typing_extensions import TypeAlias
 
 from .extractor import (
     CompositeUpdater,
@@ -29,7 +31,7 @@ R = TypeVar("R")
 T = TypeVar("T")
 V = TypeVar("V")
 
-Numeric: TypeAlias = int | float | Decimal
+Numeric: TypeAlias = Union[int, float, Decimal]
 
 
 class EntryProcessor(ABC, Generic[R]):

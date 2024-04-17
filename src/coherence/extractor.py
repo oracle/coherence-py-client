@@ -1,11 +1,13 @@
-# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, Optional, Sequence, TypeAlias, TypeVar, cast
+from typing import Any, Generic, Optional, Sequence, TypeVar, Union, cast
+
+from typing_extensions import TypeAlias
 
 from .serialization import proxy
 
@@ -322,6 +324,6 @@ class Extractors:
         return IdentityExtractor()
 
 
-ExtractorExpression: TypeAlias = ValueExtractor[T, E] | str
-ManipulatorExpression: TypeAlias = ValueManipulator[T, E] | str
-UpdaterExpression: TypeAlias = ValueUpdater[T, R] | str
+ExtractorExpression: TypeAlias = Union[ValueExtractor[T, E], str]
+ManipulatorExpression: TypeAlias = Union[ValueManipulator[T, E], str]
+UpdaterExpression: TypeAlias = Union[ValueUpdater[T, R], str]

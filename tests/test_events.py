@@ -1,10 +1,10 @@
-# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 import asyncio
 import time
-from typing import Any, AsyncGenerator, Generic, List, TypeVar, cast
+from typing import Any, AsyncGenerator, Generic, List, TypeVar, Union, cast
 
 import pytest
 import pytest_asyncio
@@ -26,7 +26,9 @@ V = TypeVar("V")
 class ValidateEvent(Generic[K, V]):
     """Simple class to validate expected values against a MapEvent."""
 
-    def __init__(self, name: str, source: NamedCache[K, V], key: K, old: V | None, new: V | None, _type: MapEventType):
+    def __init__(
+        self, name: str, source: NamedCache[K, V], key: K, old: Union[V, None], new: Union[V, None], _type: MapEventType
+    ):
         """
         Constructs a new ValidateEvent.
         :param name:    the expected cache name
@@ -39,8 +41,8 @@ class ValidateEvent(Generic[K, V]):
         self._name: str = name
         self._source: NamedCache[K, V] = source
         self._key: K = key
-        self._old: V | None = old
-        self._new: V | None = new
+        self._old: Union[V, None] = old
+        self._new: Union[V, None] = new
         self._type: MapEventType = _type
 
     def __str__(self) -> str:
@@ -98,15 +100,14 @@ class ValidateEvent(Generic[K, V]):
         Returns the event's description.
         :return: the event's description
         """
-        match self.type:
-            case MapEventType.ENTRY_INSERTED:
-                return "insert"
-            case MapEventType.ENTRY_UPDATED:
-                return "update"
-            case MapEventType.ENTRY_DELETED:
-                return "delete"
-            case _:
-                return "unknown"
+        if self.type == MapEventType.ENTRY_INSERTED:
+            return "insert"
+        elif self.type == MapEventType.ENTRY_UPDATED:
+            return "update"
+        elif self.type == MapEventType.ENTRY_DELETED:
+            return "delete"
+        else:
+            return "unknown"
 
     @property
     def source(self) -> NamedCache[K, V]:
@@ -125,7 +126,7 @@ class ValidateEvent(Generic[K, V]):
         return self._key
 
     @property
-    def old(self) -> V | None:
+    def old(self) -> Union[V, None]:
         """
         Returns the expected old value.
         :return: the expected old value
@@ -133,7 +134,7 @@ class ValidateEvent(Generic[K, V]):
         return self._old
 
     @property
-    def new(self) -> V | None:
+    def new(self) -> Union[V, None]:
         """
         Returns the expected new value.
         :return: the expected new value
@@ -253,7 +254,7 @@ class ExpectedEvents(Generic[K, V]):
 
 
 async def _run_basic_test(
-    cache: NamedCache[str, str], expected: ExpectedEvents[str, str], filter_mask: int | None = None
+    cache: NamedCache[str, str], expected: ExpectedEvents[str, str], filter_mask: Union[int, None] = None
 ) -> None:
     """
     Common logic for basic event tests.
