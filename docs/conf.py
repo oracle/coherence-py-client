@@ -23,12 +23,12 @@ print(os.path.abspath("../src"))
 sys.path.insert(0, os.path.abspath("../src"))
 
 # The full version, including alpha/beta/rc tags
-release = "1.0.2"
+release = "1.0.3"
 
 # -- Project information -----------------------------------------------------
 
 project = "Coherence Python Client. v%s" % release
-copyright = "(c) 2022, 2023, Oracle and/or its affiliates."
+copyright = "(c) 2022, 2024, Oracle and/or its affiliates."
 author = "Oracle"
 
 

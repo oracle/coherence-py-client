@@ -21,7 +21,7 @@ The Coherence Python Client allows Python applications to act as cache clients t
 
 #### Requirements
 * [Coherence CE](https://github.com/oracle/coherence) 22.06.4+ or Coherence 14.1.1.2206.4+ Commercial edition with a configured [gRPCProxy](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html).
-* Python 3.11.x
+* Python 3.8.x
 
 
 #### Starting a Coherence Cluster
@@ -53,6 +53,7 @@ issues `put()`, `get()`, `size()` and `remove` operations.
 ```python
 from coherence import NamedCache, Session
 import asyncio
+from typing import Union
 
 
 async def run_test():
@@ -61,7 +62,7 @@ async def run_test():
     session: Session = await Session.create()
 
     # create a new NamedCache with key of string|int and value of string|int
-    cache: NamedCache[str, str|int] = await session.get_cache("test")
+    cache: NamedCache[str, Union[str,int]] = await session.get_cache("test")
 
     # put a new key/value
     k: str = "one"
@@ -111,7 +112,7 @@ Please consult the [security guide](./SECURITY.md) for our responsible security 
 
 ## License
 
-Copyright (c) 2023 Oracle and/or its affiliates.
+Copyright (c) 2023, 2024, Oracle and/or its affiliates.
 
 Released under the Universal Permissive License v1.0 as shown at
 <https://oss.oracle.com/licenses/upl/>.
