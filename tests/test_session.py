@@ -154,6 +154,10 @@ async def test_session_lifecycle() -> None:
     assert not session.is_ready()
 
 
+@pytest.mark.skip(
+    reason="COH-28062 - Intermittent \
+                GitHub action failure ==> test_wait_for_ready - TimeoutError"
+)
 @pytest.mark.asyncio
 async def test_wait_for_ready() -> None:
     session: Session = await tests.get_session(10.0)
