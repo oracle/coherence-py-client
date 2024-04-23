@@ -36,6 +36,7 @@ from pymitter import EventEmitter
 from .aggregator import AverageAggregator, EntryAggregator, PriorityAggregator, SumAggregator
 from .comparator import Comparator
 from .event import MapLifecycleEvent, MapListener, SessionLifecycleEvent
+from .extractor import ValueExtractor
 from .filter import Filter
 from .messages_pb2 import PageRequest  # type: ignore
 from .processor import EntryProcessor
@@ -456,6 +457,34 @@ class NamedMap(abc.ABC, Generic[K, V]):
         :return: an AsyncIterator of MapEntry instances that satisfy the specified criteria
         """
 
+    @abc.abstractmethod
+    def add_index(self, extractor: ValueExtractor,
+                  ordered: bool = False,
+                  comparator: Optional[Comparator] = None) -> None:
+        """
+        Add an index to this map.
+
+        :param extractor: The :class: `coherence.extractor.ValueExtractor` object that is used to extract
+                   an indexable Object from a value stored in the
+                   indexed Map. Must not be null.
+        :param ordered: true if the contents of the indexed information
+                   should be ordered false otherwise.
+        :param comparator: The :class: `coherence.comparator.Comparator` object which imposes an ordering
+                   on entries in the indexed map or null if the
+                   entries' values natural ordering should be used.
+        """
+
+    @abc.abstractmethod
+    def remove_index(self, extractor: ValueExtractor) -> None:
+        """
+        Removes an index to this `NamedMap`.
+
+        :param extractor: The :class: `coherence.extractor.ValueExtractor` object that is used to extract
+                  an indexable Object from a value stored in the
+                  indexed Map. Must not be `null`.
+
+        """
+
 
 class NamedCache(NamedMap[K, V]):
     """
@@ -742,6 +771,17 @@ class NamedCacheClient(NamedCache[K, V]):
             await self._events_manager._remove_filter_listener(listener, listener_for)
         else:
             await self._events_manager._remove_key_listener(listener, listener_for)
+
+    async def add_index(self, extractor: ValueExtractor,
+                        ordered: bool = False,
+                        comparator: Optional[Comparator] = None) -> None:
+        r = self._request_factory.add_index_request(extractor, ordered,
+                                                    comparator)
+        await self._client_stub.addIndex(r)
+
+    async def remove_index(self, extractor: ValueExtractor) -> None:
+        r = self._request_factory.remove_index_request(extractor)
+        await self._client_stub.removeIndex(r)
 
     def _setup_event_handlers(self) -> None:
         """
