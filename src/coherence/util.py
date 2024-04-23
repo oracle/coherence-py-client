@@ -356,25 +356,23 @@ class RequestFactory:
         self.__next_request_id += 1
         return prefix + self.__uidPrefix + str(self.__next_request_id)
 
-    def add_index_request(self, extractor: ValueExtractor,
-                          ordered: bool = False,
-                          comparator: Optional[
-                              Comparator] = None) -> AddIndexRequest:
+    def add_index_request(
+        self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
+    ) -> AddIndexRequest:
         r = AddIndexRequest(
             scope=self._scope,
             cache=self._cache_name,
             format=self._serializer.format,
             extractor=self._serializer.serialize(extractor),
         )
-        r.sorted=ordered
+        r.sorted = ordered
 
         if comparator is not None:
-            r.comparator=self._serializer.serialize(comparator)
+            r.comparator = self._serializer.serialize(comparator)
 
         return r
 
-    def remove_index_request(self,
-                             extractor: ValueExtractor) -> RemoveIndexRequest:
+    def remove_index_request(self, extractor: ValueExtractor[T, E]) -> RemoveIndexRequest:
         r = RemoveIndexRequest(
             scope=self._scope,
             cache=self._cache_name,

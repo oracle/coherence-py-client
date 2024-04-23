@@ -44,6 +44,7 @@ from .serialization import Serializer, SerializerRegistry
 from .services_pb2_grpc import NamedCacheServiceStub
 from .util import RequestFactory
 
+E = TypeVar("E")
 K = TypeVar("K")
 V = TypeVar("V")
 R = TypeVar("R")
@@ -458,9 +459,9 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    def add_index(self, extractor: ValueExtractor,
-                  ordered: bool = False,
-                  comparator: Optional[Comparator] = None) -> None:
+    def add_index(
+        self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
+    ) -> None:
         """
         Add an index to this map.
 
@@ -475,7 +476,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    def remove_index(self, extractor: ValueExtractor) -> None:
+    def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
         """
         Removes an index to this `NamedMap`.
 
@@ -772,14 +773,15 @@ class NamedCacheClient(NamedCache[K, V]):
         else:
             await self._events_manager._remove_key_listener(listener, listener_for)
 
-    async def add_index(self, extractor: ValueExtractor,
-                        ordered: bool = False,
-                        comparator: Optional[Comparator] = None) -> None:
-        r = self._request_factory.add_index_request(extractor, ordered,
-                                                    comparator)
+    @_pre_call_cache
+    async def add_index(
+        self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
+    ) -> None:
+        r = self._request_factory.add_index_request(extractor, ordered, comparator)
         await self._client_stub.addIndex(r)
 
-    async def remove_index(self, extractor: ValueExtractor) -> None:
+    @_pre_call_cache
+    async def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
         r = self._request_factory.remove_index_request(extractor)
         await self._client_stub.removeIndex(r)
 
