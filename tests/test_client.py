@@ -10,9 +10,9 @@ import pytest
 import pytest_asyncio
 
 import tests
-from coherence import Filters, MapEntry, NamedCache, Session
+from coherence import Aggregators, Filters, MapEntry, NamedCache, Session
 from coherence.event import MapLifecycleEvent
-from coherence.extractor import ChainedExtractor, UniversalExtractor
+from coherence.extractor import ChainedExtractor, Extractors, UniversalExtractor
 from coherence.processor import ExtractorProcessor
 from tests.address import Address
 from tests.person import Person
@@ -562,3 +562,44 @@ async def test_cache_release_event() -> None:
         assert not cache.active
     finally:
         await session.close()
+
+
+# noinspection PyShadowingNames,DuplicatedCode,PyUnresolvedReferences
+@pytest.mark.asyncio
+async def test_add_remove_index(setup_and_teardown_person_cache: NamedCache[str, Person]) -> None:
+    cache: NamedCache[str, Person] = setup_and_teardown_person_cache
+
+    await cache.add_index(Extractors.extract("age"))
+    result = await cache.aggregate(Aggregators.record(), None, Filters.greater("age", 25))
+    # print(result)
+    # {'@class': 'util.SimpleQueryRecord', 'results': [{'@class': 'util.SimpleQueryRecord.PartialResult',
+    # 'partitionSet': {'@class': 'net.partition.PartitionSet', 'bits': [2147483647], 'markedCount': -1,
+    # 'partitionCount': 31, 'tailMask': 2147483647}, 'steps': [{'@class': 'util.SimpleQueryRecord.PartialResult.Step',
+    # 'efficiency': 5, 'filter': 'GreaterFilter(.age, 25)',
+    # 'indexLookupRecords': [{'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord',
+    # 'bytes': 6839, 'distinctValues': 5, 'extractor': '.age', 'index': 'Partitioned: Footprint=6.67KB, Size=5',
+    # 'indexDesc': 'Partitioned: ', 'ordered': False}], 'keySetSizePost': 0, 'keySetSizePre': 7, 'millis': 0,
+    # 'subSteps': []}]}], 'type': {'@class': 'aggregator.QueryRecorder.RecordType', 'enum': 'EXPLAIN'}}
+
+    idx_rec = result["results"][0].get("steps")[0].get("indexLookupRecords")[0]
+    # print(idx_rec)
+    # {'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord', 'bytes': 6839, 'distinctValues': 5,
+    # 'extractor': '.age', 'index': 'Partitioned: Footprint=6.67KB, Size=5', 'indexDesc': 'Partitioned: ',
+    # 'ordered': False}
+    assert "index" in idx_rec
+
+    await cache.remove_index(Extractors.extract("age"))
+    result2 = await cache.aggregate(Aggregators.record(), None, Filters.greater("age", 25))
+    print(result2)
+    # {'@class': 'util.SimpleQueryRecord', 'results': [{'@class': 'util.SimpleQueryRecord.PartialResult',
+    # 'partitionSet': {'@class': 'net.partition.PartitionSet', 'bits': [2147483647], 'markedCount': -1,
+    # 'partitionCount': 31, 'tailMask': 2147483647}, 'steps': [{'@class': 'util.SimpleQueryRecord.PartialResult.Step',
+    # 'efficiency': 7000, 'filter': 'GreaterFilter(.age, 25)',
+    # 'indexLookupRecords': [{'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord', 'bytes': -1,
+    # 'distinctValues': -1, 'extractor': '.age', 'ordered': False}], 'keySetSizePost': 0, 'keySetSizePre': 7,
+    # 'millis': 0, 'subSteps': []}]}], 'type': {'@class': 'aggregator.QueryRecorder.RecordType', 'enum': 'EXPLAIN'}}
+    idx_rec = result2["results"][0].get("steps")[0].get("indexLookupRecords")[0]
+    # print(idx_rec)
+    # {'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord', 'bytes': -1, 'distinctValues': -1,
+    # 'extractor': '.age', 'ordered': False}
+    assert "index" not in idx_rec
