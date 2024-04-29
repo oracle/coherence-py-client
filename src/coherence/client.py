@@ -471,7 +471,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         :param ordered: true if the contents of the indexed information
                    should be ordered false otherwise.
         :param comparator: The :class: `coherence.comparator.Comparator` object which imposes an ordering
-                   on entries in the indexed map or null if the
+                   on entries in the indexed map or None if the
                    entries' values natural ordering should be used.
         """
 
