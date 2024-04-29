@@ -777,11 +777,15 @@ class NamedCacheClient(NamedCache[K, V]):
     async def add_index(
         self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
     ) -> None:
+        if extractor is None:
+            raise ValueError("A ValueExtractor must be specified")
         r = self._request_factory.add_index_request(extractor, ordered, comparator)
         await self._client_stub.addIndex(r)
 
     @_pre_call_cache
     async def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
+        if extractor is None:
+            raise ValueError("A ValueExtractor must be specified")
         r = self._request_factory.remove_index_request(extractor)
         await self._client_stub.removeIndex(r)
 
