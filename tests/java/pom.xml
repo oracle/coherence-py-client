@@ -200,6 +200,8 @@
               </from>
               <container>
                 <jvmFlags>
+                  <jvmFlag>-Xmx2g</jvmFlag>
+                  <jvmFlag>-Xms2g</jvmFlag>
                   <jvmFlag>-Dcoherence.scope=${coherence.scope}</jvmFlag>
                   <jvmFlag>-Dcoherence.wka=server1</jvmFlag>
                   <jvmFlag>-Dcoherence.cluster=cluster1</jvmFlag>
@@ -246,6 +248,8 @@
               </from>
               <container>
                 <jvmFlags>
+                  <jvmFlag>-Xmx2g</jvmFlag>
+                  <jvmFlag>-Xms2g</jvmFlag>
                   <jvmFlag>-Dcoherence.scope=${coherence.scope}</jvmFlag>
                   <jvmFlag>-Dcoherence.wka=server1</jvmFlag>
                   <jvmFlag>-Dcoherence.cluster=cluster1</jvmFlag>
