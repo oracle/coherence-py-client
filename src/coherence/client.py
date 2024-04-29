@@ -478,7 +478,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
     @abc.abstractmethod
     def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
         """
-        Removes an index to this `NamedMap`.
+        Removes an index on this `NamedMap`.
 
         :param extractor: The :class: `coherence.extractor.ValueExtractor` object that is used to extract
                   an indexable Object from a value stored in the
