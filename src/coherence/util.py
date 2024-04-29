@@ -9,8 +9,10 @@ from typing import Optional, TypeVar
 
 from .aggregator import EntryAggregator
 from .comparator import Comparator
+from .extractor import ValueExtractor
 from .filter import Filter, Filters, MapEventFilter
 from .messages_pb2 import (  # type: ignore
+    AddIndexRequest,
     AggregateRequest,
     ClearRequest,
     ContainsKeyRequest,
@@ -29,6 +31,7 @@ from .messages_pb2 import (  # type: ignore
     PutAllRequest,
     PutIfAbsentRequest,
     PutRequest,
+    RemoveIndexRequest,
     RemoveMappingRequest,
     RemoveRequest,
     ReplaceMappingRequest,
@@ -352,3 +355,29 @@ class RequestFactory:
         """Generates a prefix map-specific prefix when starting a MapEvent gRPC stream."""
         self.__next_request_id += 1
         return prefix + self.__uidPrefix + str(self.__next_request_id)
+
+    def add_index_request(
+        self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
+    ) -> AddIndexRequest:
+        r = AddIndexRequest(
+            scope=self._scope,
+            cache=self._cache_name,
+            format=self._serializer.format,
+            extractor=self._serializer.serialize(extractor),
+        )
+        r.sorted = ordered
+
+        if comparator is not None:
+            r.comparator = self._serializer.serialize(comparator)
+
+        return r
+
+    def remove_index_request(self, extractor: ValueExtractor[T, E]) -> RemoveIndexRequest:
+        r = RemoveIndexRequest(
+            scope=self._scope,
+            cache=self._cache_name,
+            format=self._serializer.format,
+            extractor=self._serializer.serialize(extractor),
+        )
+
+        return r
