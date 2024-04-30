@@ -465,12 +465,12 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
         Add an index to this map.
 
-        :param extractor: The :class: `coherence.extractor.ValueExtractor` object that is used to extract
+        :param extractor: The :class:`coherence.extractor.ValueExtractor` object that is used to extract
                    an indexable Object from a value stored in the
                    indexed Map. Must not be 'None'.
         :param ordered: true if the contents of the indexed information
                    should be ordered false otherwise.
-        :param comparator: The :class: `coherence.comparator.Comparator` object which imposes an ordering
+        :param comparator: The :class:`coherence.comparator.Comparator` object which imposes an ordering
                    on entries in the indexed map or None if the
                    entries' values natural ordering should be used.
         """
@@ -480,7 +480,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
         Removes an index on this `NamedMap`.
 
-        :param extractor: The :class: `coherence.extractor.ValueExtractor` object that is used to extract
+        :param extractor: The :class:`coherence.extractor.ValueExtractor` object that is used to extract
                   an indexable Object from a value stored in the
                   indexed Map. Must not be 'None'.
 

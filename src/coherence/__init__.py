@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -16,6 +16,7 @@ from .client import NamedMap as NamedMap
 from .client import Options as Options
 from .client import Session as Session
 from .client import TlsOptions as TlsOptions
+from .comparator import Comparator as Comparator
 from .extractor import Extractors as Extractors
 from .filter import Filters as Filters
 from .processor import Processors as Processors

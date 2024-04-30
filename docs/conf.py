@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------------------------------------------
-# Copyright (c) 2022, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -23,7 +23,7 @@ print(os.path.abspath("../src"))
 sys.path.insert(0, os.path.abspath("../src"))
 
 # The full version, including alpha/beta/rc tags
-release = "1.0.3"
+release = "1.1.0"
 
 # -- Project information -----------------------------------------------------
 
