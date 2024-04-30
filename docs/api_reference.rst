@@ -11,6 +11,16 @@ Aggregators
 .. autoclass:: coherence.Aggregators
     :members:
 
+Comparator
+----------
+.. autoclass:: coherence.Comparator
+    :members:
+
+Extractors
+----------
+.. autoclass:: coherence.Extractors
+    :members:
+
 Filters
 -------
 .. autoclass:: coherence.Filters
@@ -83,8 +93,9 @@ Modules
    :maxdepth: 3
    :titlesonly:
 
-   api_reference/processor.rst
-   api_reference/filter.rst
+   api_reference/aggregator.rst
+   api_reference/comparator.rst
    api_reference/event.rst
    api_reference/extractor.rst
-   api_reference/aggregator.rst
+   api_reference/filter.rst
+   api_reference/processor.rst
