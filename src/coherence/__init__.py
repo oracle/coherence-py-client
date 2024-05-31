@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-__version__ = "1.0rc2"
+__version__ = "1.1.1"
 
 import logging
 
