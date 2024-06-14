@@ -110,12 +110,32 @@ build-test-images: ## Build the Test images
 .PHONY: generate-proto
 generate-proto:  ## Generate Proto Files
 	mkdir -p $(PROTO_DIR) || true
-	curl -o $(PROTO_DIR)/services.proto https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/services.proto
-	curl -o $(PROTO_DIR)/messages.proto https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/messages.proto
-	python -m grpc_tools.protoc --proto_path=$(CURRDIR)/etc/proto --python_out=$(CURRDIR)/src/coherence --grpc_python_out=$(CURRDIR)/src/coherence $(CURRDIR)/etc/proto/messages.proto $(CURRDIR)/etc/proto/services.proto
-	sed -e 's/import messages_pb2 as messages__pb2/import coherence.messages_pb2 as messages__pb2/' \
-		< $(CURRDIR)/src/coherence/services_pb2_grpc.py > $(CURRDIR)/src/coherence/services_pb2_grpc.py.out
-	mv $(CURRDIR)/src/coherence/services_pb2_grpc.py.out $(CURRDIR)/src/coherence/services_pb2_grpc.py
+	curl -o $(PROTO_DIR)/proxy_service_v1.proto \
+		https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/proxy_service_v1.proto
+	curl -o $(PROTO_DIR)/proxy_service_messages_v1.proto \
+		https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/proxy_service_messages_v1.proto
+	curl -o $(PROTO_DIR)/common_messages_v1.proto \
+		https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/common_messages_v1.proto
+	curl -o $(PROTO_DIR)/cache_service_messages_v1.proto \
+		https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/cache_service_messages_v1.proto
+	python -m grpc_tools.protoc --proto_path=$(CURRDIR)/etc/proto --python_out=$(CURRDIR)/src/coherence \
+			--grpc_python_out=$(CURRDIR)/src/coherence \
+			$(CURRDIR)/etc/proto/proxy_service_v1.proto \
+			$(CURRDIR)/etc/proto/proxy_service_messages_v1.proto \
+			$(CURRDIR)/etc/proto/common_messages_v1.proto \
+			$(CURRDIR)/etc/proto/cache_service_messages_v1.proto
+	sed -e 's/import proxy_service_messages_v1_pb2 as proxy__service__messages__v1__pb2/import coherence.proxy_service_messages_v1_pb2 as proxy__service__messages__v1__pb2/' \
+		< $(CURRDIR)/src/coherence/proxy_service_v1_pb2.py > $(CURRDIR)/src/coherence/proxy_service_v1_pb2.py.out
+	mv $(CURRDIR)/src/coherence/proxy_service_v1_pb2.py.out $(CURRDIR)/src/coherence/proxy_service_v1_pb2.py
+	sed -e 's/import common_messages_v1_pb2 as common__messages__v1__pb2/import coherence.common_messages_v1_pb2 as common__messages__v1__pb2/' \
+		< $(CURRDIR)/src/coherence/proxy_service_messages_v1_pb2.py > $(CURRDIR)/src/coherence/proxy_service_messages_v1_pb2.py.out
+	mv $(CURRDIR)/src/coherence/proxy_service_messages_v1_pb2.py.out $(CURRDIR)/src/coherence/proxy_service_messages_v1_pb2.py
+	sed -e 's/import proxy_service_messages_v1_pb2 as proxy__service__messages__v1__pb2/import coherence.proxy_service_messages_v1_pb2 as proxy__service__messages__v1__pb2/' \
+		< $(CURRDIR)/src/coherence/proxy_service_v1_pb2_grpc.py > $(CURRDIR)/src/coherence/proxy_service_v1_pb2_grpc.py.out
+	mv $(CURRDIR)/src/coherence/proxy_service_v1_pb2_grpc.py.out $(CURRDIR)/src/coherence/proxy_service_v1_pb2_grpc.py
+	sed -e 's/import common_messages_v1_pb2 as common__messages__v1__pb2/import coherence.common_messages_v1_pb2 as common__messages__v1__pb2/' \
+		< $(CURRDIR)/src/coherence/cache_service_messages_v1_pb2.py > $(CURRDIR)/src/coherence/cache_service_messages_v1_pb2.py.out
+	mv $(CURRDIR)/src/coherence/cache_service_messages_v1_pb2.py.out $(CURRDIR)/src/coherence/cache_service_messages_v1_pb2.py
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run tests with code coverage
