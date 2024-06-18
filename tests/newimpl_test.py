@@ -1,7 +1,12 @@
+import asyncio
+import queue
+from time import sleep
+
 import grpc
 import json
 from google.protobuf.json_format import MessageToJson, Parse
 from google.protobuf.any_pb2 import Any
+from google.protobuf.wrappers_pb2 import BytesValue
 
 # Import the generated protobuf and gRPC files
 import coherence.proxy_service_v1_pb2 as proxy_service_v1_pb2
@@ -36,7 +41,7 @@ def create_ensure_cache_request(cache_name):
     )
 
     any_ensure_cache_request = Any()
-    any_ensure_cache_request.value = ensure_cache_request.SerializeToString()
+    any_ensure_cache_request.Pack(ensure_cache_request)
 
     named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
         type = cache_service_messages_v1_pb2.NamedCacheRequestType.EnsureCache,
@@ -53,7 +58,7 @@ def create_put_request(cache_id, key, value):
     )
 
     any_put_request = Any()
-    any_put_request.value = put_request.SerializeToString()
+    any_put_request.Pack(put_request)
 
     named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
         type = cache_service_messages_v1_pb2.NamedCacheRequestType.Put,
@@ -64,11 +69,9 @@ def create_put_request(cache_id, key, value):
     return named_cache_request
 
 def create_get_request(cache_id, key):
-    get_request = cache_service_messages_v1_pb2.GetRequest(
-        key = serializer.serialize(key)  # Serialized key
-    )
+    get_request = BytesValue(value=serializer.serialize(key))
     any_get_request = Any()
-    any_get_request.value = get_request.SerializeToString()
+    any_get_request.Pack(get_request)
 
     named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
         type = cache_service_messages_v1_pb2.NamedCacheRequestType.Get,
@@ -78,138 +81,134 @@ def create_get_request(cache_id, key):
 
     return named_cache_request
 
-def run_requests():
-    channel = grpc.insecure_channel('localhost:1408')
-    stub = proxy_service_v1_pb2_grpc.ProxyServiceStub(channel)
-
+async def send_init_request(stream):
     # InitRequest
-    proxy_request = proxy_service_messages_v1_pb2.ProxyRequest(
+    init_request = proxy_service_messages_v1_pb2.ProxyRequest(
         id = 2,
         init = create_init_request(),
     )
-    responses = stub.subChannel(iter([proxy_request]))
-
-    # for response in responses:
-    #     print(response)
-    #     print("InitRequest request completed.")
-    response = next(responses)
+    await stream.write(init_request)
+    response = await stream.read()
     print(response)
     print("InitRequest request completed.")
 
+async def send_ensure_cache_request(stream, cache_name):
     # Ensure Cache
-    ensure_cache_request = create_ensure_cache_request("example_cache")
+    ensure_cache_request = create_ensure_cache_request(cache_name)
     any_named_cache_request = Any()
-    any_named_cache_request.value = ensure_cache_request.SerializeToString()
+    any_named_cache_request.Pack(ensure_cache_request)
 
     proxy_request = proxy_service_messages_v1_pb2.ProxyRequest(
         id = 12,
         message = any_named_cache_request,
     )
-    responses = stub.subChannel(iter([proxy_request]))
-
+    await stream.write(proxy_request)
     cache_id = None
-    for response in responses:
+    while True:
+        response = await stream.read()
         if response.HasField("message"):
             named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
             response.message.Unpack(named_cache_response)
             response_json = MessageToJson(named_cache_response)
             print("EnsureCache request successful. Response:")
+            print(named_cache_response)
             print(response_json)
-
             cache_id = named_cache_response.cacheId
-            break
         elif response.HasField("error"):
             error_message = response.error
             print(f"EnsureCache request failed with error: {error_message}")
             return
         elif response.HasField("complete"):
-            print("EnsureCache request completed.")
+            print("EnsureRequest Complete response received successfully.")
+            break
 
     if cache_id is None:
         print("Failed to ensure cache.")
-        return
+    else:
+        return cache_id
 
+async def send_put_request(stream, cache_id, key, value):
     # Put Request
-    put_request = create_put_request(cache_id, b"example_key", b"example_value")
+    put_request = create_put_request(cache_id, key, value)
     any_named_cache_request = Any()
-    any_named_cache_request.value = put_request.SerializeToString()
+    any_named_cache_request.Pack(put_request)
 
     proxy_request = proxy_service_messages_v1_pb2.ProxyRequest(
         id = 22,
         message = any_named_cache_request,
     )
-    responses = stub.subChannel(iter([proxy_request]))
-    for response in responses:
+    await stream.write(proxy_request)
+    while True:
+        response = await stream.read()
         if response.HasField("message"):
             named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
             response.message.Unpack(named_cache_response)
             response_json = MessageToJson(named_cache_response)
             print("PUT request successful. Response:")
+            print(named_cache_response)
             print(response_json)
         elif response.HasField("error"):
             error_message = response.error
             print(f"PUT request failed with error: {error_message}")
         elif response.HasField("complete"):
-            print("PUT request completed.")
+            print("PutRequest Complete response received successfully.")
+            break
 
+async def send_get_request(stream, cache_id, key):
     # Get Request
-    get_request = create_get_request(cache_id, b"example_key")
+    get_request = create_get_request(cache_id, key)
 
     any_named_cache_request = Any()
-    any_named_cache_request.value = get_request.SerializeToString()
+    any_named_cache_request.Pack(get_request)
 
     proxy_request = proxy_service_messages_v1_pb2.ProxyRequest(
         id = 32,
         message = any_named_cache_request,
     )
-    responses = stub.subChannel(iter([proxy_request]))
-    for response in responses:
+    await stream.write(proxy_request)
+    while True:
+        response = await stream.read()
         if response.HasField("message"):
             named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
             response.message.Unpack(named_cache_response)
-            response_json = MessageToJson(named_cache_response)
+            if named_cache_response.HasField("message"):
+                optional_value = common_messages_v1_pb2.OptionalValue()
+                named_cache_response.message.Unpack(optional_value)
             print("GET request successful. Response:")
-            print(response_json)
+            print(named_cache_response)
+            print(f"optional_value.present : {optional_value.present}")
+            print(f"optional_value.value : {optional_value.value}")
+            print(f"Retrieved value : {serializer.deserialize(optional_value.value)}")
         elif response.HasField("error"):
             error_message = response.error
             print(f"GET request failed with error: {error_message}")
         elif response.HasField("complete"):
-            print("GET request completed.")
+            print("PutRequest Complete response received successfully.")
+            break
 
 
-def run_requests_mine():
-    channel = grpc.insecure_channel('localhost:1408')
+async def run_requests():
+    channel = grpc.aio.insecure_channel('localhost:1408')
     stub = proxy_service_v1_pb2_grpc.ProxyServiceStub(channel)
+    stream = stub.subChannel()
 
     # InitRequest
-    responses = stub.subChannel(iter([create_init_request()]))
-    # responses = stub.subChannel(create_init_request())
-    print(responses)
+    await send_init_request(stream)
 
-    cache_id = None
-    for response in responses:
-        print(response)
-        if response.HasField("message"):
-            named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-            response.message.Unpack(named_cache_response)
-            response_json = MessageToJson(named_cache_response)
-            print("EnsureCache request successful. Response:")
-            print(response_json)
+    # Ensure Cache
+    cache_name = "example_cache"
+    cache_id = await send_ensure_cache_request(stream, cache_name)
 
-            cache_id = named_cache_response.cacheId
-            break
-        elif response.HasField("error"):
-            error_message = response.error
-            print(f"EnsureCache request failed with error: {error_message}")
-            return
-        elif response.HasField("complete"):
-            print("EnsureCache request completed.")
+    # Put Request
+    key = "example_key"
+    value = "example_value"
+    await send_put_request(stream, cache_id, key, value)
 
-    if cache_id is None:
-        print("Failed to ensure cache.")
-        return
+    # Get Request
+    await send_get_request(stream, cache_id, key)
+
 
 if __name__ == "__main__":
-    run_requests()
+    asyncio.run(run_requests())
     # run_requests_mine()
 

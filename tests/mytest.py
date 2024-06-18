@@ -2,6 +2,7 @@ import grpc
 import json
 from google.protobuf.json_format import MessageToJson, Parse
 from google.protobuf.any_pb2 import Any
+from google.protobuf.wrappers_pb2 import BytesValue
 
 # Import the generated protobuf and gRPC files
 import coherence.proxy_service_v1_pb2 as proxy_service_v1_pb2
@@ -43,5 +44,16 @@ named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
     type = cache_service_messages_v1_pb2.NamedCacheRequestType.EnsureCache,
     message = any_ensure_cache_request,
 )
+
+# Define a string
+example_string = "example_value"
+e1 = serializer.serialize(example_string)
+
+# Convert the string to bytes
+example_bytes = example_string.encode('utf-8')
+
+# Create a BytesValue instance
+bytes_value = BytesValue(value=example_bytes)
+
 
 print(init_request)
