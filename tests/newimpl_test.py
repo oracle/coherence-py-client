@@ -88,9 +88,16 @@ async def send_init_request(stream):
         init = create_init_request(),
     )
     await stream.write(init_request)
-    response = await stream.read()
-    print(response)
-    print("InitRequest request completed.")
+    try:
+        response = await stream.read()
+        print(response)
+        print("InitRequest request completed.")
+    except grpc.aio._call.AioRpcError as e:
+        if e.details() == 'Method not found: coherence.proxy.v1.ProxyService/subChannel' :
+            print("Server is running v1 gRPC version")
+            await stream.write(init_request)
+            print("Checking if stream is closed")
+        raise e
 
 async def send_ensure_cache_request(stream, cache_name):
     # Ensure Cache
