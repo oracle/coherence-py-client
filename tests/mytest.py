@@ -4,6 +4,7 @@ from google.protobuf.json_format import MessageToJson, Parse
 from google.protobuf.any_pb2 import Any
 from google.protobuf.wrappers_pb2 import BytesValue
 
+import coherence.client
 # Import the generated protobuf and gRPC files
 import coherence.proxy_service_v1_pb2 as proxy_service_v1_pb2
 import coherence.proxy_service_v1_pb2_grpc as proxy_service_v1_pb2_grpc
@@ -56,4 +57,11 @@ example_bytes = example_string.encode('utf-8')
 bytes_value = BytesValue(value=example_bytes)
 
 
+class MyTestClass(object):
+    def __init__(self):
+        self.clz = coherence.client.NamedCacheClient
+
+
+test = MyTestClass()
+test.clz()
 print(init_request)

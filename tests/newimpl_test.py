@@ -1,5 +1,6 @@
 import asyncio
 import queue
+import sys
 from time import sleep
 
 import grpc
@@ -17,6 +18,7 @@ import coherence.cache_service_messages_v1_pb2 as cache_service_messages_v1_pb2
 import coherence.cache_service_messages_v1_pb2_grpc as cache_service_messages_v1_pb2_grpc
 import coherence.common_messages_v1_pb2 as common_messages_v1_pb2
 import coherence.common_messages_v1_pb2_grpc as common_messages_v1_pb2_grpc
+from coherence import Session, NamedCache
 from coherence.serialization import SerializerRegistry
 
 serializer = SerializerRegistry.serializer("json")
@@ -215,7 +217,41 @@ async def run_requests():
     await send_get_request(stream, cache_id, key)
 
 
+def exception_hook(exc_type, exc_value, tb):
+    print('Traceback:')
+    filename = tb.tb_frame.f_code.co_filename
+    name = tb.tb_frame.f_code.co_name
+    line_no = tb.tb_lineno
+    print(f"File {filename} line {line_no}, in {name}")
+
+    # Exception type and value
+    print(f"{exc_type.__name__}, Message: {exc_value}")
+
+sys.excepthook = exception_hook
+
+async def run_request_real():
+    s: Session = Session()
+    c: NamedCache = await s.get_cache('new_example_cache')
+    await c.put("example_key1", "example_value1")
+    v = await c.get("example_key1")
+    print(v)
+    await s.close()
+
+async def run_request_real2():
+    s: Session = Session()
+    c: NamedCache = await s.get_cache('new_example_cache')
+    c2: NamedCache = await s.get_cache('new_example_cache2')
+    await c.put("example_key1", "example_value1")
+    await c2.put("example_key2", "example_value2")
+    v = await c.get("example_key1")
+    v2 = await c2.get("example_key2")
+    print(v)
+    print(v2)
+    await s.close()
+
 if __name__ == "__main__":
-    asyncio.run(run_requests())
+    # asyncio.run(run_requests())
     # run_requests_mine()
+    # asyncio.run(run_request_real())
+    asyncio.run(run_request_real2())
 
