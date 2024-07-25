@@ -871,16 +871,40 @@ class NamedCacheClient_v1(NamedCache[K, V]):
         pass
 
     async def clear(self) -> None:
-        pass
+        named_cache_request = self._request_factory.clear_request()
+        proxy_request = (self._request_factory.
+                         create_proxy_request(named_cache_request))
+        request_id = proxy_request.id
+        # await self._client_stream.write(proxy_request)
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        await asyncio.wait_for(self._stream_handler.get_response(request_id),
+                               1.0)
 
     async def destroy(self) -> None:
-        pass
+        named_cache_request = self._request_factory.destroy_request()
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        # await self._client_stream.write(proxy_request)
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        await asyncio.wait_for(self._stream_handler.get_response(request_id),
+                               1.0)
 
     def release(self) -> None:
         pass
 
     async def truncate(self) -> None:
-        pass
+        named_cache_request = self._request_factory.truncate_request()
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        # await self._client_stream.write(proxy_request)
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        await asyncio.wait_for(self._stream_handler.get_response(request_id),
+                               10000.0)
 
     async def remove(self, key: K) -> V:
         pass
@@ -983,11 +1007,14 @@ class NamedCacheClient_v1(NamedCache[K, V]):
 
     async def get(self, key: K) -> Optional[V]:
         named_cache_request = self._request_factory.get_request(key)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
         request_id = proxy_request.id
         # await self._client_stream.write(proxy_request)
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 1.0)
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        response = await asyncio.wait_for(
+            self._stream_handler.get_response(request_id), 10.0)
         if response.HasField("message"):
             optional_value = common_messages_v1_pb2.OptionalValue()
             response.message.Unpack(optional_value)
@@ -1000,11 +1027,14 @@ class NamedCacheClient_v1(NamedCache[K, V]):
 
     async def put(self, key: K, value: V, ttl: int = -1) -> V:
         named_cache_request = self._request_factory.put_request(key, value, ttl)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
         request_id = proxy_request.id
         # await self._client_stream.write(proxy_request)
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 1.0)
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        response = await asyncio.wait_for(
+            self._stream_handler.get_response(request_id), 10.0)
         if response.HasField("message"):
             optional_value = common_messages_v1_pb2.OptionalValue()
             response.message.Unpack(optional_value)

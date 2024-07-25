@@ -217,17 +217,17 @@ async def run_requests():
     await send_get_request(stream, cache_id, key)
 
 
-def exception_hook(exc_type, exc_value, tb):
-    print('Traceback:')
-    filename = tb.tb_frame.f_code.co_filename
-    name = tb.tb_frame.f_code.co_name
-    line_no = tb.tb_lineno
-    print(f"File {filename} line {line_no}, in {name}")
-
-    # Exception type and value
-    print(f"{exc_type.__name__}, Message: {exc_value}")
-
-sys.excepthook = exception_hook
+# def exception_hook(exc_type, exc_value, tb):
+#     print('Traceback:')
+#     filename = tb.tb_frame.f_code.co_filename
+#     name = tb.tb_frame.f_code.co_name
+#     line_no = tb.tb_lineno
+#     print(f"File {filename} line {line_no}, in {name}")
+#
+#     # Exception type and value
+#     print(f"{exc_type.__name__}, Message: {exc_value}")
+#
+# sys.excepthook = exception_hook
 
 async def run_request_real():
     s: Session = Session()
@@ -249,9 +249,41 @@ async def run_request_real2():
     print(v2)
     await s.close()
 
+async def run_request_real3():
+    s: Session = Session()
+    c: NamedCache = await s.get_cache('new_example_cache')
+    await c.put("example_key1", "example_value1")
+    v = await c.get("example_key1")
+    print(v)
+    await c.truncate()
+    await s.close()
+
+async def run_request_real4():
+    s: Session = Session()
+    c: NamedCache = await s.get_cache('new_example_cache')
+    await c.put("example_key1", "example_value1")
+    v = await c.get("example_key1")
+    print(v)
+    await c.clear()
+    v = await c.get("example_key1")
+    print(v)
+    await s.close()
+
+async def run_request_real5():
+    s: Session = Session()
+    c: NamedCache = await s.get_cache('new_example_cache')
+    await c.put("example_key1", "example_value1")
+    v = await c.get("example_key1")
+    print(v)
+    await c.destroy()
+    await s.close()
+
 if __name__ == "__main__":
     # asyncio.run(run_requests())
     # run_requests_mine()
     # asyncio.run(run_request_real())
-    asyncio.run(run_request_real2())
+    # asyncio.run(run_request_real2())
+    # asyncio.run(run_request_real3())
+    # asyncio.run(run_request_real4())
+    asyncio.run(run_request_real5())
 

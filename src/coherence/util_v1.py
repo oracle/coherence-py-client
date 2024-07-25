@@ -13,6 +13,7 @@ from asyncio import Event
 from typing import Optional, TypeVar
 
 import grpc
+from google.protobuf.json_format import MessageToJson
 from requests import Response
 
 from . import cache_service_messages_v1_pb2, proxy_service_messages_v1_pb2
@@ -201,16 +202,25 @@ class RequestFactory_v1:
         return p
 
     def clear_request(self) -> ClearRequest:
-        r = ClearRequest(scope=self._scope, cache=self._cache_name)
-        return r
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.Clear,
+            cacheId=self.cache_id,
+        )
+        return named_cache_request
 
     def destroy_request(self) -> DestroyRequest:
-        r = DestroyRequest(scope=self._scope, cache=self._cache_name)
-        return r
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.Destroy,
+            cacheId=self.cache_id,
+        )
+        return named_cache_request
 
     def truncate_request(self) -> TruncateRequest:
-        r = TruncateRequest(scope=self._scope, cache=self._cache_name)
-        return r
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.Truncate,
+            cacheId=self.cache_id,
+        )
+        return named_cache_request
 
     def remove_request(self, key: K) -> RemoveRequest:
         r = RemoveRequest(
@@ -503,37 +513,41 @@ class StreamHandler:
             await asyncio.sleep(0)
             response = await self.stream.read()
             response_id = response.id
-            if response.HasField("message"):
-                req_type = self._request_id_request_map[response_id].type
-                if req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.EnsureCache:
-                    named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                    response.message.Unpack(named_cache_response)
-                    # COH_LOG.info(f"cache_id: {named_cache_response.cacheId}")
-                    self.response_result = named_cache_response
-                elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Put:
-                    named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                    response.message.Unpack(named_cache_response)
-                    # COH_LOG.info("PUT request successful. Response:")
-                    self.response_result = named_cache_response
-                elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Get:
-                    named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                    response.message.Unpack(named_cache_response)
-                    # COH_LOG.info("GET request successful. Response:")
-                    self.response_result = named_cache_response
-                else:
-                    pass
-            elif response.HasField("init"):
-                self._request_id_to_event_map.pop(response_id)
-                print("InitRequest request completed.")
-                self.result_available.set()
-            elif response.HasField("error"):
-                error_message = response.error
-                print(f"EnsureCache request failed with error: {error_message}")
-                return
-            elif response.HasField("complete"):
-                # self.session.request_id_map.pop(response_id)
-                # COH_LOG.info("Complete response received successfully.")
-                self._request_id_to_event_map[response_id].set()
+            COH_LOG.debug(f"response_id: {response_id}")
+            if response_id == 0 :
+                self.handle_zero_id_response(response)
+            else:
+                if response.HasField("message"):
+                    req_type = self._request_id_request_map[response_id].type
+                    if req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.EnsureCache:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info(f"cache_id: {named_cache_response.cacheId}")
+                        self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Put:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("PUT request successful. Response:")
+                        self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Get:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result = named_cache_response
+                    else:
+                        pass
+                elif response.HasField("init"):
+                    self._request_id_to_event_map.pop(response_id)
+                    print("InitRequest request completed.")
+                    self.result_available.set()
+                elif response.HasField("error"):
+                    error_message = response.error
+                    print(f"EnsureCache request failed with error: {error_message}")
+                    return
+                elif response.HasField("complete"):
+                    # self.session.request_id_map.pop(response_id)
+                    # COH_LOG.info("Complete response received successfully.")
+                    self._request_id_to_event_map[response_id].set()
 
     async def get_response(self, response_id: int):
         await self._request_id_to_event_map[response_id].wait()
@@ -551,3 +565,31 @@ class StreamHandler:
         self._request_id_to_event_map[request_id].clear()
         self._request_id_request_map[request_id] = request
         await self._stream.write(proxy_request)
+
+    def handle_zero_id_response(self, response):
+        if response.HasField("message"):
+            named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+            response.message.Unpack(named_cache_response)
+            type = named_cache_response.type
+            cache_id = named_cache_response.cacheId
+            if type == cache_service_messages_v1_pb2.ResponseType.Message:
+                pass
+            elif type == cache_service_messages_v1_pb2.ResponseType.MapEvent:
+                # Handle MapEvent Response
+                COH_LOG.debug("MapEvent Response type received")
+                response_json = MessageToJson(named_cache_response)
+                COH_LOG.debug(response_json)
+                pass
+            elif type == cache_service_messages_v1_pb2.ResponseType.Destroyed:
+                # Handle Destroyed Response
+                COH_LOG.debug("Destroyed Response type received")
+                response_json = MessageToJson(named_cache_response)
+                COH_LOG.debug(response_json)
+                pass
+            elif type == cache_service_messages_v1_pb2.ResponseType.Truncated:
+                # Handle Truncated Response
+                COH_LOG.debug("Truncated Response type received")
+                response_json = MessageToJson(named_cache_response)
+                COH_LOG.debug(response_json)
+            else:
+                pass
