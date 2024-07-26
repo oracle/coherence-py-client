@@ -1,7 +1,9 @@
 import asyncio
 import queue
 import sys
+
 from time import sleep
+from typing import TypeVar, AsyncIterator, Awaitable
 
 import grpc
 import json
@@ -278,6 +280,32 @@ async def run_request_real5():
     await c.destroy()
     await s.close()
 
+T = TypeVar("T")
+
+
+class SimulateAsyncIterator(AsyncIterator):
+    def __init__(self, the_list: list):
+        super().__init__()
+        self.the_list = the_list
+        self.index = 0
+
+    def __aiter__(self):
+        self.index = 0
+        return self
+
+    async def __anext__(self):
+        if self.index >= len(self.the_list):
+            raise StopAsyncIteration
+        await asyncio.sleep(0)  # Simulate an asynchronous operation
+        item = self.the_list[self.index]
+        self.index += 1
+        return item
+
+async def run_sumulator():
+    data = [1, 2, 3, 4, 5]
+    async for item in SimulateAsyncIterator(data):
+        print(item)
+
 if __name__ == "__main__":
     # asyncio.run(run_requests())
     # run_requests_mine()
@@ -285,5 +313,7 @@ if __name__ == "__main__":
     # asyncio.run(run_request_real2())
     # asyncio.run(run_request_real3())
     # asyncio.run(run_request_real4())
-    asyncio.run(run_request_real5())
+    #asyncio.run(run_request_real5())
+
+    asyncio.run(run_sumulator())
 

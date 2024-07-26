@@ -181,15 +181,22 @@ class RequestFactory_v1:
         return g
 
     def put_if_absent_request(self, key: K, value: V, ttl: int = -1) -> PutIfAbsentRequest:
-        p = PutIfAbsentRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
-            key=self._serializer.serialize(key),
-            value=self._serializer.serialize(value),
-            ttl=ttl,
+        put_request = cache_service_messages_v1_pb2.PutRequest(
+            key=self._serializer.serialize(key),     # Serialized key
+            value=self._serializer.serialize(value), # Serialized value
+            ttl=ttl
         )
-        return p
+
+        any_put_request = Any()
+        any_put_request.Pack(put_request)
+
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.PutIfAbsent,
+            cacheId=self.cache_id,
+            message=any_put_request,
+        )
+
+        return named_cache_request
 
     def put_all_request(self, map: dict[K, V]) -> PutAllRequest:
         entry_list = list()
@@ -509,6 +516,7 @@ class StreamHandler:
             return cls.theStreamHandler
 
     async def handle_response(self):
+        COH_LOG.setLevel(logging.DEBUG)
         while not self.session.closed:
             await asyncio.sleep(0)
             response = await self.stream.read()
@@ -525,6 +533,11 @@ class StreamHandler:
                         # COH_LOG.info(f"cache_id: {named_cache_response.cacheId}")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Put:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("PUT request successful. Response:")
+                        self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.PutIfAbsent:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         # COH_LOG.info("PUT request successful. Response:")

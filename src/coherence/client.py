@@ -46,7 +46,7 @@ from .serialization import Serializer, SerializerRegistry
 from .services_pb2_grpc import NamedCacheServiceStub
 from .util import RequestFactory
 from .util_v1 import RequestFactory_v1, StreamHandler
-
+from google.protobuf.wrappers_pb2 import BytesValue
 
 E = TypeVar("E")
 K = TypeVar("K")
@@ -830,140 +830,8 @@ class NamedCacheClient(NamedCache[K, V]):
             f" released={self.released}, destroyed={self.destroyed})"
         )
 
+
 class NamedCacheClient_v1(NamedCache[K, V]):
-    async def put_if_absent(self, key: K, value: V, ttl: int = -1) -> V:
-        pass
-
-    @property
-    def name(self) -> str:
-        return self._cache_name
-
-    def on(self, event: MapLifecycleEvent,
-           callback: Callable[[str], None]) -> None:
-        pass
-
-    @property
-    def destroyed(self) -> bool:
-        pass
-
-    @property
-    def released(self) -> bool:
-        pass
-
-    async def add_map_listener(self, listener: MapListener[K, V],
-                               listener_for: Optional[K | Filter] = None,
-                               lite: bool = False) -> None:
-        pass
-
-    async def remove_map_listener(self, listener: MapListener[K, V],
-                                  listener_for: Optional[
-                                      K | Filter] = None) -> None:
-        pass
-
-    async def get_or_default(self, key: K, default_value: Optional[V] = None) -> \
-    Optional[V]:
-        pass
-
-    def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
-        pass
-
-    async def put_all(self, map: dict[K, V]) -> None:
-        pass
-
-    async def clear(self) -> None:
-        named_cache_request = self._request_factory.clear_request()
-        proxy_request = (self._request_factory.
-                         create_proxy_request(named_cache_request))
-        request_id = proxy_request.id
-        # await self._client_stream.write(proxy_request)
-        await self._stream_handler.write_request(proxy_request, request_id,
-                                                 named_cache_request)
-        await asyncio.wait_for(self._stream_handler.get_response(request_id),
-                               1.0)
-
-    async def destroy(self) -> None:
-        named_cache_request = self._request_factory.destroy_request()
-        proxy_request = self._request_factory.create_proxy_request(
-            named_cache_request)
-        request_id = proxy_request.id
-        # await self._client_stream.write(proxy_request)
-        await self._stream_handler.write_request(proxy_request, request_id,
-                                                 named_cache_request)
-        await asyncio.wait_for(self._stream_handler.get_response(request_id),
-                               1.0)
-
-    def release(self) -> None:
-        pass
-
-    async def truncate(self) -> None:
-        named_cache_request = self._request_factory.truncate_request()
-        proxy_request = self._request_factory.create_proxy_request(
-            named_cache_request)
-        request_id = proxy_request.id
-        # await self._client_stream.write(proxy_request)
-        await self._stream_handler.write_request(proxy_request, request_id,
-                                                 named_cache_request)
-        await asyncio.wait_for(self._stream_handler.get_response(request_id),
-                               10000.0)
-
-    async def remove(self, key: K) -> V:
-        pass
-
-    async def remove_mapping(self, key: K, value: V) -> bool:
-        pass
-
-    async def replace(self, key: K, value: V) -> V:
-        pass
-
-    async def replace_mapping(self, key: K, old_value: V, new_value: V) -> bool:
-        pass
-
-    async def contains_key(self, key: K) -> bool:
-        pass
-
-    async def contains_value(self, value: V) -> bool:
-        pass
-
-    async def is_empty(self) -> bool:
-        pass
-
-    async def size(self) -> int:
-        pass
-
-    async def invoke(self, key: K, processor: EntryProcessor[R]) -> R:
-        pass
-
-    def invoke_all(self, processor: EntryProcessor[R],
-                   keys: Optional[set[K]] = None,
-                   filter: Optional[Filter] = None) -> AsyncIterator[
-        MapEntry[K, R]]:
-        pass
-
-    async def aggregate(self, aggregator: EntryAggregator[R],
-                        keys: Optional[set[K]] = None,
-                        filter: Optional[Filter] = None) -> R:
-        pass
-
-    def values(self, filter: Optional[Filter] = None,
-               comparator: Optional[Comparator] = None,
-               by_page: bool = False) -> AsyncIterator[V]:
-        pass
-
-    def keys(self, filter: Optional[Filter] = None, by_page: bool = False) -> \
-    AsyncIterator[K]:
-        pass
-
-    def entries(self, filter: Optional[Filter] = None,
-                comparator: Optional[Comparator] = None,
-                by_page: bool = False) -> AsyncIterator[MapEntry[K, V]]:
-        pass
-
-    def add_index(self, extractor: ValueExtractor[T, E], ordered: bool = False,
-                  comparator: Optional[Comparator] = None) -> None:
-        pass
-
-    def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
-        pass
 
     def __init__(self, cache_name: str, session: Session, serializer: Serializer):
         self._cache_name: str = cache_name
@@ -1035,15 +903,173 @@ class NamedCacheClient_v1(NamedCache[K, V]):
                                                  named_cache_request)
         response = await asyncio.wait_for(
             self._stream_handler.get_response(request_id), 10.0)
-        if response.HasField("message"):
-            optional_value = common_messages_v1_pb2.OptionalValue()
-            response.message.Unpack(optional_value)
-            if optional_value.present:
-                return self._serializer.deserialize(optional_value.value)
+        if response is None:
+            return None
+        else:
+            if response.HasField("message"):
+                value = BytesValue()
+                response.message.Unpack(value)
+                result = self._serializer.deserialize(value.value)
+                return result
             else:
                 return None
+
+    async def put_if_absent(self, key: K, value: V, ttl: int = -1) -> V:
+            named_cache_request = self._request_factory.put_if_absent_request(key, value, ttl)
+            proxy_request = self._request_factory.create_proxy_request(
+                named_cache_request)
+            request_id = proxy_request.id
+            # await self._client_stream.write(proxy_request)
+            await self._stream_handler.write_request(proxy_request, request_id,
+                                                     named_cache_request)
+            response = await asyncio.wait_for(
+                self._stream_handler.get_response(request_id), 10.0)
+            if response is None:
+                return None
+            else:
+                if response.HasField("message"):
+                    value = BytesValue()
+                    response.message.Unpack(value)
+                    result = self._serializer.deserialize(value.value)
+                    return result
+                else:
+                    return None
+
+    @property
+    def name(self) -> str:
+        return self._cache_name
+
+    def on(self, event: MapLifecycleEvent,
+           callback: Callable[[str], None]) -> None:
+        pass
+
+    @property
+    def destroyed(self) -> bool:
+        pass
+
+    @property
+    def released(self) -> bool:
+        pass
+
+    async def add_map_listener(self, listener: MapListener[K, V],
+                               listener_for: Optional[K | Filter] = None,
+                               lite: bool = False) -> None:
+        pass
+
+    async def remove_map_listener(self, listener: MapListener[K, V],
+                                  listener_for: Optional[
+                                      K | Filter] = None) -> None:
+        pass
+
+    async def get_or_default(self, key: K, default_value: Optional[V] = None) -> \
+    Optional[V]:
+        v: Optional[V] = await self.get(key)
+        if v is not None:
+            return v
         else:
-            return None
+            return default_value
+
+
+    def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
+        pass
+
+    async def put_all(self, map: dict[K, V]) -> None:
+        pass
+
+    async def clear(self) -> None:
+        named_cache_request = self._request_factory.clear_request()
+        proxy_request = (self._request_factory.
+                         create_proxy_request(named_cache_request))
+        request_id = proxy_request.id
+        # await self._client_stream.write(proxy_request)
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        await asyncio.wait_for(self._stream_handler.get_response(request_id),
+                               1.0)
+
+    async def destroy(self) -> None:
+        named_cache_request = self._request_factory.destroy_request()
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        # await self._client_stream.write(proxy_request)
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        await asyncio.wait_for(self._stream_handler.get_response(request_id),
+                               1.0)
+
+    def release(self) -> None:
+        pass
+
+    async def truncate(self) -> None:
+        named_cache_request = self._request_factory.truncate_request()
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        # await self._client_stream.write(proxy_request)
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        await asyncio.wait_for(self._stream_handler.get_response(request_id),
+                               1.0)
+
+    async def remove(self, key: K) -> V:
+        pass
+
+    async def remove_mapping(self, key: K, value: V) -> bool:
+        pass
+
+    async def replace(self, key: K, value: V) -> V:
+        pass
+
+    async def replace_mapping(self, key: K, old_value: V, new_value: V) -> bool:
+        pass
+
+    async def contains_key(self, key: K) -> bool:
+        pass
+
+    async def contains_value(self, value: V) -> bool:
+        pass
+
+    async def is_empty(self) -> bool:
+        pass
+
+    async def size(self) -> int:
+        pass
+
+    async def invoke(self, key: K, processor: EntryProcessor[R]) -> R:
+        pass
+
+    def invoke_all(self, processor: EntryProcessor[R],
+                   keys: Optional[set[K]] = None,
+                   filter: Optional[Filter] = None) -> AsyncIterator[
+        MapEntry[K, R]]:
+        pass
+
+    async def aggregate(self, aggregator: EntryAggregator[R],
+                        keys: Optional[set[K]] = None,
+                        filter: Optional[Filter] = None) -> R:
+        pass
+
+    def values(self, filter: Optional[Filter] = None,
+               comparator: Optional[Comparator] = None,
+               by_page: bool = False) -> AsyncIterator[V]:
+        pass
+
+    def keys(self, filter: Optional[Filter] = None, by_page: bool = False) -> \
+    AsyncIterator[K]:
+        pass
+
+    def entries(self, filter: Optional[Filter] = None,
+                comparator: Optional[Comparator] = None,
+                by_page: bool = False) -> AsyncIterator[MapEntry[K, V]]:
+        pass
+
+    def add_index(self, extractor: ValueExtractor[T, E], ordered: bool = False,
+                  comparator: Optional[Comparator] = None) -> None:
+        pass
+
+    def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
+        pass
 
 
 class TlsOptions:
