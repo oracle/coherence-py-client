@@ -586,7 +586,7 @@ class NamedCacheClient(NamedCache[K, V]):
             return default_value
 
     @_pre_call_cache
-    def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
+    async def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
         r = self._request_factory.get_all_request(keys)
         stream = self._client_stub.getAll(r)
 
@@ -969,9 +969,27 @@ class NamedCacheClient_v1(NamedCache[K, V]):
         else:
             return default_value
 
+    async def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
+        named_cache_request = self._request_factory.get_all_request(keys)
+        proxy_request = (self._request_factory.
+                         create_proxy_request(named_cache_request))
+        request_id = proxy_request.id
+        # await self._client_stream.write(proxy_request)
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        result_set = await asyncio.wait_for(
+            self._stream_handler.get_response_collection(request_id),
+            1.0)
+        l = list()
+        for entry in result_set:
+            if entry.HasField("message"):
+                binary_key_value = common_messages_v1_pb2.BinaryKeyAndValue()
+                entry.message.Unpack(binary_key_value)
+                m = MapEntry(binary_key_value.key,
+                             binary_key_value.value)
+                l.append(m)
+        return _ListAsyncIterator(self._serializer, l, _entry_producer_from_list)
 
-    def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
-        pass
 
     async def put_all(self, map: dict[K, V]) -> None:
         pass
@@ -2157,3 +2175,36 @@ async def _entry_producer(serializer: Serializer, stream: grpc.Channel.unary_str
     async for item in stream:
         return _entry_deserializer(serializer, item)
     raise StopAsyncIteration
+
+
+async def _entry_producer_from_list(serializer: Serializer, the_list: list) -> MapEntry[K, V]:
+    if len(the_list) == 0:
+        raise StopAsyncIteration
+    for item in the_list:
+        await asyncio.sleep(0)
+        the_list.pop(0)
+        return _entry_deserializer(serializer, item)
+
+
+class _ListAsyncIterator(abc.ABC, AsyncIterator[T]):
+    def __init__(
+            self,
+            serializer: Serializer,
+            the_list: list,
+            next_producer: Callable[[Serializer, list], Awaitable[T]],
+    ) -> None:
+        super().__init__()
+        # A function that may be called to produce a series of results
+        self._next_producer = next_producer
+
+        # the Serializer that should be used to deserialize results
+        self._serializer = serializer
+
+        # the gRPC stream providing results
+        self._the_list = the_list
+
+    def __aiter__(self) -> AsyncIterator[T]:
+        return self
+
+    def __anext__(self) -> Awaitable[T]:
+        return self._next_producer(self._serializer, self._the_list)

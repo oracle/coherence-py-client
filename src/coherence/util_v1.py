@@ -16,7 +16,7 @@ import grpc
 from google.protobuf.json_format import MessageToJson
 from requests import Response
 
-from . import cache_service_messages_v1_pb2, proxy_service_messages_v1_pb2
+from . import cache_service_messages_v1_pb2, proxy_service_messages_v1_pb2,common_messages_v1_pb2
 from .aggregator import EntryAggregator
 from .comparator import Comparator
 from .extractor import ValueExtractor
@@ -155,7 +155,7 @@ class RequestFactory_v1:
 
         return named_cache_request
 
-    def get_request(self, key: K) -> GetRequest:
+    def get_request(self, key: K) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         get_request = BytesValue(value=self._serializer.serialize(key))
 
         any_get_request = Any()
@@ -169,16 +169,27 @@ class RequestFactory_v1:
 
         return named_cache_request
 
-    def get_all_request(self, keys: set[K]) -> GetRequest:
+    def get_all_request(self, keys: set[K]) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         if keys is None:
             raise ValueError("Must specify a set of keys")
 
-        g: GetAllRequest = GetAllRequest(scope=self._scope, cache=self._cache_name, format=self._serializer.format)
+        l = list()
+        for k in keys:
+            l.append(self._serializer.serialize(k))
+        get_all_request = common_messages_v1_pb2.CollectionOfBytesValues(
+            values=l,
+        )
 
-        for key in keys:
-            g.key.append(self._serializer.serialize(key))
+        any_request = Any()
+        any_request.Pack(get_all_request)
 
-        return g
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.GetAll,
+            cacheId=self.cache_id,
+            message=any_request,
+        )
+
+        return named_cache_request
 
     def put_if_absent_request(self, key: K, value: V, ttl: int = -1) -> PutIfAbsentRequest:
         put_request = cache_service_messages_v1_pb2.PutRequest(
@@ -497,6 +508,7 @@ class StreamHandler:
         self.result_available = Event()
         self.result_available.clear()
         self.response_result = None
+        self.response_result_collection = list()
         asyncio.create_task(self.handle_response())
 
     @property
@@ -547,6 +559,11 @@ class StreamHandler:
                         response.message.Unpack(named_cache_response)
                         # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.GetAll:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result_collection.append(named_cache_response)
                     else:
                         pass
                 elif response.HasField("init"):
@@ -566,6 +583,15 @@ class StreamHandler:
         await self._request_id_to_event_map[response_id].wait()
         result = self.response_result
         self.response_result = None
+        self._request_id_to_event_map[response_id].clear()
+        self._request_id_to_event_map.pop(response_id)
+        self._request_id_request_map.pop(response_id)
+        return result
+
+    async def get_response_collection(self, response_id: int):
+        await self._request_id_to_event_map[response_id].wait()
+        result = self.response_result_collection
+        self.response_result_collection = list()
         self._request_id_to_event_map[response_id].clear()
         self._request_id_to_event_map.pop(response_id)
         self._request_id_request_map.pop(response_id)

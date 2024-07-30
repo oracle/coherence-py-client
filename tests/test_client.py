@@ -300,7 +300,8 @@ async def test_get_all(setup_and_teardown: NamedCache[str, str]) -> None:
     await cache.put(k3, v3)
 
     r: Dict[str, str] = {}
-    async for e in cache.get_all({k1, k3}):
+    # result = await cache.get_all({k1, k3})
+    async for e in await cache.get_all({k1, k3}):
         r[e.key] = e.value
 
     assert r == {k1: v1, k3: v3}
