@@ -209,15 +209,28 @@ class RequestFactory_v1:
 
         return named_cache_request
 
-    def put_all_request(self, map: dict[K, V]) -> PutAllRequest:
+    def put_all_request(self, map: dict[K, V]) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         entry_list = list()
         for key, value in map.items():
             k = self._serializer.serialize(key)
             v = self._serializer.serialize(value)
-            e = Entry(key=k, value=v)
+            e = common_messages_v1_pb2.BinaryKeyAndValue(key=k, value=v)
             entry_list.append(e)
-        p = PutAllRequest(scope=self._scope, cache=self._cache_name, format=self._serializer.format, entry=entry_list)
-        return p
+        put_all_request = cache_service_messages_v1_pb2.PutAllRequest(
+            entries=entry_list,
+        )
+
+        any_put_all_request = Any()
+        any_put_all_request.Pack(put_all_request)
+
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.PutAll,
+            cacheId=self.cache_id,
+            message=any_put_all_request,
+        )
+
+        return named_cache_request
+
 
     def clear_request(self) -> ClearRequest:
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(

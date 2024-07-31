@@ -992,7 +992,16 @@ class NamedCacheClient_v1(NamedCache[K, V]):
 
 
     async def put_all(self, map: dict[K, V]) -> None:
-        pass
+        named_cache_request = self._request_factory.put_all_request(map)
+        proxy_request = (self._request_factory.
+                         create_proxy_request(named_cache_request))
+        request_id = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        await asyncio.wait_for(
+            self._stream_handler.get_response(request_id),
+            1.0)
+
 
     async def clear(self) -> None:
         named_cache_request = self._request_factory.clear_request()
