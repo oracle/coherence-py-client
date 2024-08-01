@@ -112,7 +112,7 @@ class RequestFactory_v1:
         return self._serializer
 
     def create_proxy_request(self, named_cache_request:
-                    cache_service_messages_v1_pb2.NamedCacheRequest) -> proxy_service_messages_v1_pb2.ProxyRequest:
+    cache_service_messages_v1_pb2.NamedCacheRequest) -> proxy_service_messages_v1_pb2.ProxyRequest:
         any_named_cache_request = Any()
         any_named_cache_request.Pack(named_cache_request)
         req_id = Request_ID_Generator.get_next_id()
@@ -120,51 +120,50 @@ class RequestFactory_v1:
             id=req_id,
             message=any_named_cache_request,
         )
-        # self._session._request_id_map[req_id] = named_cache_request
         return proxy_request
 
     def ensure_request(self, cache_name: str) -> cache_service_messages_v1_pb2.NamedCacheRequest:
-        ensure_cache_request = cache_service_messages_v1_pb2.EnsureCacheRequest(
+        cache_request = cache_service_messages_v1_pb2.EnsureCacheRequest(
             cache=cache_name
         )
 
-        any_ensure_cache_request = Any()
-        any_ensure_cache_request.Pack(ensure_cache_request)
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
 
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.EnsureCache,
-            message=any_ensure_cache_request,
+            message=any_cache_request,
         )
         return named_cache_request
 
     def put_request(self, key: K, value: V, ttl: int = -1) -> cache_service_messages_v1_pb2.NamedCacheRequest:
-        put_request = cache_service_messages_v1_pb2.PutRequest(
+        cache_request = cache_service_messages_v1_pb2.PutRequest(
             key=self._serializer.serialize(key),     # Serialized key
             value=self._serializer.serialize(value), # Serialized value
             ttl=ttl
         )
 
-        any_put_request = Any()
-        any_put_request.Pack(put_request)
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
 
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.Put,
             cacheId=self.cache_id,
-            message=any_put_request,
+            message=any_cache_request,
         )
 
         return named_cache_request
 
     def get_request(self, key: K) -> cache_service_messages_v1_pb2.NamedCacheRequest:
-        get_request = BytesValue(value=self._serializer.serialize(key))
+        cache_request = BytesValue(value=self._serializer.serialize(key))
 
-        any_get_request = Any()
-        any_get_request.Pack(get_request)
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
 
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.Get,
             cacheId=self.cache_id,
-            message=any_get_request,
+            message=any_cache_request,
         )
 
         return named_cache_request
@@ -176,111 +175,133 @@ class RequestFactory_v1:
         l = list()
         for k in keys:
             l.append(self._serializer.serialize(k))
-        get_all_request = common_messages_v1_pb2.CollectionOfBytesValues(
+        cache_request = common_messages_v1_pb2.CollectionOfBytesValues(
             values=l,
         )
 
-        any_request = Any()
-        any_request.Pack(get_all_request)
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
 
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.GetAll,
             cacheId=self.cache_id,
-            message=any_request,
+            message=any_cache_request,
         )
 
         return named_cache_request
 
     def put_if_absent_request(self, key: K, value: V, ttl: int = -1) -> PutIfAbsentRequest:
-        put_request = cache_service_messages_v1_pb2.PutRequest(
+        cache_request = cache_service_messages_v1_pb2.PutRequest(
             key=self._serializer.serialize(key),     # Serialized key
             value=self._serializer.serialize(value), # Serialized value
             ttl=ttl
         )
 
-        any_put_request = Any()
-        any_put_request.Pack(put_request)
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
 
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.PutIfAbsent,
             cacheId=self.cache_id,
-            message=any_put_request,
+            message=any_cache_request,
         )
 
         return named_cache_request
 
-    def put_all_request(self, map: dict[K, V]) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+    def put_all_request(self, map: dict[K, V], ttl: Optional[
+        int] = 0) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         entry_list = list()
         for key, value in map.items():
             k = self._serializer.serialize(key)
             v = self._serializer.serialize(value)
             e = common_messages_v1_pb2.BinaryKeyAndValue(key=k, value=v)
             entry_list.append(e)
-        put_all_request = cache_service_messages_v1_pb2.PutAllRequest(
+        cache_request = cache_service_messages_v1_pb2.PutAllRequest(
             entries=entry_list,
+            ttl=ttl,
         )
 
-        any_put_all_request = Any()
-        any_put_all_request.Pack(put_all_request)
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
 
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.PutAll,
             cacheId=self.cache_id,
-            message=any_put_all_request,
+            message=any_cache_request,
         )
 
         return named_cache_request
 
-
-    def clear_request(self) -> ClearRequest:
+    def clear_request(self) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.Clear,
             cacheId=self.cache_id,
         )
         return named_cache_request
 
-    def destroy_request(self) -> DestroyRequest:
+    def destroy_request(
+            self) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.Destroy,
             cacheId=self.cache_id,
         )
         return named_cache_request
 
-    def truncate_request(self) -> TruncateRequest:
+    def truncate_request(
+            self) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.Truncate,
             cacheId=self.cache_id,
         )
         return named_cache_request
 
-    def remove_request(self, key: K) -> RemoveRequest:
-        r = RemoveRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
-            key=self._serializer.serialize(key),
-        )
-        return r
+    def remove_request(self,
+                       key: K) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+        cache_request = BytesValue(value=self._serializer.serialize(key))
 
-    def remove_mapping_request(self, key: K, value: V) -> RemoveMappingRequest:
-        r = RemoveMappingRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
-            key=self._serializer.serialize(key),
-            value=self._serializer.serialize(value),
-        )
-        return r
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
 
-    def replace_request(self, key: K, value: V) -> ReplaceRequest:
-        r = ReplaceRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
-            key=self._serializer.serialize(key),
-            value=self._serializer.serialize(value),
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.Remove,
+            cacheId=self.cache_id,
+            message=any_cache_request,
         )
-        return r
+
+        return named_cache_request
+
+
+    def remove_mapping_request(self, key: K, value: V) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+        cache_request = common_messages_v1_pb2.BinaryKeyAndValue(
+            key=self._serializer.serialize(key),
+            value=self._serializer.serialize(value))
+
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
+
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.RemoveMapping,
+            cacheId=self.cache_id,
+            message=any_cache_request,
+        )
+
+        return named_cache_request
+
+    def replace_request(self, key: K, value: V) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+        cache_request = common_messages_v1_pb2.BinaryKeyAndValue(
+                            key=self._serializer.serialize(key),
+                            value=self._serializer.serialize(value))
+
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
+
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.Replace,
+            cacheId=self.cache_id,
+            message=any_cache_request,
+        )
+
+        return named_cache_request
 
     def replace_mapping_request(self, key: K, old_value: V, new_value: V) -> ReplaceMappingRequest:
         r = ReplaceMappingRequest(
@@ -577,6 +598,21 @@ class StreamHandler:
                         response.message.Unpack(named_cache_response)
                         # COH_LOG.info("GET request successful. Response:")
                         self.response_result_collection.append(named_cache_response)
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Remove:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Replace:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.RemoveMapping:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result = named_cache_response
                     else:
                         pass
                 elif response.HasField("init"):
