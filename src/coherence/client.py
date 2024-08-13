@@ -1083,16 +1083,72 @@ class NamedCacheClient_v1(NamedCache[K, V]):
             return None
 
     async def replace_mapping(self, key: K, old_value: V, new_value: V) -> bool:
-        pass
+        named_cache_request = self._request_factory.replace_mapping_request(key, old_value, new_value)
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        response = await asyncio.wait_for(
+            self._stream_handler.get_response(request_id), 10.0)
+        if response.HasField("message"):
+            value = BoolValue()
+            response.message.Unpack(value)
+            result = self._serializer.deserialize(value.value)
+            return result
+        else:
+            return False
 
     async def contains_key(self, key: K) -> bool:
-        pass
+        named_cache_request = self._request_factory.contains_key_request(key)
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        response = await asyncio.wait_for(
+            self._stream_handler.get_response(request_id), 10.0)
+        if response.HasField("message"):
+            value = BoolValue()
+            response.message.Unpack(value)
+            result = self._serializer.deserialize(value.value)
+            return result
+        else:
+            return False
 
     async def contains_value(self, value: V) -> bool:
-        pass
+        named_cache_request = self._request_factory.contains_value_request(value)
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        response = await asyncio.wait_for(
+            self._stream_handler.get_response(request_id), 10.0)
+        if response.HasField("message"):
+            value = BoolValue()
+            response.message.Unpack(value)
+            result = self._serializer.deserialize(value.value)
+            return result
+        else:
+            return False
 
     async def is_empty(self) -> bool:
-        pass
+        named_cache_request = self._request_factory.is_empty_request()
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        response = await asyncio.wait_for(
+            self._stream_handler.get_response(request_id), 10.0)
+        if response.HasField("message"):
+            value = BoolValue()
+            response.message.Unpack(value)
+            result = self._serializer.deserialize(value.value)
+            return result
+        else:
+            return False
 
     async def size(self) -> int:
         pass

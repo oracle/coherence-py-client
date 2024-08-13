@@ -303,38 +303,61 @@ class RequestFactory_v1:
 
         return named_cache_request
 
-    def replace_mapping_request(self, key: K, old_value: V, new_value: V) -> ReplaceMappingRequest:
-        r = ReplaceMappingRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
+    def replace_mapping_request(self, key: K, old_value: V,
+                                new_value: V) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+        cache_request = cache_service_messages_v1_pb2.ReplaceMappingRequest(
             key=self._serializer.serialize(key),
             previousValue=self._serializer.serialize(old_value),
             newValue=self._serializer.serialize(new_value),
         )
-        return r
 
-    def contains_key_request(self, key: K) -> ContainsKeyRequest:
-        r = ContainsKeyRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
-            key=self._serializer.serialize(key),
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
+
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.ReplaceMapping,
+            cacheId=self.cache_id,
+            message=any_cache_request,
         )
-        return r
 
-    def contains_value_request(self, value: V) -> ContainsValueRequest:
-        r = ContainsValueRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
-            value=self._serializer.serialize(value),
+        return named_cache_request
+
+    def contains_key_request(self, key: K) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+        cache_request = BytesValue(value=self._serializer.serialize(key))
+
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
+
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.ContainsKey,
+            cacheId=self.cache_id,
+            message=any_cache_request,
         )
-        return r
 
-    def is_empty_request(self) -> IsEmptyRequest:
-        r = IsEmptyRequest(scope=self._scope, cache=self._cache_name)
-        return r
+        return named_cache_request
+
+    def contains_value_request(self,
+                               value: V) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+        cache_request = BytesValue(value=self._serializer.serialize(value))
+
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
+
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.ContainsValue,
+            cacheId=self.cache_id,
+            message=any_cache_request,
+        )
+
+        return named_cache_request
+
+    def is_empty_request(
+            self) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.IsEmpty,
+            cacheId=self.cache_id,
+        )
+        return named_cache_request
 
     def size_request(self) -> SizeRequest:
         r = SizeRequest(scope=self._scope, cache=self._cache_name)
@@ -609,6 +632,26 @@ class StreamHandler:
                         # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.RemoveMapping:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ReplaceMapping:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ContainsKey:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ContainsValue:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.IsEmpty:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         # COH_LOG.info("GET request successful. Response:")
