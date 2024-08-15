@@ -359,61 +359,107 @@ class RequestFactory_v1:
         )
         return named_cache_request
 
-    def size_request(self) -> SizeRequest:
-        r = SizeRequest(scope=self._scope, cache=self._cache_name)
-        return r
-
-    def invoke_request(self, key: K, processor: EntryProcessor[R]) -> InvokeRequest:
-        r = InvokeRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
-            processor=self._serializer.serialize(processor),
-            key=self._serializer.serialize(key),
+    def size_request(self) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.Size,
+            cacheId=self.cache_id,
         )
-        return r
+        return named_cache_request
+
+    def invoke_request(self, key: K, processor: EntryProcessor[
+        R]) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+        cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
+            agent=self._serializer.serialize(processor),
+            keys=cache_service_messages_v1_pb2.KeysOrFilter(
+                key=self._serializer.serialize(key),
+            )
+        )
+
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
+
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.Invoke,
+            cacheId=self.cache_id,
+            message=any_cache_request,
+        )
+
+        return named_cache_request
 
     def invoke_all_request(
-        self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
-    ) -> InvokeAllRequest:
+            self, processor: EntryProcessor[R], keys: Optional[set[K]] = None,
+            filter: Optional[Filter] = None
+    ) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         if keys is not None and filter is not None:
             raise ValueError("keys and filter are mutually exclusive")
 
-        r = InvokeAllRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
-            processor=self._serializer.serialize(processor),
-        )
-
+        list_of_keys = list()
         if keys is not None:
             for key in keys:
-                r.keys.append(self._serializer.serialize(key))
+                list_of_keys.append(self._serializer.serialize(key))
+            cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
+                agent=self._serializer.serialize(processor),
+                keys=cache_service_messages_v1_pb2.KeysOrFilter(
+                    keys=common_messages_v1_pb2.CollectionOfBytesValues(
+                        values=list_of_keys,
+                    ),
+                )
+            )
         else:
-            r.filter = self._serializer.serialize(filter)
+            cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
+                agent=self._serializer.serialize(processor),
+                keys=cache_service_messages_v1_pb2.KeysOrFilter(
+                    filter=self._serializer.serialize(filter),
+                )
+            )
 
-        return r
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
+
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.Invoke,
+            cacheId=self.cache_id,
+            message=any_cache_request,
+        )
+
+        return named_cache_request
 
     def aggregate_request(
         self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
-    ) -> AggregateRequest:
+    ) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         if keys is not None and filter is not None:
             raise ValueError("keys and filter are mutually exclusive")
 
-        r: AggregateRequest = AggregateRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
-            aggregator=self._serializer.serialize(aggregator),
-        )
-
+        list_of_keys = list()
         if keys is not None:
             for key in keys:
-                r.keys.append(self._serializer.serialize(key))
-        if filter is not None:
-            r.filter = self._serializer.serialize(filter)
+                list_of_keys.append(self._serializer.serialize(key))
+            cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
+                agent=self._serializer.serialize(aggregator),
+                keys=cache_service_messages_v1_pb2.KeysOrFilter(
+                    keys=common_messages_v1_pb2.CollectionOfBytesValues(
+                        values=list_of_keys,
+                    ),
+                )
+            )
+        else:
+            cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
+                agent=self._serializer.serialize(aggregator),
+                keys=cache_service_messages_v1_pb2.KeysOrFilter(
+                    filter=self._serializer.serialize(filter),
+                )
+            )
 
-        return r
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
+
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.Aggregate,
+            cacheId=self.cache_id,
+            message=any_cache_request,
+        )
+
+        return named_cache_request
 
     def values_request(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> ValuesRequest:
         if filter is None and comparator is not None:
@@ -652,6 +698,21 @@ class StreamHandler:
                         # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.IsEmpty:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Size:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result = named_cache_response
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Invoke:
+                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        # COH_LOG.info("GET request successful. Response:")
+                        self.response_result_collection.append(named_cache_response)
+                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Aggregate:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         # COH_LOG.info("GET request successful. Response:")

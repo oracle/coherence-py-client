@@ -46,7 +46,7 @@ from .serialization import Serializer, SerializerRegistry
 from .services_pb2_grpc import NamedCacheServiceStub
 from .util import RequestFactory
 from .util_v1 import RequestFactory_v1, StreamHandler
-from google.protobuf.wrappers_pb2 import BytesValue, BoolValue
+from google.protobuf.wrappers_pb2 import BytesValue, BoolValue, Int32Value
 
 E = TypeVar("E")
 K = TypeVar("K")
@@ -380,7 +380,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    def invoke_all(
+    async def invoke_all(
         self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> AsyncIterator[MapEntry[K, R]]:
         """
@@ -688,7 +688,7 @@ class NamedCacheClient(NamedCache[K, V]):
         return self._request_factory.get_serializer().deserialize(v.value)
 
     @_pre_call_cache
-    def invoke_all(
+    async def invoke_all(
         self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> AsyncIterator[MapEntry[K, R]]:
         r = self._request_factory.invoke_all_request(processor, keys, filter)
@@ -1151,21 +1151,83 @@ class NamedCacheClient_v1(NamedCache[K, V]):
             return False
 
     async def size(self) -> int:
-        pass
+        named_cache_request = self._request_factory.size_request()
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        response = await asyncio.wait_for(
+            self._stream_handler.get_response(request_id), 10.0)
+        if response.HasField("message"):
+            value = Int32Value()
+            response.message.Unpack(value)
+            result = self._serializer.deserialize(value.value)
+            return result
+        else:
+            return 0
 
     async def invoke(self, key: K, processor: EntryProcessor[R]) -> R:
-        pass
+        named_cache_request = self._request_factory.invoke_request(key, processor)
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        result_set = await asyncio.wait_for(
+            self._stream_handler.get_response_collection(request_id),
+            1.0)
+        if len(result_set) == 0:
+            return None
+        else:
+            entry = result_set[0]
+            if entry.HasField("message"):
+                binary_key_value = common_messages_v1_pb2.BinaryKeyAndValue()
+                entry.message.Unpack(binary_key_value)
+                return self._serializer.deserialize(binary_key_value.value)
 
-    def invoke_all(self, processor: EntryProcessor[R],
+    async def invoke_all(self, processor: EntryProcessor[R],
                    keys: Optional[set[K]] = None,
                    filter: Optional[Filter] = None) -> AsyncIterator[
         MapEntry[K, R]]:
-        pass
+        named_cache_request = self._request_factory.invoke_all_request(processor, keys, filter)
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        result_set = await asyncio.wait_for(
+            self._stream_handler.get_response_collection(request_id),
+            1.0)
+        l = list()
+        for entry in result_set:
+            if entry.HasField("message"):
+                binary_key_value = common_messages_v1_pb2.BinaryKeyAndValue()
+                entry.message.Unpack(binary_key_value)
+                m = MapEntry(binary_key_value.key,
+                             binary_key_value.value)
+                l.append(m)
+        return _ListAsyncIterator(self._serializer, l, _entry_producer_from_list)
+
 
     async def aggregate(self, aggregator: EntryAggregator[R],
                         keys: Optional[set[K]] = None,
                         filter: Optional[Filter] = None) -> R:
-        pass
+        named_cache_request = self._request_factory.aggregate_request(aggregator, keys, filter)
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        response = await asyncio.wait_for(
+            self._stream_handler.get_response(request_id), 1.0)
+        if response.HasField("message"):
+            value = BytesValue()
+            response.message.Unpack(value)
+            result = self._serializer.deserialize(value.value)
+            return result
+        else:
+            return None
 
     def values(self, filter: Optional[Filter] = None,
                comparator: Optional[Comparator] = None,
