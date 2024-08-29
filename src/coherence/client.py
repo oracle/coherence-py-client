@@ -1243,12 +1243,34 @@ class NamedCacheClient_v1(NamedCache[K, V]):
                 by_page: bool = False) -> AsyncIterator[MapEntry[K, V]]:
         pass
 
-    def add_index(self, extractor: ValueExtractor[T, E], ordered: bool = False,
-                  comparator: Optional[Comparator] = None) -> None:
-        pass
+    async def add_index(self, extractor: ValueExtractor[T, E],
+                        ordered: bool = False,
+                        comparator: Optional[Comparator] = None) -> None:
+        if extractor is None:
+            raise ValueError("A ValueExtractor must be specified")
+        named_cache_request = self._request_factory.add_index_request(extractor,
+                                                                      ordered,
+                                                                      comparator)
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        await asyncio.wait_for(self._stream_handler.get_response(request_id),
+                               1.0)
 
-    def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
-        pass
+    async def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
+        if extractor is None:
+            raise ValueError("A ValueExtractor must be specified")
+        named_cache_request = self._request_factory.remove_index_request(
+            extractor)
+        proxy_request = self._request_factory.create_proxy_request(
+            named_cache_request)
+        request_id = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id,
+                                                 named_cache_request)
+        await asyncio.wait_for(self._stream_handler.get_response(request_id),
+                               1.0)
 
 
 class TlsOptions:

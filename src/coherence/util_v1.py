@@ -393,8 +393,8 @@ class RequestFactory_v1:
         if keys is not None and filter is not None:
             raise ValueError("keys and filter are mutually exclusive")
 
-        list_of_keys = list()
         if keys is not None:
+            list_of_keys = list()
             for key in keys:
                 list_of_keys.append(self._serializer.serialize(key))
             cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
@@ -405,12 +405,16 @@ class RequestFactory_v1:
                     ),
                 )
             )
-        else:
+        elif filter is not None:
             cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
                 agent=self._serializer.serialize(processor),
                 keys=cache_service_messages_v1_pb2.KeysOrFilter(
                     filter=self._serializer.serialize(filter),
                 )
+            )
+        else:
+            cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
+                agent=self._serializer.serialize(processor),
             )
 
         any_cache_request = Any()
@@ -430,8 +434,8 @@ class RequestFactory_v1:
         if keys is not None and filter is not None:
             raise ValueError("keys and filter are mutually exclusive")
 
-        list_of_keys = list()
         if keys is not None:
+            list_of_keys = list()
             for key in keys:
                 list_of_keys.append(self._serializer.serialize(key))
             cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
@@ -442,12 +446,16 @@ class RequestFactory_v1:
                     ),
                 )
             )
-        else:
+        elif filter is not None:
             cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
                 agent=self._serializer.serialize(aggregator),
                 keys=cache_service_messages_v1_pb2.KeysOrFilter(
                     filter=self._serializer.serialize(filter),
                 )
+            )
+        else:
+            cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
+                agent=self._serializer.serialize(aggregator),
             )
 
         any_cache_request = Any()
@@ -574,30 +582,45 @@ class RequestFactory_v1:
         return prefix + self.__uidPrefix + str(self.__next_request_id)
 
     def add_index_request(
-        self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
-    ) -> AddIndexRequest:
-        r = AddIndexRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
+            self, extractor: ValueExtractor[T, E], ordered: bool = False,
+            comparator: Optional[Comparator] = None
+    ) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+        cache_request = cache_service_messages_v1_pb2.IndexRequest(
+            add=True,
             extractor=self._serializer.serialize(extractor),
+            sorted=ordered,
         )
-        r.sorted = ordered
-
         if comparator is not None:
-            r.comparator = self._serializer.serialize(comparator)
+            cache_request.comparator = self._serializer.serialize(comparator)
 
-        return r
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
 
-    def remove_index_request(self, extractor: ValueExtractor[T, E]) -> RemoveIndexRequest:
-        r = RemoveIndexRequest(
-            scope=self._scope,
-            cache=self._cache_name,
-            format=self._serializer.format,
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.Index,
+            cacheId=self.cache_id,
+            message=any_cache_request,
+        )
+
+        return named_cache_request
+
+    def remove_index_request(self, extractor: ValueExtractor[
+        T, E]) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+        cache_request = cache_service_messages_v1_pb2.IndexRequest(
+            add=False,
             extractor=self._serializer.serialize(extractor),
         )
 
-        return r
+        any_cache_request = Any()
+        any_cache_request.Pack(cache_request)
+
+        named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
+            type=cache_service_messages_v1_pb2.NamedCacheRequestType.Index,
+            cacheId=self.cache_id,
+            message=any_cache_request,
+        )
+
+        return named_cache_request
 
 
 class StreamHandler:
@@ -612,7 +635,10 @@ class StreamHandler:
         self.result_available.clear()
         self.response_result = None
         self.response_result_collection = list()
-        asyncio.create_task(self.handle_response())
+        self._background_tasks = set()
+        task = asyncio.create_task(self.handle_response())
+        self._background_tasks.add(task)
+        task.add_done_callback(self._background_tasks.discard)
 
     @property
     def session(self) -> Session:
@@ -650,72 +676,58 @@ class StreamHandler:
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Put:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("PUT request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.PutIfAbsent:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("PUT request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Get:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.GetAll:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result_collection.append(named_cache_response)
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Remove:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Replace:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.RemoveMapping:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ReplaceMapping:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ContainsKey:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ContainsValue:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.IsEmpty:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Size:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Invoke:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result_collection.append(named_cache_response)
                     elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Aggregate:
                         named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
-                        # COH_LOG.info("GET request successful. Response:")
                         self.response_result = named_cache_response
                     else:
                         pass
