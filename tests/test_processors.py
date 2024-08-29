@@ -176,7 +176,7 @@ async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> 
 
     f = Filters.always()  # This will always return True
     cp = Processors.conditional_put_all(f, dict([(k1, "only-one-one"), (k2, "only-two-two")]))
-    async for _ in cache.invoke_all(cp):
+    async for _ in await cache.invoke_all(cp):
         break  # ignore the results
 
     assert await cache.get(k1) == "only-one-one"
@@ -184,7 +184,7 @@ async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> 
 
     pf = Filters.present()
     cp = Processors.conditional_put_all(Filters.negate(pf), dict([("three", "only-three")]))
-    async for _ in cache.invoke_all(cp, {"one", "three"}):
+    async for _ in await cache.invoke_all(cp, {"one", "three"}):
         break  # ignore the results
 
     assert await cache.get(k1) == "only-one-one"
@@ -406,7 +406,7 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
 
     vpa = Processors.versioned_put_all(dict([(k1, versioned123_update), (k2, versioned234_update)]))
 
-    async for _ in cache.invoke_all(vpa):
+    async for _ in await cache.invoke_all(vpa):
         break
 
     assert await cache.get(k1) == expected_versioned123_update
