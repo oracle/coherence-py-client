@@ -4,56 +4,29 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import sys
 import threading
-import time
-from asyncio import Event
 from typing import Optional, TypeVar
 
-import grpc
-from google.protobuf.json_format import MessageToJson
-from requests import Response
+from google.protobuf.any_pb2 import Any  # type: ignore
+from google.protobuf.wrappers_pb2 import BytesValue  # type: ignore
 
-from . import cache_service_messages_v1_pb2, proxy_service_messages_v1_pb2,common_messages_v1_pb2
+from . import cache_service_messages_v1_pb2, common_messages_v1_pb2, proxy_service_messages_v1_pb2
 from .aggregator import EntryAggregator
 from .comparator import Comparator
 from .extractor import ValueExtractor
 from .filter import Filter, Filters, MapEventFilter
-from .messages_pb2 import (  # type: ignore
-    AddIndexRequest,
-    AggregateRequest,
-    ClearRequest,
-    ContainsKeyRequest,
-    ContainsValueRequest,
-    DestroyRequest,
-    Entry,
+from .messages_pb2 import (
     EntrySetRequest,
-    GetAllRequest,
-    GetRequest,
-    InvokeAllRequest,
-    InvokeRequest,
-    IsEmptyRequest,
     KeySetRequest,
     MapListenerRequest,
     PageRequest,
-    PutAllRequest,
     PutIfAbsentRequest,
-    PutRequest,
-    RemoveIndexRequest,
-    RemoveMappingRequest,
-    RemoveRequest,
-    ReplaceMappingRequest,
-    ReplaceRequest,
-    SizeRequest,
-    TruncateRequest,
     ValuesRequest,
 )
 from .processor import EntryProcessor
 from .serialization import Serializer
-from google.protobuf.any_pb2 import Any
-from google.protobuf.wrappers_pb2 import BytesValue
 
 E = TypeVar("E")
 K = TypeVar("K")
@@ -67,18 +40,18 @@ COH_LOG = logging.getLogger("coherence")
 class Request_ID_Generator:
     _generator = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._lock = threading.Lock()
         self._counter = 0
 
     @classmethod
-    def generator(cls):
+    def generator(cls) -> Request_ID_Generator:
         if Request_ID_Generator._generator is None:
             Request_ID_Generator._generator = Request_ID_Generator()
         return Request_ID_Generator._generator
 
     @classmethod
-    def get_next_id(cls):
+    def get_next_id(cls) -> int:
         generator = cls.generator()
         with generator._lock:
             if generator._counter == sys.maxsize:
@@ -90,29 +63,29 @@ class Request_ID_Generator:
 
 class RequestFactory_v1:
 
-    def __init__(self, cache_name: str, cache_id: int, session: Session, serializer: Serializer) -> None:
-        self._cache_name = cache_name
-        self._cache_id = cache_id
-        self._session = session
-        self._scope: str = session.scope
+    def __init__(self, cache_name: str, cache_id: int, scope: str, serializer: Serializer) -> None:
+        self._cache_name: str = cache_name
+        self._cache_id: int = cache_id
+        self._scope: str = scope
         self._serializer: Serializer = serializer
         # self.__uidPrefix: str = "-" + cache_name + "-" + str(time.time_ns())
         # self.__next_request_id: int = 0
         # self.__next_filter_id: int = 0
 
     @property
-    def cache_id(self):
+    def cache_id(self) -> int:
         return self._cache_id
 
     @cache_id.setter
-    def cache_id(self, value):
+    def cache_id(self, value: int) -> None:
         self._cache_id = value
 
     def get_serializer(self) -> Serializer:
         return self._serializer
 
-    def create_proxy_request(self, named_cache_request:
-    cache_service_messages_v1_pb2.NamedCacheRequest) -> proxy_service_messages_v1_pb2.ProxyRequest:
+    def create_proxy_request(
+        self, named_cache_request: cache_service_messages_v1_pb2.NamedCacheRequest
+    ) -> proxy_service_messages_v1_pb2.ProxyRequest:
         any_named_cache_request = Any()
         any_named_cache_request.Pack(named_cache_request)
         req_id = Request_ID_Generator.get_next_id()
@@ -123,9 +96,7 @@ class RequestFactory_v1:
         return proxy_request
 
     def ensure_request(self, cache_name: str) -> cache_service_messages_v1_pb2.NamedCacheRequest:
-        cache_request = cache_service_messages_v1_pb2.EnsureCacheRequest(
-            cache=cache_name
-        )
+        cache_request = cache_service_messages_v1_pb2.EnsureCacheRequest(cache=cache_name)
 
         any_cache_request = Any()
         any_cache_request.Pack(cache_request)
@@ -138,9 +109,9 @@ class RequestFactory_v1:
 
     def put_request(self, key: K, value: V, ttl: int = -1) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         cache_request = cache_service_messages_v1_pb2.PutRequest(
-            key=self._serializer.serialize(key),     # Serialized key
-            value=self._serializer.serialize(value), # Serialized value
-            ttl=ttl
+            key=self._serializer.serialize(key),  # Serialized key
+            value=self._serializer.serialize(value),  # Serialized value
+            ttl=ttl,
         )
 
         any_cache_request = Any()
@@ -172,11 +143,11 @@ class RequestFactory_v1:
         if keys is None:
             raise ValueError("Must specify a set of keys")
 
-        l = list()
+        lst = list()
         for k in keys:
-            l.append(self._serializer.serialize(k))
+            lst.append(self._serializer.serialize(k))
         cache_request = common_messages_v1_pb2.CollectionOfBytesValues(
-            values=l,
+            values=lst,
         )
 
         any_cache_request = Any()
@@ -192,9 +163,9 @@ class RequestFactory_v1:
 
     def put_if_absent_request(self, key: K, value: V, ttl: int = -1) -> PutIfAbsentRequest:
         cache_request = cache_service_messages_v1_pb2.PutRequest(
-            key=self._serializer.serialize(key),     # Serialized key
-            value=self._serializer.serialize(value), # Serialized value
-            ttl=ttl
+            key=self._serializer.serialize(key),  # Serialized key
+            value=self._serializer.serialize(value),  # Serialized value
+            ttl=ttl,
         )
 
         any_cache_request = Any()
@@ -208,8 +179,9 @@ class RequestFactory_v1:
 
         return named_cache_request
 
-    def put_all_request(self, map: dict[K, V], ttl: Optional[
-        int] = 0) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+    def put_all_request(
+        self, map: dict[K, V], ttl: Optional[int] = 0
+    ) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         entry_list = list()
         for key, value in map.items():
             k = self._serializer.serialize(key)
@@ -239,24 +211,21 @@ class RequestFactory_v1:
         )
         return named_cache_request
 
-    def destroy_request(
-            self) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+    def destroy_request(self) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.Destroy,
             cacheId=self.cache_id,
         )
         return named_cache_request
 
-    def truncate_request(
-            self) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+    def truncate_request(self) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.Truncate,
             cacheId=self.cache_id,
         )
         return named_cache_request
 
-    def remove_request(self,
-                       key: K) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+    def remove_request(self, key: K) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         cache_request = BytesValue(value=self._serializer.serialize(key))
 
         any_cache_request = Any()
@@ -270,11 +239,10 @@ class RequestFactory_v1:
 
         return named_cache_request
 
-
     def remove_mapping_request(self, key: K, value: V) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         cache_request = common_messages_v1_pb2.BinaryKeyAndValue(
-            key=self._serializer.serialize(key),
-            value=self._serializer.serialize(value))
+            key=self._serializer.serialize(key), value=self._serializer.serialize(value)
+        )
 
         any_cache_request = Any()
         any_cache_request.Pack(cache_request)
@@ -289,8 +257,8 @@ class RequestFactory_v1:
 
     def replace_request(self, key: K, value: V) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         cache_request = common_messages_v1_pb2.BinaryKeyAndValue(
-                            key=self._serializer.serialize(key),
-                            value=self._serializer.serialize(value))
+            key=self._serializer.serialize(key), value=self._serializer.serialize(value)
+        )
 
         any_cache_request = Any()
         any_cache_request.Pack(cache_request)
@@ -303,8 +271,9 @@ class RequestFactory_v1:
 
         return named_cache_request
 
-    def replace_mapping_request(self, key: K, old_value: V,
-                                new_value: V) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+    def replace_mapping_request(
+        self, key: K, old_value: V, new_value: V
+    ) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         cache_request = cache_service_messages_v1_pb2.ReplaceMappingRequest(
             key=self._serializer.serialize(key),
             previousValue=self._serializer.serialize(old_value),
@@ -336,8 +305,7 @@ class RequestFactory_v1:
 
         return named_cache_request
 
-    def contains_value_request(self,
-                               value: V) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+    def contains_value_request(self, value: V) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         cache_request = BytesValue(value=self._serializer.serialize(value))
 
         any_cache_request = Any()
@@ -351,8 +319,7 @@ class RequestFactory_v1:
 
         return named_cache_request
 
-    def is_empty_request(
-            self) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+    def is_empty_request(self) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         named_cache_request = cache_service_messages_v1_pb2.NamedCacheRequest(
             type=cache_service_messages_v1_pb2.NamedCacheRequestType.IsEmpty,
             cacheId=self.cache_id,
@@ -366,13 +333,12 @@ class RequestFactory_v1:
         )
         return named_cache_request
 
-    def invoke_request(self, key: K, processor: EntryProcessor[
-        R]) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+    def invoke_request(self, key: K, processor: EntryProcessor[R]) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
             agent=self._serializer.serialize(processor),
             keys=cache_service_messages_v1_pb2.KeysOrFilter(
                 key=self._serializer.serialize(key),
-            )
+            ),
         )
 
         any_cache_request = Any()
@@ -387,8 +353,7 @@ class RequestFactory_v1:
         return named_cache_request
 
     def invoke_all_request(
-            self, processor: EntryProcessor[R], keys: Optional[set[K]] = None,
-            filter: Optional[Filter] = None
+        self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         if keys is not None and filter is not None:
             raise ValueError("keys and filter are mutually exclusive")
@@ -403,14 +368,14 @@ class RequestFactory_v1:
                     keys=common_messages_v1_pb2.CollectionOfBytesValues(
                         values=list_of_keys,
                     ),
-                )
+                ),
             )
         elif filter is not None:
             cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
                 agent=self._serializer.serialize(processor),
                 keys=cache_service_messages_v1_pb2.KeysOrFilter(
                     filter=self._serializer.serialize(filter),
-                )
+                ),
             )
         else:
             cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
@@ -444,14 +409,14 @@ class RequestFactory_v1:
                     keys=common_messages_v1_pb2.CollectionOfBytesValues(
                         values=list_of_keys,
                     ),
-                )
+                ),
             )
         elif filter is not None:
             cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
                 agent=self._serializer.serialize(aggregator),
                 keys=cache_service_messages_v1_pb2.KeysOrFilter(
                     filter=self._serializer.serialize(filter),
-                )
+                ),
             )
         else:
             cache_request = cache_service_messages_v1_pb2.ExecuteRequest(
@@ -582,8 +547,7 @@ class RequestFactory_v1:
         return prefix + self.__uidPrefix + str(self.__next_request_id)
 
     def add_index_request(
-            self, extractor: ValueExtractor[T, E], ordered: bool = False,
-            comparator: Optional[Comparator] = None
+        self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
     ) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         cache_request = cache_service_messages_v1_pb2.IndexRequest(
             add=True,
@@ -604,8 +568,7 @@ class RequestFactory_v1:
 
         return named_cache_request
 
-    def remove_index_request(self, extractor: ValueExtractor[
-        T, E]) -> cache_service_messages_v1_pb2.NamedCacheRequest:
+    def remove_index_request(self, extractor: ValueExtractor[T, E]) -> cache_service_messages_v1_pb2.NamedCacheRequest:
         cache_request = cache_service_messages_v1_pb2.IndexRequest(
             add=False,
             extractor=self._serializer.serialize(extractor),
@@ -621,179 +584,3 @@ class RequestFactory_v1:
         )
 
         return named_cache_request
-
-
-class StreamHandler:
-    theStreamHandler = None
-
-    def __init__(self, session: Session, stream: grpc.aio._call.StreamStreamCall):
-        self._session: Session = session
-        self._stream: grpc.aio._call.StreamStreamCall = stream
-        self._request_id_to_event_map = dict()
-        self._request_id_request_map = dict()
-        self.result_available = Event()
-        self.result_available.clear()
-        self.response_result = None
-        self.response_result_collection = list()
-        self._background_tasks = set()
-        task = asyncio.create_task(self.handle_response())
-        self._background_tasks.add(task)
-        task.add_done_callback(self._background_tasks.discard)
-
-    @property
-    def session(self) -> Session:
-        return self._session
-
-    @property
-    def stream(self) -> grpc.aio._call.StreamStreamCall:
-        return self._stream
-
-    @classmethod
-    def getStreamHandler(cls, session: Session, stream: grpc.aio._call.StreamStreamCall):
-        if cls.theStreamHandler is None:
-            cls.theStreamHandler = StreamHandler(session, stream)
-            return cls.theStreamHandler
-        else:
-            return cls.theStreamHandler
-
-    async def handle_response(self):
-        COH_LOG.setLevel(logging.DEBUG)
-        while not self.session.closed:
-            await asyncio.sleep(0)
-            response = await self.stream.read()
-            response_id = response.id
-            COH_LOG.debug(f"response_id: {response_id}")
-            if response_id == 0 :
-                self.handle_zero_id_response(response)
-            else:
-                if response.HasField("message"):
-                    req_type = self._request_id_request_map[response_id].type
-                    if req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.EnsureCache:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        # COH_LOG.info(f"cache_id: {named_cache_response.cacheId}")
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Put:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.PutIfAbsent:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Get:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.GetAll:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result_collection.append(named_cache_response)
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Remove:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Replace:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.RemoveMapping:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ReplaceMapping:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ContainsKey:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ContainsValue:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.IsEmpty:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Size:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Invoke:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result_collection.append(named_cache_response)
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Aggregate:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
-                        self.response_result = named_cache_response
-                    else:
-                        pass
-                elif response.HasField("init"):
-                    self._request_id_to_event_map.pop(response_id)
-                    print("InitRequest request completed.")
-                    self.result_available.set()
-                elif response.HasField("error"):
-                    error_message = response.error
-                    print(f"EnsureCache request failed with error: {error_message}")
-                    return
-                elif response.HasField("complete"):
-                    # self.session.request_id_map.pop(response_id)
-                    # COH_LOG.info("Complete response received successfully.")
-                    self._request_id_to_event_map[response_id].set()
-
-    async def get_response(self, response_id: int):
-        await self._request_id_to_event_map[response_id].wait()
-        result = self.response_result
-        self.response_result = None
-        self._request_id_to_event_map[response_id].clear()
-        self._request_id_to_event_map.pop(response_id)
-        self._request_id_request_map.pop(response_id)
-        return result
-
-    async def get_response_collection(self, response_id: int):
-        await self._request_id_to_event_map[response_id].wait()
-        result = self.response_result_collection
-        self.response_result_collection = list()
-        self._request_id_to_event_map[response_id].clear()
-        self._request_id_to_event_map.pop(response_id)
-        self._request_id_request_map.pop(response_id)
-        return result
-
-    async def write_request(self, proxy_request: proxy_service_messages_v1_pb2.ProxyRequest,
-                            request_id: int,
-                            request: cache_service_messages_v1_pb2.NamedCacheRequest):
-        self._request_id_to_event_map[request_id] = Event()
-        self._request_id_to_event_map[request_id].clear()
-        self._request_id_request_map[request_id] = request
-        await self._stream.write(proxy_request)
-
-    def handle_zero_id_response(self, response):
-        if response.HasField("message"):
-            named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
-            response.message.Unpack(named_cache_response)
-            type = named_cache_response.type
-            cache_id = named_cache_response.cacheId
-            if type == cache_service_messages_v1_pb2.ResponseType.Message:
-                pass
-            elif type == cache_service_messages_v1_pb2.ResponseType.MapEvent:
-                # Handle MapEvent Response
-                COH_LOG.debug("MapEvent Response type received")
-                response_json = MessageToJson(named_cache_response)
-                COH_LOG.debug(response_json)
-                pass
-            elif type == cache_service_messages_v1_pb2.ResponseType.Destroyed:
-                # Handle Destroyed Response
-                COH_LOG.debug("Destroyed Response type received")
-                response_json = MessageToJson(named_cache_response)
-                COH_LOG.debug(response_json)
-                pass
-            elif type == cache_service_messages_v1_pb2.ResponseType.Truncated:
-                # Handle Truncated Response
-                COH_LOG.debug("Truncated Response type received")
-                response_json = MessageToJson(named_cache_response)
-                COH_LOG.debug(response_json)
-            else:
-                pass

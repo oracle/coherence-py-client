@@ -11,7 +11,7 @@ from .aggregator import EntryAggregator
 from .comparator import Comparator
 from .extractor import ValueExtractor
 from .filter import Filter, Filters, MapEventFilter
-from .messages_pb2 import (  # type: ignore
+from .messages_pb2 import (
     AddIndexRequest,
     AggregateRequest,
     ClearRequest,

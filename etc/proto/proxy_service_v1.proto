@@ -27,4 +27,3 @@ service ProxyService {
     rpc subChannel (stream ProxyRequest) returns (stream ProxyResponse) {
     }
 }
-

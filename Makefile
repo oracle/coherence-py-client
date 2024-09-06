@@ -118,7 +118,7 @@ generate-proto:  ## Generate Proto Files
 		https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/common_messages_v1.proto
 	curl -o $(PROTO_DIR)/cache_service_messages_v1.proto \
 		https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/cache_service_messages_v1.proto
-	python -m grpc_tools.protoc --proto_path=$(CURRDIR)/etc/proto --python_out=$(CURRDIR)/src/coherence \
+	python -m grpc_tools.protoc --proto_path=$(CURRDIR)/etc/proto --pyi_out=$(CURRDIR)/src/coherence --python_out=$(CURRDIR)/src/coherence \
 			--grpc_python_out=$(CURRDIR)/src/coherence \
 			$(CURRDIR)/etc/proto/proxy_service_v1.proto \
 			$(CURRDIR)/etc/proto/proxy_service_messages_v1.proto \

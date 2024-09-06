@@ -504,5 +504,3 @@ message MapEventResponse {
     // A flag indicating whether the event is a priming event.
     bool priming = 8;
 }
-
-

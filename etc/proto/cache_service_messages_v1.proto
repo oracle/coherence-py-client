@@ -36,7 +36,7 @@ option java_package = "com.oracle.coherence.grpc.messages.cache.v1";
 enum NamedCacheRequestType {
     // An unknown message.
     // This request type is not used, it is here as enums must have a zero value,
-    // but we need to know the difference between a zero value and the field being 
+    // but we need to know the difference between a zero value and the field being
     // incorrectly set.
     Unknown = 0;
     // Called to ensure a cache.
@@ -101,7 +101,7 @@ enum NamedCacheRequestType {
     // Execute an entry processor against a single entry in the cache and return the result.
     // The message field must contain a ExecuteRequest where the agent field
     // is the serialized entry processor.
-    // The response will be a stream of BinaryKeyAndValue values followed by a Complete 
+    // The response will be a stream of BinaryKeyAndValue values followed by a Complete
     // message to signal the end of the response stream.
     Invoke = 13;
     // Add or remove a MapListener.
@@ -145,20 +145,20 @@ enum NamedCacheRequestType {
     // serialized previous value mapped to the key.
     PutIfAbsent = 19;
     // Execute a query for cache entries
-    // The message field must contain a QueryRequest 
-    // The response will be a stream of BinaryKeyAndValue representing each cache entry 
+    // The message field must contain a QueryRequest
+    // The response will be a stream of BinaryKeyAndValue representing each cache entry
     // in the results of the query, finally followed by a Complete message to signal
     // the end of the response stream.
     QueryEntries = 20;
     // Execute a query for cache keys
-    // The message field must contain a QueryRequest 
-    // The response will be a stream of BytesValue representing each cache key in 
+    // The message field must contain a QueryRequest
+    // The response will be a stream of BytesValue representing each cache key in
     // the results of the query, finally followed by a Complete message to signal
     // the end of the response stream.
     QueryKeys = 21;
     // Execute a query for cache values
-    // The message field must contain a QueryRequest 
-    // The response will be a stream of BytesValue representing each cache value in 
+    // The message field must contain a QueryRequest
+    // The response will be a stream of BytesValue representing each cache value in
     // the results of the query, finally followed by a Complete message to signal
     // the end of the response stream.
     QueryValues = 22;
