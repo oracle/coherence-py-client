@@ -7,9 +7,7 @@ from __future__ import annotations
 from abc import ABC
 from decimal import Decimal
 from enum import Enum, IntEnum
-from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
-
-from typing_extensions import TypeAlias
+from typing import Any, Dict, Generic, List, Optional, TypeAlias, TypeVar, Union
 
 from .comparator import Comparator, InverseComparator, SafeComparator
 from .extractor import ExtractorExpression, Extractors, ValueExtractor
