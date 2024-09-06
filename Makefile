@@ -112,7 +112,7 @@ generate-proto:  ## Generate Proto Files
 	mkdir -p $(PROTO_DIR) || true
 	curl -o $(PROTO_DIR)/services.proto https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/services.proto
 	curl -o $(PROTO_DIR)/messages.proto https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/messages.proto
-	python -m grpc_tools.protoc --proto_path=$(CURRDIR)/etc/proto --python_out=$(CURRDIR)/src/coherence --grpc_python_out=$(CURRDIR)/src/coherence $(CURRDIR)/etc/proto/messages.proto $(CURRDIR)/etc/proto/services.proto
+	python -m grpc_tools.protoc --proto_path=$(CURRDIR)/etc/proto --pyi_out=$(CURRDIR)/src/coherence --python_out=$(CURRDIR)/src/coherence --grpc_python_out=$(CURRDIR)/src/coherence $(CURRDIR)/etc/proto/messages.proto $(CURRDIR)/etc/proto/services.proto
 	sed -e 's/import messages_pb2 as messages__pb2/import coherence.messages_pb2 as messages__pb2/' \
 		< $(CURRDIR)/src/coherence/services_pb2_grpc.py > $(CURRDIR)/src/coherence/services_pb2_grpc.py.out
 	mv $(CURRDIR)/src/coherence/services_pb2_grpc.py.out $(CURRDIR)/src/coherence/services_pb2_grpc.py
