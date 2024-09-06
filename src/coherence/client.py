@@ -38,7 +38,7 @@ from .comparator import Comparator
 from .event import MapLifecycleEvent, MapListener, SessionLifecycleEvent
 from .extractor import ValueExtractor
 from .filter import Filter
-from .messages_pb2 import PageRequest  # type: ignore
+from .messages_pb2 import PageRequest
 from .processor import EntryProcessor
 from .serialization import Serializer, SerializerRegistry
 from .services_pb2_grpc import NamedCacheServiceStub

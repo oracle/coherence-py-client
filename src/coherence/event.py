@@ -17,7 +17,7 @@ from pymitter import EventEmitter
 import coherence.client
 
 from .filter import Filter, Filters, MapEventFilter
-from .messages_pb2 import MapEventResponse, MapListenerRequest, MapListenerResponse  # type: ignore
+from .messages_pb2 import MapEventResponse, MapListenerRequest, MapListenerResponse
 from .serialization import Serializer
 from .services_pb2_grpc import NamedCacheServiceStub
 from .util import RequestFactory
@@ -104,9 +104,9 @@ class MapEvent(Generic[K, V]):
         self._name: str = source.name
         self._source: coherence.client.NamedMap[K, V] = source
         self._serializer: Serializer = serializer
-        self._key_bytes: bytearray = response.key
-        self._new_value_bytes: bytearray = response.newValue
-        self._old_value_bytes: bytearray = response.oldValue
+        self._key_bytes: bytes = response.key
+        self._new_value_bytes: bytes = response.newValue
+        self._old_value_bytes: bytes = response.oldValue
 
     @property
     def source(self) -> coherence.client.NamedMap[K, V]:
