@@ -19,6 +19,7 @@ from typing import (
     Callable,
     Final,
     Generic,
+    List,
     Literal,
     Optional,
     Sequence,
@@ -29,16 +30,18 @@ from typing import (
     no_type_check,
 )
 
-import cache_service_messages_v1_pb2
 # noinspection PyPackageRequirements
 import grpc
+from cache_service_messages_v1_pb2 import NamedCacheRequest, NamedCacheRequestType, NamedCacheResponse, ResponseType
 # import proxy_service_messages_v1_pb2
 from google.protobuf.json_format import MessageToJson  # type: ignore
 from google.protobuf.wrappers_pb2 import BoolValue, BytesValue, Int32Value  # type: ignore
+from proxy_service_messages_v1_pb2 import ProxyRequest
 from pymitter import EventEmitter
 
-from . import common_messages_v1_pb2, proxy_service_messages_v1_pb2, proxy_service_v1_pb2_grpc
+from . import proxy_service_messages_v1_pb2, proxy_service_v1_pb2_grpc
 from .aggregator import AverageAggregator, EntryAggregator, PriorityAggregator, SumAggregator
+from .common_messages_v1_pb2 import BinaryKeyAndValue, OptionalValue
 from .comparator import Comparator
 from .event import MapLifecycleEvent, MapListener, SessionLifecycleEvent
 from .extractor import ValueExtractor
@@ -48,7 +51,7 @@ from .processor import EntryProcessor
 from .serialization import Serializer, SerializerRegistry
 from .services_pb2_grpc import NamedCacheServiceStub
 from .util import RequestFactory
-from .util_v1 import RequestFactory_v1
+from .util_v1 import RequestFactoryV1
 
 E = TypeVar("E")
 K = TypeVar("K")
@@ -834,7 +837,7 @@ class NamedCacheClient(NamedCache[K, V]):
         )
 
 
-class NamedCacheClient_v1(NamedCache[K, V]):
+class NamedCacheClientV1(NamedCache[K, V]):
 
     def __init__(self, cache_name: str, session: Session, serializer: Serializer):
         self._cache_name: str = cache_name
@@ -842,7 +845,7 @@ class NamedCacheClient_v1(NamedCache[K, V]):
         self._serializer: Serializer = serializer
         self._client_stub: proxy_service_v1_pb2_grpc.ProxyServiceStub = session._v1_init_response_details.get("stub")
         self._client_stream: grpc.aio._call.StreamStreamCall = session._v1_init_response_details.get("stream")
-        self._request_factory: RequestFactory_v1 = RequestFactory_v1(
+        self._request_factory: RequestFactoryV1 = RequestFactoryV1(
             cache_name, self._cache_id, session.scope, serializer
         )
         # self._emitter: EventEmitter = EventEmitter()
@@ -860,6 +863,13 @@ class NamedCacheClient_v1(NamedCache[K, V]):
         #     self, session, self._client_stub, serializer, self._internal_emitter
         # )
 
+    async def _dispatch_and_wait(self, request: NamedCacheRequest) -> Any:
+        proxy_request: ProxyRequest = self._request_factory.create_proxy_request(request)
+        request_id: int = proxy_request.id
+        await self._stream_handler.write_request(proxy_request, request_id, request)
+        # TODO: use timeout from configuration
+        return await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+
     @property
     def cache_id(self) -> int:
         return self._cache_id
@@ -869,23 +879,19 @@ class NamedCacheClient_v1(NamedCache[K, V]):
         self._cache_id = cache_id
 
     async def ensure_cache(self) -> None:
-        named_cache_request = self._request_factory.ensure_request(self._cache_name)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 1.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(
+            self._request_factory.ensure_request(self._cache_name)
+        )
+
         self.cache_id = response.cacheId
         self._session.update_cache_id_map(self.cache_id, self)
         self._request_factory.cache_id = response.cacheId
 
     async def get(self, key: K) -> Optional[V]:
-        named_cache_request = self._request_factory.get_request(key)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.get_request(key))
+
         if response.HasField("message"):
-            optional_value = common_messages_v1_pb2.OptionalValue()
+            optional_value = OptionalValue()
             response.message.Unpack(optional_value)
             if optional_value.present:
                 return self._serializer.deserialize(optional_value.value)
@@ -895,11 +901,8 @@ class NamedCacheClient_v1(NamedCache[K, V]):
             return None
 
     async def put(self, key: K, value: V, ttl: int = 0) -> V:
-        named_cache_request = self._request_factory.put_request(key, value, ttl)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.put_request(key, value, ttl))
+
         if response is None:
             return None
         else:
@@ -912,11 +915,10 @@ class NamedCacheClient_v1(NamedCache[K, V]):
                 return None
 
     async def put_if_absent(self, key: K, value: V, ttl: int = 0) -> V:
-        named_cache_request = self._request_factory.put_if_absent_request(key, value, ttl)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(
+            self._request_factory.put_if_absent_request(key, value, ttl)
+        )
+
         if response is None:
             return None
         else:
@@ -959,57 +961,36 @@ class NamedCacheClient_v1(NamedCache[K, V]):
             return default_value
 
     async def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
-        named_cache_request = self._request_factory.get_all_request(keys)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        result_set = await asyncio.wait_for(self._stream_handler.get_response_collection(request_id), 1.0)
+        response: List[NamedCacheResponse] = await self._dispatch_and_wait(self._request_factory.get_all_request(keys))
+
         lst = list()
-        for entry in result_set:
+        for entry in response:
             if entry.HasField("message"):
-                binary_key_value = common_messages_v1_pb2.BinaryKeyAndValue()
+                binary_key_value = BinaryKeyAndValue()
                 entry.message.Unpack(binary_key_value)
                 m = MapEntry(binary_key_value.key, binary_key_value.value)
                 lst.append(m)
         return _ListAsyncIterator(self._serializer, lst, _entry_producer_from_list)
 
-    async def put_all(self, map: dict[K, V], ttl: Optional[int] = 0) -> None:
-        named_cache_request = self._request_factory.put_all_request(map, ttl)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        await asyncio.wait_for(self._stream_handler.get_response(request_id), 1.0)
+    async def put_all(self, kv_map: dict[K, V], ttl: Optional[int] = 0) -> None:
+        await self._dispatch_and_wait(self._request_factory.put_all_request(kv_map, ttl))
 
     async def clear(self) -> None:
-        named_cache_request = self._request_factory.clear_request()
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        await asyncio.wait_for(self._stream_handler.get_response(request_id), 1.0)
+        await self._dispatch_and_wait(self._request_factory.clear_request())
 
     async def destroy(self) -> None:
-        named_cache_request = self._request_factory.destroy_request()
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        await asyncio.wait_for(self._stream_handler.get_response(request_id), 1.0)
+        await self._dispatch_and_wait(self._request_factory.destroy_request())
 
     def release(self) -> None:
+        # TODO
         pass
 
     async def truncate(self) -> None:
-        named_cache_request = self._request_factory.truncate_request()
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        await asyncio.wait_for(self._stream_handler.get_response(request_id), 1.0)
+        await self._dispatch_and_wait(self._request_factory.truncate_request())
 
     async def remove(self, key: K) -> V:
-        named_cache_request = self._request_factory.remove_request(key)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.remove_request(key))
+
         if response.HasField("message"):
             value = BytesValue()
             response.message.Unpack(value)
@@ -1019,25 +1000,20 @@ class NamedCacheClient_v1(NamedCache[K, V]):
             return None
 
     async def remove_mapping(self, key: K, value: V) -> bool:
-        named_cache_request = self._request_factory.remove_mapping_request(key, value)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(
+            self._request_factory.remove_mapping_request(key, value)
+        )
+
         if response.HasField("message"):
             value = BoolValue()
             response.message.Unpack(value)
-            result: bool = self._serializer.deserialize(value.value)
-            return result
+            return value.value
         else:
             return False
 
     async def replace(self, key: K, value: V) -> V:
-        named_cache_request = self._request_factory.replace_request(key, value)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.replace_request(key, value))
+
         if response.HasField("message"):
             value = BytesValue()
             response.message.Unpack(value)
@@ -1047,102 +1023,84 @@ class NamedCacheClient_v1(NamedCache[K, V]):
             return None
 
     async def replace_mapping(self, key: K, old_value: V, new_value: V) -> bool:
-        named_cache_request = self._request_factory.replace_mapping_request(key, old_value, new_value)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(
+            self._request_factory.replace_mapping_request(key, old_value, new_value)
+        )
+
         if response.HasField("message"):
             value = BoolValue()
             response.message.Unpack(value)
-            result = self._serializer.deserialize(value.value)
-            return result
+            return value.value
         else:
             return False
 
     async def contains_key(self, key: K) -> bool:
-        named_cache_request = self._request_factory.contains_key_request(key)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.contains_key_request(key))
+
         if response.HasField("message"):
             value = BoolValue()
             response.message.Unpack(value)
-            result = self._serializer.deserialize(value.value)
-            return result
+            return value.value
         else:
             return False
 
     async def contains_value(self, value: V) -> bool:
-        named_cache_request = self._request_factory.contains_value_request(value)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(
+            self._request_factory.contains_value_request(value)
+        )
+
         if response.HasField("message"):
             value = BoolValue()
             response.message.Unpack(value)
-            result = self._serializer.deserialize(value.value)
-            return result
+            return value.value
         else:
             return False
 
     async def is_empty(self) -> bool:
-        named_cache_request = self._request_factory.is_empty_request()
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.is_empty_request())
+
         if response.HasField("message"):
             value = BoolValue()
             response.message.Unpack(value)
-            result = self._serializer.deserialize(value.value)
-            return result
+            return value.value
         else:
             return False
 
     async def size(self) -> int:
-        named_cache_request = self._request_factory.size_request()
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.size_request())
+
         if response.HasField("message"):
             value = Int32Value()
             response.message.Unpack(value)
-            result = self._serializer.deserialize(value.value)
-            return result
+            return value.value
         else:
             return 0
 
     async def invoke(self, key: K, processor: EntryProcessor[R]) -> R:
-        named_cache_request = self._request_factory.invoke_request(key, processor)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        result_set = await asyncio.wait_for(self._stream_handler.get_response_collection(request_id), 1.0)
-        if len(result_set) == 0:
+        response: List[NamedCacheResponse] = await self._dispatch_and_wait(
+            self._request_factory.invoke_request(key, processor)
+        )
+
+        if len(response) == 0:
             return None
         else:
-            entry = result_set[0]
+            entry = response[0]
             if entry.HasField("message"):
-                binary_key_value = common_messages_v1_pb2.BinaryKeyAndValue()
+                binary_key_value = BinaryKeyAndValue()
                 entry.message.Unpack(binary_key_value)
                 return self._serializer.deserialize(binary_key_value.value)
 
     async def invoke_all(
         self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> AsyncIterator[MapEntry[K, R]]:
-        named_cache_request = self._request_factory.invoke_all_request(processor, keys, filter)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        result_set = await asyncio.wait_for(self._stream_handler.get_response_collection(request_id), 1.0)
+        response: List[NamedCacheResponse] = await self._dispatch_and_wait(
+            self._request_factory.invoke_all_request(processor, keys, filter)
+        )
+
         lst = list()
-        for entry in result_set:
+        for entry in response:
             if entry.HasField("message"):
-                binary_key_value = common_messages_v1_pb2.BinaryKeyAndValue()
+                binary_key_value = BinaryKeyAndValue()
                 entry.message.Unpack(binary_key_value)
                 m = MapEntry(binary_key_value.key, binary_key_value.value)
                 lst.append(m)
@@ -1151,11 +1109,11 @@ class NamedCacheClient_v1(NamedCache[K, V]):
     async def aggregate(
         self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> R:
-        named_cache_request = self._request_factory.aggregate_request(aggregator, keys, filter)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        response = await asyncio.wait_for(self._stream_handler.get_response(request_id), 1.0)
+        response: NamedCacheResponse = await self._dispatch_and_wait(
+            self._request_factory.aggregate_request(aggregator, keys, filter)
+        )
+
+        # TODO is this right?
         if response.HasField("message"):
             value = BytesValue()
             response.message.Unpack(value)
@@ -1182,20 +1140,14 @@ class NamedCacheClient_v1(NamedCache[K, V]):
     ) -> None:
         if extractor is None:
             raise ValueError("A ValueExtractor must be specified")
-        named_cache_request = self._request_factory.add_index_request(extractor, ordered, comparator)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        await asyncio.wait_for(self._stream_handler.get_response(request_id), 1.0)
+
+        await self._dispatch_and_wait(self._request_factory.add_index_request(extractor, ordered, comparator))
 
     async def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
         if extractor is None:
             raise ValueError("A ValueExtractor must be specified")
-        named_cache_request = self._request_factory.remove_index_request(extractor)
-        proxy_request = self._request_factory.create_proxy_request(named_cache_request)
-        request_id = proxy_request.id
-        await self._stream_handler.write_request(proxy_request, request_id, named_cache_request)
-        await asyncio.wait_for(self._stream_handler.get_response(request_id), 1.0)
+
+        await self._dispatch_and_wait(self._request_factory.remove_index_request(extractor))
 
 
 class TlsOptions:
@@ -1795,7 +1747,7 @@ class Session:
             with self._lock:
                 c = self._caches.get(name)
                 if c is None:
-                    c = NamedCacheClient_v1(name, self, serializer)
+                    c = NamedCacheClientV1(name, self, serializer)
                     await c.ensure_cache()
                     # initialize the event stream now to ensure lifecycle listeners will work as expected
                     # await c._events_manager._ensure_stream()
@@ -1838,7 +1790,7 @@ class Session:
             with self._lock:
                 c = self._caches.get(name)
             if c is None:
-                c = NamedCacheClient_v1(name, self, serializer)
+                c = NamedCacheClientV1(name, self, serializer)
                 await c.ensure_cache()
                 # initialize the event stream now to ensure lifecycle listeners will work as expected
                 # await c._events_manager._ensure_stream()
@@ -2310,11 +2262,11 @@ class StreamHandler:
         self._session: Session = session
         self._stream: grpc.aio._call.StreamStreamCall = stream
         self._request_id_to_event_map: dict[int, Event] = dict()
-        self._request_id_request_map: dict[int, cache_service_messages_v1_pb2.NamedCacheRequest] = dict()
+        self._request_id_request_map: dict[int, NamedCacheRequest] = dict()
         self.result_available = Event()
         self.result_available.clear()
-        self.response_result: cache_service_messages_v1_pb2.NamedCacheResponse | None = None
-        self.response_result_collection: list[cache_service_messages_v1_pb2.NamedCacheResponse] = list()
+        self.response_result: NamedCacheResponse | None = None
+        self.response_result_collection: list[NamedCacheResponse] = list()
         self._background_tasks = set()
         task = asyncio.create_task(self.handle_response())
         self._background_tasks.add(task)
@@ -2348,65 +2300,65 @@ class StreamHandler:
             else:
                 if response.HasField("message"):
                     req_type = self._request_id_request_map[response_id].type
-                    if req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.EnsureCache:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    if req_type == NamedCacheRequestType.EnsureCache:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         # COH_LOG.info(f"cache_id: {named_cache_response.cacheId}")
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Put:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.Put:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.PutIfAbsent:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.PutIfAbsent:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Get:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.Get:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.GetAll:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.GetAll:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result_collection.append(named_cache_response)
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Remove:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.Remove:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Replace:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.Replace:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.RemoveMapping:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.RemoveMapping:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ReplaceMapping:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.ReplaceMapping:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ContainsKey:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.ContainsKey:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.ContainsValue:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.ContainsValue:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.IsEmpty:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.IsEmpty:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Size:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.Size:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Invoke:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.Invoke:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result_collection.append(named_cache_response)
-                    elif req_type == cache_service_messages_v1_pb2.NamedCacheRequestType.Aggregate:
-                        named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+                    elif req_type == NamedCacheRequestType.Aggregate:
+                        named_cache_response = NamedCacheResponse()
                         response.message.Unpack(named_cache_response)
                         self.response_result = named_cache_response
                     else:
@@ -2424,7 +2376,7 @@ class StreamHandler:
                     # COH_LOG.info("Complete response received successfully.")
                     self._request_id_to_event_map[response_id].set()
 
-    async def get_response(self, response_id: int) -> cache_service_messages_v1_pb2.NamedCacheResponse:
+    async def get_response(self, response_id: int) -> NamedCacheResponse:
         await self._request_id_to_event_map[response_id].wait()
         result = self.response_result
         self.response_result = None
@@ -2433,7 +2385,7 @@ class StreamHandler:
         self._request_id_request_map.pop(response_id)
         return result
 
-    async def get_response_collection(self, response_id: int) -> list[cache_service_messages_v1_pb2.NamedCacheResponse]:
+    async def get_response_collection(self, response_id: int) -> list[NamedCacheResponse]:
         await self._request_id_to_event_map[response_id].wait()
         result = self.response_result_collection
         self.response_result_collection = list()
@@ -2446,7 +2398,7 @@ class StreamHandler:
         self,
         proxy_request: proxy_service_messages_v1_pb2.ProxyRequest,
         request_id: int,
-        request: cache_service_messages_v1_pb2.NamedCacheRequest,
+        request: NamedCacheRequest,
     ) -> None:
         self._request_id_to_event_map[request_id] = Event()
         self._request_id_to_event_map[request_id].clear()
@@ -2455,25 +2407,25 @@ class StreamHandler:
 
     def handle_zero_id_response(self, response) -> None:
         if response.HasField("message"):
-            named_cache_response = cache_service_messages_v1_pb2.NamedCacheResponse()
+            named_cache_response = NamedCacheResponse()
             response.message.Unpack(named_cache_response)
             type = named_cache_response.type
             # cache_id = named_cache_response.cacheId
-            if type == cache_service_messages_v1_pb2.ResponseType.Message:
+            if type == ResponseType.Message:
                 pass
-            elif type == cache_service_messages_v1_pb2.ResponseType.MapEvent:
+            elif type == ResponseType.MapEvent:
                 # Handle MapEvent Response
                 COH_LOG.debug("MapEvent Response type received")
                 response_json = MessageToJson(named_cache_response)
                 COH_LOG.debug(response_json)
                 pass
-            elif type == cache_service_messages_v1_pb2.ResponseType.Destroyed:
+            elif type == ResponseType.Destroyed:
                 # Handle Destroyed Response
                 COH_LOG.debug("Destroyed Response type received")
                 response_json = MessageToJson(named_cache_response)
                 COH_LOG.debug(response_json)
                 pass
-            elif type == cache_service_messages_v1_pb2.ResponseType.Truncated:
+            elif type == ResponseType.Truncated:
                 # Handle Truncated Response
                 COH_LOG.debug("Truncated Response type received")
                 response_json = MessageToJson(named_cache_response)
