@@ -346,8 +346,9 @@ class GroupAggregator(EntryAggregator[R]):
          that is based on an array of corresponding :class:`coherence.extractor.UniversalExtractor` objects; may not be
          `NONE`
 
-        :param aggregator: an EntryAggregator object; may not be null
-        :param filter: an optional Filter object used to filter out results of individual group aggregation results
+        :param aggregator:   an EntryAggregator object; may not be null
+        :param filter: an optional Filter object used to filter out results
+         of individual group aggregation results
         """
         super().__init__(extractor_or_property)
         if aggregator is not None:
@@ -654,8 +655,8 @@ class Aggregators:
 
         :param extractor_or_property: the extractor or method/property name to provide values for aggregation
         :param aggregator: the underlying :class:`coherence.aggregator.EntryAggregator`
-        :param filter: an optional :class:`coherence.filter.Filter` object used to filter out results of individual
-          group aggregation results
+        :param filter: an optional :class:`coherence.filter.Filter` object used to filter out results
+          of individual group aggregation results
         :return: a :class:`coherence.aggregator.GroupAggregator` based on a specified property or method name(s) and an
           :class:`coherence.aggregator.EntryAggregator`.
         """

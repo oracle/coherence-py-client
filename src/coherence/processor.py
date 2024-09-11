@@ -62,8 +62,8 @@ class EntryProcessor(ABC, Generic[R]):
         applied to the entry evaluates to `true`; otherwise the
         result of the invocation will return `None`.
 
-        :param filter: the filter :return: Returns a :class:`coherence.processor.ConditionalProcessor` comprised of
-         this processor and the provided filter.
+        :param filter: the filter :return: Returns a :class:`coherence.processor.ConditionalProcessor` comprised
+         of this processor and the provided filter.
         """
         return ConditionalProcessor(filter, self)
 

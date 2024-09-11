@@ -154,20 +154,24 @@ async def test_session_lifecycle() -> None:
     assert not session.is_ready()
 
 
-@pytest.mark.skip(
-    reason="COH-28062 - Intermittent \
-                GitHub action failure ==> test_wait_for_ready - TimeoutError"
-)
+# @pytest.mark.skip(
+#     reason="COH-28062 - Intermittent \
+#                 GitHub action failure ==> test_wait_for_ready - TimeoutError"
+# )
 @pytest.mark.asyncio
 async def test_wait_for_ready() -> None:
     session: Session = await tests.get_session(10.0)
-    print(f"Session -> {session}")
+
+    print(f"Session (pre-cache) -> {session}")
 
     logging.debug("Getting cache ...")
 
     try:
         count: int = 50
         cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
+
+        print(f"Session (post-cache) -> {session}")
+
         listener: CountingMapListener[str, str] = CountingMapListener("Test")
 
         await _run_pre_shutdown_logic(cache, listener, count)

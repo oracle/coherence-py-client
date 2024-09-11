@@ -32,26 +32,39 @@ from typing import (
 
 # noinspection PyPackageRequirements
 import grpc
-from cache_service_messages_v1_pb2 import NamedCacheRequest, NamedCacheRequestType, NamedCacheResponse, ResponseType
-# import proxy_service_messages_v1_pb2
+from cache_service_messages_v1_pb2 import (
+    MapEventMessage,
+    NamedCacheRequest,
+    NamedCacheRequestType,
+    NamedCacheResponse,
+    ResponseType,
+)
 from google.protobuf.json_format import MessageToJson  # type: ignore
 from google.protobuf.wrappers_pb2 import BoolValue, BytesValue, Int32Value  # type: ignore
-from proxy_service_messages_v1_pb2 import ProxyRequest
+from proxy_service_messages_v1_pb2 import ProxyRequest, ProxyResponse
 from pymitter import EventEmitter
 
-from . import proxy_service_messages_v1_pb2, proxy_service_v1_pb2_grpc
+from . import proxy_service_messages_v1_pb2
 from .aggregator import AverageAggregator, EntryAggregator, PriorityAggregator, SumAggregator
 from .common_messages_v1_pb2 import BinaryKeyAndValue, OptionalValue
 from .comparator import Comparator
-from .event import MapLifecycleEvent, MapListener, SessionLifecycleEvent
+from .event import (
+    MapEvent,
+    MapLifecycleEvent,
+    MapListener,
+    SessionLifecycleEvent,
+    _ListenerGroup,
+    _MapEventsManagerV0,
+    _MapEventsManagerV1,
+)
 from .extractor import ValueExtractor
 from .filter import Filter
 from .messages_pb2 import PageRequest
 from .processor import EntryProcessor
+from .proxy_service_v1_pb2_grpc import ProxyServiceStub
 from .serialization import Serializer, SerializerRegistry
 from .services_pb2_grpc import NamedCacheServiceStub
-from .util import RequestFactory
-from .util_v1 import RequestFactoryV1
+from .util import RequestFactory, RequestFactoryV1
 
 E = TypeVar("E")
 K = TypeVar("K")
@@ -228,7 +241,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def put(self, key: K, value: V) -> V:
+    async def put(self, key: K, value: V) -> Optional[V]:
         """
         Associates the specified value with the specified key in this map. If the
         map previously contained a mapping for this key, the old value is replaced.
@@ -242,7 +255,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def put_if_absent(self, key: K, value: V) -> V:
+    async def put_if_absent(self, key: K, value: V) -> Optional[V]:
         """
         If the specified key is not already associated with a value (or is mapped to `None`) associates
         it with the given value and returns `None`, else returns the current value.
@@ -298,7 +311,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def remove(self, key: K) -> V:
+    async def remove(self, key: K) -> Optional[V]:
         """
         Removes the mapping for a key from this map if it is present.
 
@@ -317,7 +330,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def replace(self, key: K, value: V) -> V:
+    async def replace(self, key: K, value: V) -> Optional[V]:
         """
         Replaces the entry for the specified key only if currently mapped to the specified value.
 
@@ -374,7 +387,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def invoke(self, key: K, processor: EntryProcessor[R]) -> R:
+    async def invoke(self, key: K, processor: EntryProcessor[R]) -> Optional[R]:
         """
         Invoke the passed EntryProcessor against the Entry specified by the
         passed key, returning the result of the invocation.
@@ -411,7 +424,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
     @abc.abstractmethod
     async def aggregate(
         self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
-    ) -> R:
+    ) -> Optional[R]:
         """
         Perform an aggregating operation against the entries specified by the passed keys.
 
@@ -428,7 +441,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
         Return a Set of the values contained in this map that satisfy the criteria expressed by the filter.
         If no filter or comparator is specified, it returns a Set view of the values contained in this map.The
-        collection is backed by the map, so changes to the map are reflected in the collection, and vice-versa. If
+        collection is backed by the map, so changes to the map are reflected in the collection, and vice versa. If
         the map is modified while an iteration over the collection is in progress (except through the iterator's own
         `remove` operation), the results of the iteration are undefined.
 
@@ -509,7 +522,7 @@ class NamedCache(NamedMap[K, V]):
     """
 
     @abc.abstractmethod
-    async def put(self, key: K, value: V, ttl: int = 0) -> V:
+    async def put(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
         """
         Associates the specified value with the specified key in this map. If the map previously contained a mapping
         for this key, the old value is replaced.
@@ -524,7 +537,7 @@ class NamedCache(NamedMap[K, V]):
         """
 
     @abc.abstractmethod
-    async def put_if_absent(self, key: K, value: V, ttl: int = 0) -> V:
+    async def put_if_absent(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
         """
         If the specified key is not already associated with a value (or is mapped to null) associates it with the
         given value and returns `None`, else returns the current value.
@@ -550,11 +563,10 @@ class NamedCacheClient(NamedCache[K, V]):
         self._destroyed: bool = False
         self._released: bool = False
         self._session: Session = session
-        from .event import _MapEventsManager
 
         self._setup_event_handlers()
 
-        self._events_manager: _MapEventsManager[K, V] = _MapEventsManager(
+        self._events_manager: _MapEventsManagerV0[K, V] = _MapEventsManagerV0(
             self, session, self._client_stub, serializer, self._internal_emitter
         )
 
@@ -599,13 +611,13 @@ class NamedCacheClient(NamedCache[K, V]):
         return _Stream(self._request_factory.get_serializer(), stream, _entry_producer)
 
     @_pre_call_cache
-    async def put(self, key: K, value: V, ttl: int = 0) -> V:
+    async def put(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
         p = self._request_factory.put_request(key, value, ttl)
         v = await self._client_stub.put(p)
         return self._request_factory.get_serializer().deserialize(v.value)
 
     @_pre_call_cache
-    async def put_if_absent(self, key: K, value: V, ttl: int = 0) -> V:
+    async def put_if_absent(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
         p = self._request_factory.put_if_absent_request(key, value, ttl)
         v = await self._client_stub.putIfAbsent(p)
         return self._request_factory.get_serializer().deserialize(v.value)
@@ -639,7 +651,7 @@ class NamedCacheClient(NamedCache[K, V]):
         await self._client_stub.truncate(r)
 
     @_pre_call_cache
-    async def remove(self, key: K) -> V:
+    async def remove(self, key: K) -> Optional[V]:
         r = self._request_factory.remove_request(key)
         v = await self._client_stub.remove(r)
         return self._request_factory.get_serializer().deserialize(v.value)
@@ -651,7 +663,7 @@ class NamedCacheClient(NamedCache[K, V]):
         return self._request_factory.get_serializer().deserialize(v.value)
 
     @_pre_call_cache
-    async def replace(self, key: K, value: V) -> V:
+    async def replace(self, key: K, value: V) -> Optional[V]:
         r = self._request_factory.replace_request(key, value)
         v = await self._client_stub.replace(r)
         return self._request_factory.get_serializer().deserialize(v.value)
@@ -687,7 +699,7 @@ class NamedCacheClient(NamedCache[K, V]):
         return self._request_factory.get_serializer().deserialize(v.value)
 
     @_pre_call_cache
-    async def invoke(self, key: K, processor: EntryProcessor[R]) -> R:
+    async def invoke(self, key: K, processor: EntryProcessor[R]) -> Optional[R]:
         r = self._request_factory.invoke_request(key, processor)
         v = await self._client_stub.invoke(r)
         return self._request_factory.get_serializer().deserialize(v.value)
@@ -704,7 +716,7 @@ class NamedCacheClient(NamedCache[K, V]):
     @_pre_call_cache
     async def aggregate(
         self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
-    ) -> R:
+    ) -> Optional[R]:
         r = self._request_factory.aggregate_request(aggregator, keys, filter)
         results = await self._client_stub.aggregate(r)
         value: Any = self._request_factory.get_serializer().deserialize(results.value)
@@ -843,25 +855,27 @@ class NamedCacheClientV1(NamedCache[K, V]):
         self._cache_name: str = cache_name
         self._cache_id: int = 0
         self._serializer: Serializer = serializer
-        self._client_stub: proxy_service_v1_pb2_grpc.ProxyServiceStub = session._v1_init_response_details.get("stub")
-        self._client_stream: grpc.aio._call.StreamStreamCall = session._v1_init_response_details.get("stream")
+        self._client_stub: ProxyServiceStub = cast(ProxyServiceStub, session._v1_init_response_details.get("stub"))
+        self._client_stream: grpc.aio._call.StreamStreamCall = cast(
+            grpc.aio._call.StreamStreamCall, session._v1_init_response_details.get("stream")
+        )
         self._request_factory: RequestFactoryV1 = RequestFactoryV1(
             cache_name, self._cache_id, session.scope, serializer
         )
-        # self._emitter: EventEmitter = EventEmitter()
-        # self._internal_emitter: EventEmitter = EventEmitter()
+        self._emitter: EventEmitter = EventEmitter()
+        self._internal_emitter: EventEmitter = EventEmitter()
         self._destroyed: bool = False
         self._released: bool = False
         self._session: Session = session
-        self._stream_handler: StreamHandler = StreamHandler.get_stream_handler(self._session, self._client_stream)
+        self._stream_handler: StreamHandler = StreamHandler.get_stream_handler(self, self._session, self._client_stream)
         # asyncio.create_task(self._stream_handler.handle_response())
         # from .event import _MapEventsManager
 
-        # self._setup_event_handlers()
+        self._setup_event_handlers()
 
-        # self._events_manager: _MapEventsManager[K, V] = _MapEventsManager(
-        #     self, session, self._client_stub, serializer, self._internal_emitter
-        # )
+        self._events_manager: _MapEventsManagerV1[K, V] = _MapEventsManagerV1(
+            self, session, serializer, self._internal_emitter, self._request_factory
+        )
 
     async def _dispatch_and_wait(self, request: NamedCacheRequest) -> Any:
         proxy_request: ProxyRequest = self._request_factory.create_proxy_request(request)
@@ -869,6 +883,37 @@ class NamedCacheClientV1(NamedCache[K, V]):
         await self._stream_handler.write_request(proxy_request, request_id, request)
         # TODO: use timeout from configuration
         return await asyncio.wait_for(self._stream_handler.get_response(request_id), 10.0)
+
+    def _setup_event_handlers(self) -> None:
+        """
+        Setup handlers to notify cache-level handlers of events.
+        """
+        emitter: EventEmitter = self._emitter
+        internal_emitter: EventEmitter = self._internal_emitter
+        this: NamedCacheClientV1[K, V] = self
+        cache_name = self._cache_name
+
+        # noinspection PyProtectedMember
+        def on_destroyed(name: str) -> None:
+            if name == cache_name and not this.destroyed:
+                this._events_manager._close()
+                this._destroyed = True
+                emitter.emit(MapLifecycleEvent.DESTROYED.value, name)
+
+        # noinspection PyProtectedMember
+        def on_released(name: str) -> None:
+            if name == cache_name and not this.released:
+                this._events_manager._close()
+                this._released = True
+                emitter.emit(MapLifecycleEvent.RELEASED.value, name)
+
+        def on_truncated(name: str) -> None:
+            if name == cache_name:
+                emitter.emit(MapLifecycleEvent.TRUNCATED.value, name)
+
+        internal_emitter.on(MapLifecycleEvent.DESTROYED.value, on_destroyed)
+        internal_emitter.on(MapLifecycleEvent.RELEASED.value, on_released)
+        internal_emitter.on(MapLifecycleEvent.TRUNCATED.value, on_truncated)
 
     @property
     def cache_id(self) -> int:
@@ -878,6 +923,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
     def cache_id(self, cache_id: int) -> None:
         self._cache_id = cache_id
 
+    @_pre_call_cache
     async def ensure_cache(self) -> None:
         response: NamedCacheResponse = await self._dispatch_and_wait(
             self._request_factory.ensure_request(self._cache_name)
@@ -887,6 +933,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
         self._session.update_cache_id_map(self.cache_id, self)
         self._request_factory.cache_id = response.cacheId
 
+    @_pre_call_cache
     async def get(self, key: K) -> Optional[V]:
         response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.get_request(key))
 
@@ -900,21 +947,23 @@ class NamedCacheClientV1(NamedCache[K, V]):
         else:
             return None
 
-    async def put(self, key: K, value: V, ttl: int = 0) -> V:
+    @_pre_call_cache
+    async def put(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
         response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.put_request(key, value, ttl))
 
         if response is None:
             return None
         else:
             if response.HasField("message"):
-                value = BytesValue()
-                response.message.Unpack(value)
-                result: V = self._serializer.deserialize(value.value)
+                bytes_value = BytesValue()
+                response.message.Unpack(bytes_value)
+                result: V = self._serializer.deserialize(bytes_value.value)
                 return result
             else:
                 return None
 
-    async def put_if_absent(self, key: K, value: V, ttl: int = 0) -> V:
+    @_pre_call_cache
+    async def put_if_absent(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
         response: NamedCacheResponse = await self._dispatch_and_wait(
             self._request_factory.put_if_absent_request(key, value, ttl)
         )
@@ -923,9 +972,9 @@ class NamedCacheClientV1(NamedCache[K, V]):
             return None
         else:
             if response.HasField("message"):
-                value = BytesValue()
-                response.message.Unpack(value)
-                result: V = self._serializer.deserialize(value.value)
+                bytes_value = BytesValue()
+                response.message.Unpack(bytes_value)
+                result: V = self._serializer.deserialize(bytes_value.value)
                 return result
             else:
                 return None
@@ -939,20 +988,37 @@ class NamedCacheClientV1(NamedCache[K, V]):
 
     @property
     def destroyed(self) -> bool:
-        pass
+        return False  # TODO
 
     @property
     def released(self) -> bool:
-        pass
+        return False  # TODO
 
+    # noinspection PyProtectedMember
+    @_pre_call_cache
     async def add_map_listener(
         self, listener: MapListener[K, V], listener_for: Optional[K | Filter] = None, lite: bool = False
     ) -> None:
-        pass
+        if listener is None:
+            raise ValueError("A MapListener must be specified")
 
+        if listener_for is None or isinstance(listener_for, Filter):
+            await self._events_manager._register_filter_listener(listener, listener_for, lite)
+        else:
+            await self._events_manager._register_key_listener(listener, listener_for, lite)
+
+    # noinspection PyProtectedMember
+    @_pre_call_cache
     async def remove_map_listener(self, listener: MapListener[K, V], listener_for: Optional[K | Filter] = None) -> None:
-        pass
+        if listener is None:
+            raise ValueError("A MapListener must be specified")
 
+        if listener_for is None or isinstance(listener_for, Filter):
+            await self._events_manager._remove_filter_listener(listener, listener_for)
+        else:
+            await self._events_manager._remove_key_listener(listener, listener_for)
+
+    @_pre_call_cache
     async def get_or_default(self, key: K, default_value: Optional[V] = None) -> Optional[V]:
         v: Optional[V] = await self.get(key)
         if v is not None:
@@ -960,6 +1026,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
         else:
             return default_value
 
+    @_pre_call_cache
     async def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
         response: List[NamedCacheResponse] = await self._dispatch_and_wait(self._request_factory.get_all_request(keys))
 
@@ -970,58 +1037,66 @@ class NamedCacheClientV1(NamedCache[K, V]):
                 entry.message.Unpack(binary_key_value)
                 m = MapEntry(binary_key_value.key, binary_key_value.value)
                 lst.append(m)
-        return _ListAsyncIterator(self._serializer, lst, _entry_producer_from_list)
+        return _ListAsyncIterator(self._serializer, lst, _entry_producer_from_list)  # type: ignore
 
+    @_pre_call_cache
     async def put_all(self, kv_map: dict[K, V], ttl: Optional[int] = 0) -> None:
         await self._dispatch_and_wait(self._request_factory.put_all_request(kv_map, ttl))
 
+    @_pre_call_cache
     async def clear(self) -> None:
         await self._dispatch_and_wait(self._request_factory.clear_request())
 
     async def destroy(self) -> None:
         await self._dispatch_and_wait(self._request_factory.destroy_request())
 
+    @_pre_call_cache
     def release(self) -> None:
         # TODO
         pass
 
+    @_pre_call_cache
     async def truncate(self) -> None:
         await self._dispatch_and_wait(self._request_factory.truncate_request())
 
-    async def remove(self, key: K) -> V:
+    @_pre_call_cache
+    async def remove(self, key: K) -> Optional[V]:
         response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.remove_request(key))
 
         if response.HasField("message"):
             value = BytesValue()
             response.message.Unpack(value)
-            result = self._serializer.deserialize(value.value)
+            result: V = self._serializer.deserialize(value.value)
             return result
         else:
             return None
 
+    @_pre_call_cache
     async def remove_mapping(self, key: K, value: V) -> bool:
         response: NamedCacheResponse = await self._dispatch_and_wait(
             self._request_factory.remove_mapping_request(key, value)
         )
 
         if response.HasField("message"):
-            value = BoolValue()
-            response.message.Unpack(value)
-            return value.value
+            bool_value = BoolValue()
+            response.message.Unpack(bool_value)
+            return bool_value.value
         else:
             return False
 
-    async def replace(self, key: K, value: V) -> V:
+    @_pre_call_cache
+    async def replace(self, key: K, value: V) -> Optional[V]:
         response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.replace_request(key, value))
 
         if response.HasField("message"):
-            value = BytesValue()
-            response.message.Unpack(value)
-            result = self._serializer.deserialize(value.value)
+            bytes_value = BytesValue()
+            response.message.Unpack(bytes_value)
+            result: V = self._serializer.deserialize(bytes_value.value)
             return result
         else:
             return None
 
+    @_pre_call_cache
     async def replace_mapping(self, key: K, old_value: V, new_value: V) -> bool:
         response: NamedCacheResponse = await self._dispatch_and_wait(
             self._request_factory.replace_mapping_request(key, old_value, new_value)
@@ -1034,6 +1109,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
         else:
             return False
 
+    @_pre_call_cache
     async def contains_key(self, key: K) -> bool:
         response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.contains_key_request(key))
 
@@ -1044,18 +1120,20 @@ class NamedCacheClientV1(NamedCache[K, V]):
         else:
             return False
 
+    @_pre_call_cache
     async def contains_value(self, value: V) -> bool:
         response: NamedCacheResponse = await self._dispatch_and_wait(
             self._request_factory.contains_value_request(value)
         )
 
         if response.HasField("message"):
-            value = BoolValue()
+            bool_value = BoolValue()
             response.message.Unpack(value)
-            return value.value
+            return bool_value.value
         else:
             return False
 
+    @_pre_call_cache
     async def is_empty(self) -> bool:
         response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.is_empty_request())
 
@@ -1066,6 +1144,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
         else:
             return False
 
+    @_pre_call_cache
     async def size(self) -> int:
         response: NamedCacheResponse = await self._dispatch_and_wait(self._request_factory.size_request())
 
@@ -1076,7 +1155,8 @@ class NamedCacheClientV1(NamedCache[K, V]):
         else:
             return 0
 
-    async def invoke(self, key: K, processor: EntryProcessor[R]) -> R:
+    @_pre_call_cache
+    async def invoke(self, key: K, processor: EntryProcessor[R]) -> Optional[R]:
         response: List[NamedCacheResponse] = await self._dispatch_and_wait(
             self._request_factory.invoke_request(key, processor)
         )
@@ -1089,7 +1169,10 @@ class NamedCacheClientV1(NamedCache[K, V]):
                 binary_key_value = BinaryKeyAndValue()
                 entry.message.Unpack(binary_key_value)
                 return self._serializer.deserialize(binary_key_value.value)
+            else:
+                return None
 
+    @_pre_call_cache
     async def invoke_all(
         self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> AsyncIterator[MapEntry[K, R]]:
@@ -1104,11 +1187,12 @@ class NamedCacheClientV1(NamedCache[K, V]):
                 entry.message.Unpack(binary_key_value)
                 m = MapEntry(binary_key_value.key, binary_key_value.value)
                 lst.append(m)
-        return _ListAsyncIterator(self._serializer, lst, _entry_producer_from_list)
+        return _ListAsyncIterator(self._serializer, lst, _entry_producer_from_list)  # type: ignore
 
+    @_pre_call_cache
     async def aggregate(
         self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
-    ) -> R:
+    ) -> Optional[R]:
         response: NamedCacheResponse = await self._dispatch_and_wait(
             self._request_factory.aggregate_request(aggregator, keys, filter)
         )
@@ -1117,24 +1201,31 @@ class NamedCacheClientV1(NamedCache[K, V]):
         if response.HasField("message"):
             value = BytesValue()
             response.message.Unpack(value)
-            result = self._serializer.deserialize(value.value)
+            result: R = self._serializer.deserialize(value.value)
             return result
         else:
             return None
 
+    # TODO
+    @_pre_call_cache
     def values(
         self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False
     ) -> AsyncIterator[V]:
-        pass
+        return None  # type: ignore
 
+    # TODO
+    @_pre_call_cache
     def keys(self, filter: Optional[Filter] = None, by_page: bool = False) -> AsyncIterator[K]:
-        pass
+        return None  # type: ignore
 
+    # TODO
+    @_pre_call_cache
     def entries(
         self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False
     ) -> AsyncIterator[MapEntry[K, V]]:
-        pass
+        return None  # type: ignore
 
+    @_pre_call_cache
     async def add_index(
         self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
     ) -> None:
@@ -1143,6 +1234,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
 
         await self._dispatch_and_wait(self._request_factory.add_index_request(extractor, ordered, comparator))
 
+    @_pre_call_cache
     async def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
         if extractor is None:
             raise ValueError("A ValueExtractor must be specified")
@@ -1569,6 +1661,8 @@ class Session:
         else:
             self._session_options = Options()
 
+        self._protocol_version: int | str = "unknown"
+
         self._ready_timeout_seconds: float = self._session_options.ready_timeout_seconds
         self._ready_enabled: bool = self._ready_timeout_seconds > 0
 
@@ -1592,7 +1686,7 @@ class Session:
         ]
 
         self._is_server_grpc_v1 = False
-        self._v1_init_response_details = None
+        self._v1_init_response_details: dict[str, Any] = dict()
 
         if self._session_options.tls_options is None:
             self._channel: grpc.aio.Channel = grpc.aio.insecure_channel(
@@ -1706,7 +1800,7 @@ class Session:
     def __str__(self) -> str:
         return (
             f"Session(id={self.session_id}, closed={self.closed}, state={self._channel.get_state(False)},"
-            f" caches/maps={len(self._caches)}, options={self.options})"
+            f" caches/maps={len(self._caches)}, protocol-version={self._protocol_version} options={self.options})"
         )
 
     def update_cache_id_map(self, cache_id: int, cache: NamedCache[K, V]) -> None:
@@ -1727,11 +1821,11 @@ class Session:
         if not Session._initialized:
             check_result = await self._check_server_grpc_version_is_v1()
             Session._initialized = True
-            if check_result is None:  # Server is running grpc v0
+            if len(check_result) == 0:  # Server is running grpc v0
                 self._is_server_grpc_v1 = False
             else:  # Server is running grpc v1
                 self._is_server_grpc_v1 = True
-                self._v1_init_response_details = check_result
+                self._v1_init_response_details = {**self._v1_init_response_details, **check_result}
 
         if not self._is_server_grpc_v1:
             with self._lock:
@@ -1770,11 +1864,11 @@ class Session:
         if not Session._initialized:
             check_result = await self._check_server_grpc_version_is_v1()
             Session._initialized = True
-            if check_result is None:  # Server is running grpc v0
+            if len(check_result) == 0:  # Server is running grpc v0
                 self._is_server_grpc_v1 = False
             else:  # Server is running grpc v1
                 self._is_server_grpc_v1 = True
-                self._v1_init_response_details = check_result
+                self._v1_init_response_details = {**self._v1_init_response_details, **check_result}
 
         if not self._is_server_grpc_v1:
             with self._lock:
@@ -1867,8 +1961,8 @@ class Session:
         client.on(MapLifecycleEvent.DESTROYED, on_destroyed)
         client.on(MapLifecycleEvent.RELEASED, on_released)
 
-    async def _check_server_grpc_version_is_v1(self) -> object:
-        stub = proxy_service_v1_pb2_grpc.ProxyServiceStub(self._channel)
+    async def _check_server_grpc_version_is_v1(self) -> dict[str, Any]:
+        stub = ProxyServiceStub(self._channel)
         stream = stub.subChannel()
         results: dict[str, Any] = dict()
         results["stub"] = stub
@@ -1877,11 +1971,13 @@ class Session:
         try:
             response = await self._send_init_request(stream)
             results["init_response"] = response
+            self._protocol_version = 1
             return results
         except grpc.aio._call.AioRpcError:
-            return None
+            self._protocol_version = 0
+            return dict()
 
-    async def _send_init_request(self, stream) -> object:
+    async def _send_init_request(self, stream) -> object:  # type: ignore
         # InitRequest
         init_request = proxy_service_messages_v1_pb2.ProxyRequest(
             id=2,
@@ -2222,11 +2318,10 @@ async def _entry_producer(serializer: Serializer, stream: grpc.Channel.unary_str
     raise StopAsyncIteration
 
 
-async def _entry_producer_from_list(serializer: Serializer, the_list: list[Any]) -> MapEntry[K, V]:
+async def _entry_producer_from_list(serializer: Serializer, the_list: list[Any]) -> MapEntry[K, V]:  # type: ignore
     if len(the_list) == 0:
         raise StopAsyncIteration
     for item in the_list:
-        await asyncio.sleep(0)
         the_list.pop(0)
         return _entry_deserializer(serializer, item)
 
@@ -2258,7 +2353,8 @@ class _ListAsyncIterator(abc.ABC, AsyncIterator[T]):
 class StreamHandler:
     theStreamHandler = None
 
-    def __init__(self, session: Session, stream: grpc.aio._call.StreamStreamCall):
+    def __init__(self, client: NamedCacheClientV1[K, V], session: Session, stream: grpc.aio._call.StreamStreamCall):
+        self._client: NamedCacheClientV1[K, V] = client
         self._session: Session = session
         self._stream: grpc.aio._call.StreamStreamCall = stream
         self._request_id_to_event_map: dict[int, Event] = dict()
@@ -2281,9 +2377,11 @@ class StreamHandler:
         return self._stream
 
     @classmethod
-    def get_stream_handler(cls, session: Session, stream: grpc.aio._call.StreamStreamCall) -> StreamHandler:
+    def get_stream_handler(
+        cls, client: NamedCacheClientV1[K, V], session: Session, stream: grpc.aio._call.StreamStreamCall
+    ) -> StreamHandler:
         if cls.theStreamHandler is None:
-            cls.theStreamHandler = StreamHandler(session, stream)
+            cls.theStreamHandler = StreamHandler(client, session, stream)
             return cls.theStreamHandler
         else:
             return cls.theStreamHandler
@@ -2405,7 +2503,8 @@ class StreamHandler:
         self._request_id_request_map[request_id] = request
         await self._stream.write(proxy_request)
 
-    def handle_zero_id_response(self, response) -> None:
+    # noinspection PyUnresolvedReferences
+    def handle_zero_id_response(self, response: ProxyResponse) -> None:
         if response.HasField("message"):
             named_cache_response = NamedCacheResponse()
             response.message.Unpack(named_cache_response)
@@ -2418,7 +2517,20 @@ class StreamHandler:
                 COH_LOG.debug("MapEvent Response type received")
                 response_json = MessageToJson(named_cache_response)
                 COH_LOG.debug(response_json)
-                pass
+                event_response = MapEventMessage()
+                named_cache_response.message.Unpack(event_response)
+
+                event: MapEvent[Any, Any] = MapEvent(self._client, event_response, self._client._serializer)
+                for _id in event_response.filterIds:
+                    filter_group: Optional[_ListenerGroup[Any, Any, Any]] = (
+                        self._client._events_manager._filter_id_listener_group_map.get(_id, None)
+                    )
+                    if filter_group is not None:
+                        filter_group._notify_listeners(event)
+
+                key_group = self._client._events_manager._key_map.get(event.key, None)
+                if key_group is not None:
+                    key_group._notify_listeners(event)
             elif type == ResponseType.Destroyed:
                 # Handle Destroyed Response
                 COH_LOG.debug("Destroyed Response type received")

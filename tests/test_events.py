@@ -263,11 +263,14 @@ async def _run_basic_test(
     :param filter_mask:  the event mask, if any
     """
     listener: CountingMapListener[str, str] = CountingMapListener("basic")
+    query_filter: MapEventFilter[str, str] = (
+        None if filter_mask is None else MapEventFilter(filter_mask, Filters.always())
+    )
 
-    if filter_mask is None:
+    if query_filter is None:
         await cache.add_map_listener(listener)
     else:
-        await cache.add_map_listener(listener, MapEventFilter(filter_mask, Filters.always()))
+        await cache.add_map_listener(listener, query_filter)
 
     await cache.put("A", "B")
     await cache.put("A", "C")
@@ -279,7 +282,10 @@ async def _run_basic_test(
 
     # remove the listener and trigger some events.  Ensure no events captured.
     listener.reset()
-    await cache.remove_map_listener(listener)
+    if query_filter is None:
+        await cache.remove_map_listener(listener)
+    else:
+        await cache.remove_map_listener(listener, query_filter)
 
     await cache.put("A", "B")
     await cache.put("A", "C")
