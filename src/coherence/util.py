@@ -4,23 +4,30 @@
 
 from __future__ import annotations
 
+import asyncio
 import sys
 import threading
 import time
-from typing import Any, Optional, Tuple, TypeVar
+
+from abc import ABC, abstractmethod
+from asyncio import Event
+from typing import Any, Optional, Tuple, TypeVar, Generic, AsyncIterator
 
 from google.protobuf.any_pb2 import Any as GrpcAny  # type: ignore
-from google.protobuf.wrappers_pb2 import BytesValue  # type: ignore
+from google.protobuf.wrappers_pb2 import BytesValue, Int32Value, \
+    BoolValue  # type: ignore
 
 from .aggregator import EntryAggregator
-from .cache_service_messages_v1_pb2 import EnsureCacheRequest, ExecuteRequest, IndexRequest, KeyOrFilter, KeysOrFilter
+from .cache_service_messages_v1_pb2 import EnsureCacheRequest, ExecuteRequest, \
+    IndexRequest, KeyOrFilter, KeysOrFilter, NamedCacheResponse
 from .cache_service_messages_v1_pb2 import MapListenerRequest as V1MapListenerRequest
 from .cache_service_messages_v1_pb2 import NamedCacheRequest, NamedCacheRequestType
 from .cache_service_messages_v1_pb2 import PutAllRequest as V1PutAllRequest
 from .cache_service_messages_v1_pb2 import PutRequest as V1PutRequest
 from .cache_service_messages_v1_pb2 import QueryRequest
 from .cache_service_messages_v1_pb2 import ReplaceMappingRequest as V1ReplaceMappingRequest
-from .common_messages_v1_pb2 import BinaryKeyAndValue, CollectionOfBytesValues
+from .common_messages_v1_pb2 import BinaryKeyAndValue, CollectionOfBytesValues, \
+    OptionalValue
 from .comparator import Comparator
 from .extractor import ValueExtractor
 from .filter import Filter, Filters, MapEventFilter
@@ -62,6 +69,187 @@ K = TypeVar("K")
 R = TypeVar("R")
 T = TypeVar("T")
 V = TypeVar("V")
+
+class Error:
+
+    def __init__(self, message: str):
+        super().__init__()
+        self._message: str = message
+
+    @property
+    def message(self) -> str:
+        return self._message
+
+
+class Dispatcher(ABC):
+    @abstractmethod
+    async def dispatch(self, stream_handler: Any) -> None:
+        pass
+
+
+class ResponseTransformer(ABC, Generic[T]):
+    @abstractmethod
+    def transform(self, response: NamedCacheResponse) -> Optional[T]:
+        ...
+
+
+class ScalarResultProducer(ABC, Generic[T]):
+    @abstractmethod
+    def result(self) -> Optional[T]:
+        pass
+
+
+class OptionalValueTransformer(ResponseTransformer[T]):
+    def __init__(self, serializer: Serializer):
+        self._serializer: Serializer = serializer
+
+    def transform(self, response: NamedCacheResponse) -> Optional[T]:
+        if response.HasField("message"):
+            optional_value = OptionalValue()
+            response.message.Unpack(optional_value)
+            if optional_value.present:
+                return self._serializer.deserialize(optional_value.value)
+            else:
+                return None
+        else:
+            return None
+
+class IntValueTransformer(ResponseTransformer[int]):
+    def __init__(self, serializer: Serializer):
+        self._serializer: Serializer = serializer
+
+    def transform(self, response: NamedCacheResponse) -> Optional[T]:
+        if response.HasField("message"):
+            value = Int32Value()
+            response.message.Unpack(value)
+            return value.value
+        else:
+            return 0
+
+class BoolValueTransformer(ResponseTransformer[bool]):
+    def __init__(self, serializer: Serializer):
+        self._serializer: Serializer = serializer
+
+    def transform(self, response: NamedCacheResponse) -> Optional[T]:
+        if response.HasField("message"):
+            bool_value = BoolValue()
+            response.message.Unpack(bool_value)
+            return bool_value.value
+        else:
+            return False
+
+
+class BytesValueTransformer(ResponseTransformer[bool]):
+    def __init__(self, serializer: Serializer):
+        self._serializer: Serializer = serializer
+
+    def transform(self, response: NamedCacheResponse) -> Optional[T]:
+        if response.HasField("message"):
+            bytes_value = BytesValue()
+            response.message.Unpack(bytes_value)
+            result: V = self._serializer.deserialize(bytes_value.value)
+            return result
+        else:
+            return None
+
+
+class CacheIdTransformer(ResponseTransformer[int]):
+
+    def transform(self, response: NamedCacheResponse) -> Optional[T]:
+        return response.cacheId
+
+
+class ResponseObserver(ABC):
+    def __init__(self, request: ProxyRequest):
+        if request is None:
+            raise ValueError("Request cannot be None")
+
+        self._request: ProxyRequest = request
+        self._waiter: Event = Event()
+        self._complete: bool = False
+        self._error: Optional[Error] = None
+
+    @abstractmethod
+    def _next(self, response: NamedCacheResponse) -> None:
+        pass
+
+    def _err(self, error: Error) -> None:
+        self._error = error
+        self._done()
+
+    def _done(self) -> None:
+        self._complete = True
+        self._waiter.set()
+
+    @property
+    def id(self) -> int:
+        return self._request.id
+
+
+class UnaryDispatcher(ResponseObserver, Dispatcher, ScalarResultProducer[T]):
+    def __init__(self, request: ProxyRequest, transformer: Optional[ResponseTransformer[T]] = None):
+        super().__init__(request)
+        self._waiter = Event()
+        self._transformer = transformer
+        self._result: Optional[T]
+        self._complete: bool = False
+
+    def _next(self, response: NamedCacheResponse) -> None:
+        if self._complete is True:
+            return
+
+        self._result = self._transformer.transform(response)
+
+    async def dispatch(self, stream_handler: Any) -> None:
+        assert self._complete is False
+
+        stream_handler.register_observer(self)
+        await stream_handler.send_proxy_request(self._request)
+
+        await asyncio.wait_for(self._waiter.wait(), 10.0)
+
+        if self._error is not None:
+            raise RuntimeError(self._error.message)
+
+    def result(self) -> Optional[T] | Error:
+        return self._result
+
+
+class StreamingDispatcher(ResponseObserver, Dispatcher, AsyncIterator[T]):
+    def __init__(self, request: ProxyRequest, transformer: ResponseTransformer[T]):
+        super().__init__(request)
+        self._transformer = transformer
+
+    def _next(self, response: NamedCacheResponse) -> None:
+        if self._complete is True:
+            return
+
+        self._result: T = self._transformer.transform(response)
+        self._waiter.set()
+
+    async def dispatch(self, stream_handler: Any) -> None:
+        assert self._complete is False
+
+        stream_handler.register_observer(self)
+        await stream_handler.send_proxy_request(self._request)
+
+        # await asyncio.wait_for(self._waiter.wait(), 10.0)
+        #
+        # if self._error is not None:
+        #     raise RuntimeError(self._error.message)
+
+
+    def __aiter__(self) -> AsyncIterator[T]:
+        return self
+
+    async def __anext__(self):
+        await self._waiter.wait()
+        if self._error is not None:
+            raise RuntimeError(self._error.message)
+        elif self._complete is True:
+            raise StopAsyncIteration
+        else:
+            yield self._result
 
 
 class RequestFactory:
@@ -434,9 +622,6 @@ class RequestFactoryV1:
         self._cache_id: int = cache_id
         self._scope: str = scope
         self._serializer: Serializer = serializer
-        # self.__uidPrefix: str = "-" + cache_name + "-" + str(time.time_ns())
-        # self.__next_request_id: int = 0
-        # self.__next_filter_id: int = 0
 
     @property
     def cache_id(self) -> int:
@@ -459,8 +644,7 @@ class RequestFactoryV1:
             message=any_cache_request,
         )
 
-    @staticmethod
-    def create_proxy_request(named_cache_request: NamedCacheRequest) -> ProxyRequest:
+    def create_proxy_request(self, named_cache_request: NamedCacheRequest) -> ProxyRequest:
         any_named_cache_request = GrpcAny()
         any_named_cache_request.Pack(named_cache_request)
         req_id = RequestIdGenerator.next()
@@ -470,8 +654,7 @@ class RequestFactoryV1:
         )
         return proxy_request
 
-    @staticmethod
-    def ensure_request(cache_name: str) -> NamedCacheRequest:
+    def ensure_request(self, cache_name: str) -> UnaryDispatcher[int]:
         cache_request = EnsureCacheRequest(cache=cache_name)
 
         any_cache_request = GrpcAny()
@@ -481,10 +664,10 @@ class RequestFactoryV1:
             type=NamedCacheRequestType.EnsureCache,
             message=any_cache_request,
         )
-        return named_cache_request
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request), CacheIdTransformer())
 
-    def put_request(self, key: K, value: V, ttl: int = 0) -> NamedCacheRequest:
-        return self._create_named_cache_request(
+    def put_request(self, key: K, value: V, ttl: int = 0) -> UnaryDispatcher[V]:
+        request: NamedCacheRequest = self._create_named_cache_request(
             V1PutRequest(
                 key=self._serializer.serialize(key),  # Serialized key
                 value=self._serializer.serialize(value),  # Serialized value
@@ -493,10 +676,14 @@ class RequestFactoryV1:
             NamedCacheRequestType.Put,
         )
 
-    def get_request(self, key: K) -> NamedCacheRequest:
-        return self._create_named_cache_request(
+        return UnaryDispatcher(self.create_proxy_request(request), OptionalValueTransformer(self._serializer))
+
+    def get_request(self, key: K) -> UnaryDispatcher[V]:
+        request: NamedCacheRequest = self._create_named_cache_request(
             BytesValue(value=self._serializer.serialize(key)), NamedCacheRequestType.Get
         )
+
+        return UnaryDispatcher(self.create_proxy_request(request), OptionalValueTransformer(self._serializer))
 
     def get_all_request(self, keys: set[K]) -> NamedCacheRequest:
         if keys is None:
@@ -509,10 +696,9 @@ class RequestFactoryV1:
             NamedCacheRequestType.GetAll,
         )
 
-    def put_if_absent_request(self, key: K, value: V, ttl: int = 0) -> NamedCacheRequest:
-
-        return self._create_named_cache_request(
-            PutRequest(
+    def put_if_absent_request(self, key: K, value: V, ttl: int = 0) -> UnaryDispatcher[V]:
+        request: NamedCacheRequest = self._create_named_cache_request(
+            V1PutRequest(
                 key=self._serializer.serialize(key),  # Serialized key
                 value=self._serializer.serialize(value),  # Serialized value
                 ttl=ttl,
@@ -520,8 +706,10 @@ class RequestFactoryV1:
             NamedCacheRequestType.PutIfAbsent,
         )
 
-    def put_all_request(self, kv_map: dict[K, V], ttl: Optional[int] = 0) -> NamedCacheRequest:
-        return self._create_named_cache_request(
+        return UnaryDispatcher(self.create_proxy_request(request), BytesValueTransformer(self._serializer))
+
+    def put_all_request(self, kv_map: dict[K, V], ttl: Optional[int] = 0) -> Dispatcher:
+        request: NamedCacheRequest = self._create_named_cache_request(
             V1PutAllRequest(
                 entries=list(
                     BinaryKeyAndValue(key=self._serializer.serialize(k), value=self._serializer.serialize(v))
@@ -532,46 +720,55 @@ class RequestFactoryV1:
             NamedCacheRequestType.PutAll,
         )
 
-    def clear_request(self) -> NamedCacheRequest:
+        return UnaryDispatcher(self.create_proxy_request(request))
+
+    def clear_request(self) -> Dispatcher:
         named_cache_request = NamedCacheRequest(
             type=NamedCacheRequestType.Clear,
             cacheId=self.cache_id,
         )
-        return named_cache_request
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request))
 
-    def destroy_request(self) -> NamedCacheRequest:
-        named_cache_request = NamedCacheRequest(
+    def destroy_request(self) -> Dispatcher:
+        named_cache_request: NamedCacheRequest = NamedCacheRequest(
             type=NamedCacheRequestType.Destroy,
             cacheId=self.cache_id,
         )
-        return named_cache_request
 
-    def truncate_request(self) -> NamedCacheRequest:
-        named_cache_request = NamedCacheRequest(
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request))
+
+    def truncate_request(self) -> Dispatcher:
+        named_cache_request: NamedCacheRequest = NamedCacheRequest(
             type=NamedCacheRequestType.Truncate,
             cacheId=self.cache_id,
         )
-        return named_cache_request
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request))
 
-    def remove_request(self, key: K) -> NamedCacheRequest:
-        return self._create_named_cache_request(
+    def remove_request(self, key: K) -> UnaryDispatcher[Optional[V]]:
+        named_cache_request: NamedCacheRequest = self._create_named_cache_request(
             BytesValue(value=self._serializer.serialize(key)), NamedCacheRequestType.Remove
         )
 
-    def remove_mapping_request(self, key: K, value: V) -> NamedCacheRequest:
-        return self._create_named_cache_request(
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request), BytesValueTransformer(self._serializer))
+
+    def remove_mapping_request(self, key: K, value: V) -> UnaryDispatcher[bool]:
+        named_cache_request: NamedCacheRequest = self._create_named_cache_request(
             BinaryKeyAndValue(key=self._serializer.serialize(key), value=self._serializer.serialize(value)),
             NamedCacheRequestType.RemoveMapping,
         )
 
-    def replace_request(self, key: K, value: V) -> NamedCacheRequest:
-        return self._create_named_cache_request(
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request), BoolValueTransformer(self._serializer))
+
+    def replace_request(self, key: K, value: V) -> UnaryDispatcher[Optional[V]]:
+        named_cache_request: NamedCacheRequest = self._create_named_cache_request(
             BinaryKeyAndValue(key=self._serializer.serialize(key), value=self._serializer.serialize(value)),
             NamedCacheRequestType.Replace,
         )
 
-    def replace_mapping_request(self, key: K, old_value: V, new_value: V) -> NamedCacheRequest:
-        return self._create_named_cache_request(
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request), BytesValueTransformer(self._serializer))
+
+    def replace_mapping_request(self, key: K, old_value: V, new_value: V) -> UnaryDispatcher[bool]:
+        named_cache_request: NamedCacheRequest = self._create_named_cache_request(
             V1ReplaceMappingRequest(
                 key=self._serializer.serialize(key),
                 previousValue=self._serializer.serialize(old_value),
@@ -580,29 +777,37 @@ class RequestFactoryV1:
             NamedCacheRequestType.ReplaceMapping,
         )
 
-    def contains_key_request(self, key: K) -> NamedCacheRequest:
-        return self._create_named_cache_request(
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request), BoolValueTransformer(self._serializer))
+
+    def contains_key_request(self, key: K) -> UnaryDispatcher[bool]:
+        named_cache_request = self._create_named_cache_request(
             BytesValue(value=self._serializer.serialize(key)), NamedCacheRequestType.ContainsKey
         )
 
-    def contains_value_request(self, value: V) -> NamedCacheRequest:
-        return self._create_named_cache_request(
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request), BoolValueTransformer(self._serializer))
+
+    def contains_value_request(self, value: V) -> UnaryDispatcher[bool]:
+        named_cache_request = self._create_named_cache_request(
             BytesValue(value=self._serializer.serialize(value)), NamedCacheRequestType.ContainsValue
         )
 
-    def is_empty_request(self) -> NamedCacheRequest:
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request), BoolValueTransformer(self._serializer))
+
+    def is_empty_request(self) -> UnaryDispatcher[bool]:
         named_cache_request = NamedCacheRequest(
             type=NamedCacheRequestType.IsEmpty,
             cacheId=self.cache_id,
         )
-        return named_cache_request
 
-    def size_request(self) -> NamedCacheRequest:
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request), BoolValueTransformer(self._serializer))
+
+    def size_request(self) -> UnaryDispatcher[int]:
         named_cache_request = NamedCacheRequest(
             type=NamedCacheRequestType.Size,
             cacheId=self.cache_id,
         )
-        return named_cache_request
+
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request), IntValueTransformer(self._serializer))
 
     def invoke_request(self, key: K, processor: EntryProcessor[R]) -> NamedCacheRequest:
         return self._create_named_cache_request(
@@ -675,7 +880,7 @@ class RequestFactoryV1:
 
     def values_request(
         self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None
-    ) -> NamedCacheRequest:
+    ) -> StreamingDispatcher[V]:
         if filter is None and comparator is not None:
             raise ValueError("Filter cannot be None")
 
@@ -686,7 +891,10 @@ class RequestFactoryV1:
         else:
             query_request = QueryRequest()
 
-        return self._create_named_cache_request(query_request, NamedCacheRequestType.QueryValues)
+        named_cache_request: NamedCacheRequest = self._create_named_cache_request(query_request, NamedCacheRequestType.QueryValues)
+
+        return StreamingDispatcher(self.create_proxy_request(named_cache_request), IntValueTransformer(self._serializer))
+
 
     def keys_request(self, filter: Optional[Filter] = None) -> NamedCacheRequest:
 
@@ -761,38 +969,28 @@ class RequestFactoryV1:
             listener_request.filterId,
         )
 
-    # def map_event_subscribe(self) -> MapListenerRequest:
-    #     request: MapListenerRequest = MapListenerRequest(
-    #         cache=self._cache_name, scope=self._scope, format=self._serializer.format
-    #     )
-    #     request.uid = self.__generate_next_request_id("init")
-    #     request.subscribe = True
-    #     request.type = MapListenerRequest.RequestType.INIT
-    #
-    #     return request
-    #
-    # def __generate_next_request_id(self, prefix: str) -> str:
-    #     """Generates a prefix map-specific prefix when starting a MapEvent gRPC stream."""
-    #     self.__next_request_id += 1
-    #     return prefix + self.__uidPrefix + str(self.__next_request_id)
-
     def add_index_request(
         self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
-    ) -> NamedCacheRequest:
-        return self._create_named_cache_request(
+    ) -> Dispatcher:
+        named_cache_request: NamedCacheRequest = self._create_named_cache_request(
             IndexRequest(
                 add=True,
                 extractor=self._serializer.serialize(extractor),
                 sorted=ordered,
+                comparator=comparator,
             ),
             NamedCacheRequestType.Index,
         )
 
-    def remove_index_request(self, extractor: ValueExtractor[T, E]) -> NamedCacheRequest:
-        return self._create_named_cache_request(
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request))
+
+    def remove_index_request(self, extractor: ValueExtractor[T, E]) -> Dispatcher:
+        named_cache_request: NamedCacheRequest = self._create_named_cache_request(
             IndexRequest(
                 add=False,
                 extractor=self._serializer.serialize(extractor),
             ),
             NamedCacheRequestType.Index,
         )
+
+        return UnaryDispatcher(self.create_proxy_request(named_cache_request))

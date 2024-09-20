@@ -224,7 +224,7 @@ async def test_values_filtered(setup_and_teardown: NamedCache[str, str]) -> None
     await cache.put(k2, v2)
 
     local_list: List[str] = []
-    async for e in cache.values(Filters.equals("length()", 8)):
+    async for e in await cache.values(Filters.equals("length()", 8)):
         local_list.append(e)
 
     assert len(local_list) == 2
