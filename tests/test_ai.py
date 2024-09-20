@@ -2,7 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
-from coherence.ai import BitVector, ByteVector, FloatVector, DocumentChunk
+from coherence.ai import BitVector, ByteVector, DocumentChunk, FloatVector
 from coherence.serialization import JSONSerializer, SerializerRegistry
 
 s = SerializerRegistry.serializer(JSONSerializer.SER_FORMAT)
@@ -53,22 +53,32 @@ def test_FloatVector_serialization() -> None:
 def test_DocumentChunk_serialization() -> None:
     dc = DocumentChunk("test")
     ser = s.serialize(dc)
-    assert ser == b'\x15{"@class": "ai.DocumentChunk", "dataVersion": 0, "metadata": {"@ordered": true, "entries": []}, "text": "test"}'
+    assert ser == (
+        b'\x15{"@class": "ai.DocumentChunk", "dataVersion": 0, '
+        b'"metadata": {"@ordered": true, "entries": []}, "text": "test"}'
+    )
     o = s.deserialize(ser)
     assert isinstance(o, DocumentChunk)
 
-    d = {"one":"one-value", "two": "two-value"}
-    dc = DocumentChunk("test",d)
+    d = {"one": "one-value", "two": "two-value"}
+    dc = DocumentChunk("test", d)
     ser = s.serialize(dc)
-    assert ser == b'\x15{"@class": "ai.DocumentChunk", "dataVersion": 0, "metadata": {"entries": [{"key": "one", "value": "one-value"}, {"key": "two", "value": "two-value"}]}, "text": "test"}'
+    assert ser == (
+        b'\x15{"@class": "ai.DocumentChunk", "dataVersion": 0, "metadata": {"entries": ['
+        b'{"key": "one", "value": "one-value"}, {"key": "two", "value": "two-value"}]}, '
+        b'"text": "test"}'
+    )
     o = s.deserialize(ser)
     assert isinstance(o, DocumentChunk)
 
     coh_fv = FloatVector([1.0, 2.0, 3.0])
-    d = {"one":"one-value", "two": "two-value"}
-    dc = DocumentChunk("test",d, coh_fv)
+    d = {"one": "one-value", "two": "two-value"}
+    dc = DocumentChunk("test", d, coh_fv)
     ser = s.serialize(dc)
-    assert ser == b'\x15{"@class": "ai.DocumentChunk", "dataVersion": 0, "metadata": {"entries": [{"key": "one", "value": "one-value"}, {"key": "two", "value": "two-value"}]}, "vector": {"@class": "ai.Float32Vector", "array": [1.0, 2.0, 3.0]}, "text": "test"}'
+    assert ser == (
+        b'\x15{"@class": "ai.DocumentChunk", "dataVersion": 0, "metadata": {"entries": ['
+        b'{"key": "one", "value": "one-value"}, {"key": "two", "value": "two-value"}]}, '
+        b'"vector": {"@class": "ai.Float32Vector", "array": [1.0, 2.0, 3.0]}, "text": "test"}'
+    )
     o = s.deserialize(ser)
     assert isinstance(o, DocumentChunk)
-
