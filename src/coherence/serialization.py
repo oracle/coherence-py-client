@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import collections
 from abc import ABC, abstractmethod
 from decimal import Decimal
 from typing import Any, Callable, Dict, Final, Optional, Type, TypeVar, cast
@@ -18,6 +19,7 @@ _BIG_INT_ALIAS: Final[str] = "math.BigInt"
 _META_CLASS: Final[str] = "@class"
 _META_VERSION: Final[str] = "@version"
 _META_ENUM: Final[str] = "enum"
+_META_ORDERED: Final[str] = "@ordered"
 
 _JSON_KEY = "key"
 _JSON_VALUE = "value"
@@ -205,10 +207,10 @@ class JavaProxyUnpickler(jsonpickle.Unpickler):
     # noinspection PyUnresolvedReferences
     def _restore(self, obj: Any) -> Any:
         if isinstance(obj, dict):
-            metadata: str = obj.get(_META_CLASS, None)
+            metadata: Any = obj.get(_META_CLASS, None)
             if metadata is not None:
                 type_: Optional[Type[Any]] = _type_for(metadata)
-                actual: dict[str, Any] = dict()
+                actual: dict[Any, Any] = dict()
                 if type_ is None:
                     if "map" in metadata.lower():
                         for entry in obj[_JSON_ENTRIES]:
@@ -227,6 +229,25 @@ class JavaProxyUnpickler(jsonpickle.Unpickler):
                         actual[key_ if key_ is not None else key] = value
 
                 return super().restore(actual, reset=False)
+
+            # When "@Ordered" set to true which converts to OrderedDict()
+            metadata = obj.get(_META_ORDERED, False)
+            if metadata is True:
+                o = collections.OrderedDict()
+                entries = obj.get(_JSON_ENTRIES, None)
+                if entries is not None:
+                    for entry in obj[_JSON_ENTRIES]:
+                        o[entry[_JSON_KEY]] = entry[_JSON_VALUE]
+                return o
+
+            #  When there is no "@Ordered" set. Only "entries" list exists
+            if len(obj) == 1:
+                entries = obj.get(_JSON_ENTRIES, None)
+                if entries is not None:
+                    actual = dict()
+                    for entry in obj[_JSON_ENTRIES]:
+                        actual[entry[_JSON_KEY]] = entry[_JSON_VALUE]
+                    return super().restore(actual, reset=False)
 
         return super()._restore(obj)
 

@@ -6,9 +6,12 @@ from __future__ import annotations
 
 import base64
 from abc import ABC
-from typing import Optional
+from collections import OrderedDict
+from typing import Any, Dict, Optional, cast
 
-from coherence.serialization import proxy
+import jsonpickle
+
+from coherence.serialization import JavaProxyUnpickler, proxy
 
 
 class Vector(ABC):
@@ -54,3 +57,73 @@ class FloatVector(Vector):
     def __init__(self, float_array: list[float]):
         super().__init__()
         self.array = float_array
+
+
+class AbstractEvolvable(ABC):
+    def __init__(self, data_version: int = 0, bin_future: Optional[Any] = None):
+        self.dataVersion = data_version
+        self.binFuture = bin_future
+
+
+@proxy("ai.DocumentChunk")
+class DocumentChunk(AbstractEvolvable):
+    def __init__(
+        self,
+        text: str,
+        metadata: Optional[dict[str, Any] | OrderedDict[str, Any]] = None,
+        vector: Optional[Vector] = None,
+    ):
+        super().__init__()
+        self.text = text
+        if metadata is None:
+            self.metadata: Dict[str, Any] = OrderedDict()
+        else:
+            self.metadata = metadata
+        self.vector = vector
+
+
+@jsonpickle.handlers.register(DocumentChunk)
+class DocumentChunkHandler(jsonpickle.handlers.BaseHandler):
+    def flatten(self, obj: object, data: dict[str, Any]) -> dict[str, Any]:
+        dc: DocumentChunk = cast(DocumentChunk, obj)
+        result_dict: Dict[Any, Any] = dict()
+        result_dict["@class"] = "ai.DocumentChunk"
+        result_dict["dataVersion"] = dc.dataVersion
+        if hasattr(dc, "binFuture"):
+            if dc.binFuture is not None:
+                result_dict["binFuture"] = dc.binFuture
+        if hasattr(dc, "metadata"):
+            if dc.metadata is not None:
+                result_dict["metadata"] = dict()
+                if isinstance(dc.metadata, OrderedDict):
+                    result_dict["metadata"]["@ordered"] = True
+                entries = list()
+                for k, v in dc.metadata.items():
+                    entries.append({"key": k, "value": v})
+                result_dict["metadata"]["entries"] = entries
+        if hasattr(dc, "vector"):
+            v = dc.vector
+            if v is not None:
+                if isinstance(v, BitVector):
+                    result_dict["vector"] = dict()
+                    result_dict["vector"]["@class"] = "ai.BitVector"
+                    # noinspection PyUnresolvedReferences
+                    result_dict["vector"]["bits"] = v.bits
+                elif isinstance(v, ByteVector):
+                    result_dict["vector"] = dict()
+                    result_dict["vector"]["@class"] = "ai.Int8Vector"
+                    # noinspection PyUnresolvedReferences
+                    result_dict["vector"]["array"] = v.array
+                elif isinstance(v, FloatVector):
+                    result_dict["vector"] = dict()
+                    result_dict["vector"]["@class"] = "ai.Float32Vector"
+                    # noinspection PyUnresolvedReferences
+                    result_dict["vector"]["array"] = v.array
+        result_dict["text"] = dc.text
+        return result_dict
+
+    def restore(self, obj: dict[str, Any]) -> DocumentChunk:
+        jpu = JavaProxyUnpickler()
+        d = DocumentChunk("")
+        o = jpu._restore_from_dict(obj, d)
+        return o
