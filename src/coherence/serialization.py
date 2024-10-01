@@ -80,7 +80,8 @@ class JSONSerializer(Serializer):
                 return cast(T, None)
             else:
                 if ord(s[0]) == ord(MAGIC_BYTE):
-                    return jsonpickle.decode(s[1:], context=self._unpickler)
+                    r = jsonpickle.decode(s[1:], context=self._unpickler)
+                    return r
                 else:
                     raise ValueError("Invalid JSON serialization format")
         else:

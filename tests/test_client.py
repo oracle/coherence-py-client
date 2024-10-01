@@ -66,7 +66,7 @@ async def setup_and_teardown_person_cache() -> AsyncGenerator[NamedCache[str, Pe
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_get_and_put(setup_and_teardown: NamedCache[str, Union[str, int, Person]]) -> None:
     cache: NamedCache[str, Union[str, int, Person]] = setup_and_teardown
 
@@ -93,7 +93,7 @@ async def test_get_and_put(setup_and_teardown: NamedCache[str, Union[str, int, P
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_put_with_ttl(setup_and_teardown: NamedCache[str, Union[str, int]]) -> None:
     cache: NamedCache[str, Union[str, int, Person]] = setup_and_teardown
 
@@ -109,7 +109,7 @@ async def test_put_with_ttl(setup_and_teardown: NamedCache[str, Union[str, int]]
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_put_if_absent(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -126,7 +126,7 @@ async def test_put_if_absent(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_keys_filtered(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -141,7 +141,7 @@ async def test_keys_filtered(setup_and_teardown: NamedCache[str, str]) -> None:
     await cache.put(k2, v2)
 
     local_set: Set[str] = set()
-    async for e in cache.keys(Filters.equals("length()", 8)):
+    async for e in await cache.keys(Filters.equals("length()", 8)):
         local_set.add(e)
 
     assert len(local_set) == 2
@@ -150,7 +150,7 @@ async def test_keys_filtered(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_keys_paged(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -160,14 +160,14 @@ async def test_keys_paged(setup_and_teardown: NamedCache[str, str]) -> None:
 
     # Stream the keys and locally cache the results
     local_set: Set[str] = set()
-    async for e in cache.keys(by_page=True):
+    async for e in await cache.keys(by_page=True):
         local_set.add(e)
 
     assert len(local_set) == num_entries
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_entries_filtered(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -182,7 +182,7 @@ async def test_entries_filtered(setup_and_teardown: NamedCache[str, str]) -> Non
     await cache.put(k2, v2)
 
     local_dict: Dict[str, str] = {}
-    async for e in cache.entries(Filters.equals("length()", 8)):
+    async for e in await cache.entries(Filters.equals("length()", 8)):
         local_dict[e.key] = e.value
 
     assert len(local_dict) == 2
@@ -191,7 +191,7 @@ async def test_entries_filtered(setup_and_teardown: NamedCache[str, str]) -> Non
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_entries_paged(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -203,13 +203,13 @@ async def test_entries_paged(setup_and_teardown: NamedCache[str, str]) -> None:
 
     # Stream the keys and locally cache the results
     local_dict: Dict[str, str] = {}
-    async for e in cache.entries(by_page=True):
+    async for e in await cache.entries(by_page=True):
         local_dict[e.key] = e.value
 
     assert len(local_dict) == num_entries
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_values_filtered(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -233,7 +233,7 @@ async def test_values_filtered(setup_and_teardown: NamedCache[str, str]) -> None
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_values_paged(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -243,14 +243,14 @@ async def test_values_paged(setup_and_teardown: NamedCache[str, str]) -> None:
 
     # Stream the keys and locally cache the results
     local_list: List[str] = []
-    async for e in cache.values(by_page=True):
+    async for e in await cache.values(by_page=True):
         local_list.append(e)
 
     assert len(local_list) == num_entries
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_put_all(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -267,7 +267,7 @@ async def test_put_all(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_get_or_default(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -283,7 +283,7 @@ async def test_get_or_default(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_get_all(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -308,7 +308,7 @@ async def test_get_all(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_get_all_no_keys_raises_error(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -318,7 +318,7 @@ async def test_get_all_no_keys_raises_error(setup_and_teardown: NamedCache[str, 
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_remove(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -334,7 +334,7 @@ async def test_remove(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_remove_mapping(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -350,7 +350,7 @@ async def test_remove_mapping(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_replace(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -364,7 +364,7 @@ async def test_replace(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_replace_mapping(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -378,7 +378,7 @@ async def test_replace_mapping(setup_and_teardown: NamedCache[str, str]) -> None
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_contains_key(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -394,7 +394,7 @@ async def test_contains_key(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_contains_value(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -410,7 +410,7 @@ async def test_contains_value(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_is_empty(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -427,7 +427,7 @@ async def test_is_empty(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_size(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -449,7 +449,7 @@ async def test_size(setup_and_teardown: NamedCache[str, str]) -> None:
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_invoke(setup_and_teardown: NamedCache[str, Union[str, Person]]) -> None:
     cache: NamedCache[str, Union[str, Person]] = setup_and_teardown
 
@@ -482,7 +482,7 @@ async def test_invoke(setup_and_teardown: NamedCache[str, Union[str, Person]]) -
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_invoke_all_keys(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
 
@@ -510,7 +510,7 @@ EVENT_TIMEOUT: Final[float] = 20.0
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_cache_truncate_event(setup_and_teardown: NamedCache[str, str]) -> None:
     cache: NamedCache[str, str] = setup_and_teardown
     name: str = "UNSET"
@@ -535,7 +535,7 @@ async def test_cache_truncate_event(setup_and_teardown: NamedCache[str, str]) ->
 
 
 # noinspection PyShadowingNames,DuplicatedCode
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_cache_release_event() -> None:
     session: Session = await tests.get_session()
     cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
@@ -566,7 +566,7 @@ async def test_cache_release_event() -> None:
 
 
 # noinspection PyShadowingNames,DuplicatedCode,PyUnresolvedReferences
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="session")
 async def test_add_remove_index(setup_and_teardown_person_cache: NamedCache[str, Person]) -> None:
     cache: NamedCache[str, Person] = setup_and_teardown_person_cache
 

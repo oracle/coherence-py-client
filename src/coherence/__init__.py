@@ -10,13 +10,13 @@ import logging
 
 # expose these symbols in top-level namespace
 from .aggregator import Aggregators as Aggregators
-from .client import MapEntry as MapEntry
 from .client import NamedCache as NamedCache
 from .client import NamedMap as NamedMap
 from .client import Options as Options
 from .client import Session as Session
 from .client import TlsOptions as TlsOptions
 from .comparator import Comparator as Comparator
+from .entry import MapEntry as MapEntry
 from .extractor import Extractors as Extractors
 from .filter import Filters as Filters
 from .processor import Processors as Processors

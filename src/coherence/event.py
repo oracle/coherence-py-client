@@ -989,7 +989,6 @@ class _MapEventsManagerV1(_MapEventsManager[K, V]):
     ) -> None:
         super().__init__(named_map, session, serializer, emitter)
         self.request_factory = request_factory
-        print(self)
 
     @property
     def request_factory(self) -> RequestFactoryV1:
