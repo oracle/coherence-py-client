@@ -3,14 +3,11 @@
 # https://oss.oracle.com/licenses/upl.
 
 import asyncio
-import time
-from typing import Any, AsyncGenerator, Generic, List, TypeVar, Union, cast
+from typing import Generic, List, TypeVar, Union, cast
 
 import pytest
-import pytest_asyncio
 
-import tests
-from coherence import Filters, NamedCache, Session
+from coherence import Filters, NamedCache
 from coherence.event import MapEvent, MapEventType
 from coherence.filter import Filter, LessFilter, MapEventFilter
 from tests import CountingMapListener
@@ -297,45 +294,26 @@ async def _run_basic_test(
     expected2.validate(listener)
 
 
-@pytest_asyncio.fixture
-async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
-    """
-    Fixture for test setup/teardown.
-    """
-    session: Session = await tests.get_session()
-    cache: NamedCache[Any, Any] = await session.get_cache("test-" + str(time.time_ns()))
-
-    yield cache
-
-    await cache.clear()
-    await session.close()
-
-
 # ----- test functions ------------------------------------------------------
 
 
 @pytest.mark.asyncio
-async def test_add_no_listener(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_add_no_listener(cache: NamedCache[str, str]) -> None:
     with pytest.raises(ValueError):
         await cache.add_map_listener(None)
 
 
 @pytest.mark.asyncio
-async def test_remove_no_listener(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_remove_no_listener(cache: NamedCache[str, str]) -> None:
     with pytest.raises(ValueError):
         await cache.remove_map_listener(None)
 
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_all(setup_and_teardown: NamedCache[str, str]) -> None:
+async def test_all(cache: NamedCache[str, str]) -> None:
     """Ensure the registered MapListener is able to receive insert, update, and delete events."""
 
-    cache: NamedCache[str, str] = setup_and_teardown
     name: str = cache.name
 
     expected: ExpectedEvents[str, str] = ExpectedEvents(
@@ -349,10 +327,9 @@ async def test_all(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_inserts_only(setup_and_teardown: NamedCache[str, str]) -> None:
+async def test_inserts_only(cache: NamedCache[str, str]) -> None:
     """Ensure the registered MapListener is able to receive insert events only."""
 
-    cache: NamedCache[str, str] = setup_and_teardown
     name: str = cache.name
 
     expected: ExpectedEvents[str, str] = ExpectedEvents(
@@ -364,10 +341,9 @@ async def test_inserts_only(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_updates_only(setup_and_teardown: NamedCache[str, str]) -> None:
+async def test_updates_only(cache: NamedCache[str, str]) -> None:
     """Ensure the registered MapListener is able to receive update events only."""
 
-    cache: NamedCache[str, str] = setup_and_teardown
     name: str = cache.name
 
     expected: ExpectedEvents[str, str] = ExpectedEvents(
@@ -379,10 +355,9 @@ async def test_updates_only(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_deletes_only(setup_and_teardown: NamedCache[str, str]) -> None:
+async def test_deletes_only(cache: NamedCache[str, str]) -> None:
     """Ensure the registered MapListener is able to receive delete events only."""
 
-    cache: NamedCache[str, str] = setup_and_teardown
     name: str = cache.name
 
     expected: ExpectedEvents[str, str] = ExpectedEvents(
@@ -394,10 +369,9 @@ async def test_deletes_only(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_multiple_listeners(setup_and_teardown: NamedCache[str, str]) -> None:
+async def test_multiple_listeners(cache: NamedCache[str, str]) -> None:
     """Ensure the multiple registered MapListeners are able to receive insert, update, and delete events."""
 
-    cache: NamedCache[str, str] = setup_and_teardown
     name: str = cache.name
 
     expected: ExpectedEvents[str, str] = ExpectedEvents(
@@ -462,10 +436,9 @@ async def test_multiple_listeners(setup_and_teardown: NamedCache[str, str]) -> N
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_custom_filter_listener(setup_and_teardown: NamedCache[str, Person]) -> None:
+async def test_custom_filter_listener(cache: NamedCache[str, Person]) -> None:
     """Ensure a custom filter is applied when filtering values for events."""
 
-    cache: NamedCache[str, Person] = setup_and_teardown
     name: str = cache.name
 
     fred: Person = Person.fred()
@@ -499,10 +472,9 @@ async def test_custom_filter_listener(setup_and_teardown: NamedCache[str, Person
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_key_listener(setup_and_teardown: NamedCache[str, Person]) -> None:
+async def test_key_listener(cache: NamedCache[str, Person]) -> None:
     """Ensure a listener can be associated with a key."""
 
-    cache: NamedCache[str, Person] = setup_and_teardown
     name: str = cache.name
 
     fred: Person = Person.fred()
@@ -535,11 +507,10 @@ async def test_key_listener(setup_and_teardown: NamedCache[str, Person]) -> None
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_lite_listeners(setup_and_teardown: NamedCache[str, Person]) -> None:
+async def test_lite_listeners(cache: NamedCache[str, Person]) -> None:
     """Ensure lite event handling works as expected alone or when similar listeners
     are registered that are non-lite.  See test comments for details."""
 
-    cache: NamedCache[str, Person] = setup_and_teardown
     name: str = cache.name
     always: Filter = Filters.always()
 

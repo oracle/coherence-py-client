@@ -863,7 +863,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
             self, session, serializer, self._internal_emitter, self._request_factory
         )
 
-        self._stream_handler: StreamHandler = StreamHandler.get_stream_handler(
+        self._stream_handler: StreamHandler = StreamHandler(
             self._request_factory, self._events_manager, self._client_stream
         )
         # asyncio.create_task(self._stream_handler.handle_response())
@@ -2281,19 +2281,6 @@ class StreamHandler:
     @property
     def stream(self) -> grpc.aio._call.StreamStreamCall:
         return self._stream
-
-    @classmethod
-    def get_stream_handler(
-        cls,
-        request_factory: RequestFactoryV1,
-        events_manager: _MapEventsManagerV1[K, V],
-        stream: grpc.aio._call.StreamStreamCall,
-    ) -> StreamHandler:
-        if cls.theStreamHandler is None:
-            cls.theStreamHandler = StreamHandler(request_factory, events_manager, stream)
-            return cls.theStreamHandler
-        else:
-            return cls.theStreamHandler
 
     def close(self) -> None:
         self._closed = True

@@ -16,22 +16,9 @@ from tests.address import Address
 from tests.person import Person
 
 
-@pytest_asyncio.fixture
-async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
-    session: Session = await tests.get_session()
-    cache: NamedCache[Any, Any] = await session.get_cache("test")
-
-    yield cache
-
-    await cache.clear()
-    await session.close()
-
-
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_extractor(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_extractor(cache: NamedCache[Any, Any]) -> None:
     k1 = "one"
     v1 = "only-one"
     await cache.put(k1, v1)
@@ -62,9 +49,7 @@ async def test_extractor(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_composite(setup_and_teardown: NamedCache[str, Any]) -> None:
-    cache: NamedCache[str, Any] = setup_and_teardown
-
+async def test_composite(cache: NamedCache[str, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -82,9 +67,7 @@ async def test_composite(setup_and_teardown: NamedCache[str, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_conditional(setup_and_teardown: NamedCache[str, Any]) -> None:
-    cache: NamedCache[str, Any] = setup_and_teardown
-
+async def test_conditional(cache: NamedCache[str, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -101,9 +84,7 @@ async def test_conditional(setup_and_teardown: NamedCache[str, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_null(setup_and_teardown: NamedCache[str, Any]) -> None:
-    cache: NamedCache[str, Any] = setup_and_teardown
-
+async def test_null(cache: NamedCache[str, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -114,9 +95,7 @@ async def test_null(setup_and_teardown: NamedCache[str, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_multiplier(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_multiplier(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -127,9 +106,7 @@ async def test_multiplier(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_incrementor(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_incrementor(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -140,9 +117,7 @@ async def test_incrementor(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_conditional_put(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_conditional_put(cache: NamedCache[Any, Any]) -> None:
     k1 = "one"
     v1 = "only-one"
     await cache.put(k1, v1)
@@ -163,9 +138,7 @@ async def test_conditional_put(setup_and_teardown: NamedCache[Any, Any]) -> None
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_conditional_put_all(cache: NamedCache[Any, Any]) -> None:
     k1 = "one"
     v1 = "only-one"
     await cache.put(k1, v1)
@@ -194,9 +167,7 @@ async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> 
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_conditional_remove(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_conditional_remove(cache: NamedCache[str, str]) -> None:
     k1 = "one"
     v1 = "only-one"
     await cache.put(k1, v1)
@@ -220,9 +191,7 @@ async def test_conditional_remove(setup_and_teardown: NamedCache[str, str]) -> N
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_method_invocation(setup_and_teardown: NamedCache[str, Any]) -> None:
-    cache: NamedCache[str, Any] = setup_and_teardown
-
+async def test_method_invocation(cache: NamedCache[str, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -281,9 +250,7 @@ async def test_preload() -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_updater(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_updater(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -294,9 +261,7 @@ async def test_updater(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_versioned_put(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_versioned_put(cache: NamedCache[Any, Any]) -> None:
     k = "123"
     versioned123 = {
         _META_VERSION: 1,
@@ -337,8 +302,7 @@ async def test_versioned_put(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
+async def test_versioned_put_all(cache: NamedCache[Any, Any]) -> None:
     k1 = "123"
     versioned123 = {
         _META_VERSION: 1,
