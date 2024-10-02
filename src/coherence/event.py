@@ -603,13 +603,11 @@ class _KeyListenerGroupV1(_ListenerGroupV1[K, V]):
 
     # noinspection PyProtectedMember
     def _post_subscribe(self, request: MapListenerRequest) -> None:
-        manager: _MapEventsManagerV1[K, V] = self._manager
         self._manager._key_group_subscribed(self._key_or_filter, self)
 
     # noinspection PyProtectedMember
     def _post_unsubscribe(self, request: MapListenerRequest) -> None:
-        manager: _MapEventsManager[K, V] = self._manager
-        manager._key_group_unsubscribed(self._key_or_filter)
+        self._manager._key_group_unsubscribed(self._key_or_filter)
 
 
 class _FilterListenerGroupV0(_ListenerGroupV0[K, V]):
