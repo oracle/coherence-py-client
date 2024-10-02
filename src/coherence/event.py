@@ -496,6 +496,7 @@ class _ListenerGroupV0(_ListenerGroup[K, V, MapListenerRequest], metaclass=ABCMe
         self._subscribed_waiter.set()
 
 
+# noinspection PyProtectedMember
 class _ListenerGroupV1(_ListenerGroup[K, V, NamedCacheRequest], ABC):
 
     def __init__(self, manager: _MapEventsManagerV1[K, V], key_or_filter: K | Filter):
@@ -517,11 +518,11 @@ class _ListenerGroupV1(_ListenerGroup[K, V, NamedCacheRequest], ABC):
         request: NamedCacheRequest
         filter_id: int
         if isinstance(self._key_or_filter, Filter):
-            (request, filter_id) = self._manager.request_factory.map_listener_request(
+            (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(
                 True, lite, filter=self._key_or_filter
             )
         else:
-            (request, filter_id) = self._manager.request_factory.map_listener_request(
+            (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(
                 True, lite, key=self._key_or_filter
             )
 
@@ -531,20 +532,23 @@ class _ListenerGroupV1(_ListenerGroup[K, V, NamedCacheRequest], ABC):
         # set this registration as pending
         self._manager._pending_registrations[filter_id] = self
 
-        await self._manager._named_map._dispatch_and_wait(request)
+        # noinspection PyUnresolvedReferences
+        await dispatcher.dispatch(self._manager._named_map._stream_handler)
 
         self._subscribe_complete()
 
     async def _unsubscribe(self) -> None:
         request: NamedCacheRequest
         if isinstance(self._key_or_filter, MapEventFilter):
-            request = self._manager.request_factory.map_listener_request(
+            # noinspection PyTypeChecker
+            (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(
                 subscribe=False, filter=self._key_or_filter, filter_id=self._filter_id
-            )[0]
+            )
         else:
-            request = self._manager.request_factory.map_listener_request(subscribe=False, key=self._key_or_filter)[0]
+            (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(subscribe=False, key=self._key_or_filter)
 
-        await self._manager._named_map._dispatch_and_wait(request)
+        # noinspection PyUnresolvedReferences
+        await dispatcher.dispatch(self._manager._named_map._stream_handler)
         self._post_unsubscribe(request)
 
     def _subscribe_complete(self) -> None:
@@ -600,14 +604,12 @@ class _KeyListenerGroupV1(_ListenerGroupV1[K, V]):
     # noinspection PyProtectedMember
     def _post_subscribe(self, request: MapListenerRequest) -> None:
         manager: _MapEventsManagerV1[K, V] = self._manager
-        key: K = manager._serializer.deserialize(request.key)
-        self._manager._key_group_subscribed(key, self)
+        self._manager._key_group_subscribed(self._key_or_filter, self)
 
     # noinspection PyProtectedMember
     def _post_unsubscribe(self, request: MapListenerRequest) -> None:
         manager: _MapEventsManager[K, V] = self._manager
-        key: K = manager._serializer.deserialize(request.key)
-        manager._key_group_unsubscribed(key)
+        manager._key_group_unsubscribed(self._key_or_filter)
 
 
 class _FilterListenerGroupV0(_ListenerGroupV0[K, V]):

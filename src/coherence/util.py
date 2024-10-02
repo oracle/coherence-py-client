@@ -1109,7 +1109,7 @@ class RequestFactoryV1:
         key: Optional[K] = None,
         filter: Optional[Filter] = None,
         filter_id: int = -1,
-    ) -> Tuple[NamedCacheRequest, int]:
+    ) -> Tuple[UnaryDispatcher, ProxyRequest, int]:
         """Creates a gRPC generated MapListenerRequest"""
 
         if key is None and filter is None:
@@ -1128,11 +1128,16 @@ class RequestFactoryV1:
                 keyOrFilter=KeyOrFilter(filter=self._serializer.serialize(filter_local)),
             )
         else:  # registering a key listener
-            listener_request = V1MapListenerRequest(subscribe=subscribe, lite=lite, priming=False)
-            listener_request.keyOrFilter = KeyOrFilter(key=self._serializer.serialize(key))
+            listener_request = V1MapListenerRequest(subscribe=subscribe, lite=lite, priming=False, keyOrFilter=KeyOrFilter(key=self._serializer.serialize(key)))
+
+        named_cache_request: NamedCacheRequest = self._create_named_cache_request(
+            listener_request, NamedCacheRequestType.MapListener
+        )
+        proxy_request: ProxyRequest = self.create_proxy_request(named_cache_request)
 
         return (
-            self._create_named_cache_request(listener_request, NamedCacheRequestType.MapListener),
+            UnaryDispatcher(proxy_request),
+            proxy_request,
             listener_request.filterId,
         )
 

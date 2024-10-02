@@ -2348,9 +2348,6 @@ class StreamHandler:
                 pass
             elif type == ResponseType.MapEvent:
                 # Handle MapEvent Response
-                COH_LOG.debug("MapEvent Response type received")
-                response_json = MessageToJson(named_cache_response)
-                COH_LOG.debug(response_json)
                 event_response = MapEventMessage()
                 named_cache_response.message.Unpack(event_response)
 
