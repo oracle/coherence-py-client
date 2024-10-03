@@ -545,7 +545,9 @@ class _ListenerGroupV1(_ListenerGroup[K, V, NamedCacheRequest], ABC):
                 subscribe=False, filter=self._key_or_filter, filter_id=self._filter_id
             )
         else:
-            (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(subscribe=False, key=self._key_or_filter)
+            (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(
+                subscribe=False, key=self._key_or_filter
+            )
 
         # noinspection PyUnresolvedReferences
         await dispatcher.dispatch(self._manager._named_map._stream_handler)
@@ -603,11 +605,11 @@ class _KeyListenerGroupV1(_ListenerGroupV1[K, V]):
 
     # noinspection PyProtectedMember
     def _post_subscribe(self, request: MapListenerRequest) -> None:
-        self._manager._key_group_subscribed(self._key_or_filter, self)
+        self._manager._key_group_subscribed(cast(K, self._key_or_filter), self)
 
     # noinspection PyProtectedMember
     def _post_unsubscribe(self, request: MapListenerRequest) -> None:
-        self._manager._key_group_unsubscribed(self._key_or_filter)
+        self._manager._key_group_unsubscribed(cast(K, self._key_or_filter))
 
 
 class _FilterListenerGroupV0(_ListenerGroupV0[K, V]):

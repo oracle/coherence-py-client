@@ -58,7 +58,7 @@ from .messages_pb2 import (
     ValuesRequest,
 )
 from .processor import EntryProcessor
-from .proxy_service_messages_v1_pb2 import ProxyRequest
+from .proxy_service_messages_v1_pb2 import InitRequest, ProxyRequest
 from .serialization import Serializer
 
 E = TypeVar("E")
@@ -757,6 +757,20 @@ class RequestFactoryV1:
         )
         return proxy_request
 
+    def init_sub_channel(self) -> UnaryDispatcher[None]:
+        init_request = InitRequest(
+            scope="",
+            format="json",
+            protocol="CacheService",
+            protocolVersion=1,
+            supportedProtocolVersion=1,
+            heartbeat=0,
+        )
+
+        proxy_request = ProxyRequest(id=2, init=init_request)
+
+        return UnaryDispatcher(proxy_request)
+
     def ensure_request(self, cache_name: str) -> UnaryDispatcher[int]:
         cache_request = EnsureCacheRequest(cache=cache_name)
 
@@ -1109,7 +1123,7 @@ class RequestFactoryV1:
         key: Optional[K] = None,
         filter: Optional[Filter] = None,
         filter_id: int = -1,
-    ) -> Tuple[UnaryDispatcher, ProxyRequest, int]:
+    ) -> Tuple[UnaryDispatcher[Any], ProxyRequest, int]:
         """Creates a gRPC generated MapListenerRequest"""
 
         if key is None and filter is None:
@@ -1128,7 +1142,12 @@ class RequestFactoryV1:
                 keyOrFilter=KeyOrFilter(filter=self._serializer.serialize(filter_local)),
             )
         else:  # registering a key listener
-            listener_request = V1MapListenerRequest(subscribe=subscribe, lite=lite, priming=False, keyOrFilter=KeyOrFilter(key=self._serializer.serialize(key)))
+            listener_request = V1MapListenerRequest(
+                subscribe=subscribe,
+                lite=lite,
+                priming=False,
+                keyOrFilter=KeyOrFilter(key=self._serializer.serialize(key)),
+            )
 
         named_cache_request: NamedCacheRequest = self._create_named_cache_request(
             listener_request, NamedCacheRequestType.MapListener
