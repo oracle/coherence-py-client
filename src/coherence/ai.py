@@ -7,7 +7,7 @@ from __future__ import annotations
 import base64
 from abc import ABC
 from collections import OrderedDict
-from typing import Any, Dict, Optional, TypeVar, Union, cast
+from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 
 import jsonpickle
 
@@ -20,6 +20,7 @@ E = TypeVar("E")
 T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
+
 
 class Vector(ABC):
     def __init__(self) -> None:
@@ -35,7 +36,7 @@ class BitVector(Vector):
         self,
         hex_string: str,
         byte_array: Optional[bytes] = None,
-        int_array: Optional[list[int]] = None,
+        int_array: Optional[List[int]] = None,
     ):
         super().__init__()
         if hex_string is not None:
@@ -61,7 +62,7 @@ class ByteVector(Vector):
 
 @proxy("ai.Float32Vector")
 class FloatVector(Vector):
-    def __init__(self, float_array: list[float]):
+    def __init__(self, float_array: List[float]):
         super().__init__()
         self.array = float_array
 
@@ -77,7 +78,7 @@ class DocumentChunk(AbstractEvolvable):
     def __init__(
         self,
         text: str,
-        metadata: Optional[dict[str, Any] | OrderedDict[str, Any]] = None,
+        metadata: Optional[Dict[str, Any] | OrderedDict[str, Any]] = None,
         vector: Optional[Vector] = None,
     ):
         super().__init__()
@@ -91,7 +92,7 @@ class DocumentChunk(AbstractEvolvable):
 
 @jsonpickle.handlers.register(DocumentChunk)
 class DocumentChunkHandler(jsonpickle.handlers.BaseHandler):
-    def flatten(self, obj: object, data: dict[str, Any]) -> dict[str, Any]:
+    def flatten(self, obj: object, data: Dict[str, Any]) -> Dict[str, Any]:
         dc: DocumentChunk = cast(DocumentChunk, obj)
         result_dict: Dict[Any, Any] = dict()
         result_dict["@class"] = "ai.DocumentChunk"
@@ -129,7 +130,7 @@ class DocumentChunkHandler(jsonpickle.handlers.BaseHandler):
         result_dict["text"] = dc.text
         return result_dict
 
-    def restore(self, obj: dict[str, Any]) -> DocumentChunk:
+    def restore(self, obj: Dict[str, Any]) -> DocumentChunk:
         jpu = JavaProxyUnpickler()
         d = DocumentChunk("")
         o = jpu._restore_from_dict(obj, d)
