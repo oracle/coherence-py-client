@@ -7,12 +7,19 @@ from __future__ import annotations
 import base64
 from abc import ABC
 from collections import OrderedDict
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional, TypeVar, Union, cast
 
 import jsonpickle
 
+from coherence.aggregator import EntryAggregator
+from coherence.extractor import ValueExtractor
+from coherence.filter import Filter
 from coherence.serialization import JavaProxyUnpickler, proxy
 
+E = TypeVar("E")
+T = TypeVar("T")
+K = TypeVar("K")
+V = TypeVar("V")
 
 class Vector(ABC):
     def __init__(self) -> None:
@@ -127,3 +134,58 @@ class DocumentChunkHandler(jsonpickle.handlers.BaseHandler):
         d = DocumentChunk("")
         o = jpu._restore_from_dict(obj, d)
         return o
+
+
+class DistanceAlgorithm(ABC):
+    def __init__(self) -> None:
+        super().__init__()
+
+
+@proxy("ai.distance.CosineSimilarity")
+class CosineDistance(DistanceAlgorithm):
+    def __init__(self) -> None:
+        super().__init__()
+
+
+@proxy("ai.distance.InnerProductSimilarity")
+class InnerProductDistance(DistanceAlgorithm):
+    def __init__(self) -> None:
+        super().__init__()
+
+
+@proxy("ai.distance.L2SquaredDistance")
+class L2SquaredDistance(DistanceAlgorithm):
+    def __init__(self) -> None:
+        super().__init__()
+
+
+@proxy("ai.search.SimilarityAggregator")
+class SimilaritySearch(EntryAggregator):
+    def __init__(
+        self,
+        extractor_or_property: Union[ValueExtractor[T, E], str],
+        vector: Vector,
+        max_results: int,
+        algorithm: Optional[DistanceAlgorithm] = CosineDistance(),
+        filter: Optional[Filter] = None,
+        brute_force: Optional[bool] = True,
+    ) -> None:
+        super().__init__(extractor_or_property)
+        self.algorithm = algorithm
+        self.bruteForce = brute_force
+        self.filter = filter
+        self.maxResults = max_results
+        self.vector = vector
+
+
+class BaseQueryResult(ABC):
+    def __init__(self, result: float, key: K, value: V) -> None:
+        self.distance = result
+        self.key = key
+        self.value = value
+
+
+@proxy("ai.results.BinaryQueryResult")
+class BinaryQueryResult(BaseQueryResult):
+    def __init__(self, result: float, key: K, value: V) -> None:
+        super().__init__(result, key, value)

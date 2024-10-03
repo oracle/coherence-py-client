@@ -1,8 +1,18 @@
 # Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
-
-from coherence.ai import BitVector, ByteVector, DocumentChunk, FloatVector
+from coherence import Extractors, Filters
+from coherence.ai import (
+    BinaryQueryResult,
+    BitVector,
+    ByteVector,
+    CosineDistance,
+    DocumentChunk,
+    FloatVector,
+    SimilaritySearch,
+)
+from coherence.extractor import ValueExtractor
+from coherence.filter import Filter
 from coherence.serialization import JSONSerializer, SerializerRegistry
 
 s = SerializerRegistry.serializer(JSONSerializer.SER_FORMAT)
@@ -82,3 +92,43 @@ def test_DocumentChunk_serialization() -> None:
     )
     o = s.deserialize(ser)
     assert isinstance(o, DocumentChunk)
+
+
+# noinspection PyUnresolvedReferences
+def test_SimilaritySearch_serialization() -> None:
+    coh_fv = FloatVector([1.0, 2.0, 3.0])
+    ve = Extractors.extract("foo")
+    f = Filters.equals("foo", "bar")
+    ss = SimilaritySearch(ve, coh_fv, 19, filter=f)
+    ser = s.serialize(ss)
+    assert ser == (
+        b'\x15{"@class": "ai.search.SimilarityAggregator", '
+        b'"extractor": {"@class": "extractor.UniversalExtractor", "name": "foo", "params": null}, '
+        b'"algorithm": {"@class": "ai.distance.CosineSimilarity"}, '
+        b'"bruteForce": true, '
+        b'"filter": {"@class": "filter.EqualsFilter", '
+        b'"extractor": {"@class": "extractor.UniversalExtractor", '
+        b'"name": "foo", "params": null}, "value": "bar"}, "maxResults": 19, '
+        b'"vector": {"@class": "ai.Float32Vector", "array": [1.0, 2.0, 3.0]}}'
+    )
+
+    o = s.deserialize(ser)
+    assert isinstance(o, SimilaritySearch)
+    assert isinstance(o.extractor, ValueExtractor)
+    assert isinstance(o.algorithm, CosineDistance)
+    assert isinstance(o.filter, Filter)
+    assert o.maxResults == 19
+    assert isinstance(o.vector, FloatVector)
+
+
+# noinspection PyUnresolvedReferences
+def test_BinaryQueryResult_serialization() -> None:
+    bqr = BinaryQueryResult(3.0, 1, "abc")
+    ser = s.serialize(bqr)
+    assert ser == b'\x15{"@class": "ai.results.BinaryQueryResult", "distance": 3.0, "key": 1, "value": "abc"}'
+
+    o = s.deserialize(ser)
+    assert isinstance(o, BinaryQueryResult)
+    assert o.distance == 3.0
+    assert o.key == 1
+    assert o.value == "abc"
