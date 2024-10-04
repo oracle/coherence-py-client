@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import base64
+import math
 from abc import ABC
 from collections import OrderedDict
 from typing import Any, Dict, List, Optional, TypeVar, Union, cast
@@ -190,3 +191,26 @@ class BaseQueryResult(ABC):
 class BinaryQueryResult(BaseQueryResult):
     def __init__(self, result: float, key: K, value: V) -> None:
         super().__init__(result, key, value)
+
+
+class Vectors:
+
+    EPSILON = 1e-30  # Python automatically handles float precision
+
+    @staticmethod
+    def normalize(array: List[float]) -> List[float]:
+        norm = 0.0
+        cDim = len(array)
+
+        # Calculate the norm (sum of squares)
+        for v in array:
+            norm += v * v
+
+        # Compute the normalization factor (inverse of the square root of the sum of squares)
+        norm = 1.0 / (math.sqrt(norm) + Vectors.EPSILON)
+
+        # Apply the normalization factor to each element in the array
+        for i in range(cDim):
+            array[i] = array[i] * norm
+
+        return array

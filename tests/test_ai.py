@@ -1,7 +1,13 @@
 # Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
-from coherence import Extractors, Filters
+import random
+from typing import List, Dict, Optional
+
+import pytest
+import pytest_asyncio
+
+from coherence import Extractors, Filters, Session, NamedCache
 from coherence.ai import (
     BinaryQueryResult,
     BitVector,
@@ -9,7 +15,7 @@ from coherence.ai import (
     CosineDistance,
     DocumentChunk,
     FloatVector,
-    SimilaritySearch,
+    SimilaritySearch, Vectors,
 )
 from coherence.extractor import ValueExtractor
 from coherence.filter import Filter
@@ -132,3 +138,79 @@ def test_BinaryQueryResult_serialization() -> None:
     assert o.distance == 3.0
     assert o.key == 1
     assert o.value == "abc"
+
+
+class ValueWithVector:
+    def __init__(self, vector: FloatVector, text: str, number: int) -> None:
+        self.vector = vector
+        self.text = text
+        self.number = number
+
+    def get_vector(self) -> FloatVector:
+        return self.vector
+
+    def get_text(self) -> str:
+        return self.text
+
+    def get_number(self) -> int:
+        return self.number
+
+    def __repr__(self):
+        return f"ValueWithVector(vector={self.vector}, text='{self.text}', number={self.number})"
+
+def random_floats(n: int) -> List[float]:
+    floats: List[float] = [0.0]*n
+    for i in range(n):
+        floats[i] = random.uniform(-50.0, 50.0)
+    return floats
+
+DIMENSIONS: int = 384
+async def populate_vectors(vectors: NamedCache[int, ValueWithVector]) -> ValueWithVector:
+    matches: List[List[float]] = [[]] * 5
+    matches[0] = random_floats(DIMENSIONS)
+
+    # Creating copies of matches[0] for matches[1] to matches[4]
+    for i in range(1, 5):
+        matches[i] = matches[0].copy()
+        matches[i][0] += 1.0  # Modify the first element
+
+    values: List[Optional[ValueWithVector]] = [None] * 10000
+
+    # Assign normalized vectors to the first 5 entries
+    for i in range(5):
+        values[i] = ValueWithVector(FloatVector(Vectors.normalize(matches[i])), str(i), i)
+        await vectors.put(i, values[i])
+
+    # Fill the remaining values with random vectors
+    for i in range(5, 10000):
+        values[i] = ValueWithVector(FloatVector(Vectors.normalize(random_floats(DIMENSIONS))), str(i), i)
+        await vectors.put(i, values[i])
+
+    return values[0]
+
+# def test_populate_vectors():
+#     v = dict()
+#     populate_vectors(v)
+
+@pytest.mark.asyncio
+async def test_SimilaritySearch():
+    session: Session = await Session.create()
+    cache: NamedCache[int, ValueWithVector] = await session.get_cache("vector_cache")
+    value_with_vector = await populate_vectors(cache)
+
+    # Create a SimilaritySearch aggregator
+    value_extractor = Extractors.extract("vector")
+    k = 10
+    ss = SimilaritySearch(value_extractor, value_with_vector.vector, 10)
+
+    ser = s.serialize(ss)
+    print(ser)
+
+    hnsw_result = await cache.aggregate(ss)
+
+    assert hnsw_result is not None
+
+    await cache.truncate()
+    await cache.destroy()
+    await session.close()
+
