@@ -90,6 +90,7 @@ class _Handshake:
         stream: StreamStreamMultiCallable = stub.subChannel()
         try:
             await stream.write(RequestFactoryV1.init_sub_channel())
+            await asyncio.sleep(0)
             response = await stream.read()
             stream.cancel()  # cancel the stream; no longer needed
             self._proxy_version = response.init.version
