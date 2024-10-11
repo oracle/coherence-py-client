@@ -83,68 +83,87 @@ def test_disconnect_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_tls_options(monkeypatch: pytest.MonkeyPatch) -> None:
-    tls_options: TlsOptions = TlsOptions()
-    assert tls_options.enabled is False
-    assert tls_options.ca_cert_path is None
-    assert tls_options.client_cert_path is None
-    assert tls_options.client_key_path is None
+    try:
+        monkeypatch.delenv(name=TlsOptions.ENV_CA_CERT, raising=False)
+        monkeypatch.delenv(name=TlsOptions.ENV_CLIENT_CERT, raising=False)
+        monkeypatch.delenv(name=TlsOptions.ENV_CLIENT_KEY, raising=False)
 
-    ca_cert_path: str = "/tmp/ca.pem"
-    client_cert_path: str = "/tmp/client.pem"
-    client_key_path: str = "/tmp/client.key"
-    ca_cert_path2: str = "/tmp/ca2.pem"
-    client_cert_path2: str = "/tmp/client2.pem"
-    client_key_path2: str = "/tmp/client2.key"
+        tls_options: TlsOptions = TlsOptions()
+        assert tls_options.enabled is False
+        assert tls_options.ca_cert_path is None
+        assert tls_options.client_cert_path is None
+        assert tls_options.client_key_path is None
 
-    tls_options = TlsOptions(
-        enabled=True, ca_cert_path=ca_cert_path, client_cert_path=client_cert_path, client_key_path=client_key_path
-    )
-    assert tls_options.enabled
-    assert tls_options.ca_cert_path == ca_cert_path
-    assert tls_options.client_cert_path == client_cert_path
-    assert tls_options.client_key_path == client_key_path
+        ca_cert_path: str = "/tmp/ca.pem"
+        client_cert_path: str = "/tmp/client.pem"
+        client_key_path: str = "/tmp/client.key"
+        ca_cert_path2: str = "/tmp/ca2.pem"
+        client_cert_path2: str = "/tmp/client2.pem"
+        client_key_path2: str = "/tmp/client2.key"
 
-    monkeypatch.setenv(name=TlsOptions.ENV_CA_CERT, value=ca_cert_path)
-    monkeypatch.setenv(name=TlsOptions.ENV_CLIENT_CERT, value=client_cert_path)
-    monkeypatch.setenv(name=TlsOptions.ENV_CLIENT_KEY, value=client_key_path)
+        tls_options = TlsOptions(
+            enabled=True, ca_cert_path=ca_cert_path, client_cert_path=client_cert_path, client_key_path=client_key_path
+        )
+        assert tls_options.enabled
+        assert tls_options.ca_cert_path == ca_cert_path
+        assert tls_options.client_cert_path == client_cert_path
+        assert tls_options.client_key_path == client_key_path
 
-    tls_options = TlsOptions()
-    assert tls_options.enabled is False
-    assert tls_options.ca_cert_path == ca_cert_path
-    assert tls_options.client_cert_path == client_cert_path
-    assert tls_options.client_key_path == client_key_path
+        monkeypatch.setenv(name=TlsOptions.ENV_CA_CERT, value=ca_cert_path)
+        monkeypatch.setenv(name=TlsOptions.ENV_CLIENT_CERT, value=client_cert_path)
+        monkeypatch.setenv(name=TlsOptions.ENV_CLIENT_KEY, value=client_key_path)
 
-    tls_options = TlsOptions(
-        enabled=True, ca_cert_path=ca_cert_path2, client_cert_path=client_cert_path2, client_key_path=client_key_path2
-    )
-    assert tls_options.enabled
-    assert tls_options.ca_cert_path == ca_cert_path
-    assert tls_options.client_cert_path == client_cert_path
-    assert tls_options.client_key_path == client_key_path
+        tls_options = TlsOptions()
+        assert tls_options.enabled is False
+        assert tls_options.ca_cert_path == ca_cert_path
+        assert tls_options.client_cert_path == client_cert_path
+        assert tls_options.client_key_path == client_key_path
 
-    monkeypatch.delenv(name=TlsOptions.ENV_CA_CERT)
-    tls_options = TlsOptions(
-        enabled=True, ca_cert_path=ca_cert_path2, client_cert_path=client_cert_path2, client_key_path=client_key_path2
-    )
-    assert tls_options.enabled
-    assert tls_options.ca_cert_path == ca_cert_path2
-    assert tls_options.client_cert_path == client_cert_path
-    assert tls_options.client_key_path == client_key_path
+        tls_options = TlsOptions(
+            enabled=True,
+            ca_cert_path=ca_cert_path2,
+            client_cert_path=client_cert_path2,
+            client_key_path=client_key_path2,
+        )
+        assert tls_options.enabled
+        assert tls_options.ca_cert_path == ca_cert_path
+        assert tls_options.client_cert_path == client_cert_path
+        assert tls_options.client_key_path == client_key_path
 
-    monkeypatch.delenv(name=TlsOptions.ENV_CLIENT_CERT)
-    tls_options = TlsOptions(
-        enabled=True, ca_cert_path=ca_cert_path2, client_cert_path=client_cert_path2, client_key_path=client_key_path2
-    )
-    assert tls_options.enabled
-    assert tls_options.ca_cert_path == ca_cert_path2
-    assert tls_options.client_cert_path == client_cert_path2
-    assert tls_options.client_key_path == client_key_path
+        monkeypatch.delenv(name=TlsOptions.ENV_CA_CERT)
+        tls_options = TlsOptions(
+            enabled=True,
+            ca_cert_path=ca_cert_path2,
+            client_cert_path=client_cert_path2,
+            client_key_path=client_key_path2,
+        )
+        assert tls_options.enabled
+        assert tls_options.ca_cert_path == ca_cert_path2
+        assert tls_options.client_cert_path == client_cert_path
+        assert tls_options.client_key_path == client_key_path
 
-    monkeypatch.delenv(name=TlsOptions.ENV_CLIENT_KEY)
-    tls_options = TlsOptions(
-        enabled=True, ca_cert_path=ca_cert_path2, client_cert_path=client_cert_path2, client_key_path=client_key_path2
-    )
-    assert tls_options.enabled
-    assert tls_options.ca_cert_path == ca_cert_path2
-    assert tls_options.client_cert_path == client_cert_path2
-    assert tls_options.client_key_path == client_key_path2
+        monkeypatch.delenv(name=TlsOptions.ENV_CLIENT_CERT)
+        tls_options = TlsOptions(
+            enabled=True,
+            ca_cert_path=ca_cert_path2,
+            client_cert_path=client_cert_path2,
+            client_key_path=client_key_path2,
+        )
+        assert tls_options.enabled
+        assert tls_options.ca_cert_path == ca_cert_path2
+        assert tls_options.client_cert_path == client_cert_path2
+        assert tls_options.client_key_path == client_key_path
+
+        monkeypatch.delenv(name=TlsOptions.ENV_CLIENT_KEY)
+        tls_options = TlsOptions(
+            enabled=True,
+            ca_cert_path=ca_cert_path2,
+            client_cert_path=client_cert_path2,
+            client_key_path=client_key_path2,
+        )
+        assert tls_options.enabled
+        assert tls_options.ca_cert_path == ca_cert_path2
+        assert tls_options.client_cert_path == client_cert_path2
+        assert tls_options.client_key_path == client_key_path2
+    finally:
+        monkeypatch.undo()
