@@ -29,9 +29,9 @@ jobs:
           - ",-jakarta,javax"
           - ",jakarta,-javax"
         exclude:
-          - coherenceVersion: 24.09
+          - coherenceVersion: 24.03.1
             profile: ",-jakarta,javax"
-          - coherenceVersion: 22.06.9
+          - coherenceVersion: 22.06.7
             profile: ",jakarta,-javax"
 
     runs-on: ${{ matrix.os }}
