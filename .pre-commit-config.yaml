@@ -21,7 +21,7 @@ repos:
         - id: flake8
 
 -   repo: https://github.com/psf/black
-    rev: b965c2a5026f8ba399283ba3e01898b012853c79
+    rev: b965c2a5026f8ba399283ba3e01898b012853c79  # frozen: 24.10.0
     hooks:
         - id: black
 
