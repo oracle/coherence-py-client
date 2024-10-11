@@ -90,14 +90,16 @@ class _Handshake:
         stream: StreamStreamMultiCallable = stub.subChannel()
         try:
             await stream.write(RequestFactoryV1.init_sub_channel())
-            await asyncio.sleep(0)
             response = await stream.read()
             stream.cancel()  # cancel the stream; no longer needed
             self._proxy_version = response.init.version
             self._protocol_version = response.init.protocolVersion
             self._proxy_member_id = response.init.proxyMemberId
         except grpc.aio._call.AioRpcError as e:
-            if e.code().value[0] == grpc.StatusCode.UNIMPLEMENTED.value[0]:
+            if (
+                e.code().value[0] == grpc.StatusCode.UNIMPLEMENTED.value[0]
+                or e.code().value[0] == grpc.StatusCode.INTERNAL.value[0]
+            ):
                 pass
             else:
                 raise RuntimeError("Unknown error attempting to handshake with proxy: " + str(e))
