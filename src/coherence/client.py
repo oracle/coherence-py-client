@@ -96,9 +96,11 @@ class _Handshake:
             self._protocol_version = response.init.protocolVersion
             self._proxy_member_id = response.init.proxyMemberId
         except grpc.aio._call.AioRpcError as e:
+            error_code: int = e.code().value[0]
             if (
-                e.code().value[0] == grpc.StatusCode.UNIMPLEMENTED.value[0]
-                or e.code().value[0] == grpc.StatusCode.INTERNAL.value[0]
+                error_code == grpc.StatusCode.UNIMPLEMENTED.value[0]
+                or error_code
+                == grpc.StatusCode.INTERNAL.value[0]  # work around for grpc https://github.com/grpc/grpc/issues/36066
             ):
                 pass
             else:
