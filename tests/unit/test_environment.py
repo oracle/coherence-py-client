@@ -9,6 +9,7 @@ from coherence import Options, TlsOptions
 
 def test_options_address(monkeypatch: pytest.MonkeyPatch) -> None:
     try:
+        monkeypatch.delenv(name=Options.ENV_SERVER_ADDRESS, raising=False)
         options: Options = Options()
         assert options.address == "localhost:1408"
 
@@ -48,6 +49,7 @@ def test_options_req_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_options_ready_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
     try:
+        monkeypatch.delenv(name=Options.ENV_READY_TIMEOUT, raising=False)
         options: Options = Options()
         assert options.ready_timeout_seconds == 0
 
@@ -66,6 +68,7 @@ def test_options_ready_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_disconnect_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
     try:
+        monkeypatch.delenv(name=Options.ENV_SESSION_DISCONNECT_TIMEOUT, raising=False)
         options: Options = Options()
         assert options.session_disconnect_timeout_seconds == 30
 
