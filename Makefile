@@ -138,7 +138,7 @@ test:  ##
 .PHONY: validate-setup
 validate-setup:  ##
 	poetry update
-	pre-commit autoupdate
+	pre-commit install
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run standards validation across project
