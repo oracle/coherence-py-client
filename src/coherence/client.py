@@ -88,15 +88,15 @@ class _Handshake:
     async def handshake(self) -> None:
         stub: ProxyServiceStub = ProxyServiceStub(self._channel)
         stream: StreamStreamMultiCallable = stub.subChannel()
-        await stream.write(RequestFactoryV1.init_sub_channel())
         try:
+            await stream.write(RequestFactoryV1.init_sub_channel())
             response = await stream.read()
             stream.cancel()  # cancel the stream; no longer needed
             self._proxy_version = response.init.version
             self._protocol_version = response.init.protocolVersion
             self._proxy_member_id = response.init.proxyMemberId
         except grpc.aio._call.AioRpcError as e:
-            if e.details() == "Method not found: coherence.proxy.v1.ProxyService/subChannel":
+            if e.code().value[0] == grpc.StatusCode.UNIMPLEMENTED.value[0]:
                 pass
             else:
                 raise RuntimeError("Unknown error attempting to handshake with proxy: " + str(e))
@@ -2307,10 +2307,10 @@ class StreamHandler:
                     self.handle_zero_id_response(response)
                 else:
                     if response.HasField("message"):
-                        named_cache_response = NamedCacheResponse()
-                        response.message.Unpack(named_cache_response)
                         observer = self._observers.get(response_id, None)
                         if observer is not None:
+                            named_cache_response = NamedCacheResponse()
+                            response.message.Unpack(named_cache_response)
                             observer._next(named_cache_response)
                             continue
                     elif response.HasField("init"):

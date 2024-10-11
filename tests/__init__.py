@@ -171,6 +171,7 @@ class CountingMapListener(MapListener[K, V]):
         :param event_count:  the number of expected events
         """
         while True:
+            print("### DEBUG : COUNT -> " + str(self.count))
             if self.count == event_count:
                 return
             await asyncio.sleep(0)
