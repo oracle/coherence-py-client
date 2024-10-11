@@ -29,7 +29,7 @@ jobs:
           - ",-jakarta,javax"
           - ",jakarta,-javax"
         exclude:
-          - coherenceVersion: 24.03.1
+          - coherenceVersion: 24.03
             profile: ",-jakarta,javax"
           - coherenceVersion: 22.06.7
             profile: ",jakarta,-javax"
