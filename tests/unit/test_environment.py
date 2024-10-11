@@ -1,6 +1,7 @@
 # Copyright (c) 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
+
 import pytest
 
 from coherence import Options, TlsOptions
@@ -28,6 +29,7 @@ def test_options_address(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_options_req_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
     try:
+        monkeypatch.delenv(name=Options.ENV_REQUEST_TIMEOUT, raising=False)
         options: Options = Options()
         assert options.request_timeout_seconds == 30
 
