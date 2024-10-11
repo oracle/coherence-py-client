@@ -67,6 +67,23 @@ COMPOSE:=$(shell type -p docker-compose || echo docker compose)
 $(info COMPOSE = $(COMPOSE))
 
 # ----------------------------------------------------------------------------------------------------------------------
+# List of unit tests
+# ----------------------------------------------------------------------------------------------------------------------
+UNIT_TESTS := tests/unit/test_environment.py \
+				tests/unit/test_serialization.py \
+				tests/unit/test_extractors.py
+
+# ----------------------------------------------------------------------------------------------------------------------
+# List of E2E tests
+# ----------------------------------------------------------------------------------------------------------------------
+E2E_TESTS := tests/e2e/test_session.py \
+				tests/e2e/test_client.py \
+				tests/e2e/test_events.py \
+				tests/e2e/test_filters.py \
+				tests/e2e/test_processors.py \
+				tests/e2e/test_aggregators.py \
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Clean-up all of the build artifacts
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: clean
@@ -142,15 +159,21 @@ generate-proto:  ## Generate Proto Files
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test
 test:  ##
-	pytest -W error --cov src/coherence --cov-report=term --cov-report=html \
-		tests/test_serialization.py \
-		tests/test_extractors.py \
-		tests/test_session.py \
-		tests/test_client.py \
-		tests/test_events.py \
-		tests/test_filters.py \
-		tests/test_processors.py \
-		tests/test_aggregators.py \
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS) $(E2E_TESTS)
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Run unit tests with code coverage
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-unit
+test-unit:  ##
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS)
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Run e2e tests with code coverage
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-e2e
+test-e2e:  ##
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html $(E2E_TESTS)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run standards validation across project

@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 import asyncio
@@ -19,7 +19,7 @@ V = TypeVar("V")
 """Generic type for cache values"""
 
 # logging configuration for tests
-logging_config: str = "tests/logging.conf"  # executing from project root
+logging_config: str = os.path.dirname(__file__) + "/logging.conf"  # executing from project root
 if not os.path.exists(logging_config):
     logging_config = "logging.conf"  # executing from tests directory (most likely IntelliJ)
 

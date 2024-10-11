@@ -742,18 +742,18 @@ class _MapEventsManager(Generic[K, V], ABC):
 
         session.on(SessionLifecycleEvent.DISCONNECTED, self._close)
 
-        # intentionally ignoring the typing here to avoid complicating the
-        # callback API exposed on the session
-        # noinspection PyTypeChecker
-        session.on(SessionLifecycleEvent.RECONNECTED, self._reconnect)
-
     @abstractmethod
     def _close(self) -> None:
         pass
 
-    @abstractmethod
+    # noinspection PyProtectedMember
     async def _reconnect(self) -> None:
-        pass
+        group: _ListenerGroup[K, V, Any]
+        for group in self._key_map.values():
+            await group._subscribe(group._registered_lite)
+
+        for group in self._filter_map.values():
+            await group._subscribe(group._registered_lite)
 
     @abstractmethod
     def _new_key_group(self, key: K) -> _ListenerGroup[K, V, Any]:
@@ -879,6 +879,9 @@ class _MapEventsManagerV0(_MapEventsManager[K, V]):
         self._client = client
         self._request_factory = RequestFactory(self._map_name, session.scope, serializer)
 
+        # noinspection PyTypeChecker
+        session.on(SessionLifecycleEvent.RECONNECTED, self._reconnect)
+
     def _new_key_group(self, key: K) -> _ListenerGroup[K, V, Any]:
         return _KeyListenerGroupV0(self, key)
 
@@ -897,15 +900,6 @@ class _MapEventsManagerV0(_MapEventsManager[K, V]):
         for task in self._background_tasks:
             task.cancel()
         self._background_tasks.clear()
-
-    # noinspection PyProtectedMember
-    async def _reconnect(self) -> None:
-        group: _ListenerGroup[K, V, Any]
-        for group in self._key_map.values():
-            await group._subscribe(group._registered_lite)
-
-        for group in self._filter_map.values():
-            await group._subscribe(group._registered_lite)
 
     async def _ensure_stream(self) -> grpc.aio.StreamStreamCall:
         """
@@ -1010,7 +1004,4 @@ class _MapEventsManagerV1(_MapEventsManager[K, V]):
         return _FilterListenerGroupV1(self, filter)
 
     def _close(self) -> None:
-        pass
-
-    async def _reconnect(self) -> None:
         pass

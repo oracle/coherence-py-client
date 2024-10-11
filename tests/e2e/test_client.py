@@ -481,7 +481,7 @@ async def test_cache_release_event() -> None:
         await cache.put("C", "D")
         assert await cache.size() == 2
 
-        cache.release()
+        await cache.release()
         await tests.wait_for(event, EVENT_TIMEOUT)
 
         assert name == cache.name

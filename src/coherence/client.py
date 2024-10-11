@@ -34,9 +34,8 @@ import grpc
 from grpc.aio import Channel, StreamStreamMultiCallable
 from pymitter import EventEmitter
 
-from . import proxy_service_messages_v1_pb2
 from .aggregator import AverageAggregator, EntryAggregator, PriorityAggregator, SumAggregator
-from .cache_service_messages_v1_pb2 import MapEventMessage, NamedCacheRequest, NamedCacheResponse, ResponseType
+from .cache_service_messages_v1_pb2 import MapEventMessage, NamedCacheResponse, ResponseType
 from .comparator import Comparator
 from .entry import MapEntry
 from .event import (
@@ -52,8 +51,7 @@ from .extractor import ValueExtractor
 from .filter import Filter
 from .messages_pb2 import PageRequest
 from .processor import EntryProcessor
-from .proxy_service_messages_v1_pb2 import ProxyRequest, ProxyResponse, \
-    InitRequest
+from .proxy_service_messages_v1_pb2 import ProxyRequest, ProxyResponse
 from .proxy_service_v1_pb2_grpc import ProxyServiceStub
 from .serialization import Serializer, SerializerRegistry
 from .services_pb2_grpc import NamedCacheServiceStub
@@ -90,12 +88,7 @@ class _Handshake:
     async def handshake(self) -> None:
         stub: ProxyServiceStub = ProxyServiceStub(self._channel)
         stream: StreamStreamMultiCallable = stub.subChannel()
-
-        init_request = ProxyRequest(
-            id=2,
-            init=self._session._create_init_request(),
-        )
-        await stream.write(init_request)
+        await stream.write(RequestFactoryV1.init_sub_channel())
         try:
             response = await stream.read()
             stream.cancel()  # cancel the stream; no longer needed
@@ -333,7 +326,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    def release(self) -> None:
+    async def release(self) -> None:
         """
         Release local resources associated with instance.
 
@@ -671,13 +664,13 @@ class NamedCacheClient(NamedCache[K, V]):
         await self._client_stub.clear(r)
 
     async def destroy(self) -> None:
-        self.release()
+        await self.release()
         self._internal_emitter.once(MapLifecycleEvent.DESTROYED.value)
         self._internal_emitter.emit(MapLifecycleEvent.DESTROYED.value, self.name)
         r = self._request_factory.destroy_request()
         await self._client_stub.destroy(r)
 
-    def release(self) -> None:
+    async def release(self) -> None:
         if self.active:
             self._internal_emitter.once(MapLifecycleEvent.RELEASED.value)
             self._internal_emitter.emit(MapLifecycleEvent.RELEASED.value, self.name)
@@ -894,8 +887,6 @@ class NamedCacheClientV1(NamedCache[K, V]):
         self._cache_name: str = cache_name
         self._cache_id: int = 0
         self._serializer: Serializer = serializer
-        self._client_stub: ProxyServiceStub = ProxyServiceStub(session._channel)
-        self._client_stream: Optional[StreamStreamMultiCallable] = None
         self._request_factory: RequestFactoryV1 = RequestFactoryV1(
             cache_name, self._cache_id, session.scope, serializer
         )
@@ -909,6 +900,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
             self, session, serializer, self._internal_emitter, self._request_factory
         )
 
+        self._stream_handler: StreamHandler = StreamHandler(session, self._request_factory, self._events_manager)
         self._setup_event_handlers()
 
     def _setup_event_handlers(self) -> None:
@@ -925,6 +917,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
             if name == cache_name and not this.destroyed:
                 this._events_manager._close()
                 this._destroyed = True
+                this._released = True
                 emitter.emit(MapLifecycleEvent.DESTROYED.value, name)
 
         # noinspection PyProtectedMember
@@ -965,26 +958,11 @@ class NamedCacheClientV1(NamedCache[K, V]):
     def released(self) -> bool:
         return self._released
 
-    async def _ensure_sub_channel(self) -> None:
-        self._client_stream = self._client_stub.subChannel()
-        init_request = ProxyRequest(
-            id=2,
-            init=self._session._create_init_request(),
-        )
-        await self._client_stream.write(init_request)
-        await self._client_stream.read()  # don't care about the result; just that it completed
-
-        self._stream_handler: StreamHandler = StreamHandler(
-            self._request_factory, self._events_manager, self._client_stream
-        )
-
     async def _ensure_cache(self) -> None:
-        await self._ensure_sub_channel()
         dispatcher: UnaryDispatcher[int] = self._request_factory.ensure_request(self._cache_name)
         await dispatcher.dispatch(self._stream_handler)
 
         self.cache_id = dispatcher.result()
-        self._session.update_cache_id_map(self.cache_id, self)
         self._request_factory.cache_id = self.cache_id
 
     @_pre_call_cache
@@ -1059,9 +1037,9 @@ class NamedCacheClientV1(NamedCache[K, V]):
         dispatcher: Dispatcher = self._request_factory.destroy_request()
         await dispatcher.dispatch(self._stream_handler)
 
-    def release(self) -> None:
+    async def release(self) -> None:
         if self.active:
-            self._stream_handler.close()
+            await self._stream_handler.close()
             self._internal_emitter.once(MapLifecycleEvent.RELEASED.value)
             self._internal_emitter.emit(MapLifecycleEvent.RELEASED.value, self.name)
 
@@ -1242,11 +1220,9 @@ class TlsOptions:
         self._locked = locked
         self._enabled = enabled
 
-        self._ca_cert_path = ca_cert_path if ca_cert_path is not None else os.getenv(TlsOptions.ENV_CA_CERT)
-        self._client_cert_path = (
-            client_cert_path if client_cert_path is not None else os.getenv(TlsOptions.ENV_CLIENT_CERT)
-        )
-        self._client_key_path = client_key_path if client_key_path is not None else os.getenv(TlsOptions.ENV_CLIENT_KEY)
+        self._ca_cert_path = os.getenv(TlsOptions.ENV_CA_CERT, ca_cert_path)
+        self._client_cert_path = os.getenv(TlsOptions.ENV_CLIENT_CERT, client_cert_path)
+        self._client_key_path = os.getenv(TlsOptions.ENV_CLIENT_KEY, client_key_path)
 
     @property
     def enabled(self) -> bool:
@@ -1403,18 +1379,14 @@ class Options:
             https://github.com/grpc/grpc/blob/master/include/grpc/impl/grpc_types.h
         :param tls_options: Optional TLS configuration.
         """
-        addr = os.getenv(Options.ENV_SERVER_ADDRESS)
-        if addr is not None:
-            self._address = addr
-        else:
-            self._address = address
+        self._address = os.getenv(Options.ENV_SERVER_ADDRESS, address)
 
         self._request_timeout_seconds = Options._get_float_from_env(
             Options.ENV_REQUEST_TIMEOUT, request_timeout_seconds
         )
         self._ready_timeout_seconds = Options._get_float_from_env(Options.ENV_READY_TIMEOUT, ready_timeout_seconds)
         self._session_disconnect_timeout_seconds = Options._get_float_from_env(
-            Options.ENV_READY_TIMEOUT, session_disconnect_seconds
+            Options.ENV_SESSION_DISCONNECT_TIMEOUT, session_disconnect_seconds
         )
 
         self._scope = scope
@@ -1611,8 +1583,6 @@ class Session:
         self._initialized: bool = False
         self._ready_condition: Condition = Condition()
         self._caches: dict[str, NamedCache[Any, Any]] = dict()
-        # to map cacheId to Cache instance. Not used in v0
-        self._id_to_caches: dict[int, NamedCache[Any, Any]] = dict()
         self._lock: Lock = Lock()
         if session_options is not None:
             self._session_options = session_options
@@ -1698,6 +1668,10 @@ class Session:
         :param event:     the event to listener for
         :param callback:  the callback to invoke when the event is raised
         """
+        if event == SessionLifecycleEvent.CONNECTED and self.is_ready():
+            callback()  # type: ignore
+            return
+
         self._emitter.on(str(event.value), callback)
 
     @property
@@ -1769,9 +1743,6 @@ class Session:
                 f" caches/maps={len(self._caches)}, protocol-version={self._protocol_version} options={self.options})"
             )
 
-    def update_cache_id_map(self, cache_id: int, cache: NamedCache[K, V]) -> None:
-        self._id_to_caches.update({cache_id: cache})
-
     # noinspection PyProtectedMember
     @_pre_call_session
     async def get_cache(self, name: str, ser_format: str = DEFAULT_FORMAT) -> NamedCache[K, V]:
@@ -1816,7 +1787,7 @@ class Session:
 
         :return: Returns a :func:`coherence.client.NamedMap` for the specified cache name.
         """
-        return cast(NamedMap[K, V], self.get_cache(name, ser_format))
+        return cast(NamedMap[K, V], await self.get_cache(name, ser_format))
 
     def is_ready(self) -> bool:
         """
@@ -1872,11 +1843,12 @@ class Session:
             self._emitter.emit(SessionLifecycleEvent.CLOSED.value)
             for task in self._tasks:
                 task.cancel()
+                await task
             self._tasks.clear()
 
             caches_copy: dict[str, NamedCache[Any, Any]] = self._caches.copy()
             for cache in caches_copy.values():
-                cache.release()
+                await cache.release()
 
             self._caches.clear()
 
@@ -1898,41 +1870,6 @@ class Session:
 
         client.on(MapLifecycleEvent.DESTROYED, on_destroyed)
         client.on(MapLifecycleEvent.RELEASED, on_released)
-
-    async def _send_init_request(self, stream) -> object:  # type: ignore
-        # InitRequest
-        init_request = proxy_service_messages_v1_pb2.ProxyRequest(
-            id=2,
-            init=self._create_init_request(),
-        )
-        await stream.write(init_request)
-        try:
-            response = await stream.read()
-            # COH_LOG.info(response)
-            # COH_LOG.info("InitRequest request completed.")
-            return response
-        except grpc.aio._call.AioRpcError as e:
-            if e.details() == "Method not found: coherence.proxy.v1.ProxyService/subChannel":
-                COH_LOG.info("Server is not running v1 gRPC version")
-            raise e
-
-    def _create_init_request(self) -> InitRequest:
-
-        init_request = InitRequest(
-            scope="",
-            format="json",
-            protocol="CacheService",
-            protocolVersion=1,
-            supportedProtocolVersion=1,
-            heartbeat=0,
-        )
-
-        return init_request
-
-    # Commented out as it doesn't appear valid or used
-    # @property
-    # def request_id_map(self):
-    #     return self._request_id_map
 
 
 # noinspection PyArgumentList
@@ -2278,35 +2215,82 @@ class StreamHandler:
 
     def __init__(
         self,
+        session: Session,
         request_factory: RequestFactoryV1,
         events_manager: _MapEventsManagerV1[K, V],
-        stream: grpc.aio._call.StreamStreamCall,
     ):
+        self._channel = session.channel
+        self._reconnect_timeout: float = session.options.session_disconnect_timeout_seconds
+        self._proxy_stub = ProxyServiceStub(session.channel)
+
         self._request_factory: RequestFactoryV1 = request_factory
         self._events_manager: _MapEventsManagerV1[K, V] = events_manager
-        self._stream: grpc.aio._call.StreamStreamCall = stream
+        self._stream: Optional[StreamStreamMultiCallable] = None
         self._observers: dict[int, ResponseObserver] = dict()
-        self._request_id_to_event_map: dict[int, Event] = dict()
-        self._request_id_request_map: dict[int, NamedCacheRequest] = dict()
         self.result_available = Event()
         self.result_available.clear()
-        self.response_result: NamedCacheResponse | None = None
-        self.response_result_collection: list[NamedCacheResponse] = list()
-        self._background_tasks = set()
+        self._background_tasks: Set[Task[Any]] = set()
         self._closed: bool = False
+        self._connected = Event()
+        self._connected.clear()
+        self._ensure_lock = asyncio.Lock()
+
         task = asyncio.create_task(self.handle_response())
-        self._background_tasks.add(task)
         task.add_done_callback(self._background_tasks.discard)
+        self._background_tasks.add(task)
+
+        def on_disconnect() -> None:
+            self._connected.clear()
+            self._stream = None
+
+        async def on_reconnect() -> None:
+            self._connected.set()
+            await self._events_manager._named_map._ensure_cache()
+            await self._events_manager._reconnect()
+
+        session.on(SessionLifecycleEvent.DISCONNECTED, on_disconnect)
+        session.on(SessionLifecycleEvent.RECONNECTED, on_reconnect)
 
     @property
-    def stream(self) -> grpc.aio._call.StreamStreamCall:
+    async def stream(self) -> StreamStreamMultiCallable:
+        await self._ensure_stream()
+
         return self._stream
 
-    def close(self) -> None:
+    # noinspection PyUnresolvedReferences
+    async def close(self) -> None:
+        tasks: Set[Task[Any]] = set(self._background_tasks)
+        for task in tasks:
+            task.cancel()
+            await task
+
+        if self._stream is not None:
+            self._stream.cancel()
+            self._stream = None
+
         self._closed = True
 
+    async def _ensure_stream(self) -> StreamStreamMultiCallable:
+        if self._stream is None:
+            async with self._ensure_lock:
+                if self._stream is None:
+                    stream = self._proxy_stub.subChannel()
+
+                    try:
+                        await stream.write(self._request_factory.init_sub_channel())
+                    except grpc.aio._call.AioRpcError as e:
+                        print(e)
+
+                    await stream.read()
+                    self._stream = stream  # we don't care about the result, only that it completes
+                    self._connected.set()
+
+        return self._stream
+
+    # noinspection PyUnresolvedReferences
     async def send_proxy_request(self, proxy_request: ProxyRequest) -> None:
-        await self._stream.write(proxy_request)
+        stream: StreamStreamMultiCallable = await self.stream
+        await stream.write(proxy_request)
 
     def register_observer(self, observer: ResponseObserver) -> None:
         assert observer.id not in self._observers
@@ -2315,56 +2299,50 @@ class StreamHandler:
 
     async def handle_response(self) -> None:
         while not self._closed:
-            await asyncio.sleep(0)
-            response = await self.stream.read()
-            response_id = response.id
-            if response_id == 0:
-                self.handle_zero_id_response(response)
-            else:
-                if response.HasField("message"):
-                    named_cache_response = NamedCacheResponse()
-                    response.message.Unpack(named_cache_response)
-                    observer = self._observers.get(response_id, None)
-                    if observer is not None:
-                        observer._next(named_cache_response)
+            try:
+                stream: StreamStreamMultiCallable = await self.stream
+                response = await stream.read()
+                response_id = response.id
+                if response_id == 0:
+                    self.handle_zero_id_response(response)
+                else:
+                    if response.HasField("message"):
+                        named_cache_response = NamedCacheResponse()
+                        response.message.Unpack(named_cache_response)
+                        observer = self._observers.get(response_id, None)
+                        if observer is not None:
+                            observer._next(named_cache_response)
+                            continue
+                    elif response.HasField("init"):
+                        print("InitRequest request completed.")
+                        self.result_available.set()
+                    elif response.HasField("error"):
+                        observer = self._observers.get(response_id, None)
+                        if observer is not None:
+                            self._observers.pop(response_id, None)
+                            observer._err(Error(response.error.message))
                         continue
-                elif response.HasField("init"):
-                    self._request_id_to_event_map.pop(response_id)
-                    print("InitRequest request completed.")
-                    self.result_available.set()
-                elif response.HasField("error"):
-                    observer = self._observers.get(response_id, None)
-                    if observer is not None:
-                        self._observers.pop(response_id, None)
-                        observer._err(Error(response.error.message))
+                    elif response.HasField("complete"):
+                        observer = self._observers.get(response_id, None)
+                        if observer is not None:
+                            self._observers.pop(response_id, None)
+                            observer._done()
+            except asyncio.CancelledError:
+                return
+            except grpc.aio._call.AioRpcError as e:
+                if e.code().name == "CANCELLED":
                     continue
-                elif response.HasField("complete"):
-                    observer = self._observers.get(response_id, None)
-                    if observer is not None:
-                        self._observers.pop(response_id, None)
-                        observer._done()
-
-    async def write_request(
-        self,
-        proxy_request: proxy_service_messages_v1_pb2.ProxyRequest,
-        request_id: int,
-        request: NamedCacheRequest,
-    ) -> None:
-        self._request_id_to_event_map[request_id] = Event()
-        self._request_id_to_event_map[request_id].clear()
-        self._request_id_request_map[request_id] = request
-        await self._stream.write(proxy_request)
+                COH_LOG.error("Received unexpected error from proxy: " + str(e))
 
     # noinspection PyUnresolvedReferences
     def handle_zero_id_response(self, response: ProxyResponse) -> None:
         if response.HasField("message"):
             named_cache_response = NamedCacheResponse()
             response.message.Unpack(named_cache_response)
-            type = named_cache_response.type
-            # cache_id = named_cache_response.cacheId
-            if type == ResponseType.Message:
+            response_type = named_cache_response.type
+            if response_type == ResponseType.Message:
                 pass
-            elif type == ResponseType.MapEvent:
+            elif response_type == ResponseType.MapEvent:
                 # Handle MapEvent Response
                 event_response = MapEventMessage()
                 named_cache_response.message.Unpack(event_response)
@@ -2385,12 +2363,12 @@ class StreamHandler:
                         key_group._notify_listeners(event)
                 except Exception as e:
                     COH_LOG.warning("Unhandled Event Message: " + str(e))
-            elif type == ResponseType.Destroyed:
+            elif response_type == ResponseType.Destroyed:
                 if self._events_manager._named_map.cache_id == named_cache_response.cacheId:
                     self._events_manager._emitter.emit(
                         MapLifecycleEvent.DESTROYED.value, self._events_manager._named_map.name
                     )
-            elif type == ResponseType.Truncated:
+            elif response_type == ResponseType.Truncated:
                 if self._events_manager._named_map.cache_id == named_cache_response.cacheId:
                     self._events_manager._emitter.emit(
                         MapLifecycleEvent.TRUNCATED.value, self._events_manager._named_map.name

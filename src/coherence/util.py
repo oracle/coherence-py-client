@@ -133,13 +133,10 @@ class OptionalValueTransformer(ResponseTransformer[Optional[T]]):
         super().__init__(serializer)
 
     def transform(self, response: NamedCacheResponse) -> Optional[T]:
-        if response.HasField("message"):
-            optional_value = OptionalValue()
-            response.message.Unpack(optional_value)
-            if optional_value.present:
-                return self.serializer.deserialize(optional_value.value)
-            else:
-                return None
+        optional_value = OptionalValue()
+        response.message.Unpack(optional_value)
+        if optional_value.present:
+            return self.serializer.deserialize(optional_value.value)
         else:
             return None
 
@@ -149,12 +146,9 @@ class IntValueTransformer(ResponseTransformer[int]):
         super().__init__(serializer)
 
     def transform(self, response: NamedCacheResponse) -> int:
-        if response.HasField("message"):
-            value = Int32Value()
-            response.message.Unpack(value)
-            return value.value
-        else:
-            return 0
+        value = Int32Value()
+        response.message.Unpack(value)
+        return value.value
 
 
 class BoolValueTransformer(ResponseTransformer[bool]):
@@ -162,12 +156,9 @@ class BoolValueTransformer(ResponseTransformer[bool]):
         super().__init__(serializer)
 
     def transform(self, response: NamedCacheResponse) -> bool:
-        if response.HasField("message"):
-            bool_value = BoolValue()
-            response.message.Unpack(bool_value)
-            return bool_value.value
-        else:
-            return False
+        bool_value = BoolValue()
+        response.message.Unpack(bool_value)
+        return bool_value.value
 
 
 class BytesValueTransformer(ResponseTransformer[Optional[T]]):
@@ -175,13 +166,10 @@ class BytesValueTransformer(ResponseTransformer[Optional[T]]):
         super().__init__(serializer)
 
     def transform(self, response: NamedCacheResponse) -> Optional[T]:
-        if response.HasField("message"):
-            bytes_value = BytesValue()
-            response.message.Unpack(bytes_value)
-            result: T = self.serializer.deserialize(bytes_value.value)
-            return result
-        else:
-            return None
+        bytes_value = BytesValue()
+        response.message.Unpack(bytes_value)
+        result: T = self.serializer.deserialize(bytes_value.value)
+        return result
 
 
 class CookieTransformer(ResponseTransformer[bytes]):
@@ -757,19 +745,25 @@ class RequestFactoryV1:
         )
         return proxy_request
 
-    def init_sub_channel(self) -> UnaryDispatcher[None]:
+    @staticmethod
+    def init_sub_channel(
+        scope: str = "",
+        serialization_format: str = "json",
+        protocol: str = "CacheService",
+        protocol_version: int = 1,
+        supported_protocol_version: int = 1,
+        heartbeat: int = 0,
+    ) -> ProxyRequest:
         init_request = InitRequest(
-            scope="",
-            format="json",
-            protocol="CacheService",
-            protocolVersion=1,
-            supportedProtocolVersion=1,
-            heartbeat=0,
+            scope=scope,
+            format=serialization_format,
+            protocol=protocol,
+            protocolVersion=protocol_version,
+            supportedProtocolVersion=supported_protocol_version,
+            heartbeat=heartbeat,
         )
 
-        proxy_request = ProxyRequest(id=2, init=init_request)
-
-        return UnaryDispatcher(proxy_request)
+        return ProxyRequest(id=2, init=init_request)
 
     def ensure_request(self, cache_name: str) -> UnaryDispatcher[int]:
         cache_request = EnsureCacheRequest(cache=cache_name)

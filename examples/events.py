@@ -31,7 +31,7 @@ async def do_run() -> None:
         await asyncio.sleep(1)
 
         print("Releasing the NamedMap; this should generate an event ...")
-        named_map.release()
+        await named_map.release()
         await asyncio.sleep(1)
 
         print("Destroying the NamedMap; this should generate an event ...")

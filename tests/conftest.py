@@ -1,6 +1,7 @@
 # Copyright (c) 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
+import asyncio
 import time
 from typing import Any, AsyncGenerator
 
@@ -16,6 +17,7 @@ async def test_session() -> AsyncGenerator[Session, None]:
     session: Session = await tests.get_session()
     yield session
     await session.close()
+    await asyncio.sleep(0)  # helps avoid loop already closed errors
 
 
 @pytest_asyncio.fixture

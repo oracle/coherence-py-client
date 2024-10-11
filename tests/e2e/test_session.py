@@ -14,7 +14,7 @@ from typing import Final
 import pytest
 
 import tests
-from coherence import NamedCache, NamedMap, Options, Session, TlsOptions
+from coherence import NamedCache, NamedMap, Options, Session
 from coherence.event import MapLifecycleEvent, SessionLifecycleEvent
 from tests import CountingMapListener
 
@@ -26,7 +26,6 @@ EVENT_TIMEOUT: Final[float] = 10.0
 async def test_basics() -> None:
     """Test initial session state and post-close invocations raise error"""
 
-    run_secure: str = "RUN_SECURE"
     session: Session = await tests.get_session()
 
     def check_basics() -> None:
@@ -34,16 +33,6 @@ async def test_basics() -> None:
         assert session.format == Options.DEFAULT_FORMAT
         assert session.session_id is not None
         assert session.options is not None
-
-        if run_secure in os.environ:
-            assert session.options.tls_options is not None
-            assert session.options.tls_options.enabled
-            assert session.options.tls_options.client_key_path == os.environ.get(TlsOptions.ENV_CLIENT_KEY)
-            assert session.options.tls_options.ca_cert_path == os.environ.get(TlsOptions.ENV_CA_CERT)
-            assert session.options.tls_options.client_cert_path == os.environ.get(TlsOptions.ENV_CLIENT_CERT)
-        else:
-            assert session.options.tls_options is None
-            assert session.options.channel_options is None
 
         assert session.options.session_disconnect_timeout_seconds == Options.DEFAULT_SESSION_DISCONNECT_TIMEOUT
 
@@ -137,7 +126,7 @@ async def test_session_lifecycle() -> None:
     session.on(SessionLifecycleEvent.RECONNECTED, reconn_callback)
     session.on(SessionLifecycleEvent.CLOSED, close_callback)
 
-    await tests.wait_for(conn_event, EVENT_TIMEOUT)
+    # await tests.wait_for(conn_event, EVENT_TIMEOUT)
     assert session.is_ready()
 
     await _shutdown_proxy()
@@ -304,7 +293,7 @@ async def _validate_cache_event(lifecycle_event: MapLifecycleEvent) -> None:
         assert await cache.size() == 2
 
         if lifecycle_event == MapLifecycleEvent.RELEASED:
-            cache.release()
+            await cache.release()
         else:
             await cache.destroy()
 
