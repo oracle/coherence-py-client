@@ -20,7 +20,7 @@ The Coherence Python Client allows Python applications to act as cache clients t
 * Support for storing Python objects as JSON as well as the ability to serialize to Java objects on the server for access from other Coherence language API's
 
 #### Requirements
-* [Coherence CE](https://github.com/oracle/coherence) 22.06.4+ or Coherence 14.1.1.2206.4+ Commercial edition with a configured [gRPCProxy](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html).
+* [Coherence CE](https://github.com/oracle/coherence) 22.06.10+ or Coherence 14.1.1.2206.10+ Commercial edition with a configured [gRPCProxy](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html).
 * Python 3.8.x
 
 
