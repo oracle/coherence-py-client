@@ -1915,9 +1915,11 @@ class _BaseInterceptor:
         :param request:              the gRPC request (if any)
         :return:                     the result of the call
         """
+        from . import _TIMEOUT_CONTEXT_VAR
+
         new_details = grpc.aio.ClientCallDetails(
             client_call_details.method,
-            self._session.options.request_timeout_seconds,
+            _TIMEOUT_CONTEXT_VAR.get(self._session.options.request_timeout_seconds),
             client_call_details.metadata,
             client_call_details.credentials,
             True if self._session._ready_enabled else None,
