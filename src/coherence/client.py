@@ -21,7 +21,6 @@ from typing import (
     Final,
     Generic,
     Literal,
-    Never,
     Optional,
     Sequence,
     Set,
@@ -78,12 +77,12 @@ COH_LOG = logging.getLogger("coherence")
 
 
 @asynccontextmanager
-async def request_timeout(timeout_seconds: float) -> AsyncIterator[Never]:
+async def request_timeout(timeout_seconds: float):  # type: ignore
     from . import _TIMEOUT_CONTEXT_VAR
 
     request_timeout = _TIMEOUT_CONTEXT_VAR.set(timeout_seconds)
     try:
-        yield  # type: ignore
+        yield
     finally:
         _TIMEOUT_CONTEXT_VAR.reset(request_timeout)
 
