@@ -1,7 +1,6 @@
 # Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
-
 from asyncio import Event
 from time import sleep, time
 from typing import Dict, Final, List, Optional, Set, TypeVar, Union
@@ -9,7 +8,8 @@ from typing import Dict, Final, List, Optional, Set, TypeVar, Union
 import pytest
 
 import tests
-from coherence import Aggregators, Filters, MapEntry, NamedCache, Session
+from coherence import Aggregators, Filters, MapEntry, NamedCache, Session, request_timeout
+from coherence.error import RequestTimeoutError
 from coherence.event import MapLifecycleEvent
 from coherence.extractor import ChainedExtractor, Extractors, UniversalExtractor
 from coherence.processor import ExtractorProcessor
@@ -529,3 +529,20 @@ async def test_add_remove_index(person_cache: NamedCache[str, Person]) -> None:
     # {'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord', 'bytes': -1, 'distinctValues': -1,
     # 'extractor': '.age', 'ordered': False}
     assert "index" not in idx_rec
+
+
+@pytest.mark.asyncio
+async def test_request_timeout() -> None:
+    session: Session = await tests.get_session()
+    try:
+        cache: NamedCache[any, any] = await session.get_cache("timeout-cache")
+        start = time()
+        try:
+            async with request_timeout(timeout_seconds=5.0):
+                await cache.invoke("key", tests.LongRunningProcessor())
+                assert False
+        except RequestTimeoutError:
+            end = time()
+            assert pytest.approx((end - start), 0.5) == 5.0
+    finally:
+        await session.close()

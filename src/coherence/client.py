@@ -11,6 +11,7 @@ import os
 import time
 import uuid
 from asyncio import Condition, Event, Task
+from contextlib import asynccontextmanager
 from threading import Lock
 from typing import (
     Any,
@@ -20,6 +21,7 @@ from typing import (
     Final,
     Generic,
     Literal,
+    Never,
     Optional,
     Sequence,
     Set,
@@ -38,6 +40,7 @@ from .aggregator import AverageAggregator, EntryAggregator, PriorityAggregator, 
 from .cache_service_messages_v1_pb2 import MapEventMessage, NamedCacheResponse, ResponseType
 from .comparator import Comparator
 from .entry import MapEntry
+from .error import RequestFailedError, SessionCreationError
 from .event import (
     MapEvent,
     MapLifecycleEvent,
@@ -57,7 +60,6 @@ from .serialization import Serializer, SerializerRegistry
 from .services_pb2_grpc import NamedCacheServiceStub
 from .util import (
     Dispatcher,
-    Error,
     PagingDispatcher,
     RequestFactory,
     RequestFactoryV1,
@@ -75,6 +77,17 @@ T = TypeVar("T")
 COH_LOG = logging.getLogger("coherence")
 
 
+@asynccontextmanager
+async def request_timeout(timeout_seconds: float) -> AsyncIterator[Never]:
+    from . import _TIMEOUT_CONTEXT_VAR
+
+    request_timeout = _TIMEOUT_CONTEXT_VAR.set(timeout_seconds)
+    try:
+        yield  # type: ignore
+    finally:
+        _TIMEOUT_CONTEXT_VAR.reset(request_timeout)
+
+
 # noinspection PyUnresolvedReferences,PyProtectedMember
 class _Handshake:
     def __init__(self, session: Session):
@@ -90,7 +103,7 @@ class _Handshake:
         stream: StreamStreamMultiCallable = stub.subChannel()
         try:
             await stream.write(RequestFactoryV1.init_sub_channel())
-            response = await stream.read()
+            response = await asyncio.wait_for(stream.read(), self._session.options.request_timeout_seconds)
             stream.cancel()  # cancel the stream; no longer needed
             self._proxy_version = response.init.version
             self._protocol_version = response.init.protocolVersion
@@ -98,13 +111,20 @@ class _Handshake:
         except grpc.aio._call.AioRpcError as e:
             error_code: int = e.code().value[0]
             if (
+                # Check for StatusCode INTERNAL as work around for
+                # grpc issue https://github.com/grpc/grpc/issues/36066
                 error_code == grpc.StatusCode.UNIMPLEMENTED.value[0]
-                or error_code
-                == grpc.StatusCode.INTERNAL.value[0]  # work around for grpc https://github.com/grpc/grpc/issues/36066
+                or error_code == grpc.StatusCode.INTERNAL.value[0]
             ):
                 pass
             else:
-                raise RuntimeError("Unknown error attempting to handshake with proxy: " + str(e))
+                raise SessionCreationError(
+                    "Unexpected error attempting to handshake with proxy: " + str(e.details())
+                ) from e
+        except asyncio.TimeoutError as e:
+            raise SessionCreationError("Handshake with proxy timed out") from e
+        finally:
+            stream.cancel()
 
     @property
     def protocol_version(self) -> int:
@@ -627,7 +647,7 @@ class NamedCacheClient(NamedCache[K, V]):
         g = self._request_factory.get_request(key)
         v = await self._client_stub.get(g)
         if v.present:
-            return self._request_factory.get_serializer().deserialize(v.value)
+            return self._request_factory.serializer.deserialize(v.value)
         else:
             return None
 
@@ -644,19 +664,19 @@ class NamedCacheClient(NamedCache[K, V]):
         r = self._request_factory.get_all_request(keys)
         stream = self._client_stub.getAll(r)
 
-        return _Stream(self._request_factory.get_serializer(), stream, _entry_producer)
+        return _Stream(self._request_factory.serializer, stream, _entry_producer)
 
     @_pre_call_cache
     async def put(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
         p = self._request_factory.put_request(key, value, ttl)
         v = await self._client_stub.put(p)
-        return self._request_factory.get_serializer().deserialize(v.value)
+        return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
     async def put_if_absent(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
         p = self._request_factory.put_if_absent_request(key, value, ttl)
         v = await self._client_stub.putIfAbsent(p)
-        return self._request_factory.get_serializer().deserialize(v.value)
+        return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
     async def put_all(self, map: dict[K, V]) -> None:
@@ -690,55 +710,55 @@ class NamedCacheClient(NamedCache[K, V]):
     async def remove(self, key: K) -> Optional[V]:
         r = self._request_factory.remove_request(key)
         v = await self._client_stub.remove(r)
-        return self._request_factory.get_serializer().deserialize(v.value)
+        return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
     async def remove_mapping(self, key: K, value: V) -> bool:
         r = self._request_factory.remove_mapping_request(key, value)
         v = await self._client_stub.removeMapping(r)
-        return self._request_factory.get_serializer().deserialize(v.value)
+        return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
     async def replace(self, key: K, value: V) -> Optional[V]:
         r = self._request_factory.replace_request(key, value)
         v = await self._client_stub.replace(r)
-        return self._request_factory.get_serializer().deserialize(v.value)
+        return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
     async def replace_mapping(self, key: K, old_value: V, new_value: V) -> bool:
         r = self._request_factory.replace_mapping_request(key, old_value, new_value)
         v = await self._client_stub.replaceMapping(r)
-        return self._request_factory.get_serializer().deserialize(v.value)
+        return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
     async def contains_key(self, key: K) -> bool:
         r = self._request_factory.contains_key_request(key)
         v = await self._client_stub.containsKey(r)
-        return self._request_factory.get_serializer().deserialize(v.value)
+        return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
     async def contains_value(self, value: V) -> bool:
         r = self._request_factory.contains_value_request(value)
         v = await self._client_stub.containsValue(r)
-        return self._request_factory.get_serializer().deserialize(v.value)
+        return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
     async def is_empty(self) -> bool:
         r = self._request_factory.is_empty_request()
         v = await self._client_stub.isEmpty(r)
-        return self._request_factory.get_serializer().deserialize(v.value)
+        return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
     async def size(self) -> int:
         r = self._request_factory.size_request()
         v = await self._client_stub.size(r)
-        return self._request_factory.get_serializer().deserialize(v.value)
+        return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
     async def invoke(self, key: K, processor: EntryProcessor[R]) -> Optional[R]:
         r = self._request_factory.invoke_request(key, processor)
         v = await self._client_stub.invoke(r)
-        return self._request_factory.get_serializer().deserialize(v.value)
+        return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
     async def invoke_all(
@@ -747,7 +767,7 @@ class NamedCacheClient(NamedCache[K, V]):
         r = self._request_factory.invoke_all_request(processor, keys, filter)
         stream = self._client_stub.invokeAll(r)
 
-        return _Stream(self._request_factory.get_serializer(), stream, _entry_producer)
+        return _Stream(self._request_factory.serializer, stream, _entry_producer)
 
     @_pre_call_cache
     async def aggregate(
@@ -755,7 +775,7 @@ class NamedCacheClient(NamedCache[K, V]):
     ) -> Optional[R]:
         r = self._request_factory.aggregate_request(aggregator, keys, filter)
         results = await self._client_stub.aggregate(r)
-        value: Any = self._request_factory.get_serializer().deserialize(results.value)
+        value: Any = self._request_factory.serializer.deserialize(results.value)
         # for compatibility with 22.06
         if isinstance(aggregator, SumAggregator) and isinstance(value, str):
             return cast(R, float(value))
@@ -782,7 +802,7 @@ class NamedCacheClient(NamedCache[K, V]):
             r = self._request_factory.values_request(filter)
             stream = self._client_stub.values(r)
 
-            return _Stream(self._request_factory.get_serializer(), stream, _scalar_producer)
+            return _Stream(self._request_factory.serializer, stream, _scalar_producer)
 
     @_pre_call_cache
     async def keys(self, filter: Optional[Filter] = None, by_page: bool = False) -> AsyncIterator[K]:
@@ -792,7 +812,7 @@ class NamedCacheClient(NamedCache[K, V]):
             r = self._request_factory.keys_request(filter)
             stream = self._client_stub.keySet(r)
 
-            return _Stream(self._request_factory.get_serializer(), stream, _scalar_producer)
+            return _Stream(self._request_factory.serializer, stream, _scalar_producer)
 
     @_pre_call_cache
     async def entries(
@@ -804,7 +824,7 @@ class NamedCacheClient(NamedCache[K, V]):
             r = self._request_factory.entries_request(filter, comparator)
             stream = self._client_stub.entrySet(r)
 
-            return _Stream(self._request_factory.get_serializer(), stream, _entry_producer)
+            return _Stream(self._request_factory.serializer, stream, _entry_producer)
 
     from .event import MapListener
 
@@ -893,7 +913,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
         self._cache_id: int = 0
         self._serializer: Serializer = serializer
         self._request_factory: RequestFactoryV1 = RequestFactoryV1(
-            cache_name, self._cache_id, session.scope, serializer
+            cache_name, self._cache_id, session.scope, serializer, lambda: session.options.request_timeout_seconds
         )
         self._emitter: EventEmitter = EventEmitter()
         self._internal_emitter: EventEmitter = EventEmitter()
@@ -2071,7 +2091,7 @@ class _PagedStream(abc.ABC, AsyncIterator[T]):
         self._result_handler: Callable[[Serializer, Any], Any] = result_handler
 
         # the serializer to be used when deserializing streamed results
-        self._serializer: Serializer = client._request_factory.get_serializer()
+        self._serializer: Serializer = client._request_factory.serializer
 
         # cookie that tracks page streaming; used for each new page request
         self._cookie: bytes = bytes()
@@ -2302,6 +2322,9 @@ class StreamHandler:
 
         self._observers[observer.id] = observer
 
+    def deregister_observer(self, observer: ResponseObserver) -> None:
+        self._observers.pop(observer.id, None)
+
     async def handle_response(self) -> None:
         while not self._closed:
             try:
@@ -2325,7 +2348,7 @@ class StreamHandler:
                         observer = self._observers.get(response_id, None)
                         if observer is not None:
                             self._observers.pop(response_id, None)
-                            observer._err(Error(response.error.message))
+                            observer._err(RequestFailedError(message=response.error.message))
                         continue
                     elif response.HasField("complete"):
                         observer = self._observers.get(response_id, None)

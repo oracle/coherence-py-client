@@ -32,14 +32,14 @@ override ENV_FILE            := tests/utils/.env
 MVN_VERSION ?= 1.0.0
 
 # Coherence CE version to run base tests against
-COHERENCE_VERSION ?= 22.06.7
-COHERENCE_GROUP_ID ?= com.oracle.coherence.ce
+COHERENCE_VERSION ?= 15.1.1-0-0-SNAPSHOT
+COHERENCE_GROUP_ID ?= com.oracle.coherence
 COHERENCE_WKA1 ?= server1
 COHERENCE_WKA2 ?= server1
 CLUSTER_PORT ?= 7574
 # Profiles to include for building
-PROFILES ?= ",-jakarta,javax"
-COHERENCE_BASE_IMAGE ?= gcr.io/distroless/java17-debian11
+PROFILES ?= ",jakarta,-javax"
+COHERENCE_BASE_IMAGE ?= gcr.io/distroless/java17-debian12
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Set the location of various build tools
