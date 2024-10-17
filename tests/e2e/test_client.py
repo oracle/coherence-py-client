@@ -532,17 +532,46 @@ async def test_add_remove_index(person_cache: NamedCache[str, Person]) -> None:
 
 
 @pytest.mark.asyncio
-async def test_request_timeout() -> None:
-    session: Session = await tests.get_session()
+async def test_stream_request_timeout(cache: NamedCache[str, str]) -> None:
+    # insert enough data into the cache to ensure results will be paged
+    # by the proxy.
+    await _insert_large_number_of_entries(cache)
+
+    start = time()
     try:
-        cache: NamedCache[any, any] = await session.get_cache("timeout-cache")
-        start = time()
-        try:
-            async with request_timeout(timeout_seconds=5.0):
-                await cache.invoke("key", tests.LongRunningProcessor())
-                assert False
-        except RequestTimeoutError:
-            end = time()
-            assert pytest.approx((end - start), 0.5) == 5.0
-    finally:
-        await session.close()
+        async with request_timeout(seconds=2.0):
+            async for e in await cache.values():
+                continue
+            assert False
+    except RequestTimeoutError:
+        end = time()
+        assert pytest.approx((end - start), 0.5) == 2.0
+
+
+@pytest.mark.asyncio
+async def test_paged_stream_request_timeout(cache: NamedCache[str, str]) -> None:
+    # insert enough data into the cache to ensure results will be paged
+    # by the proxy.
+    await _insert_large_number_of_entries(cache)
+
+    start = time()
+    try:
+        async with request_timeout(seconds=2.0):
+            async for e in await cache.values(by_page=True):
+                continue
+            assert False
+    except RequestTimeoutError:
+        end = time()
+        assert pytest.approx((end - start), 0.5) == 2.0
+
+
+@pytest.mark.asyncio
+async def test_unary_request_timeout(cache: NamedCache[str, str]) -> None:
+    start = time()
+    try:
+        async with request_timeout(seconds=5.0):
+            await cache.invoke("key", tests.LongRunningProcessor())
+            assert False
+    except RequestTimeoutError:
+        end = time()
+        assert pytest.approx((end - start), 0.5) == 5.0

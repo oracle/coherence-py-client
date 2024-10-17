@@ -77,10 +77,10 @@ COH_LOG = logging.getLogger("coherence")
 
 
 @asynccontextmanager
-async def request_timeout(timeout_seconds: float):  # type: ignore
+async def request_timeout(seconds: float):  # type: ignore
     from . import _TIMEOUT_CONTEXT_VAR
 
-    request_timeout = _TIMEOUT_CONTEXT_VAR.set(timeout_seconds)
+    request_timeout = _TIMEOUT_CONTEXT_VAR.set(seconds)
     try:
         yield
     finally:
@@ -2330,6 +2330,7 @@ class StreamHandler:
         while not self._closed:
             try:
                 stream: StreamStreamMultiCallable = await self.stream
+                # noinspection PyUnresolvedReferences
                 response = await stream.read()
                 response_id = response.id
                 if response_id == 0:
@@ -2343,7 +2344,6 @@ class StreamHandler:
                             observer._next(named_cache_response)
                             continue
                     elif response.HasField("init"):
-                        print("InitRequest request completed.")
                         self.result_available.set()
                     elif response.HasField("error"):
                         observer = self._observers.get(response_id, None)
@@ -2375,6 +2375,10 @@ class StreamHandler:
                 # Handle MapEvent Response
                 event_response = MapEventMessage()
                 named_cache_response.message.Unpack(event_response)
+
+                if event_response.id == 0:
+                    # v0 map event received - drop on the floor
+                    return
 
                 try:
                     event: MapEvent[Any, Any] = MapEvent(
