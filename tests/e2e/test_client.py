@@ -565,6 +565,10 @@ async def test_paged_stream_request_timeout(cache: NamedCache[str, str]) -> None
         assert pytest.approx((end - start), 0.5) == 2.0
 
 
+@pytest.mark.skip(
+    reason="Teardown fails due to proxy-side issue blocking subsequent \
+    timed out calls due to previous call still running"
+)
 @pytest.mark.asyncio
 async def test_unary_request_timeout(cache: NamedCache[str, str]) -> None:
     start = time()
