@@ -88,6 +88,11 @@ class NamedCacheServiceStub(object):
                 request_serializer=messages__pb2.IsEmptyRequest.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_wrappers__pb2.BoolValue.FromString,
                 )
+        self.isReady = channel.unary_unary(
+                '/coherence.NamedCacheService/isReady',
+                request_serializer=messages__pb2.IsReadyRequest.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_wrappers__pb2.BoolValue.FromString,
+                )
         self.keySet = channel.unary_stream(
                 '/coherence.NamedCacheService/keySet',
                 request_serializer=messages__pb2.KeySetRequest.SerializeToString,
@@ -260,6 +265,13 @@ class NamedCacheServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def isEmpty(self, request, context):
+        """Determine whether a cache is empty.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def isReady(self, request, context):
         """Determine whether a cache is empty.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -447,6 +459,11 @@ def add_NamedCacheServiceServicer_to_server(servicer, server):
             'isEmpty': grpc.unary_unary_rpc_method_handler(
                     servicer.isEmpty,
                     request_deserializer=messages__pb2.IsEmptyRequest.FromString,
+                    response_serializer=google_dot_protobuf_dot_wrappers__pb2.BoolValue.SerializeToString,
+            ),
+            'isReady': grpc.unary_unary_rpc_method_handler(
+                    servicer.isReady,
+                    request_deserializer=messages__pb2.IsReadyRequest.FromString,
                     response_serializer=google_dot_protobuf_dot_wrappers__pb2.BoolValue.SerializeToString,
             ),
             'keySet': grpc.unary_stream_rpc_method_handler(
@@ -765,6 +782,23 @@ class NamedCacheService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/coherence.NamedCacheService/isEmpty',
             messages__pb2.IsEmptyRequest.SerializeToString,
+            google_dot_protobuf_dot_wrappers__pb2.BoolValue.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def isReady(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/coherence.NamedCacheService/isReady',
+            messages__pb2.IsReadyRequest.SerializeToString,
             google_dot_protobuf_dot_wrappers__pb2.BoolValue.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

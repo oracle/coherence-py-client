@@ -22,7 +22,7 @@ jobs:
         os: [ubuntu-latest]
         coherenceVersion:
           - 24.03
-          - 22.06.7
+          - 22.06.10
         base-image:
           - gcr.io/distroless/java17-debian11
         profile:
@@ -31,7 +31,7 @@ jobs:
         exclude:
           - coherenceVersion: 24.03
             profile: ",-jakarta,javax"
-          - coherenceVersion: 22.06.7
+          - coherenceVersion: 22.06.10
             profile: ",jakarta,-javax"
 
     runs-on: ${{ matrix.os }}

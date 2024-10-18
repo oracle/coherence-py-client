@@ -30,14 +30,14 @@ if [ -z "${PROFILE_STR}" ] ; then
   exit 1
 fi
 
-echo "Coherence CE 22.06.5"
+echo "Coherence CE 22.06.10"
 COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
   COHERENCE_VERSION=$COH_VER \
   COHERENCE_BASE_IMAGE=$BASE_IMAGE \
   PROFILES=$PROFILE_STR \
   make clean test-cluster-shutdown remove-app-images build-test-images test-cluster-startup just-wait test
 
-echo "Coherence CE 22.06.5 with SSL"
+echo "Coherence CE 22.06.10 with SSL"
 RUN_SECURE=true COHERENCE_IGNORE_INVALID_CERTS=true \
   COHERENCE_TLS_CERTS_PATH=$(pwd)/tests/utils/certs/guardians-ca.crt \
   COHERENCE_TLS_CLIENT_CERT=$(pwd)/tests/utils/certs/star-lord.crt \
