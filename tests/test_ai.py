@@ -2,20 +2,20 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 import random
-from typing import List, Dict, Optional
+from typing import List, Optional, cast
 
 import pytest
-import pytest_asyncio
 
-from coherence import Extractors, Filters, Session, NamedCache
+from coherence import Extractors, Filters, NamedCache, Session
 from coherence.ai import (
-    BinaryQueryResult,
     BitVector,
     ByteVector,
     CosineDistance,
     DocumentChunk,
     FloatVector,
-    SimilaritySearch, Vectors,
+    QueryResult,
+    SimilaritySearch,
+    Vectors,
 )
 from coherence.extractor import ValueExtractor
 from coherence.filter import Filter
@@ -128,13 +128,13 @@ def test_SimilaritySearch_serialization() -> None:
 
 
 # noinspection PyUnresolvedReferences
-def test_BinaryQueryResult_serialization() -> None:
-    bqr = BinaryQueryResult(3.0, 1, "abc")
+def test_QueryResult_serialization() -> None:
+    bqr = QueryResult(3.0, 1, "abc")
     ser = s.serialize(bqr)
-    assert ser == b'\x15{"@class": "ai.results.BinaryQueryResult", "distance": 3.0, "key": 1, "value": "abc"}'
+    assert ser == b'\x15{"@class": "ai.results.QueryResult", "distance": 3.0, "key": 1, "value": "abc"}'
 
     o = s.deserialize(ser)
-    assert isinstance(o, BinaryQueryResult)
+    assert isinstance(o, QueryResult)
     assert o.distance == 3.0
     assert o.key == 1
     assert o.value == "abc"
@@ -155,16 +155,20 @@ class ValueWithVector:
     def get_number(self) -> int:
         return self.number
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"ValueWithVector(vector={self.vector}, text='{self.text}', number={self.number})"
 
+
 def random_floats(n: int) -> List[float]:
-    floats: List[float] = [0.0]*n
+    floats: List[float] = [0.0] * n
     for i in range(n):
         floats[i] = random.uniform(-50.0, 50.0)
     return floats
 
+
 DIMENSIONS: int = 384
+
+
 async def populate_vectors(vectors: NamedCache[int, ValueWithVector]) -> ValueWithVector:
     matches: List[List[float]] = [[]] * 5
     matches[0] = random_floats(DIMENSIONS)
@@ -186,14 +190,11 @@ async def populate_vectors(vectors: NamedCache[int, ValueWithVector]) -> ValueWi
         values[i] = ValueWithVector(FloatVector(Vectors.normalize(random_floats(DIMENSIONS))), str(i), i)
         await vectors.put(i, values[i])
 
-    return values[0]
+    return cast(ValueWithVector, values[0])
 
-# def test_populate_vectors():
-#     v = dict()
-#     populate_vectors(v)
 
 @pytest.mark.asyncio
-async def test_SimilaritySearch():
+async def test_SimilaritySearch() -> None:
     session: Session = await Session.create()
     cache: NamedCache[int, ValueWithVector] = await session.get_cache("vector_cache")
     value_with_vector = await populate_vectors(cache)
@@ -203,14 +204,58 @@ async def test_SimilaritySearch():
     k = 10
     ss = SimilaritySearch(value_extractor, value_with_vector.vector, 10)
 
-    ser = s.serialize(ss)
-    print(ser)
-
     hnsw_result = await cache.aggregate(ss)
 
     assert hnsw_result is not None
+    assert len(hnsw_result) == k
 
     await cache.truncate()
     await cache.destroy()
     await session.close()
 
+
+async def populate_documentchunk_vectors(vectors: NamedCache[int, DocumentChunk]) -> DocumentChunk:
+    matches: List[List[float]] = [[]] * 5
+    matches[0] = random_floats(DIMENSIONS)
+
+    # Creating copies of matches[0] for matches[1] to matches[4]
+    for i in range(1, 5):
+        matches[i] = matches[0].copy()
+        matches[i][0] += 1.0  # Modify the first element
+
+    values: List[Optional[DocumentChunk]] = [None] * 10000
+
+    # Assign normalized vectors to the first 5 entries
+    for i in range(5):
+        values[i] = DocumentChunk(str(i), metadata=None, vector=FloatVector(Vectors.normalize(matches[i])))
+        await vectors.put(i, values[i])
+
+    # Fill the remaining values with random vectors
+    for i in range(5, 10000):
+        values[i] = DocumentChunk(
+            str(i), metadata=None, vector=FloatVector(Vectors.normalize(random_floats(DIMENSIONS)))
+        )
+        await vectors.put(i, values[i])
+
+    return cast(DocumentChunk, values[0])
+
+
+@pytest.mark.asyncio
+async def test_SimilaritySearch_with_DocumentChunk() -> None:
+    session: Session = await Session.create()
+    cache: NamedCache[int, DocumentChunk] = await session.get_cache("vector_cache")
+    dc: DocumentChunk = await populate_documentchunk_vectors(cache)
+
+    # Create a SimilaritySearch aggregator
+    value_extractor = Extractors.extract("vector")
+    k = 10
+    ss = SimilaritySearch(value_extractor, dc.vector, 10)
+
+    hnsw_result = await cache.aggregate(ss)
+
+    assert hnsw_result is not None
+    assert len(hnsw_result) == k
+
+    await cache.truncate()
+    await cache.destroy()
+    await session.close()

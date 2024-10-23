@@ -187,8 +187,8 @@ class BaseQueryResult(ABC):
         self.value = value
 
 
-@proxy("ai.results.BinaryQueryResult")
-class BinaryQueryResult(BaseQueryResult):
+@proxy("ai.results.QueryResult")
+class QueryResult(BaseQueryResult):
     def __init__(self, result: float, key: K, value: V) -> None:
         super().__init__(result, key, value)
 
