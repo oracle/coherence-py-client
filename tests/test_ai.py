@@ -8,6 +8,7 @@ import pytest
 
 from coherence import Extractors, Filters, NamedCache, Session
 from coherence.ai import (
+    BinaryQuantIndex,
     BitVector,
     ByteVector,
     CosineDistance,
@@ -138,6 +139,20 @@ def test_QueryResult_serialization() -> None:
     assert o.distance == 3.0
     assert o.key == 1
     assert o.value == "abc"
+
+
+# noinspection PyUnresolvedReferences
+def test_BinaryQuantIndex_serialization() -> None:
+    bqi = BinaryQuantIndex(Extractors.extract("foo"))
+    ser = s.serialize(bqi)
+    assert ser == (
+        b'\x15{"@class": "ai.index.BinaryQuantIndex", "dataVersion": 0, '
+        b'"binFuture": null, "extractor": {"@class": "extractor.UniversalExtractor", '
+        b'"name": "foo", "params": null}, "oversamplingFactor": 3}'
+    )
+
+    o = s.deserialize(ser)
+    assert isinstance(o, BinaryQuantIndex)
 
 
 class ValueWithVector:

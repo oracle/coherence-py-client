@@ -193,6 +193,14 @@ class QueryResult(BaseQueryResult):
         super().__init__(result, key, value)
 
 
+@proxy("ai.index.BinaryQuantIndex")
+class BinaryQuantIndex(AbstractEvolvable):
+    def __init__(self, extractor: Union[ValueExtractor[T, E], str], over_sampling_factor: int = 3):
+        super().__init__()
+        self.extractor = extractor
+        self.oversamplingFactor = over_sampling_factor
+
+
 class Vectors:
 
     EPSILON = 1e-30  # Python automatically handles float precision
