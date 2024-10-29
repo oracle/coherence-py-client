@@ -170,7 +170,7 @@ class SimilaritySearch(EntryAggregator):
         max_results: int,
         algorithm: Optional[DistanceAlgorithm] = CosineDistance(),
         filter: Optional[Filter] = None,
-        brute_force: Optional[bool] = True,
+        brute_force: Optional[bool] = False,
     ) -> None:
         super().__init__(extractor_or_property)
         self.algorithm = algorithm
@@ -191,6 +191,9 @@ class BaseQueryResult(ABC):
 class QueryResult(BaseQueryResult):
     def __init__(self, result: float, key: K, value: V) -> None:
         super().__init__(result, key, value)
+
+    def __str__(self) -> str:
+        return "QueryResult{ " + "result=" + str(self.distance) + ", key=" + str(self.key) + "}"
 
 
 @proxy("ai.index.BinaryQuantIndex")

@@ -2,11 +2,13 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 import random
+import time
+import traceback
 from typing import List, Optional, cast
 
 import pytest
 
-from coherence import Extractors, Filters, NamedCache, Session
+from coherence import COH_LOG, Extractors, Filters, NamedCache, Session
 from coherence.ai import (
     BinaryQuantIndex,
     BitVector,
@@ -112,7 +114,7 @@ def test_SimilaritySearch_serialization() -> None:
         b'\x15{"@class": "ai.search.SimilarityAggregator", '
         b'"extractor": {"@class": "extractor.UniversalExtractor", "name": "foo", "params": null}, '
         b'"algorithm": {"@class": "ai.distance.CosineSimilarity"}, '
-        b'"bruteForce": true, '
+        b'"bruteForce": false, '
         b'"filter": {"@class": "filter.EqualsFilter", '
         b'"extractor": {"@class": "extractor.UniversalExtractor", '
         b'"name": "foo", "params": null}, "value": "bar"}, "maxResults": 19, '
@@ -126,6 +128,19 @@ def test_SimilaritySearch_serialization() -> None:
     assert isinstance(o.filter, Filter)
     assert o.maxResults == 19
     assert isinstance(o.vector, FloatVector)
+
+    ss.bruteForce = True
+    ser = s.serialize(ss)
+    assert ser == (
+        b'\x15{"@class": "ai.search.SimilarityAggregator", '
+        b'"extractor": {"@class": "extractor.UniversalExtractor", "name": "foo", "params": null}, '
+        b'"algorithm": {"@class": "ai.distance.CosineSimilarity"}, '
+        b'"bruteForce": true, '
+        b'"filter": {"@class": "filter.EqualsFilter", '
+        b'"extractor": {"@class": "extractor.UniversalExtractor", '
+        b'"name": "foo", "params": null}, "value": "bar"}, "maxResults": 19, '
+        b'"vector": {"@class": "ai.Float32Vector", "array": [1.0, 2.0, 3.0]}}'
+    )
 
 
 # noinspection PyUnresolvedReferences
@@ -193,7 +208,8 @@ async def populate_vectors(vectors: NamedCache[int, ValueWithVector]) -> ValueWi
         matches[i] = matches[0].copy()
         matches[i][0] += 1.0  # Modify the first element
 
-    values: List[Optional[ValueWithVector]] = [None] * 10000
+    count = 10000
+    values: List[Optional[ValueWithVector]] = [None] * count
 
     # Assign normalized vectors to the first 5 entries
     for i in range(5):
@@ -201,7 +217,7 @@ async def populate_vectors(vectors: NamedCache[int, ValueWithVector]) -> ValueWi
         await vectors.put(i, values[i])
 
     # Fill the remaining values with random vectors
-    for i in range(5, 10000):
+    for i in range(5, count):
         values[i] = ValueWithVector(FloatVector(Vectors.normalize(random_floats(DIMENSIONS))), str(i), i)
         await vectors.put(i, values[i])
 
@@ -209,24 +225,51 @@ async def populate_vectors(vectors: NamedCache[int, ValueWithVector]) -> ValueWi
 
 
 @pytest.mark.asyncio
-async def test_SimilaritySearch() -> None:
-    session: Session = await Session.create()
-    cache: NamedCache[int, ValueWithVector] = await session.get_cache("vector_cache")
-    value_with_vector = await populate_vectors(cache)
+async def test_SimilaritySearch_with_Index() -> None:
+    try:
+        session: Session = await Session.create()
+        cache: NamedCache[int, ValueWithVector] = await session.get_cache("vector_cache")
+        cache.add_index(BinaryQuantIndex(Extractors.extract("vector")))
+        value_with_vector = await populate_vectors(cache)
 
-    # Create a SimilaritySearch aggregator
-    value_extractor = Extractors.extract("vector")
-    k = 10
-    ss = SimilaritySearch(value_extractor, value_with_vector.vector, 10)
+        # Create a SimilaritySearch aggregator
+        value_extractor = Extractors.extract("vector")
+        k = 10
+        ss = SimilaritySearch(value_extractor, value_with_vector.vector, k)
 
-    hnsw_result = await cache.aggregate(ss)
+        ss.bruteForce = True  # Set bruteForce to True
+        start_time_bf = time.perf_counter()
+        hnsw_result = await cache.aggregate(ss)
+        end_time_bf = time.perf_counter()
+        elapsed_time = end_time_bf - start_time_bf
+        # print(f"Elapsed time for brute force: {elapsed_time} seconds")
+        for e in hnsw_result:
+            COH_LOG.info(e)
+        COH_LOG.info(f"Elapsed time for brute force: {elapsed_time} seconds")
 
-    assert hnsw_result is not None
-    assert len(hnsw_result) == k
+        assert hnsw_result is not None
+        assert len(hnsw_result) == k
 
-    await cache.truncate()
-    await cache.destroy()
-    await session.close()
+        ss.bruteForce = False
+        start_time = time.perf_counter()
+        hnsw_result = await cache.aggregate(ss)
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        # print(f"Elapsed time: {elapsed_time} seconds")
+        for e in hnsw_result:
+            COH_LOG.info(e)
+        COH_LOG.info(f"Elapsed time: {elapsed_time} seconds")
+
+        assert hnsw_result is not None
+        assert len(hnsw_result) == k
+
+        await cache.truncate()
+        await cache.destroy()
+        await session.close()
+
+    except Exception as ex:
+        traceback.print_exc()
+        raise ex
 
 
 async def populate_documentchunk_vectors(vectors: NamedCache[int, DocumentChunk]) -> DocumentChunk:
