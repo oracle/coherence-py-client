@@ -24,6 +24,10 @@ V = TypeVar("V")
 
 
 class Vector(ABC):
+    """
+    Base class that represents a Vector
+    """
+
     def __init__(self) -> None:
         """
         Constructs a new `Vector`.
@@ -33,12 +37,23 @@ class Vector(ABC):
 
 @proxy("ai.BitVector")
 class BitVector(Vector):
+    """
+    Class that represents a Vector of Bits
+    """
+
     def __init__(
         self,
         hex_string: str,
         byte_array: Optional[bytes] = None,
         int_array: Optional[List[int]] = None,
     ):
+        """
+        Creates an instance of BitVector
+
+        :param hex_string: hexadecimal string used to create the BitVector
+        :param byte_array: optional byte array used to create the BitVector
+        :param int_array: optional int array used to create the BitVector
+        """
         super().__init__()
         if hex_string is not None:
             if hex_string.startswith("0x"):
@@ -56,14 +71,32 @@ class BitVector(Vector):
 
 @proxy("ai.Int8Vector")
 class ByteVector(Vector):
+    """
+    Class that represents Vector of bytes
+    """
+
     def __init__(self, byte_array: bytes):
+        """
+        Creates an instance of ByteVector
+
+        :param byte_array: byte array used to create a ByteVector
+        """
         super().__init__()
         self.array = base64.b64encode(byte_array).decode("UTF-8")
 
 
 @proxy("ai.Float32Vector")
 class FloatVector(Vector):
+    """
+    Class that represents Vector of floats
+    """
+
     def __init__(self, float_array: List[float]):
+        """
+        Creates an instance of FloatVector
+
+        :param float_array: array of floats used to create a FloatVector
+        """
         super().__init__()
         self.array = float_array
 
