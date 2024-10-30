@@ -139,30 +139,57 @@ class DocumentChunkHandler(jsonpickle.handlers.BaseHandler):
 
 
 class DistanceAlgorithm(ABC):
+    """
+    Base class that represents algorithm that can calculate distance to a given vector
+    """
+
     def __init__(self) -> None:
         super().__init__()
 
 
 @proxy("ai.distance.CosineSimilarity")
 class CosineDistance(DistanceAlgorithm):
+    """
+    Represents a DistanceAlgorithm that performs a cosine similarity calculation
+    between two vectors. Cosine similarity measures the similarity between two
+    vectors of an inner product space. It is measured by the cosine of the angle
+    between two vectors and determines whether two vectors are pointing in
+    roughly the same direction. It is often used to measure document similarity
+    in text analysis.
+    """
+
     def __init__(self) -> None:
         super().__init__()
 
 
 @proxy("ai.distance.InnerProductSimilarity")
 class InnerProductDistance(DistanceAlgorithm):
+    """
+    Represents a DistanceAlgorithm that performs inner product distance
+    calculation between two vectors.
+    """
+
     def __init__(self) -> None:
         super().__init__()
 
 
 @proxy("ai.distance.L2SquaredDistance")
 class L2SquaredDistance(DistanceAlgorithm):
+    """
+    Represents a DistanceAlgorithm that performs an L2 squared distance
+    calculation between two vectors.
+    """
+
     def __init__(self) -> None:
         super().__init__()
 
 
 @proxy("ai.search.SimilarityAggregator")
 class SimilaritySearch(EntryAggregator):
+    """
+    This class represents an aggregator to execute a similarity query.
+    """
+
     def __init__(
         self,
         extractor_or_property: Union[ValueExtractor[T, E], str],
@@ -172,6 +199,19 @@ class SimilaritySearch(EntryAggregator):
         filter: Optional[Filter] = None,
         brute_force: Optional[bool] = False,
     ) -> None:
+        """
+        Create a SimilaritySearch aggregator that will use cosine distance to
+        calculate and return up to `max_results` results that are closest to the
+        specified `vector`.
+
+        :param extractor_or_property: the ValueExtractor to extract the vector
+         from the cache value
+        :param vector: the vector to calculate similarity with
+        :param max_results: the maximum number of results to return
+        :param algorithm: the distance algorithm to use
+        :param filter: filter to use to limit the set of entries to search.
+        :param brute_force: Force brute force search, ignoring any available indexes.
+        """
         super().__init__(extractor_or_property)
         self.algorithm = algorithm
         self.bruteForce = brute_force
@@ -181,6 +221,10 @@ class SimilaritySearch(EntryAggregator):
 
 
 class BaseQueryResult(ABC):
+    """
+    A base class for QueryResult implementation
+    """
+
     def __init__(self, result: float, key: K, value: V) -> None:
         self.distance = result
         self.key = key
@@ -189,7 +233,18 @@ class BaseQueryResult(ABC):
 
 @proxy("ai.results.QueryResult")
 class QueryResult(BaseQueryResult):
+    """
+    QueryResult class
+    """
+
     def __init__(self, result: float, key: K, value: V) -> None:
+        """
+        Creates an instance of the QueryResult class
+
+        :param result: the query result
+        :param key: the key of the vector the result applies to
+        :param value:  the optional result value
+        """
         super().__init__(result, key, value)
 
     def __str__(self) -> str:
@@ -198,7 +253,17 @@ class QueryResult(BaseQueryResult):
 
 @proxy("ai.index.BinaryQuantIndex")
 class BinaryQuantIndex(AbstractEvolvable):
-    def __init__(self, extractor: Union[ValueExtractor[T, E], str], over_sampling_factor: int = 3):
+    """
+    This class represents a custom index using binary quantization of vectors
+    """
+
+    def __init__(self, extractor: Union[ValueExtractor[T, E], str], over_sampling_factor: int = 3) -> None:
+        """
+        Creates an instance of BinaryQuantIndex class
+
+        :param extractor: the ValueExtractor to use to extract the Vector
+        :param over_sampling_factor: the oversampling factor
+        """
         super().__init__()
         self.extractor = extractor
         self.oversamplingFactor = over_sampling_factor

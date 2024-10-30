@@ -3,7 +3,6 @@
 # https://oss.oracle.com/licenses/upl.
 import random
 import time
-import traceback
 from typing import List, Optional, cast
 
 import pytest
@@ -226,50 +225,45 @@ async def populate_vectors(vectors: NamedCache[int, ValueWithVector]) -> ValueWi
 
 @pytest.mark.asyncio
 async def test_SimilaritySearch_with_Index() -> None:
-    try:
-        session: Session = await Session.create()
-        cache: NamedCache[int, ValueWithVector] = await session.get_cache("vector_cache")
-        cache.add_index(BinaryQuantIndex(Extractors.extract("vector")))
-        value_with_vector = await populate_vectors(cache)
+    session: Session = await Session.create()
+    cache: NamedCache[int, ValueWithVector] = await session.get_cache("vector_cache")
+    cache.add_index(BinaryQuantIndex(Extractors.extract("vector")))
+    value_with_vector = await populate_vectors(cache)
 
-        # Create a SimilaritySearch aggregator
-        value_extractor = Extractors.extract("vector")
-        k = 10
-        ss = SimilaritySearch(value_extractor, value_with_vector.vector, k)
+    # Create a SimilaritySearch aggregator
+    value_extractor = Extractors.extract("vector")
+    k = 10
+    ss = SimilaritySearch(value_extractor, value_with_vector.vector, k)
 
-        ss.bruteForce = True  # Set bruteForce to True
-        start_time_bf = time.perf_counter()
-        hnsw_result = await cache.aggregate(ss)
-        end_time_bf = time.perf_counter()
-        elapsed_time = end_time_bf - start_time_bf
-        # print(f"Elapsed time for brute force: {elapsed_time} seconds")
-        for e in hnsw_result:
-            COH_LOG.info(e)
-        COH_LOG.info(f"Elapsed time for brute force: {elapsed_time} seconds")
+    ss.bruteForce = True  # Set bruteForce to True
+    start_time_bf = time.perf_counter()
+    hnsw_result = await cache.aggregate(ss)
+    end_time_bf = time.perf_counter()
+    elapsed_time = end_time_bf - start_time_bf
+    # print(f"Elapsed time for brute force: {elapsed_time} seconds")
+    for e in hnsw_result:
+        COH_LOG.info(e)
+    COH_LOG.info(f"Elapsed time for brute force: {elapsed_time} seconds")
 
-        assert hnsw_result is not None
-        assert len(hnsw_result) == k
+    assert hnsw_result is not None
+    assert len(hnsw_result) == k
 
-        ss.bruteForce = False
-        start_time = time.perf_counter()
-        hnsw_result = await cache.aggregate(ss)
-        end_time = time.perf_counter()
-        elapsed_time = end_time - start_time
-        # print(f"Elapsed time: {elapsed_time} seconds")
-        for e in hnsw_result:
-            COH_LOG.info(e)
-        COH_LOG.info(f"Elapsed time: {elapsed_time} seconds")
+    ss.bruteForce = False
+    start_time = time.perf_counter()
+    hnsw_result = await cache.aggregate(ss)
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    # print(f"Elapsed time: {elapsed_time} seconds")
+    for e in hnsw_result:
+        COH_LOG.info(e)
+    COH_LOG.info(f"Elapsed time: {elapsed_time} seconds")
 
-        assert hnsw_result is not None
-        assert len(hnsw_result) == k
+    assert hnsw_result is not None
+    assert len(hnsw_result) == k
 
-        await cache.truncate()
-        await cache.destroy()
-        await session.close()
-
-    except Exception as ex:
-        traceback.print_exc()
-        raise ex
+    await cache.truncate()
+    await cache.destroy()
+    await session.close()
 
 
 async def populate_documentchunk_vectors(vectors: NamedCache[int, DocumentChunk]) -> DocumentChunk:
