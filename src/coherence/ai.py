@@ -309,7 +309,7 @@ class Vectors:
     @staticmethod
     def normalize(array: List[float]) -> List[float]:
         norm = 0.0
-        cDim = len(array)
+        c_dim = len(array)
 
         # Calculate the norm (sum of squares)
         for v in array:
@@ -319,7 +319,7 @@ class Vectors:
         norm = 1.0 / (math.sqrt(norm) + Vectors.EPSILON)
 
         # Apply the normalization factor to each element in the array
-        for i in range(cDim):
+        for i in range(c_dim):
             array[i] = array[i] * norm
 
         return array
