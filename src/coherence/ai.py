@@ -109,12 +109,23 @@ class AbstractEvolvable(ABC):
 
 @proxy("ai.DocumentChunk")
 class DocumentChunk(AbstractEvolvable):
+    """
+    Class that represents a chunk of text extracted from a document.
+    """
+
     def __init__(
         self,
         text: str,
         metadata: Optional[Dict[str, Any] | OrderedDict[str, Any]] = None,
         vector: Optional[Vector] = None,
     ):
+        """
+        Creates an instance of DocumentChunk class
+
+        :param text: the chunk of text extracted from a document
+        :param metadata: optional document metadata
+        :param vector: the vector associated with the document chunk
+        """
         super().__init__()
         self.text = text
         if metadata is None:
