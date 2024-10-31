@@ -1,16 +1,18 @@
-# Copyright (c) 2022 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 import asyncio
 import logging.config
 import os
 from asyncio import Event
-from typing import Final, List, TypeVar
+from typing import Any, Final, List, TypeVar
 
 import pytest
 
 from coherence import Options, Session, TlsOptions
 from coherence.event import MapEvent, MapListener
+from coherence.processor import EntryProcessor
+from coherence.serialization import proxy
 
 K = TypeVar("K")
 """Generic type for cache keys"""
@@ -19,7 +21,7 @@ V = TypeVar("V")
 """Generic type for cache values"""
 
 # logging configuration for tests
-logging_config: str = "tests/logging.conf"  # executing from project root
+logging_config: str = os.path.dirname(__file__) + "/logging.conf"  # executing from project root
 if not os.path.exists(logging_config):
     logging_config = "logging.conf"  # executing from tests directory (most likely IntelliJ)
 
@@ -171,6 +173,7 @@ class CountingMapListener(MapListener[K, V]):
         :param event_count:  the number of expected events
         """
         while True:
+            print("### DEBUG : COUNT -> " + str(self.count))
             if self.count == event_count:
                 return
             await asyncio.sleep(0)
@@ -184,6 +187,9 @@ async def get_session(wait_for_ready: float = 0) -> Session:
 
     run_secure: Final[str] = "RUN_SECURE"
     session: Session
+    options: Options = Options(
+        default_address, default_scope, default_request_timeout, wait_for_ready, ser_format=default_format
+    )
 
     if run_secure in os.environ:
         # Default TlsOptions constructor will pick up the SSL Certs and
@@ -195,17 +201,19 @@ async def get_session(wait_for_ready: float = 0) -> Session:
         tls_options.enabled = True
         tls_options.locked()
 
-        options: Options = Options(
-            default_address, default_scope, default_request_timeout, wait_for_ready, ser_format=default_format
-        )
         options.tls_options = tls_options
         options.channel_options = (("grpc.ssl_target_name_override", "Star-Lord"),)
         session = await Session.create(options)
     else:
-        session = await Session.create(Options(ready_timeout_seconds=wait_for_ready))
+        session = await Session.create(options)
 
     return session
 
 
 async def wait_for(event: Event, timeout: float) -> None:
     await asyncio.wait_for(event.wait(), timeout)
+
+
+@proxy("test.longrunning")
+class LongRunningProcessor(EntryProcessor[Any]):
+    pass

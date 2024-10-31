@@ -38,8 +38,8 @@ COHERENCE_WKA1 ?= server1
 COHERENCE_WKA2 ?= server1
 CLUSTER_PORT ?= 7574
 # Profiles to include for building
-PROFILES ?= ",-jakarta,javax"
-COHERENCE_BASE_IMAGE ?= gcr.io/distroless/java17-debian11
+PROFILES ?= ",jakarta,-javax"
+COHERENCE_BASE_IMAGE ?= gcr.io/distroless/java17-debian12
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Set the location of various build tools
@@ -65,6 +65,23 @@ CURRDIR := $(shell pwd)
 
 COMPOSE:=$(shell type -p docker-compose || echo docker compose)
 $(info COMPOSE = $(COMPOSE))
+
+# ----------------------------------------------------------------------------------------------------------------------
+# List of unit tests
+# ----------------------------------------------------------------------------------------------------------------------
+UNIT_TESTS := tests/unit/test_environment.py \
+				tests/unit/test_serialization.py \
+				tests/unit/test_extractors.py
+
+# ----------------------------------------------------------------------------------------------------------------------
+# List of E2E tests
+# ----------------------------------------------------------------------------------------------------------------------
+E2E_TESTS := tests/e2e/test_session.py \
+				tests/e2e/test_client.py \
+				tests/e2e/test_events.py \
+				tests/e2e/test_filters.py \
+				tests/e2e/test_processors.py \
+				tests/e2e/test_aggregators.py \
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Clean-up all of the build artifacts
@@ -116,21 +133,53 @@ generate-proto:  ## Generate Proto Files
 	sed -e 's/import messages_pb2 as messages__pb2/import coherence.messages_pb2 as messages__pb2/' \
 		< $(CURRDIR)/src/coherence/services_pb2_grpc.py > $(CURRDIR)/src/coherence/services_pb2_grpc.py.out
 	mv $(CURRDIR)/src/coherence/services_pb2_grpc.py.out $(CURRDIR)/src/coherence/services_pb2_grpc.py
+	curl -o $(PROTO_DIR)/proxy_service_v1.proto \
+			https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/proxy_service_v1.proto
+		curl -o $(PROTO_DIR)/proxy_service_messages_v1.proto \
+			https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/proxy_service_messages_v1.proto
+		curl -o $(PROTO_DIR)/common_messages_v1.proto \
+			https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/common_messages_v1.proto
+		curl -o $(PROTO_DIR)/cache_service_messages_v1.proto \
+			https://raw.githubusercontent.com/oracle/coherence/$(COHERENCE_VERSION)/prj/coherence-grpc/src/main/proto/cache_service_messages_v1.proto
+		python -m grpc_tools.protoc --proto_path=$(CURRDIR)/etc/proto --pyi_out=$(CURRDIR)/src/coherence --python_out=$(CURRDIR)/src/coherence \
+				--grpc_python_out=$(CURRDIR)/src/coherence \
+				$(CURRDIR)/etc/proto/proxy_service_v1.proto \
+				$(CURRDIR)/etc/proto/proxy_service_messages_v1.proto \
+				$(CURRDIR)/etc/proto/common_messages_v1.proto \
+				$(CURRDIR)/etc/proto/cache_service_messages_v1.proto
+		sed -e 's/import proxy_service_messages_v1_pb2 as proxy__service__messages__v1__pb2/import coherence.proxy_service_messages_v1_pb2 as proxy__service__messages__v1__pb2/' \
+			< $(CURRDIR)/src/coherence/proxy_service_v1_pb2.py > $(CURRDIR)/src/coherence/proxy_service_v1_pb2.py.out
+		mv $(CURRDIR)/src/coherence/proxy_service_v1_pb2.py.out $(CURRDIR)/src/coherence/proxy_service_v1_pb2.py
+		sed -e 's/import common_messages_v1_pb2 as common__messages__v1__pb2/import coherence.common_messages_v1_pb2 as common__messages__v1__pb2/' \
+			< $(CURRDIR)/src/coherence/proxy_service_messages_v1_pb2.py > $(CURRDIR)/src/coherence/proxy_service_messages_v1_pb2.py.out
+		mv $(CURRDIR)/src/coherence/proxy_service_messages_v1_pb2.py.out $(CURRDIR)/src/coherence/proxy_service_messages_v1_pb2.py
+		sed -e 's/import proxy_service_messages_v1_pb2 as proxy__service__messages__v1__pb2/import coherence.proxy_service_messages_v1_pb2 as proxy__service__messages__v1__pb2/' \
+			< $(CURRDIR)/src/coherence/proxy_service_v1_pb2_grpc.py > $(CURRDIR)/src/coherence/proxy_service_v1_pb2_grpc.py.out
+		mv $(CURRDIR)/src/coherence/proxy_service_v1_pb2_grpc.py.out $(CURRDIR)/src/coherence/proxy_service_v1_pb2_grpc.py
+		sed -e 's/import common_messages_v1_pb2 as common__messages__v1__pb2/import coherence.common_messages_v1_pb2 as common__messages__v1__pb2/' \
+			< $(CURRDIR)/src/coherence/cache_service_messages_v1_pb2.py > $(CURRDIR)/src/coherence/cache_service_messages_v1_pb2.py.out
+		mv $(CURRDIR)/src/coherence/cache_service_messages_v1_pb2.py.out $(CURRDIR)/src/coherence/cache_service_messages_v1_pb2.py
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run tests with code coverage
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test
 test:  ##
-	pytest -W error --cov src/coherence --cov-report=term --cov-report=html \
-		tests/test_serialization.py \
-		tests/test_extractors.py \
-		tests/test_session.py \
-		tests/test_client.py \
-		tests/test_events.py \
-		tests/test_filters.py \
-		tests/test_processors.py \
-		tests/test_aggregators.py \
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS) $(E2E_TESTS)
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Run unit tests with code coverage
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-unit
+test-unit:  ##
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS)
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Run e2e tests with code coverage
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-e2e
+test-e2e:  ##
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html $(E2E_TESTS)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run standards validation across project

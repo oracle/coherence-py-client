@@ -5,10 +5,10 @@
 from __future__ import annotations
 
 import asyncio
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from asyncio import Event, Task
 from enum import Enum, unique
-from typing import Callable, Generic, Optional, Set, TypeVar, cast
+from typing import Any, Callable, Generic, Optional, Set, TypeVar, cast
 
 # noinspection PyPackageRequirements
 import grpc
@@ -16,17 +16,21 @@ from pymitter import EventEmitter
 
 import coherence.client
 
+from .cache_service_messages_v1_pb2 import MapEventMessage, NamedCacheRequest
 from .filter import Filter, Filters, MapEventFilter
 from .messages_pb2 import MapEventResponse, MapListenerRequest, MapListenerResponse
 from .serialization import Serializer
 from .services_pb2_grpc import NamedCacheServiceStub
-from .util import RequestFactory
+from .util import RequestFactory, RequestFactoryV1
 
 K = TypeVar("K")
 """the type of the map entry keys."""
 
 V = TypeVar("V")
 """the type of the map entry values."""
+
+RT = TypeVar("RT")
+"""the gRPC request type."""
 
 
 @unique
@@ -89,7 +93,10 @@ class MapEvent(Generic[K, V]):
     """
 
     def __init__(
-        self, source: coherence.client.NamedMap[K, V], response: MapEventResponse, serializer: Serializer
+        self,
+        source: coherence.client.NamedMap[K, V],
+        response: MapEventResponse | MapEventMessage,
+        serializer: Serializer,
     ) -> None:
         """
         Constructs a new MapEvent.
@@ -272,11 +279,7 @@ class MapListener(Generic[K, V]):
         return self.on_deleted(callback).on_updated(callback).on_inserted(callback)
 
 
-class _ListenerGroup(Generic[K, V], metaclass=ABCMeta):
-    """Manages a collection of MapEventListeners that will be notified when an event is raised.
-    This also manages the on-wire activities for registering/deregistering a listener with the
-    gRPC proxy."""
-
+class _ListenerGroup(Generic[K, V, RT], metaclass=ABCMeta):
     _key_or_filter: K | Filter
     """The key or Filter for which this group of listeners will receive events."""
 
@@ -289,37 +292,47 @@ class _ListenerGroup(Generic[K, V], metaclass=ABCMeta):
     _lite_false_count: int
     """The number of callbacks that aren't lite."""
 
-    _manager: _MapEventsManager[K, V]
-    """The associated MapEventsManager for this group."""
-
-    _request: MapListenerRequest
-    """The subscription request.  A reference is maintained for unsubscribe purposes."""
-
     _subscription_waiter: Event
     """Used by a caller to be notified when the listener subscription as been completed."""
 
     _unsubscription_waiter: Event
     """Used by a caller to be notified when the listener unsubscribe as been completed."""
 
-    def _init_(self, manager: _MapEventsManager[K, V], key_or_filter: K | Filter) -> None:
-        """
-        Constructs a new _ListenerGroup.
-        :param manager:        the _MapEventManager
-        :param key_or_filter:  the key or filter for this group of listeners
-        :raises ValueError:    if either `manager` or `key_or_filter` is `None`
-        """
-        if manager is None:
-            raise ValueError("Argument `manager` must not be None")
-        if key_or_filter is None:
-            raise ValueError("Argument `key_or_filter` must not be None")
-
-        self._manager = manager
+    def __init__(self, key_or_filter: K | Filter) -> None:
         self._key_or_filter = key_or_filter
         self._listeners = {}
         self._lite_false_count = 0
         self._registered_lite = False
         self._subscribed_waiter = Event()
         self._unsubscribed_waiter = Event()
+
+    @abstractmethod
+    async def _subscribe(self, lite: bool) -> None:
+        pass
+
+    @abstractmethod
+    async def _unsubscribe(self) -> None:
+        pass
+
+    @abstractmethod
+    def _post_subscribe(self, request: RT) -> None:
+        """
+        Custom actions that implementations may need to make after a subscription has been completed.
+        :param request:  the request that was used to subscribe
+        """
+        pass
+
+    @abstractmethod
+    def _post_unsubscribe(self, request: RT) -> None:
+        """
+        Custom actions that implementations may need to make after an unsubscription has been completed.
+        :param request:  the request that was used to unsubscribe
+        """
+        pass
+
+    @abstractmethod
+    def _subscribe_complete(self) -> None:
+        pass
 
     async def add_listener(self, listener: MapListener[K, V], lite: bool) -> None:
         """
@@ -374,6 +387,62 @@ class _ListenerGroup(Generic[K, V], metaclass=ABCMeta):
                 await self._subscribe(True)
 
     # noinspection PyProtectedMember
+    def _notify_listeners(self, event: MapEvent[K, V]) -> None:
+        """
+        Notify all listeners within this group of the provided event.
+        :param event:
+        """
+        event_label: str = self._get_emitter_label(event)
+        listener: MapListener[K, V]
+        for listener in self._listeners.keys():
+            listener._emitter.emit(event_label, event)
+
+    # noinspection PyProtectedMember
+    @staticmethod
+    def _get_emitter_label(event: MapEvent[K, V]) -> str:
+        """
+        The string label required by the internal event emitter.
+        :param event:  the MapEvent whose label will be generated
+        :return: the emitter-friendly event label
+        """
+        if event.type == MapEventType.ENTRY_DELETED:
+            return MapEventType.ENTRY_DELETED.value
+        elif event.type == MapEventType.ENTRY_INSERTED:
+            return MapEventType.ENTRY_INSERTED.value
+        elif event.type == MapEventType.ENTRY_UPDATED:
+            return MapEventType.ENTRY_UPDATED.value
+        else:
+            raise AssertionError(f"Unknown EventType [{event}]")
+
+
+class _ListenerGroupV0(_ListenerGroup[K, V, MapListenerRequest], metaclass=ABCMeta):
+    """Manages a collection of MapEventListeners that will be notified when an event is raised.
+    This also manages the on-wire activities for registering/de-registering a listener with the
+    gRPC proxy."""
+
+    _manager: _MapEventsManagerV0[K, V]
+    """The associated MapEventsManager for this group."""
+
+    _request: MapListenerRequest
+    """The subscription request.  A reference is maintained for unsubscribe purposes."""
+
+    def __init__(self, manager: _MapEventsManagerV0[K, V], key_or_filter: K | Filter) -> None:
+        """
+        Constructs a new _ListenerGroup.
+        :param manager:        the _MapEventManager
+        :param key_or_filter:  the key or filter for this group of listeners
+        :raises ValueError:    if either `manager` or `key_or_filter` is `None`
+        """
+        if manager is None:
+            raise ValueError("Argument `manager` must not be None")
+        if key_or_filter is None:
+            raise ValueError("Argument `key_or_filter` must not be None")
+
+        super().__init__(key_or_filter=key_or_filter)
+
+        self._manager = manager
+
+    # noinspection PyProtectedMember
     async def _write(self, request: MapListenerRequest) -> None:
         """Write the request to the event stream."""
         event_stream: grpc.aio.StreamStreamCall = await self._manager._ensure_stream()
@@ -403,17 +472,6 @@ class _ListenerGroup(Generic[K, V], metaclass=ABCMeta):
         self._subscribed_waiter.clear()
 
     # noinspection PyProtectedMember
-    def _subscribe_complete(self) -> None:
-        """Called when the response to the subscription request has been received."""
-
-        # no longer pending
-        del self._manager._pending_registrations[self._request.uid]
-        self._post_subscribe(self._request)
-
-        # notify caller that subscription is active
-        self._subscribed_waiter.set()
-
-    # noinspection PyProtectedMember
     async def _unsubscribe(self) -> None:
         """
         Send a gRPC MapListener request to unsubscribe a listener for a key or filter.
@@ -430,60 +488,86 @@ class _ListenerGroup(Generic[K, V], metaclass=ABCMeta):
         self._post_unsubscribe(request)
 
     # noinspection PyProtectedMember
-    def _notify_listeners(self, event: MapEvent[K, V]) -> None:
-        """
-        Notify all listeners within this group of the provided event.
-        :param event:
-        """
-        event_label: str = self._get_emitter_label(event)
-        listener: MapListener[K, V]
-        for listener in self._listeners.keys():
-            listener._emitter.emit(event_label, event)
+    def _subscribe_complete(self) -> None:
+        del self._manager._pending_registrations[self._request.uid]
+        self._post_subscribe(self._request)
 
-    # noinspection PyProtectedMember
-    @staticmethod
-    def _get_emitter_label(event: MapEvent[K, V]) -> str:
+        # notify caller that subscription is active
+        self._subscribed_waiter.set()
+
+
+# noinspection PyProtectedMember
+class _ListenerGroupV1(_ListenerGroup[K, V, NamedCacheRequest], ABC):
+
+    def __init__(self, manager: _MapEventsManagerV1[K, V], key_or_filter: K | Filter):
+        if manager is None:
+            raise ValueError("Argument `manager` must not be None")
+        if key_or_filter is None:
+            raise ValueError("Argument `key_or_filter` must not be None")
+
+        super().__init__(key_or_filter=key_or_filter)
+
+        self._manager = manager
+
+    async def _subscribe(self, lite: bool) -> None:
         """
-        The string label required by the internal event emitter.
-        :param event:  the MapEvent whose label will be generated
-        :return: the emitter-friendly event label
+        Send a gRPC MapListener subscription request for a key or filter.
+        :param lite:  `True` if the event should only include the key, or `False`
+                      if the event should include old and new values as well as the key
         """
-        if event.type == MapEventType.ENTRY_DELETED:
-            return MapEventType.ENTRY_DELETED.value
-        elif event.type == MapEventType.ENTRY_INSERTED:
-            return MapEventType.ENTRY_INSERTED.value
-        elif event.type == MapEventType.ENTRY_UPDATED:
-            return MapEventType.ENTRY_UPDATED.value
+        request: NamedCacheRequest
+        filter_id: int
+        if isinstance(self._key_or_filter, Filter):
+            (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(
+                True, lite, filter=self._key_or_filter
+            )
         else:
-            raise AssertionError(f"Unknown EventType [{event}]")
+            (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(
+                True, lite, key=self._key_or_filter
+            )
 
-    @abstractmethod
-    def _post_subscribe(self, request: MapListenerRequest) -> None:
-        """
-        Custom actions that implementations may need to make after a subscription has been completed.
-        :param request:  the request that was used to subscribe
-        """
-        pass
+        self._request = request
+        self._filter_id = filter_id
 
-    @abstractmethod
-    def _post_unsubscribe(self, request: MapListenerRequest) -> None:
-        """
-        Custom actions that implementations may need to make after an unsubscription has been completed.
-        :param request:  the request that was used to unsubscribe
-        """
-        pass
+        # set this registration as pending
+        self._manager._pending_registrations[filter_id] = self
+
+        # noinspection PyUnresolvedReferences
+        await dispatcher.dispatch(self._manager._named_map._stream_handler)
+
+        self._subscribe_complete()
+
+    async def _unsubscribe(self) -> None:
+        request: NamedCacheRequest
+        if isinstance(self._key_or_filter, MapEventFilter):
+            # noinspection PyTypeChecker
+            (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(
+                subscribe=False, filter=self._key_or_filter, filter_id=self._filter_id
+            )
+        else:
+            (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(
+                subscribe=False, key=self._key_or_filter
+            )
+
+        # noinspection PyUnresolvedReferences
+        await dispatcher.dispatch(self._manager._named_map._stream_handler)
+        self._post_unsubscribe(request)
+
+    def _subscribe_complete(self) -> None:
+        del self._manager._pending_registrations[self._filter_id]
+        self._post_subscribe(self._request)
 
 
-class _KeyListenerGroup(_ListenerGroup[K, V]):
+class _KeyListenerGroupV0(_ListenerGroupV0[K, V]):
     """A ListenerGroup for key-based MapListeners"""
 
-    def __init__(self, manager: _MapEventsManager[K, V], key: K) -> None:
+    def __init__(self, manager: _MapEventsManagerV0[K, V], key: K) -> None:
         """
         Creates a new _KeyListenerGroup
         :param manager:  the _MapEventManager
         :param key:      the group key
         """
-        super()._init_(manager, key)
+        super().__init__(manager, key)
 
     # noinspection PyProtectedMember
     def _post_subscribe(self, request: MapListenerRequest) -> None:
@@ -498,16 +582,46 @@ class _KeyListenerGroup(_ListenerGroup[K, V]):
         manager._key_group_unsubscribed(key)
 
 
-class _FilterListenerGroup(_ListenerGroup[K, V]):
+class _KeyListenerGroupV1(_ListenerGroupV1[K, V]):
+    _manager: _MapEventsManagerV1[K, V]
+    """The associated MapEventsManager for this group."""
+
+    _request: MapListenerRequest
+    """The subscription request.  A reference is maintained for unsubscribe purposes."""
+
+    def __init__(self, manager: _MapEventsManagerV1[K, V], key_or_filter: K | Filter) -> None:
+        """
+        Constructs a new _ListenerGroup.
+        :param manager:        the _MapEventManager
+        :param key_or_filter:  the key or filter for this group of listeners
+        :raises ValueError:    if either `manager` or `key_or_filter` is `None`
+        """
+        if manager is None:
+            raise ValueError("Argument `manager` must not be None")
+        if key_or_filter is None:
+            raise ValueError("Argument `key_or_filter` must not be None")
+
+        super().__init__(manager, key_or_filter)
+
+    # noinspection PyProtectedMember
+    def _post_subscribe(self, request: MapListenerRequest) -> None:
+        self._manager._key_group_subscribed(cast(K, self._key_or_filter), self)
+
+    # noinspection PyProtectedMember
+    def _post_unsubscribe(self, request: MapListenerRequest) -> None:
+        self._manager._key_group_unsubscribed(cast(K, self._key_or_filter))
+
+
+class _FilterListenerGroupV0(_ListenerGroupV0[K, V]):
     """A ListenerGroup for Filter-based MapListeners"""
 
-    def __init__(self, manager: _MapEventsManager[K, V], filter: Filter) -> None:
+    def __init__(self, manager: _MapEventsManagerV0[K, V], filter: Filter) -> None:
         """
-        Creates a new _KeyListenerGroup
+        Creates a new _FilterListenerGroupV0
         :param manager:  the _MapEventManager
         :param filter:   the group Filter
         """
-        super()._init_(manager, filter)
+        super().__init__(manager, filter)
 
     # noinspection PyProtectedMember
     def _post_subscribe(self, request: MapListenerRequest) -> None:
@@ -518,7 +632,27 @@ class _FilterListenerGroup(_ListenerGroup[K, V]):
         self._manager._filter_group_unsubscribed(request.filterId, cast(Filter, self._key_or_filter))
 
 
-class _MapEventsManager(Generic[K, V]):
+class _FilterListenerGroupV1(_ListenerGroupV1[K, V]):
+    """A ListenerGroup for Filter-based MapListeners"""
+
+    def __init__(self, manager: _MapEventsManagerV1[K, V], filter: Filter) -> None:
+        """
+        Creates a new _KeyListenerGroup
+        :param manager:  the _MapEventManager
+        :param filter:   the group Filter
+        """
+        super().__init__(manager, filter)
+
+    # noinspection PyProtectedMember
+    def _post_subscribe(self, request: MapListenerRequest) -> None:
+        self._manager._filter_group_subscribed(self._filter_id, cast(Filter, self._key_or_filter), self)
+
+    # noinspection PyProtectedMember
+    def _post_unsubscribe(self, request: MapListenerRequest) -> None:
+        self._manager._filter_group_unsubscribed(self._filter_id, cast(Filter, self._key_or_filter))
+
+
+class _MapEventsManager(Generic[K, V], ABC):
     """MapEventsManager handles registration, de-registration of callbacks, and
     notification of {@link MapEvent}s to callbacks. Since multiple callbacks can
     be registered for a single key / filter, this class relies on another internal
@@ -554,17 +688,14 @@ class _MapEventsManager(Generic[K, V]):
     _map_name: str
     """The logical name of the provided NamedMap."""
 
-    _key_map: dict[K, _ListenerGroup[K, V]]
+    _key_map: dict[K, _ListenerGroup[K, V, Any]]
     """Contains mappings between a key and its group of MapListeners."""
 
-    _filter_map: dict[Filter, _ListenerGroup[K, V]]
+    _filter_map: dict[Filter, _ListenerGroup[K, V, Any]]
     """Contains mappings between a Filter and its group of MapListeners."""
 
-    _filter_id_listener_group_map: dict[int, _ListenerGroup[K, V]]
+    _filter_id_listener_group_map: dict[int, _ListenerGroup[K, V, Any]]
     """Contains mappings between a logical filter ID and its ListenerGroup."""
-
-    _request_factory: RequestFactory
-    """The RequestFactory used to obtain the necessary gRPC requests."""
 
     _event_stream: Optional[grpc.aio.StreamStreamCall]
     """gRPC bidirectional stream for subscribing/unsubscribing MapListeners and receiving MapEvents from
@@ -574,10 +705,158 @@ class _MapEventsManager(Generic[K, V]):
     """"Flag indicating the event stream is open and ready for listener registrations and
     incoming events."""
 
-    _pending_registrations: dict[str, _ListenerGroup[K, V]]
+    _pending_registrations: dict[str | int, _ListenerGroup[K, V, Any]]
     """The mapping of pending listener registrations keyed by request uid."""
 
     _background_tasks: Set[Task[None]]
+
+    def __init__(
+        self,
+        named_map: coherence.client.NamedMap[K, V],
+        session: coherence.Session,
+        serializer: Serializer,
+        emitter: EventEmitter,
+    ) -> None:
+        """
+        Constructs a new _MapEventManager.
+        :param named_map:   the 'source' of the events
+        :param session:     the Session associated with this NamedMap
+        :param serializer:  the Serializer that will be used for ser/deser operations
+        :param emitter:     the internal event emitter used to notify registered MapListeners
+        """
+        self._named_map = named_map
+        self._serializer = serializer
+        self._emitter = emitter
+        self._map_name = named_map.name
+        self._session = session
+
+        self._key_map = {}
+        self._filter_map = {}
+        self._filter_id_listener_group_map = {}
+        self._pending_registrations = {}
+
+        self._event_stream = None
+        self._open = False
+        self._background_tasks = set()
+        self._stream_waiter = Event()
+
+        session.on(SessionLifecycleEvent.DISCONNECTED, self._close)
+
+    @abstractmethod
+    def _close(self) -> None:
+        pass
+
+    # noinspection PyProtectedMember
+    async def _reconnect(self) -> None:
+        group: _ListenerGroup[K, V, Any]
+        for group in self._key_map.values():
+            await group._subscribe(group._registered_lite)
+
+        for group in self._filter_map.values():
+            await group._subscribe(group._registered_lite)
+
+    @abstractmethod
+    def _new_key_group(self, key: K) -> _ListenerGroup[K, V, Any]:
+        pass
+
+    @abstractmethod
+    def _new_filter_group(self, filter: Filter) -> _ListenerGroup[K, V, Any]:
+        pass
+
+    async def _register_key_listener(self, listener: MapListener[K, V], key: K, lite: bool = False) -> None:
+        """
+        Registers the specified listener to listen for events matching the provided key.
+        :param listener:  the MapListener to register
+        :param key:       the key to listener to
+        :param lite:      `True` if the event should only include the key, or `False`
+                          if the event should include old and new values as well as the key
+        """
+        group: Optional[_ListenerGroup[K, V, Any]] = self._key_map.get(key, None)
+
+        if group is None:
+            group = self._new_key_group(key)
+            self._key_map[key] = group
+
+        await group.add_listener(listener, lite)
+
+    async def _remove_key_listener(self, listener: MapListener[K, V], key: K) -> None:
+        """
+        Removes the registration of the listener for the provided key.
+        :param listener:  the MapListener to remove
+        :param key:       they key the listener was associated with
+        """
+        group: Optional[_ListenerGroup[K, V, Any]] = self._key_map.get(key, None)
+
+        if group is not None:
+            await group.remove_listener(listener)
+
+    async def _register_filter_listener(
+        self, listener: MapListener[K, V], filter: Optional[Filter], lite: bool = False
+    ) -> None:
+        """
+        Registers the specified listener to listen for events matching the provided filter.
+        :param listener:  the MapListener to register
+        :param filter:    the Filter associated with the listener
+        :param lite:      `True` if the event should only include the key, or `False`
+          if the event should include old and new values as well as the key
+        """
+        filter_local: Filter = filter if filter is not None else self._DEFAULT_FILTER
+        group: Optional[_ListenerGroup[K, V, Any]] = self._filter_map.get(filter_local, None)
+
+        if group is None:
+            group = self._new_filter_group(filter_local)
+            self._filter_map[filter_local] = group
+        await group.add_listener(listener, lite)
+
+    async def _remove_filter_listener(self, listener: MapListener[K, V], filter: Optional[Filter]) -> None:
+        """
+        Removes the registration of the listener for the provided filter.
+        :param listener:  the MapListener to remove
+        :param filter:    the Filter that was used with the listener registration
+        """
+        filter_local: Filter = filter if filter is not None else self._DEFAULT_FILTER
+        group: Optional[_ListenerGroup[K, V, Any]] = self._filter_map.get(filter_local, None)
+
+        if group is not None:
+            await group.remove_listener(listener)
+
+    def _key_group_subscribed(self, key: K, group: _ListenerGroup[K, V, Any]) -> None:
+        """
+        Called internally by _KeyListenerGroup when a key listener is subscribed.
+        :param key:    the registration key
+        :param group:  the registered group
+        """
+        self._key_map[key] = group
+
+    def _key_group_unsubscribed(self, key: K) -> None:
+        """
+        Called internally by _KeyListenerGroup when a listener is unsubscribed.
+        :param key:  the key used at registration
+        """
+        del self._key_map[key]
+
+    def _filter_group_subscribed(self, filter_id: int, filter: Filter, group: _ListenerGroup[K, V, Any]) -> None:
+        """
+        Called internally by _FilterListenerGroup when a filter listener is subscribed.
+        :param filter_id:  the ID of the filter
+        :param filter:     the Filter associated with the listener registration
+        :param group:      the registered group
+        """
+        self._filter_id_listener_group_map[filter_id] = group
+        self._filter_map[filter] = group
+
+    def _filter_group_unsubscribed(self, filter_id: int, filter: Filter) -> None:
+        """
+        Called internally by _FilterListenerGroup when a filter listener is unsubscribed.
+        :param filter_id:  the ID of the filter
+        :param filter:     the Filter used at registration
+        """
+        del self._filter_id_listener_group_map[filter_id]
+        del self._filter_map[filter]
+
+
+class _MapEventsManagerV0(_MapEventsManager[K, V]):
+    """MapEventsManager implementation for V0 of the gRPC proxy."""
 
     # noinspection PyProtectedMember
     def __init__(
@@ -596,31 +875,18 @@ class _MapEventsManager(Generic[K, V]):
         :param serializer:  the Serializer that will be used for ser/deser operations
         :param emitter:     the internal event emitter used to notify registered MapListeners
         """
-        self._named_map = named_map
+        super().__init__(named_map, session, serializer, emitter)
         self._client = client
-        self._serializer = serializer
-        self._emitter = emitter
-        self._map_name = named_map.name
-        self._session = session
-
-        self._key_map = {}
-        self._filter_map = {}
-        self._filter_id_listener_group_map = {}
-        self._pending_registrations = {}
-
         self._request_factory = RequestFactory(self._map_name, session.scope, serializer)
 
-        self._event_stream = None
-        self._open = False
-        self._background_tasks = set()
-        self._stream_waiter = Event()
-
-        session.on(SessionLifecycleEvent.DISCONNECTED, self._close)
-
-        # intentionally ignoring the typing here to avoid complicating the
-        # callback API exposed on the session
         # noinspection PyTypeChecker
         session.on(SessionLifecycleEvent.RECONNECTED, self._reconnect)
+
+    def _new_key_group(self, key: K) -> _ListenerGroup[K, V, Any]:
+        return _KeyListenerGroupV0(self, key)
+
+    def _new_filter_group(self, filter: Filter) -> _ListenerGroup[K, V, Any]:
+        return _FilterListenerGroupV0(self, filter)
 
     def _close(self) -> None:
         """Close the gRPC event stream and any background tasks."""
@@ -634,15 +900,6 @@ class _MapEventsManager(Generic[K, V]):
         for task in self._background_tasks:
             task.cancel()
         self._background_tasks.clear()
-
-    # noinspection PyProtectedMember
-    async def _reconnect(self) -> None:
-        group: _ListenerGroup[K, V]
-        for group in self._key_map.values():
-            await group._subscribe(group._registered_lite)
-
-        for group in self._filter_map.values():
-            await group._subscribe(group._registered_lite)
 
     async def _ensure_stream(self) -> grpc.aio.StreamStreamCall:
         """
@@ -669,97 +926,6 @@ class _MapEventsManager(Generic[K, V]):
 
         return self._event_stream
 
-    async def _register_key_listener(self, listener: MapListener[K, V], key: K, lite: bool = False) -> None:
-        """
-        Registers the specified listener to listen for events matching the provided key.
-        :param listener:  the MapListener to register
-        :param key:       the key to listener to
-        :param lite:      `True` if the event should only include the key, or `False`
-                          if the event should include old and new values as well as the key
-        """
-        group: Optional[_ListenerGroup[K, V]] = self._key_map.get(key, None)
-
-        if group is None:
-            group = _KeyListenerGroup(self, key)
-            self._key_map[key] = group
-
-        await group.add_listener(listener, lite)
-
-    async def _remove_key_listener(self, listener: MapListener[K, V], key: K) -> None:
-        """
-        Removes the registration of the listener for the provided key.
-        :param listener:  the MapListener to remove
-        :param key:       they key the listener was associated with
-        """
-        group: Optional[_ListenerGroup[K, V]] = self._key_map.get(key, None)
-
-        if group is not None:
-            await group.remove_listener(listener)
-
-    async def _register_filter_listener(
-        self, listener: MapListener[K, V], filter: Optional[Filter], lite: bool = False
-    ) -> None:
-        """
-        Registers the specified listener to listen for events matching the provided filter.
-        :param listener:  the MapListener to register
-        :param filter:    the Filter associated with the listener
-        :param lite:      `True` if the event should only include the key, or `False`
-                           if the event should include old and new values as well as the key
-        """
-        filter_local: Filter = filter if filter is not None else self._DEFAULT_FILTER
-        group: Optional[_ListenerGroup[K, V]] = self._filter_map.get(filter_local, None)
-
-        if group is None:
-            group = _FilterListenerGroup(self, filter_local)
-            self._filter_map[filter_local] = group
-        await group.add_listener(listener, lite)
-
-    async def _remove_filter_listener(self, listener: MapListener[K, V], filter: Optional[Filter]) -> None:
-        """
-        Removes the registration of the listener for the provided filter.
-        :param listener:  the MapListener to remove
-        :param filter:    the Filter that was used with the listener registration
-        """
-        filter_local: Filter = filter if filter is not None else self._DEFAULT_FILTER
-        group: Optional[_ListenerGroup[K, V]] = self._filter_map.get(filter_local, None)
-
-        if group is not None:
-            await group.remove_listener(listener)
-
-    def _key_group_subscribed(self, key: K, group: _ListenerGroup[K, V]) -> None:
-        """
-        Called internally by _KeyListenerGroup when a key listener is subscribed.
-        :param key:    the registration key
-        :param group:  the registered group
-        """
-        self._key_map[key] = group
-
-    def _key_group_unsubscribed(self, key: K) -> None:
-        """
-        Called internally by _KeyListenerGroup when a listener is unsubscribed.
-        :param key:  the key used at registration
-        """
-        del self._key_map[key]
-
-    def _filter_group_subscribed(self, filter_id: int, filter: Filter, group: _ListenerGroup[K, V]) -> None:
-        """
-        Called internally by _FilterListenerGroup when a filter listener is subscribed.
-        :param filter_id:  the ID of the filter
-        :param filter:     the Filter associated with the listener registration
-        :param group:      the registered group
-        """
-        self._filter_id_listener_group_map[filter_id] = group
-        self._filter_map[filter] = group
-
-    def _filter_group_unsubscribed(self, filter_id: int, filter: Filter) -> None:
-        """
-        Called internally by _FilterListenerGroup when a filter listener is unsubscribed.
-        :param filter_id:  the ID of the filter
-        :param filter:     the Filter used at registration
-        """
-        del self._filter_id_listener_group_map[filter_id]
-        del self._filter_map[filter]
-
     # noinspection PyProtectedMember
     async def _handle_response(self) -> None:
         """
@@ -778,7 +944,9 @@ class _MapEventsManager(Generic[K, V]):
                     response: MapListenerResponse = await event_stream.read()
                     if response.HasField("subscribed"):
                         subscribed = response.subscribed
-                        group: Optional[_ListenerGroup[K, V]] = self._pending_registrations.get(subscribed.uid, None)
+                        group: Optional[_ListenerGroup[K, V, Any]] = self._pending_registrations.get(
+                            subscribed.uid, None
+                        )
                         if group is not None:
                             group._subscribe_complete()
                     elif response.HasField("destroyed"):
@@ -793,7 +961,7 @@ class _MapEventsManager(Generic[K, V]):
                         response_event = response.event
                         event: MapEvent[K, V] = MapEvent(self._named_map, response_event, self._serializer)
                         for _id in response_event.filterIds:
-                            filter_group: Optional[_ListenerGroup[K, V]] = self._filter_id_listener_group_map.get(
+                            filter_group: Optional[_ListenerGroup[K, V, Any]] = self._filter_id_listener_group_map.get(
                                 _id, None
                             )
                             if filter_group is not None:
@@ -804,3 +972,36 @@ class _MapEventsManager(Generic[K, V]):
                             key_group._notify_listeners(event)
             except asyncio.CancelledError:
                 return
+
+
+class _MapEventsManagerV1(_MapEventsManager[K, V]):
+    def __init__(
+        self,
+        named_map: coherence.client.NamedMap[K, V],
+        session: coherence.Session,
+        serializer: Serializer,
+        emitter: EventEmitter,
+        request_factory: RequestFactoryV1,
+    ) -> None:
+        super().__init__(named_map, session, serializer, emitter)
+        self.request_factory = request_factory
+
+    @property
+    def request_factory(self) -> RequestFactoryV1:
+        return self._request_factory
+
+    @request_factory.setter
+    def request_factory(self, value: RequestFactoryV1) -> None:
+        self._request_factory = value
+
+    async def _ensure_stream(self) -> grpc.aio.StreamStreamCall:
+        pass  # in v1, this is a no-op
+
+    def _new_key_group(self, key: K) -> _ListenerGroup[K, V, Any]:
+        return _KeyListenerGroupV1(self, key)
+
+    def _new_filter_group(self, filter: Filter) -> _ListenerGroup[K, V, Any]:
+        return _FilterListenerGroupV1(self, filter)
+
+    def _close(self) -> None:
+        pass
