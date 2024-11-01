@@ -39,7 +39,6 @@ from .aggregator import AverageAggregator, EntryAggregator, PriorityAggregator, 
 from .cache_service_messages_v1_pb2 import MapEventMessage, NamedCacheResponse, ResponseType
 from .comparator import Comparator
 from .entry import MapEntry
-from .error import RequestFailedError, SessionCreationError
 from .event import (
     MapEvent,
     MapLifecycleEvent,
@@ -117,11 +116,11 @@ class _Handshake:
             ):
                 pass
             else:
-                raise SessionCreationError(
-                    "Unexpected error attempting to handshake with proxy: " + str(e.details())
+                raise RuntimeError(
+                    f"Unexpected error: {e}" "Unexpected error attempting to handshake with proxy: " + str(e.details())
                 ) from e
         except asyncio.TimeoutError as e:
-            raise SessionCreationError("Handshake with proxy timed out") from e
+            raise RuntimeError("Handshake with proxy timed out") from e
         finally:
             stream.cancel()
 
@@ -2349,7 +2348,7 @@ class StreamHandler:
                         observer = self._observers.get(response_id, None)
                         if observer is not None:
                             self._observers.pop(response_id, None)
-                            observer._err(RequestFailedError(message=response.error.message))
+                            observer._err(Exception(response.error.message))
                         continue
                     elif response.HasField("complete"):
                         observer = self._observers.get(response_id, None)
