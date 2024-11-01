@@ -6,6 +6,8 @@ from time import sleep, time
 from typing import Dict, Final, List, Optional, Set, TypeVar, Union
 
 import pytest
+from grpc import StatusCode
+from grpc.aio import AioRpcError
 
 import tests
 from coherence import Aggregators, Filters, MapEntry, NamedCache, Session, request_timeout
@@ -538,13 +540,17 @@ async def test_stream_request_timeout(cache: NamedCache[str, str]) -> None:
 
     start = time()
     try:
-        async with request_timeout(seconds=2.0):
+        async with request_timeout(seconds=1.0):
             async for e in await cache.values():
                 continue
             assert False
-    except TimeoutError:
+    except TimeoutError:  # v1
         end = time()
-        assert pytest.approx((end - start), 0.5) == 2.0
+        assert pytest.approx((end - start), 0.5) == 1.0
+    except AioRpcError as e:  # noqa: F841
+        end = time()
+        assert e.code() == StatusCode.DEADLINE_EXCEEDED
+        assert pytest.approx((end - start), 0.5) == 1.0
 
 
 @pytest.mark.asyncio
@@ -555,26 +561,31 @@ async def test_paged_stream_request_timeout(cache: NamedCache[str, str]) -> None
 
     start = time()
     try:
-        async with request_timeout(seconds=2.0):
+        async with request_timeout(seconds=1.0):
             async for e in await cache.values(by_page=True):
                 continue
             assert False
     except TimeoutError:
         end = time()
-        assert pytest.approx((end - start), 0.5) == 2.0
+        assert pytest.approx((end - start), 0.5) == 1.0
+    except AioRpcError as e:  # noqa: F841
+        end = time()
+        assert e.code() == StatusCode.DEADLINE_EXCEEDED
+        assert pytest.approx((end - start), 0.5) == 1.0
 
 
-@pytest.mark.skip(
-    reason="Teardown fails due to proxy-side issue blocking subsequent \
-    timed out calls due to previous call still running"
-)
 @pytest.mark.asyncio
-async def test_unary_request_timeout(cache: NamedCache[str, str]) -> None:
+async def test_unary_request_timeout(test_session: Session) -> None:
+    cache: NamedCache[str, str] = await test_session.get_cache("test-" + str(int(time() * 1000)))
     start = time()
     try:
         async with request_timeout(seconds=5.0):
             await cache.invoke("key", tests.LongRunningProcessor())
             assert False
-    except TimeoutError:
+    except TimeoutError:  # v1
         end = time()
+        assert pytest.approx((end - start), 0.5) == 5.0
+    except AioRpcError as e:
+        end = time()
+        assert e.code() == StatusCode.DEADLINE_EXCEEDED
         assert pytest.approx((end - start), 0.5) == 5.0
