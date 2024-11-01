@@ -9,7 +9,6 @@ import pytest
 
 import tests
 from coherence import Aggregators, Filters, MapEntry, NamedCache, Session, request_timeout
-from coherence.error import RequestTimeoutError
 from coherence.event import MapLifecycleEvent
 from coherence.extractor import ChainedExtractor, Extractors, UniversalExtractor
 from coherence.processor import ExtractorProcessor
@@ -543,7 +542,7 @@ async def test_stream_request_timeout(cache: NamedCache[str, str]) -> None:
             async for e in await cache.values():
                 continue
             assert False
-    except RequestTimeoutError:
+    except TimeoutError:
         end = time()
         assert pytest.approx((end - start), 0.5) == 2.0
 
@@ -560,7 +559,7 @@ async def test_paged_stream_request_timeout(cache: NamedCache[str, str]) -> None
             async for e in await cache.values(by_page=True):
                 continue
             assert False
-    except RequestTimeoutError:
+    except TimeoutError:
         end = time()
         assert pytest.approx((end - start), 0.5) == 2.0
 
@@ -576,6 +575,6 @@ async def test_unary_request_timeout(cache: NamedCache[str, str]) -> None:
         async with request_timeout(seconds=5.0):
             await cache.invoke("key", tests.LongRunningProcessor())
             assert False
-    except RequestTimeoutError:
+    except TimeoutError:
         end = time()
         assert pytest.approx((end - start), 0.5) == 5.0

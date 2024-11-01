@@ -12,7 +12,6 @@ from abc import ABC, abstractmethod
 from asyncio import Event
 from typing import Any, AsyncIterator, Callable, Generic, Optional, Tuple, TypeVar
 
-import grpc.aio
 from google.protobuf.any_pb2 import Any as GrpcAny  # type: ignore
 from google.protobuf.wrappers_pb2 import BoolValue, BytesValue, Int32Value  # type: ignore
 
@@ -27,7 +26,6 @@ from .cache_service_messages_v1_pb2 import ReplaceMappingRequest as V1ReplaceMap
 from .common_messages_v1_pb2 import BinaryKeyAndValue, CollectionOfBytesValues, OptionalValue
 from .comparator import Comparator
 from .entry import MapEntry
-from .error import RequestFailedError, RequestTimeoutError
 from .extractor import ValueExtractor
 from .filter import Filter, Filters, MapEventFilter
 from .messages_pb2 import (
@@ -232,18 +230,16 @@ class UnaryDispatcher(ResponseObserver, Dispatcher, ScalarResultProducer[T]):
             await stream_handler.send_proxy_request(self._request)
 
             if self._error is not None:
-                raise RequestFailedError() from self._error
+                raise self._error
 
             await self._waiter.wait()
 
         stream_handler.register_observer(self)
         try:
             await asyncio.wait_for(_dispatch_and_wait(), _TIMEOUT_CONTEXT_VAR.get(self._timeout))
-        except asyncio.TimeoutError:
+        except Exception as e:
             stream_handler.deregister_observer(self)
-            raise RequestTimeoutError()
-        except grpc.aio.AioRpcError as e:
-            raise RequestFailedError("Unexpected error dispatching request: " + str(e.details()))
+            raise e
 
     def result(self) -> T:
         return self._result
@@ -276,15 +272,12 @@ class StreamingDispatcher(ResponseObserver, Dispatcher, AsyncIterator[T]):
                 await stream_handler.send_proxy_request(self._request)
 
                 if self._error is not None:
-                    raise RequestFailedError() from self._error
+                    raise self._error
 
                 await asyncio.wait_for(self._deadline.wait(), _TIMEOUT_CONTEXT_VAR.get(self._timeout))
-            except asyncio.TimeoutError:
+            except Exception as e:
                 stream_handler.deregister_observer(self)
-                self._error = RequestTimeoutError()
-                self._waiter.set()  # raise error to the caller
-            except grpc.aio.AioRpcError as e:
-                self._error = RequestFailedError("Unexpected error dispatching request: " + str(e.details()))
+                self._error = e
                 self._waiter.set()  # raise error to the caller
 
         stream_handler.register_observer(self)
@@ -296,14 +289,7 @@ class StreamingDispatcher(ResponseObserver, Dispatcher, AsyncIterator[T]):
     async def __anext__(self) -> T:
         await self._waiter.wait()
         if self._error is not None:
-            if isinstance(self._error, RequestTimeoutError):
-                self._stream_handler.deregister_observer(self)
-                raise self._error
-            elif isinstance(self._error, RequestFailedError):
-                self._stream_handler.deregister_observer(self)
-                raise self._error
-            else:
-                raise RequestFailedError from self._error
+            raise self._error
         elif self._complete is True:
             self._deadline.set()
             raise StopAsyncIteration
@@ -372,15 +358,12 @@ class PagingDispatcher(ResponseObserver, Dispatcher, AsyncIterator[T]):
                     await stream_handler.send_proxy_request(self._request)
 
                     if self._error is not None:
-                        raise RequestFailedError() from self._error
+                        raise self._error
 
                     await asyncio.wait_for(self._deadline.wait(), _TIMEOUT_CONTEXT_VAR.get(self._timeout))
-                except asyncio.TimeoutError:
+                except Exception as e:
                     stream_handler.deregister_observer(self)
-                    self._error = RequestTimeoutError()
-                    self._waiter.set()  # raise error to the caller
-                except grpc.aio.AioRpcError as e:
-                    self._error = RequestFailedError("Unexpected error dispatching request: " + str(e.details()))
+                    self._error = e
                     self._waiter.set()  # raise error to the caller
 
             stream_handler.register_observer(self)
@@ -391,7 +374,7 @@ class PagingDispatcher(ResponseObserver, Dispatcher, AsyncIterator[T]):
 
             if self._error is not None:
                 stream_handler.deregister_observer(self)
-                raise RequestFailedError() from self._error
+                raise self._error
 
     def __aiter__(self) -> AsyncIterator[T]:
         return self
@@ -399,14 +382,7 @@ class PagingDispatcher(ResponseObserver, Dispatcher, AsyncIterator[T]):
     async def __anext__(self) -> T:
         await self._waiter.wait()
         if self._error is not None:
-            if isinstance(self._error, RequestTimeoutError):
-                self._stream_handler.deregister_observer(self)
-                raise self._error
-            elif isinstance(self._error, RequestFailedError):
-                self._stream_handler.deregister_observer(self)
-                raise self._error
-            else:
-                raise RequestFailedError from self._error
+            raise self._error
         elif self._complete is True:
             raise StopAsyncIteration
         else:
