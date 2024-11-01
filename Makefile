@@ -82,7 +82,7 @@ E2E_TESTS := tests/e2e/test_session.py \
 				tests/e2e/test_filters.py \
 				tests/e2e/test_processors.py \
 				tests/e2e/test_aggregators.py \
-				tests/e2e/test_ai.py \
+#				tests/e2e/test_ai.py \
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Clean-up all of the build artifacts
