@@ -8,6 +8,8 @@ import abc
 import asyncio
 import logging
 import os
+import sys
+import textwrap
 import time
 import uuid
 from asyncio import Condition, Event, Task
@@ -32,6 +34,7 @@ from typing import (
 
 # noinspection PyPackageRequirements
 import grpc
+from google.protobuf.json_format import MessageToJson  # type:ignore
 from grpc.aio import Channel, StreamStreamMultiCallable
 from pymitter import EventEmitter
 
@@ -1157,7 +1160,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
             await dispatcher.dispatch(self._stream_handler)
             return dispatcher
 
-    # TODO
+    # gTODO
     @_pre_call_cache
     async def keys(self, filter: Optional[Filter] = None, by_page: bool = False) -> AsyncIterator[K]:
         if by_page and filter is None:
@@ -2244,6 +2247,8 @@ class StreamHandler:
         request_factory: RequestFactoryV1,
         events_manager: _MapEventsManagerV1[K, V],
     ):
+        self._debug: str = os.environ.get("COHERENCE_MESSAGING_DEBUG", "off")
+        self._session: Session = session
         self._channel = session.channel
         self._reconnect_timeout: float = session.options.session_disconnect_timeout_seconds
         self._proxy_stub = ProxyServiceStub(session.channel)
@@ -2275,6 +2280,17 @@ class StreamHandler:
 
         session.on(SessionLifecycleEvent.DISCONNECTED, on_disconnect)
         session.on(SessionLifecycleEvent.RECONNECTED, on_reconnect)
+
+    def _log_message(self, message: Any, send: bool = True) -> None:
+        debug: str = self._debug
+
+        if debug != sys.intern("off"):
+            session_id = self._session.session_id
+            prefix: str = f"c.m.d SND [{session_id}] -> " if send else f"c.m.d RCV [{session_id}] <- "
+            if debug == sys.intern("on"):
+                COH_LOG.debug(prefix + textwrap.shorten(MessageToJson(message=message, indent=None), 256))
+            elif debug == sys.intern("full"):
+                COH_LOG.debug(prefix + MessageToJson(message=message, indent=None))
 
     @property
     async def stream(self) -> StreamStreamMultiCallable:
@@ -2315,6 +2331,9 @@ class StreamHandler:
     # noinspection PyUnresolvedReferences
     async def send_proxy_request(self, proxy_request: ProxyRequest) -> None:
         stream: StreamStreamMultiCallable = await self.stream
+
+        self._log_message(proxy_request)
+
         await stream.write(proxy_request)
 
     def register_observer(self, observer: ResponseObserver) -> None:
@@ -2332,6 +2351,9 @@ class StreamHandler:
                 # noinspection PyUnresolvedReferences
                 response = await stream.read()
                 response_id = response.id
+
+                self._log_message(response, False)
+
                 if response_id == 0:
                     self.handle_zero_id_response(response)
                 else:
