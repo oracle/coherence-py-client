@@ -589,3 +589,6 @@ async def test_unary_request_timeout(test_session: Session) -> None:
         end = time()
         assert e.code() == StatusCode.DEADLINE_EXCEEDED
         assert pytest.approx((end - start), 0.5) == 5.0
+    except Exception as e:
+        print(str(type(e)))
+        pytest.fail("Unexpected Exception")
