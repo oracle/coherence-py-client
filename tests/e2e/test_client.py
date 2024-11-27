@@ -552,7 +552,7 @@ async def test_stream_request_timeout(cache: NamedCache[str, str]) -> None:
         assert pytest.approx((end - start), 0.5) == 1.0
     except asyncio.exceptions.TimeoutError:  # v1
         end = time()
-        assert pytest.approx((end - start), 0.5) == 5.0
+        assert pytest.approx((end - start), 0.5) == 1.0
     except AioRpcError as e:  # noqa: F841
         end = time()
         assert e.code() == StatusCode.DEADLINE_EXCEEDED
@@ -577,7 +577,7 @@ async def test_paged_stream_request_timeout(cache: NamedCache[str, str]) -> None
         assert pytest.approx((end - start), 0.5) == 1.0
     except asyncio.exceptions.TimeoutError:  # v1
         end = time()
-        assert pytest.approx((end - start), 0.5) == 5.0
+        assert pytest.approx((end - start), 0.5) == 1.0
     except AioRpcError as e:  # noqa: F841
         end = time()
         assert e.code() == StatusCode.DEADLINE_EXCEEDED
