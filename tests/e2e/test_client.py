@@ -1,6 +1,8 @@
 # Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
+
+import asyncio
 from asyncio import Event
 from time import sleep, time
 from typing import Dict, Final, List, Optional, Set, TypeVar, Union
@@ -585,10 +587,10 @@ async def test_unary_request_timeout(test_session: Session) -> None:
     except TimeoutError:  # v1
         end = time()
         assert pytest.approx((end - start), 0.5) == 5.0
+    except asyncio.exceptions.TimeoutError:  # v1
+        end = time()
+        assert pytest.approx((end - start), 0.5) == 5.0
     except AioRpcError as e:
         end = time()
         assert e.code() == StatusCode.DEADLINE_EXCEEDED
         assert pytest.approx((end - start), 0.5) == 5.0
-    except Exception as e:
-        print(str(type(e)))
-        pytest.fail("Unexpected Exception")
