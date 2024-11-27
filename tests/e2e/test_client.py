@@ -534,6 +534,7 @@ async def test_add_remove_index(person_cache: NamedCache[str, Person]) -> None:
     assert "index" not in idx_rec
 
 
+# noinspection PyExceptClausesOrder
 @pytest.mark.asyncio
 async def test_stream_request_timeout(cache: NamedCache[str, str]) -> None:
     # insert enough data into the cache to ensure results will be paged
@@ -549,12 +550,16 @@ async def test_stream_request_timeout(cache: NamedCache[str, str]) -> None:
     except TimeoutError:  # v1
         end = time()
         assert pytest.approx((end - start), 0.5) == 1.0
+    except asyncio.exceptions.TimeoutError:  # v1
+        end = time()
+        assert pytest.approx((end - start), 0.5) == 5.0
     except AioRpcError as e:  # noqa: F841
         end = time()
         assert e.code() == StatusCode.DEADLINE_EXCEEDED
         assert pytest.approx((end - start), 0.5) == 1.0
 
 
+# noinspection PyExceptClausesOrder
 @pytest.mark.asyncio
 async def test_paged_stream_request_timeout(cache: NamedCache[str, str]) -> None:
     # insert enough data into the cache to ensure results will be paged
@@ -570,12 +575,16 @@ async def test_paged_stream_request_timeout(cache: NamedCache[str, str]) -> None
     except TimeoutError:
         end = time()
         assert pytest.approx((end - start), 0.5) == 1.0
+    except asyncio.exceptions.TimeoutError:  # v1
+        end = time()
+        assert pytest.approx((end - start), 0.5) == 5.0
     except AioRpcError as e:  # noqa: F841
         end = time()
         assert e.code() == StatusCode.DEADLINE_EXCEEDED
         assert pytest.approx((end - start), 0.5) == 1.0
 
 
+# noinspection PyExceptClausesOrder
 @pytest.mark.asyncio
 async def test_unary_request_timeout(test_session: Session) -> None:
     cache: NamedCache[str, str] = await test_session.get_cache("test-" + str(int(time() * 1000)))
