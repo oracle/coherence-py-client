@@ -5,6 +5,18 @@
 from decimal import Decimal
 from typing import Any
 
+from coherence.ai import (
+    BinaryQuantIndex,
+    BitVector,
+    ByteVector,
+    CosineDistance,
+    DocumentChunk,
+    FloatVector,
+    QueryResult,
+    SimilaritySearch,
+)
+from coherence.extractor import Extractors, ValueExtractor
+from coherence.filter import Filter, Filters
 from coherence.serialization import JSONSerializer, proxy
 from tests.Task import Task
 
@@ -63,3 +75,153 @@ def _verify_round_trip(obj: Any, should_have_class: bool) -> None:
     deser_result: Any = serializer.deserialize(ser_result)
     print(f"Deserialized [{type(deser_result)}] result: {deser_result}")
     assert deser_result == obj
+
+
+def test_BitVector_serialization() -> None:
+    serializer: JSONSerializer = JSONSerializer()
+    coh_bv = BitVector(hex_string="AABBCC")
+    ser = serializer.serialize(coh_bv)
+    assert ser == b'\x15{"@class": "ai.BitVector", "bits": "0xAABBCC"}'
+    o = serializer.deserialize(ser)
+    assert isinstance(o, BitVector)
+
+    coh_bv = BitVector(hex_string="0xAABBCC")
+    ser = serializer.serialize(coh_bv)
+    assert ser == b'\x15{"@class": "ai.BitVector", "bits": "0xAABBCC"}'
+    o = serializer.deserialize(ser)
+    assert isinstance(o, BitVector)
+
+    coh_bv = BitVector(hex_string=None, byte_array=bytes([1, 2, 10]))
+    ser = serializer.serialize(coh_bv)
+    assert ser == b'\x15{"@class": "ai.BitVector", "bits": "0x01020a"}'
+    o = serializer.deserialize(ser)
+    assert isinstance(o, BitVector)
+
+    coh_bv = BitVector(hex_string=None, int_array=[1234, 1235])
+    ser = serializer.serialize(coh_bv)
+    assert ser == b'\x15{"@class": "ai.BitVector", "bits": "0x4d24d3"}'
+    o = serializer.deserialize(ser)
+    assert isinstance(o, BitVector)
+
+
+def test_ByteVector_serialization() -> None:
+    serializer: JSONSerializer = JSONSerializer()
+    coh_int8v = ByteVector(bytes([1, 2, 3, 4]))
+    ser = serializer.serialize(coh_int8v)
+    assert ser == b'\x15{"@class": "ai.Int8Vector", "array": "AQIDBA=="}'
+    o = serializer.deserialize(ser)
+    assert isinstance(o, ByteVector)
+
+
+def test_FloatVector_serialization() -> None:
+    serializer: JSONSerializer = JSONSerializer()
+    coh_fv = FloatVector([1.0, 2.0, 3.0])
+    ser = serializer.serialize(coh_fv)
+    assert ser == b'\x15{"@class": "ai.Float32Vector", "array": [1.0, 2.0, 3.0]}'
+    o = serializer.deserialize(ser)
+    assert isinstance(o, FloatVector)
+
+
+def test_DocumentChunk_serialization() -> None:
+    serializer: JSONSerializer = JSONSerializer()
+    dc = DocumentChunk("test")
+    ser = serializer.serialize(dc)
+    assert ser == (
+        b'\x15{"@class": "ai.DocumentChunk", "dataVersion": 0, '
+        b'"metadata": {"@ordered": true, "entries": []}, "text": "test"}'
+    )
+    o = serializer.deserialize(ser)
+    assert isinstance(o, DocumentChunk)
+
+    d = {"one": "one-value", "two": "two-value"}
+    dc = DocumentChunk("test", d)
+    ser = serializer.serialize(dc)
+    assert ser == (
+        b'\x15{"@class": "ai.DocumentChunk", "dataVersion": 0, "metadata": {"entries": ['
+        b'{"key": "one", "value": "one-value"}, {"key": "two", "value": "two-value"}]}, '
+        b'"text": "test"}'
+    )
+    o = serializer.deserialize(ser)
+    assert isinstance(o, DocumentChunk)
+
+    coh_fv = FloatVector([1.0, 2.0, 3.0])
+    d = {"one": "one-value", "two": "two-value"}
+    dc = DocumentChunk("test", d, coh_fv)
+    ser = serializer.serialize(dc)
+    assert ser == (
+        b'\x15{"@class": "ai.DocumentChunk", "dataVersion": 0, "metadata": {"entries": ['
+        b'{"key": "one", "value": "one-value"}, {"key": "two", "value": "two-value"}]}, '
+        b'"vector": {"@class": "ai.Float32Vector", "array": [1.0, 2.0, 3.0]}, "text": "test"}'
+    )
+    o = serializer.deserialize(ser)
+    assert isinstance(o, DocumentChunk)
+
+
+# noinspection PyUnresolvedReferences
+def test_SimilaritySearch_serialization() -> None:
+    serializer: JSONSerializer = JSONSerializer()
+    coh_fv = FloatVector([1.0, 2.0, 3.0])
+    ve = Extractors.extract("foo")
+    f = Filters.equals("foo", "bar")
+    ss = SimilaritySearch(ve, coh_fv, 19, filter=f)
+    ser = serializer.serialize(ss)
+    assert ser == (
+        b'\x15{"@class": "ai.search.SimilarityAggregator", '
+        b'"extractor": {"@class": "extractor.UniversalExtractor", "name": "foo", "params": null}, '
+        b'"algorithm": {"@class": "ai.distance.CosineSimilarity"}, '
+        b'"bruteForce": false, '
+        b'"filter": {"@class": "filter.EqualsFilter", '
+        b'"extractor": {"@class": "extractor.UniversalExtractor", '
+        b'"name": "foo", "params": null}, "value": "bar"}, "maxResults": 19, '
+        b'"vector": {"@class": "ai.Float32Vector", "array": [1.0, 2.0, 3.0]}}'
+    )
+
+    o = serializer.deserialize(ser)
+    assert isinstance(o, SimilaritySearch)
+    assert isinstance(o.extractor, ValueExtractor)
+    assert isinstance(o.algorithm, CosineDistance)
+    assert isinstance(o.filter, Filter)
+    assert o.maxResults == 19
+    assert isinstance(o.vector, FloatVector)
+
+    ss.bruteForce = True
+    ser = serializer.serialize(ss)
+    assert ser == (
+        b'\x15{"@class": "ai.search.SimilarityAggregator", '
+        b'"extractor": {"@class": "extractor.UniversalExtractor", "name": "foo", "params": null}, '
+        b'"algorithm": {"@class": "ai.distance.CosineSimilarity"}, '
+        b'"bruteForce": true, '
+        b'"filter": {"@class": "filter.EqualsFilter", '
+        b'"extractor": {"@class": "extractor.UniversalExtractor", '
+        b'"name": "foo", "params": null}, "value": "bar"}, "maxResults": 19, '
+        b'"vector": {"@class": "ai.Float32Vector", "array": [1.0, 2.0, 3.0]}}'
+    )
+
+
+# noinspection PyUnresolvedReferences
+def test_QueryResult_serialization() -> None:
+    serializer: JSONSerializer = JSONSerializer()
+    bqr = QueryResult(3.0, 1, "abc")
+    ser = serializer.serialize(bqr)
+    assert ser == b'\x15{"@class": "ai.results.QueryResult", "distance": 3.0, "key": 1, "value": "abc"}'
+
+    o = serializer.deserialize(ser)
+    assert isinstance(o, QueryResult)
+    assert o.distance == 3.0
+    assert o.key == 1
+    assert o.value == "abc"
+
+
+# noinspection PyUnresolvedReferences
+def test_BinaryQuantIndex_serialization() -> None:
+    serializer: JSONSerializer = JSONSerializer()
+    bqi = BinaryQuantIndex(Extractors.extract("foo"))
+    ser = serializer.serialize(bqi)
+    assert ser == (
+        b'\x15{"@class": "ai.index.BinaryQuantIndex", "dataVersion": 0, '
+        b'"binFuture": null, "extractor": {"@class": "extractor.UniversalExtractor", '
+        b'"name": "foo", "params": null}, "oversamplingFactor": 3}'
+    )
+
+    o = serializer.deserialize(ser)
+    assert isinstance(o, BinaryQuantIndex)
