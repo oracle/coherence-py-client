@@ -30,21 +30,44 @@ if [ -z "${PROFILE_STR}" ] ; then
   exit 1
 fi
 
-echo "Coherence CE 22.06.10"
-COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
-  COHERENCE_VERSION=$COH_VER \
-  COHERENCE_BASE_IMAGE=$BASE_IMAGE \
-  PROFILES=$PROFILE_STR \
-  make clean test-cluster-shutdown remove-app-images build-test-images test-cluster-startup just-wait test
-
-echo "Coherence CE 22.06.10 with SSL"
-RUN_SECURE=true COHERENCE_IGNORE_INVALID_CERTS=true \
-  COHERENCE_TLS_CERTS_PATH=$(pwd)/tests/utils/certs/guardians-ca.crt \
-  COHERENCE_TLS_CLIENT_CERT=$(pwd)/tests/utils/certs/star-lord.crt \
-  COHERENCE_TLS_CLIENT_KEY=$(pwd)/tests/utils/certs/star-lord.pem \
+if [[ "${COH_VER}" =~ "22.06" ]] ; then
+  echo "Coherence CE 22.06"
   COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
-  COHERENCE_VERSION=$COH_VER \
-  COHERENCE_BASE_IMAGE=$BASE_IMAGE \
-  PROFILES=$PROFILE_STR,secure \
-  make clean certs test-cluster-shutdown remove-app-images \
-                                                  build-test-images test-cluster-startup just-wait test
+    COHERENCE_VERSION=$COH_VER \
+    COHERENCE_BASE_IMAGE=$BASE_IMAGE \
+    PROFILES=$PROFILE_STR \
+    make clean test-cluster-shutdown remove-app-images build-test-images test-cluster-startup just-wait test
+else
+  echo "Coherence CE 24.09"
+  COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
+    COHERENCE_VERSION=$COH_VER \
+    COHERENCE_BASE_IMAGE=$BASE_IMAGE \
+    PROFILES=$PROFILE_STR \
+    make clean test-cluster-shutdown remove-app-images build-test-images test-cluster-startup just-wait test-with-ai
+fi
+
+if [[ "${COH_VER}" =~ "22.06" ]] ; then
+  echo "Coherence CE 22.06 with SSL"
+  RUN_SECURE=true COHERENCE_IGNORE_INVALID_CERTS=true \
+    COHERENCE_TLS_CERTS_PATH=$(pwd)/tests/utils/certs/guardians-ca.crt \
+    COHERENCE_TLS_CLIENT_CERT=$(pwd)/tests/utils/certs/star-lord.crt \
+    COHERENCE_TLS_CLIENT_KEY=$(pwd)/tests/utils/certs/star-lord.pem \
+    COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
+    COHERENCE_VERSION=$COH_VER \
+    COHERENCE_BASE_IMAGE=$BASE_IMAGE \
+    PROFILES=$PROFILE_STR,secure \
+    make clean certs test-cluster-shutdown remove-app-images \
+                                                    build-test-images test-cluster-startup just-wait test
+else
+  echo "Coherence CE 22.06 with SSL"
+    RUN_SECURE=true COHERENCE_IGNORE_INVALID_CERTS=true \
+      COHERENCE_TLS_CERTS_PATH=$(pwd)/tests/utils/certs/guardians-ca.crt \
+      COHERENCE_TLS_CLIENT_CERT=$(pwd)/tests/utils/certs/star-lord.crt \
+      COHERENCE_TLS_CLIENT_KEY=$(pwd)/tests/utils/certs/star-lord.pem \
+      COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
+      COHERENCE_VERSION=$COH_VER \
+      COHERENCE_BASE_IMAGE=$BASE_IMAGE \
+      PROFILES=$PROFILE_STR,secure \
+      make clean certs test-cluster-shutdown remove-app-images \
+                                                      build-test-images test-cluster-startup just-wait test-with-ai
+fi

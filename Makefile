@@ -133,6 +133,22 @@ test:  ##
 		tests/test_aggregators.py \
 
 # ----------------------------------------------------------------------------------------------------------------------
+# Run ai tests with code coverage
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-with-ai
+test:  ##
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html \
+		tests/test_serialization.py \
+		tests/test_extractors.py \
+		tests/test_session.py \
+		tests/test_client.py \
+		tests/test_events.py \
+		tests/test_filters.py \
+		tests/test_processors.py \
+		tests/test_aggregators.py \
+		tests/test_ai.py \
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Run standards validation across project
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: validate-setup
