@@ -217,7 +217,7 @@ class CacheStats:
 
     def reset(self) -> None:
         """
-        Resets all statistics aside from memory consumption.
+        Resets all statistics aside from memory consumption and size.
 
         :return: None
         """
@@ -323,7 +323,7 @@ class LocalCache(Generic[K, V]):
         self._name: str = name
         self._options: NearCacheOptions = options
         self._stats: CacheStats = CacheStats(self)
-        self._data: dict[K, Optional[LocalEntry[K, V]]] = dict()
+        self._storage: dict[K, Optional[LocalEntry[K, V]]] = dict()
         self._lock: asyncio.Lock = asyncio.Lock()
 
     async def put(self, key: K, value: V, ttl: Optional[int] = None) -> Optional[V]:
@@ -333,6 +333,7 @@ class LocalCache(Generic[K, V]):
 
         :param key: the key with which the specified value is to be associated
         :param value: the value to be associated with the specified key
+        :param ttl: the time-to-live (in millis) of this entry
         :return: the previous value associated with the specified key, or `None`
          if there was no mapping for key. A `None` return can also indicate
          that the map previously associated `None` with the specified key
@@ -378,7 +379,7 @@ class LocalCache(Generic[K, V]):
 
     async def get_all(self, keys: set[K]) -> dict[K, V]:
         """
-        Get all the specified keys if they are in the cache. For each key that is in the cacje,
+        Get all the specified keys if they are in the cache. For each key that is in the cache,
         that key and its corresponding value will be placed in the cache that is returned by
         this method. The absence of a key in the returned map indicates that it was not in the cache,
         which may imply (for caches that can load behind the scenes) that the requested data
@@ -441,7 +442,7 @@ class LocalCache(Generic[K, V]):
         Clears all the mappings in the cache.
         """
         async with self._lock:
-            self._data = dict()
+            self._storage = dict()
 
             self.stats._memory = 0
 
@@ -470,7 +471,7 @@ class LocalCache(Generic[K, V]):
         """
         :return: the local storage for this cache
         """
-        return self._data
+        return self._storage
 
     @property
     def options(self) -> NearCacheOptions:
