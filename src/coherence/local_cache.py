@@ -154,7 +154,10 @@ class CacheStats:
         misses: int = self.misses
         total = hits + misses
 
-        return 0.0 if total == 0 else round((float(hits) / float(misses)), 2)
+        if misses == 0 and hits > 0:
+            return 1.0 if hits > 0 else 0.0
+
+        return 0.0 if total == 0 else round((float(hits) / (float(total))), 3)
 
     @property
     def puts(self) -> int:
@@ -373,7 +376,7 @@ class LocalCache(Generic[K, V]):
                 return None
 
             stats._register_hit()
-            entry._last_access = time.time_ns()
+            entry.touch()
 
             return entry.value
 
@@ -402,7 +405,7 @@ class LocalCache(Generic[K, V]):
                     continue
 
                 stats._register_hit()
-                entry._last_access = time.time_ns()
+                entry.touch()
 
                 results[key] = entry.value
 
@@ -540,4 +543,4 @@ class LocalCache(Generic[K, V]):
             stats._register_expires(size, end - start)
 
     def __str__(self) -> str:
-        return f"LocalCache(name={self.name}, options={self.options}" f", stats={self.stats})"
+        return f"LocalCache(name={self.name}, options={self.options}, stats={self.stats})"

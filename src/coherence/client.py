@@ -206,7 +206,7 @@ class NearCacheOptions:
     def __str__(self) -> str:
         return (
             f"NearCacheOptions(ttl={self.ttl}, high-units={self.high_units}, high-units-memory={self.high_unit_memory}"
-            f"prune-factor={self.prune_factor})"
+            f", prune-factor={self.prune_factor})"
         )
 
     def __eq__(self, other: Any) -> bool:
