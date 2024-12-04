@@ -183,6 +183,94 @@ def _pre_call_session(func):
     return inner
 
 
+class NearCacheOptions:
+
+    def __init__(
+        self, ttl: int = 0, high_units: int = 0, high_units_memory: int = 0, prune_factor: float = 0.80
+    ) -> None:
+        super().__init__()
+        if high_units < 0 or high_units_memory < 0:
+            raise ValueError("values for high_units and high_units_memory must be positive")
+        if ttl == 0 and high_units == 0 and high_units_memory == 0:
+            raise ValueError("at least one option must be specified and non-zero")
+        if high_units != 0 and high_units_memory != 0:
+            raise ValueError("high_units and high_units_memory cannot be used together; specify one or the other")
+        if 0.01 < prune_factor > 1:
+            raise ValueError("prune_factor must be between .01 and 1")
+
+        self._ttl = ttl if ttl >= 0 else -1
+        self._high_units = high_units
+        self._high_units_memory = high_units_memory
+        self._prune_factor = prune_factor
+
+    def __str__(self) -> str:
+        return (
+            f"NearCacheOptions(ttl={self.ttl}, high_units={self.high_units}, high_units_memory={self.high_unit_memory})"
+        )
+
+    def __eq__(self, other: Any) -> bool:
+        if self is other:
+            return True
+
+        if isinstance(other, NearCacheOptions):
+            return (
+                self.ttl == other.ttl
+                and self.high_units == other.high_units
+                and self.high_unit_memory == other.high_unit_memory
+            )
+
+        return False
+
+    @property
+    def ttl(self) -> int:
+        return self._ttl
+
+    @property
+    def high_units(self) -> int:
+        return self._high_units
+
+    @property
+    def high_unit_memory(self) -> int:
+        return self._high_units_memory
+
+    @property
+    def prune_factor(self) -> float:
+        return self._prune_factor
+
+
+class CacheOptions:
+    def __init__(self, default_expiry: int = 0, near_cache_options: Optional[NearCacheOptions] = None):
+        super().__init__()
+        self._default_expiry: int = default_expiry if default_expiry >= 0 else -1
+        self._near_cache_options = near_cache_options
+
+    def __str__(self) -> str:
+        result: str = f"CacheOptions(default_expiry={self._default_expiry}"
+        result += ")" if self.near_cache_options is None else f", near_cache_options={self._near_cache_options})"
+        return result
+
+    def __eq__(self, other: Any) -> bool:
+        if self is other:
+            return True
+
+        if isinstance(other, CacheOptions):
+            return (
+                self.default_expiry == other.default_expiry and True
+                if self.near_cache_options is None
+                else self.near_cache_options == other.near_cache_options
+            )
+
+        return False
+
+    @property
+    def default_expiry(self) -> int:
+        return self._default_expiry
+
+    @property
+    def near_cache_options(self) -> Optional[NearCacheOptions]:
+        return self._near_cache_options
+
+
 class NamedMap(abc.ABC, Generic[K, V]):
     # noinspection PyUnresolvedReferences
     """
@@ -196,7 +284,12 @@ class NamedMap(abc.ABC, Generic[K, V]):
     @property
     @abc.abstractmethod
     def name(self) -> str:
-        """documentation"""
+        """Returns the logical name of this NamedMap"""
+
+    @property
+    @abc.abstractmethod
+    def session(self) -> Session:
+        """Returns the Session associated with NamedMap"""
 
     @abc.abstractmethod
     def on(self, event: MapLifecycleEvent, callback: Callable[[str], None]) -> None:
@@ -579,14 +672,15 @@ class NamedCache(NamedMap[K, V]):
     """
 
     @abc.abstractmethod
-    async def put(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
+    async def put(self, key: K, value: V, ttl: Optional[int] = None) -> Optional[V]:
         """
         Associates the specified value with the specified key in this map. If the map previously contained a mapping
         for this key, the old value is replaced.
 
         :param key: the key with which the specified value is to be associated
         :param value: the value to be associated with the specified key
-        :param ttl: the expiry time in millis (optional)
+        :param ttl: the expiry time in millis (optional).  If not specific, it will default to the default
+          ttl defined in the cache options provided when the cache was obtained
         :return: resolving to the previous value associated with specified key, or `None` if there was no mapping for
          key. A `None` return can also indicate that the map previously associated `None` with the specified key
          if the implementation supports `None` values
@@ -594,14 +688,15 @@ class NamedCache(NamedMap[K, V]):
         """
 
     @abc.abstractmethod
-    async def put_if_absent(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
+    async def put_if_absent(self, key: K, value: V, ttl: Optional[int] = None) -> Optional[V]:
         """
         If the specified key is not already associated with a value (or is mapped to null) associates it with the
         given value and returns `None`, else returns the current value.
 
         :param key: the key with which the specified value is to be associated
         :param value: the value to be associated with the specified key
-        :param ttl: the expiry time in millis (optional)
+        :param ttl: the expiry time in millis (optional).  If not specific, it will default to the default
+          ttl defined in the cache options provided when the cache was obtained.
         :return: resolving to the previous value associated with specified key, or `None` if there was no mapping for
          key. A `None` return can also indicate that the map previously associated `None` with the specified key
          if the implementation supports `None` values
@@ -610,7 +705,9 @@ class NamedCache(NamedMap[K, V]):
 
 
 class NamedCacheClient(NamedCache[K, V]):
-    def __init__(self, cache_name: str, session: Session, serializer: Serializer):
+    def __init__(
+        self, cache_name: str, session: Session, serializer: Serializer, cache_options: Optional[CacheOptions] = None
+    ) -> None:
         self._cache_name: str = cache_name
         self._serializer: Serializer = serializer
         self._client_stub: NamedCacheServiceStub = NamedCacheServiceStub(session.channel)
@@ -620,6 +717,7 @@ class NamedCacheClient(NamedCache[K, V]):
         self._destroyed: bool = False
         self._released: bool = False
         self._session: Session = session
+        self._default_expiry: int = cache_options.default_expiry if cache_options is not None else 0
 
         self._setup_event_handlers()
 
@@ -630,6 +728,10 @@ class NamedCacheClient(NamedCache[K, V]):
     @property
     def name(self) -> str:
         return self._cache_name
+
+    @property
+    def session(self) -> Session:
+        return self._session
 
     @property
     def destroyed(self) -> bool:
@@ -668,14 +770,14 @@ class NamedCacheClient(NamedCache[K, V]):
         return _Stream(self._request_factory.serializer, stream, _entry_producer)
 
     @_pre_call_cache
-    async def put(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
-        p = self._request_factory.put_request(key, value, ttl)
+    async def put(self, key: K, value: V, ttl: Optional[int] = None) -> Optional[V]:
+        p = self._request_factory.put_request(key, value, ttl if ttl is not None else self._default_expiry)
         v = await self._client_stub.put(p)
         return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
-    async def put_if_absent(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
-        p = self._request_factory.put_if_absent_request(key, value, ttl)
+    async def put_if_absent(self, key: K, value: V, ttl: Optional[int] = None) -> Optional[V]:
+        p = self._request_factory.put_if_absent_request(key, value, ttl if ttl is not None else self._default_expiry)
         v = await self._client_stub.putIfAbsent(p)
         return self._request_factory.serializer.deserialize(v.value)
 
@@ -909,7 +1011,9 @@ class NamedCacheClient(NamedCache[K, V]):
 
 class NamedCacheClientV1(NamedCache[K, V]):
 
-    def __init__(self, cache_name: str, session: Session, serializer: Serializer):
+    def __init__(
+        self, cache_name: str, session: Session, serializer: Serializer, cache_options: Optional[CacheOptions] = None
+    ):
         self._cache_name: str = cache_name
         self._cache_id: int = 0
         self._serializer: Serializer = serializer
@@ -921,6 +1025,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
         self._destroyed: bool = False
         self._released: bool = False
         self._session: Session = session
+        self._default_expiry: int = cache_options.default_expiry if cache_options is not None else 0
 
         self._events_manager: _MapEventsManagerV1[K, V] = _MapEventsManagerV1(
             self, session, serializer, self._internal_emitter, self._request_factory
@@ -973,6 +1078,10 @@ class NamedCacheClientV1(NamedCache[K, V]):
     def name(self) -> str:
         return self._cache_name
 
+    @property
+    def session(self) -> Session:
+        return self._session
+
     def on(self, event: MapLifecycleEvent, callback: Callable[[str], None]) -> None:
         self._emitter.on(str(event.value), callback)
 
@@ -998,14 +1107,18 @@ class NamedCacheClientV1(NamedCache[K, V]):
         return dispatcher.result()
 
     @_pre_call_cache
-    async def put(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
-        dispatcher: UnaryDispatcher[Optional[V]] = self._request_factory.put_request(key, value, ttl)
+    async def put(self, key: K, value: V, ttl: Optional[int] = None) -> Optional[V]:
+        dispatcher: UnaryDispatcher[Optional[V]] = self._request_factory.put_request(
+            key, value, ttl if ttl is not None else self._default_expiry
+        )
         await dispatcher.dispatch(self._stream_handler)
         return dispatcher.result()
 
     @_pre_call_cache
-    async def put_if_absent(self, key: K, value: V, ttl: int = 0) -> Optional[V]:
-        dispatcher: UnaryDispatcher[Optional[V]] = self._request_factory.put_if_absent_request(key, value, ttl)
+    async def put_if_absent(self, key: K, value: V, ttl: Optional[int] = None) -> Optional[V]:
+        dispatcher: UnaryDispatcher[Optional[V]] = self._request_factory.put_if_absent_request(
+            key, value, ttl if ttl is not None else self._default_expiry
+        )
         await dispatcher.dispatch(self._stream_handler)
         return dispatcher.result()
 
@@ -1594,9 +1707,6 @@ class Session:
 
     """
 
-    DEFAULT_FORMAT: Final[str] = "json"
-    """The default serialization format"""
-
     def __init__(self, session_options: Optional[Options] = None):
         """
         Construct a new `Session` based on the provided :func:`coherence.client.Options`
@@ -1771,22 +1881,22 @@ class Session:
 
     # noinspection PyProtectedMember
     @_pre_call_session
-    async def get_cache(self, name: str, ser_format: str = DEFAULT_FORMAT) -> NamedCache[K, V]:
+    async def get_cache(self, name: str, cache_options: Optional[CacheOptions] = None) -> NamedCache[K, V]:
         """
         Returns a :func:`coherence.client.NamedCache` for the specified cache name.
 
         :param name: the cache name
-        :param ser_format: the serialization format for keys and values stored within the cache
+        :param cache_options: a :class:`coherence.client.CacheOptions`
 
         :return: Returns a :func:`coherence.client.NamedCache` for the specified cache name.
         """
-        serializer = SerializerRegistry.serializer(ser_format)
+        serializer = SerializerRegistry.serializer(self._session_options.format)
 
         if self._protocol_version == 0:
             with self._lock:
                 c = self._caches.get(name)
                 if c is None:
-                    c = NamedCacheClient(name, self, serializer)
+                    c = NamedCacheClient(name, self, serializer, cache_options)
                     # initialize the event stream now to ensure lifecycle listeners will work as expected
                     await c._events_manager._ensure_stream()
                     self._setup_event_handlers(c)
@@ -1796,7 +1906,7 @@ class Session:
             with self._lock:
                 c = self._caches.get(name)
                 if c is None:
-                    c = NamedCacheClientV1(name, self, serializer)
+                    c = NamedCacheClientV1(name, self, serializer, cache_options)
                     await c._ensure_cache()
                     self._setup_event_handlers(c)
                     self._caches.update({name: c})
@@ -1804,16 +1914,16 @@ class Session:
 
     # noinspection PyProtectedMember
     @_pre_call_session
-    async def get_map(self, name: str, ser_format: str = DEFAULT_FORMAT) -> NamedMap[K, V]:
+    async def get_map(self, name: str, cache_options: Optional[CacheOptions] = None) -> NamedMap[K, V]:
         """
         Returns a :func:`coherence.client.NameMap` for the specified cache name.
 
         :param name: the map name
-        :param ser_format: the serialization format for keys and values stored within the cache
+        :param cache_options: a :class:`coherence.client.CacheOptions`
 
         :return: Returns a :func:`coherence.client.NamedMap` for the specified cache name.
         """
-        return cast(NamedMap[K, V], await self.get_cache(name, ser_format))
+        return cast(NamedMap[K, V], await self.get_cache(name, cache_options))
 
     def is_ready(self) -> bool:
         """

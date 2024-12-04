@@ -13,6 +13,7 @@ from grpc.aio import AioRpcError
 
 import tests
 from coherence import Aggregators, Filters, MapEntry, NamedCache, Session, request_timeout
+from coherence.client import CacheOptions
 from coherence.event import MapLifecycleEvent
 from coherence.extractor import ChainedExtractor, Extractors, UniversalExtractor
 from coherence.processor import ExtractorProcessor
@@ -603,3 +604,44 @@ async def test_unary_request_timeout(test_session: Session) -> None:
         end = time()
         assert e.code() == StatusCode.DEADLINE_EXCEEDED
         assert pytest.approx((end - start), 0.5) == 5.0
+
+
+# noinspection PyUnresolvedReferences
+@pytest.mark.asyncio
+async def test_ttl_configuration(test_session: Session) -> None:
+    cache: NamedCache[str, str] = await test_session.get_cache("none")
+    assert cache._default_expiry == 0
+    await cache.destroy()
+
+    options: CacheOptions = CacheOptions()
+    cache = await test_session.get_cache("default", options)
+    assert cache._default_expiry == options.default_expiry
+    await cache.destroy()
+
+    options = CacheOptions(default_expiry=2000)
+    cache = await test_session.get_cache("defined", options)
+    assert cache._default_expiry == options.default_expiry
+
+    await cache.put("a", "b")
+    assert await cache.size() == 1
+
+    sleep(2.5)
+    assert await cache.size() == 0
+    await cache.destroy()
+
+    options = CacheOptions(default_expiry=2000)
+    cache = await test_session.get_cache("override", options)
+
+    await cache.put("a", "b", 5000)
+
+    assert await cache.size() == 1
+
+    sleep(2.5)
+    assert await cache.size() == 1
+
+    sleep(1)
+    assert await cache.size() == 1
+
+    sleep(3)
+    assert await cache.size() == 0
+    await cache.destroy()

@@ -69,7 +69,8 @@ $(info COMPOSE = $(COMPOSE))
 # ----------------------------------------------------------------------------------------------------------------------
 # List of unit tests
 # ----------------------------------------------------------------------------------------------------------------------
-UNIT_TESTS := tests/unit/test_environment.py \
+UNIT_TESTS := tests/unit/test_cache_options.py \
+				tests/unit/test_environment.py \
 				tests/unit/test_serialization.py \
 				tests/unit/test_extractors.py
 

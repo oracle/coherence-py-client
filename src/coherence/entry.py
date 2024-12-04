@@ -12,5 +12,13 @@ class MapEntry(Generic[K, V]):
     """
 
     def __init__(self, key: K, value: V):
-        self.key = key
-        self.value = value
+        self._key = key
+        self._value = value
+
+    @property
+    def key(self) -> K:
+        return self._key
+
+    @property
+    def value(self) -> V:
+        return self._value

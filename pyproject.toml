@@ -21,7 +21,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 protobuf = "5.28.3"
 grpcio = "1.68.0"
 grpcio-tools = "1.68.0"
@@ -29,6 +29,7 @@ jsonpickle = ">=3.0,<4.1"
 pymitter = ">=0.4,<0.6"
 typing-extensions = ">=4.11,<4.13"
 types-protobuf = "5.27.0.20240626"
+pympler = "1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "~8.3"
@@ -41,6 +42,7 @@ sphinx-rtd-theme = "~2.0"
 sphinxcontrib-napoleon = "~0.7"
 m2r = "~0.3"
 third-party-license-file-generator = "~2024.8"
+pyinstrument="5.0.0"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
