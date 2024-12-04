@@ -209,11 +209,15 @@ async def test_pruning_units() -> None:
         key_value: str = str(i)
         await cache.put(key_value, key_value, 0)
 
-    # todo validate oldest entries pruned
-
-    assert await cache.size() < 100
+    cur_size: int = await cache.size()
+    assert cur_size < 100
     assert stats.prunes == 6
     assert stats.prunes_duration > 0
+
+    # assert that the oldest entries were pruned first
+    for i in range(210 - cur_size, 210):
+        key_value = str(i)
+        assert await cache.get(key_value) == key_value
 
 
 @pytest.mark.asyncio
@@ -227,12 +231,14 @@ async def test_pruning_memory() -> None:
         key_value: str = str(i)
         await cache.put(key_value, key_value, 0)
 
-    # todo validate oldest entries pruned
-
     assert stats.prunes > 0
     assert stats.prunes_duration > 0
-
     assert stats.bytes < upper_bound_mem
+
+    # assert that the oldest entries were pruned first
+    for i in range(210 - await cache.size(), 210):
+        key_value = str(i)
+        assert await cache.get(key_value) == key_value
 
 
 @pytest.mark.asyncio
