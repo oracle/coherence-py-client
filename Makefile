@@ -136,7 +136,7 @@ test:  ##
 # Run ai tests with code coverage
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-with-ai
-test:  ##
+test-with-ai:  ##
 	pytest -W error --cov src/coherence --cov-report=term --cov-report=html \
 		tests/test_serialization.py \
 		tests/test_extractors.py \
