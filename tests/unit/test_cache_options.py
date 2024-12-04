@@ -46,6 +46,44 @@ def test_near_cache_options_both_units() -> None:
     assert str(err.value) == message
 
 
+def test_near_cache_options_prune_factor() -> None:
+    message: str = "prune_factor must be between .1 and 1"
+
+    with pytest.raises(ValueError) as err:
+        NearCacheOptions(high_units=100, prune_factor=-1)
+
+    assert str(err.value) == message
+
+    with pytest.raises(ValueError) as err:
+        NearCacheOptions(high_units=100, prune_factor=0)
+
+    assert str(err.value) == message
+
+    with pytest.raises(ValueError) as err:
+        NearCacheOptions(high_units=100, prune_factor=0.05)
+
+    assert str(err.value) == message
+
+    with pytest.raises(ValueError) as err:
+        NearCacheOptions(high_units=100, prune_factor=1.001)
+
+    assert str(err.value) == message
+
+
+def test_near_cache_options_str() -> None:
+    options: NearCacheOptions = NearCacheOptions(high_units=100)
+    assert str(options) == "NearCacheOptions(ttl=0ms, high-units=100, high-units-memory=0, prune-factor=0.80)"
+
+    options = NearCacheOptions(high_units=100, ttl=100)
+    assert str(options) == "NearCacheOptions(ttl=100ms, high-units=100, high-units-memory=0, prune-factor=0.80)"
+
+    options = NearCacheOptions(high_units_memory=100 * 1024)
+    assert str(options) == "NearCacheOptions(ttl=0ms, high-units=0, high-units-memory=102400, prune-factor=0.80)"
+
+    options = NearCacheOptions(high_units_memory=100 * 1024, prune_factor=0.25)
+    assert str(options) == "NearCacheOptions(ttl=0ms, high-units=0, high-units-memory=102400, prune-factor=0.25)"
+
+
 def test_near_cache_options_ttl() -> None:
     options: NearCacheOptions = NearCacheOptions(ttl=-10)
     assert options.ttl == -1
@@ -66,12 +104,12 @@ def test_near_cache_options_high_units_memory() -> None:
 
 def test_cache_options_str() -> None:
     options: CacheOptions = CacheOptions(10000)
-    assert str(options) == "CacheOptions(default_expiry=10000)"
+    assert str(options) == "CacheOptions(default-expiry=10000)"
 
     options = CacheOptions(5000, NearCacheOptions(high_units=10000))
     assert (
-        str(options) == "CacheOptions(default_expiry=5000, near_cache_options=NearCacheOptions(ttl=0,"
-        " high_units=10000, high_units_memory=0))"
+        str(options) == "CacheOptions(default-expiry=5000, near-cache-options=NearCacheOptions(ttl=0ms,"
+        " high-units=10000, high-units-memory=0, prune-factor=0.80))"
     )
 
 

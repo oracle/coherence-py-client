@@ -195,8 +195,8 @@ class NearCacheOptions:
             raise ValueError("at least one option must be specified and non-zero")
         if high_units != 0 and high_units_memory != 0:
             raise ValueError("high_units and high_units_memory cannot be used together; specify one or the other")
-        if 0.01 < prune_factor > 1:
-            raise ValueError("prune_factor must be between .01 and 1")
+        if prune_factor < 0.1 or prune_factor > 1:
+            raise ValueError("prune_factor must be between .1 and 1")
 
         self._ttl = ttl if ttl >= 0 else -1
         self._high_units = high_units
@@ -205,8 +205,9 @@ class NearCacheOptions:
 
     def __str__(self) -> str:
         return (
-            f"NearCacheOptions(ttl={self.ttl}, high-units={self.high_units}, high-units-memory={self.high_unit_memory}"
-            f", prune-factor={self.prune_factor})"
+            f"NearCacheOptions(ttl={self.ttl}ms, high-units={self.high_units}"
+            f", high-units-memory={self.high_unit_memory}"
+            f", prune-factor={self.prune_factor:.2f})"
         )
 
     def __eq__(self, other: Any) -> bool:
@@ -246,8 +247,8 @@ class CacheOptions:
         self._near_cache_options = near_cache_options
 
     def __str__(self) -> str:
-        result: str = f"CacheOptions(default_expiry={self._default_expiry}"
-        result += ")" if self.near_cache_options is None else f", near_cache_options={self._near_cache_options})"
+        result: str = f"CacheOptions(default-expiry={self._default_expiry}"
+        result += ")" if self.near_cache_options is None else f", near-cache-options={self.near_cache_options})"
         return result
 
     def __eq__(self, other: Any) -> bool:
