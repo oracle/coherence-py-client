@@ -66,6 +66,7 @@ async def populate_vectors(vectors: NamedCache[int, ValueWithVector]) -> ValueWi
 
 
 @pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 async def test_SimilaritySearch_with_Index() -> None:
     session: Session = await Session.create()
     cache: NamedCache[int, ValueWithVector] = await session.get_cache("vector_cache")
@@ -136,6 +137,7 @@ async def populate_documentchunk_vectors(vectors: NamedCache[int, DocumentChunk]
 
 
 @pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 async def test_SimilaritySearch_with_DocumentChunk() -> None:
     session: Session = await Session.create()
     cache: NamedCache[int, DocumentChunk] = await session.get_cache("vector_cache")
