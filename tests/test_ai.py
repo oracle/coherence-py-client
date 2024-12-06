@@ -104,7 +104,7 @@ async def test_SimilaritySearch_with_Index() -> None:
     assert len(hnsw_result) == k
 
     await cache.truncate()
-    # await cache.destroy()
+    await cache.destroy()
     await session.close()
 
 
@@ -155,5 +155,5 @@ async def test_SimilaritySearch_with_DocumentChunk() -> None:
         COH_LOG.info(e)
 
     await cache.truncate()
-    # await cache.destroy()
+    await cache.destroy()
     await session.close()
