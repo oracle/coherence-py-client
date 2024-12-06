@@ -4,7 +4,7 @@
 import asyncio
 import random
 import time
-from typing import List, Optional, cast, AsyncGenerator
+from typing import AsyncGenerator, List, Optional, cast
 
 import pytest
 import pytest_asyncio
@@ -20,6 +20,7 @@ async def test_session() -> AsyncGenerator[Session, None]:
     yield session
     await session.close()
     await asyncio.sleep(0)  # helps avoid loop already closed errors
+
 
 class ValueWithVector:
     def __init__(self, vector: FloatVector, text: str, number: int) -> None:
