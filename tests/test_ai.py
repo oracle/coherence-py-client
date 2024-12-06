@@ -1,15 +1,25 @@
 # Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
+import asyncio
 import random
 import time
-from typing import List, Optional, cast
+from typing import List, Optional, cast, AsyncGenerator
 
 import pytest
+import pytest_asyncio
 
+import tests
 from coherence import COH_LOG, Extractors, NamedCache, Session
 from coherence.ai import BinaryQuantIndex, DocumentChunk, FloatVector, SimilaritySearch, Vectors
 
+
+@pytest_asyncio.fixture
+async def test_session() -> AsyncGenerator[Session, None]:
+    session: Session = await tests.get_session()
+    yield session
+    await session.close()
+    await asyncio.sleep(0)  # helps avoid loop already closed errors
 
 class ValueWithVector:
     def __init__(self, vector: FloatVector, text: str, number: int) -> None:
@@ -67,9 +77,8 @@ async def populate_vectors(vectors: NamedCache[int, ValueWithVector]) -> ValueWi
 
 @pytest.mark.asyncio
 @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
-async def test_SimilaritySearch_with_Index() -> None:
-    session: Session = await Session.create()
-    cache: NamedCache[int, ValueWithVector] = await session.get_cache("vector_cache")
+async def test_SimilaritySearch_with_Index(test_session: Session) -> None:
+    cache: NamedCache[int, ValueWithVector] = await test_session.get_cache("vector_cache")
     cache.add_index(BinaryQuantIndex(Extractors.extract("vector")))
     value_with_vector = await populate_vectors(cache)
 
@@ -106,7 +115,6 @@ async def test_SimilaritySearch_with_Index() -> None:
 
     await cache.truncate()
     await cache.destroy()
-    await session.close()
 
 
 async def populate_documentchunk_vectors(vectors: NamedCache[int, DocumentChunk]) -> DocumentChunk:
@@ -138,9 +146,8 @@ async def populate_documentchunk_vectors(vectors: NamedCache[int, DocumentChunk]
 
 @pytest.mark.asyncio
 @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
-async def test_SimilaritySearch_with_DocumentChunk() -> None:
-    session: Session = await Session.create()
-    cache: NamedCache[int, DocumentChunk] = await session.get_cache("vector_cache")
+async def test_SimilaritySearch_with_DocumentChunk(test_session: Session) -> None:
+    cache: NamedCache[int, DocumentChunk] = await test_session.get_cache("vector_cache")
     dc: DocumentChunk = await populate_documentchunk_vectors(cache)
 
     # Create a SimilaritySearch aggregator
@@ -158,4 +165,3 @@ async def test_SimilaritySearch_with_DocumentChunk() -> None:
 
     await cache.truncate()
     await cache.destroy()
-    await session.close()

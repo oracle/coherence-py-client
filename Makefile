@@ -138,7 +138,6 @@ test:  ##
 .PHONY: test-with-ai
 test-with-ai:  ##
 	pytest -W error --cov src/coherence --cov-report=term --cov-report=html \
-		tests/test_ai.py \
 		tests/test_serialization.py \
 		tests/test_extractors.py \
 		tests/test_session.py \
@@ -147,7 +146,7 @@ test-with-ai:  ##
 		tests/test_filters.py \
 		tests/test_processors.py \
 		tests/test_aggregators.py \
-
+		tests/test_ai.py \
 # ----------------------------------------------------------------------------------------------------------------------
 # Run standards validation across project
 # ----------------------------------------------------------------------------------------------------------------------
