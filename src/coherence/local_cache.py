@@ -612,7 +612,6 @@ class LocalCache(Generic[K, V]):
 
         for expire_time, keys in expires.items():
             if expire_time < now:
-                print(f"Expiring keys in bucket {expire_time} {len(keys)}")
                 exp_buckets_to_remove.append(expire_time)
                 for key in keys:
                     entry: Optional[LocalEntry[K, V]] = storage.pop(key, None)
