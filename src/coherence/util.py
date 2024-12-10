@@ -10,6 +10,7 @@ import threading
 import time
 from abc import ABC, abstractmethod
 from asyncio import Event
+from datetime import datetime, timezone
 from typing import Any, AsyncIterator, Callable, Generic, Optional, Tuple, TypeVar
 
 from google.protobuf.any_pb2 import Any as GrpcAny  # type: ignore
@@ -66,6 +67,24 @@ K = TypeVar("K")
 R = TypeVar("R")
 T = TypeVar("T")
 V = TypeVar("V")
+
+
+def cur_time_millis() -> int:
+    """
+    :return: the current time, in millis, since epoch
+    """
+    return time.time_ns() // 1_000_000
+
+
+def millis_format_date(millis: int) -> str:
+    """
+    Format the given time in millis to a readable format.
+
+    :param millis: the millis time to format
+    :return: the formatted date
+    """
+    dt = datetime.fromtimestamp(millis / 1000, timezone.utc)
+    return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")
 
 
 class Dispatcher(ABC):
@@ -1210,6 +1229,8 @@ class RequestFactoryV1:
         self,
         subscribe: bool,
         lite: bool = False,
+        sync: bool = False,
+        priming: bool = False,
         *,
         key: Optional[K] = None,
         filter: Optional[Filter] = None,
@@ -1228,7 +1249,8 @@ class RequestFactoryV1:
             listener_request: V1MapListenerRequest = V1MapListenerRequest(
                 subscribe=subscribe,
                 lite=lite,
-                priming=False,
+                synchronous=sync,
+                priming=priming,
                 filterId=RequestIdGenerator.next() if filter_id == -1 else filter_id,
                 keyOrFilter=KeyOrFilter(filter=self._serializer.serialize(filter_local)),
             )
@@ -1236,7 +1258,8 @@ class RequestFactoryV1:
             listener_request = V1MapListenerRequest(
                 subscribe=subscribe,
                 lite=lite,
-                priming=False,
+                synchronous=sync,
+                priming=priming,
                 keyOrFilter=KeyOrFilter(key=self._serializer.serialize(key)),
             )
 

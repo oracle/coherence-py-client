@@ -1,19 +1,81 @@
 # Copyright (c) 2024, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
+from __future__ import annotations
 
 import asyncio
-import time
-from datetime import datetime, timezone
-from typing import Generic, Optional, Tuple, TypeVar
+from collections import OrderedDict
+from typing import Any, Generic, Optional, Tuple, TypeVar
 
 from pympler import asizeof
 
-from . import MapEntry
-from .client import NearCacheOptions
+from .entry import MapEntry
+from .util import cur_time_millis, millis_format_date
 
 K = TypeVar("K")
 V = TypeVar("V")
+
+
+class NearCacheOptions:
+
+    def __init__(
+        self, ttl: int = 0, high_units: int = 0, high_units_memory: int = 0, prune_factor: float = 0.80
+    ) -> None:
+        super().__init__()
+        if high_units < 0 or high_units_memory < 0:
+            raise ValueError("values for high_units and high_units_memory must be positive")
+        if ttl == 0 and high_units == 0 and high_units_memory == 0:
+            raise ValueError("at least one option must be specified and non-zero")
+        if ttl < 0:
+            raise ValueError("ttl cannot be less than zero")
+        if 0 < ttl < 250:
+            raise ValueError("ttl has 1/4 second resolution;  minimum TTL is 250")
+        if high_units != 0 and high_units_memory != 0:
+            raise ValueError("high_units and high_units_memory cannot be used together; specify one or the other")
+        if prune_factor < 0.1 or prune_factor > 1:
+            raise ValueError("prune_factor must be between .1 and 1")
+
+        self._ttl = ttl if ttl >= 0 else -1
+        self._high_units = high_units
+        self._high_units_memory = high_units_memory
+        self._prune_factor = prune_factor
+
+    def __str__(self) -> str:
+        return (
+            f"NearCacheOptions(ttl={self.ttl}ms, high-units={self.high_units}"
+            f", high-units-memory={self.high_unit_memory}"
+            f", prune-factor={self.prune_factor:.2f})"
+        )
+
+    def __eq__(self, other: Any) -> bool:
+        if self is other:
+            return True
+
+        if isinstance(other, NearCacheOptions):
+            return (
+                self.ttl == other.ttl
+                and self.high_units == other.high_units
+                and self.high_unit_memory == other.high_unit_memory
+                and self.prune_factor == other.prune_factor
+            )
+
+        return False
+
+    @property
+    def ttl(self) -> int:
+        return self._ttl
+
+    @property
+    def high_units(self) -> int:
+        return self._high_units
+
+    @property
+    def high_unit_memory(self) -> int:
+        return self._high_units_memory
+
+    @property
+    def prune_factor(self) -> float:
+        return self._prune_factor
 
 
 class LocalEntry(MapEntry[K, V]):
@@ -32,10 +94,11 @@ class LocalEntry(MapEntry[K, V]):
         :param ttl: the time-to-live for this entry
         """
         super().__init__(key, value)
-        self._ttl_orig: int = ttl
-        self._ttl: int = ttl * 1_000_000
-        self._insert_time = time.time_ns()
-        self._last_access = self._insert_time
+        self._ttl: int = ttl
+        now: int = cur_time_millis()
+        # store when this entry expires (1/4 second resolution)
+        self._expires: int = ((now + ttl) & ~0xFF) if ttl > 0 else 0
+        self._last_access: int = now
         self._size = asizeof.asizeof(self)
 
     @property
@@ -48,56 +111,46 @@ class LocalEntry(MapEntry[K, V]):
     @property
     def ttl(self) -> int:
         """
-        :return: the time-to-live of this entry
+        :return: the time-to-live , in millis, of this entry
         """
-        return self._ttl_orig
-
-    @property
-    def insert_time(self) -> int:
-        """
-        :return: the insert time, in nanos, of this entry
-        """
-        return self._insert_time
+        return self._ttl
 
     @property
     def last_access(self) -> int:
         """
-        :return: the last time, in nanos, this entry was accessed
+        :return: the last time, in millis, this entry was accessed
         """
         return self._last_access
+
+    @property
+    def expires_at(self) -> int:
+        """
+        :return: the time when this entry will expire
+        """
+        return self._expires
 
     def touch(self) -> None:
         """
         Updates the last accessed time of this entry.
         """
-        self._last_access = time.time_ns()
+        self._last_access = cur_time_millis()
 
     def expired(self, now: int) -> bool:
         """
         Determines if this entry is expired relative to the given
-        time (in nanos).
+        time (in millis).
 
-        :param now:  the time to compare against (in nanos)
+        :param now:  the time to compare against (in millis)
         :return: True if expired, otherwise False
         """
-        return 0 < self._ttl < now - self._insert_time
-
-    def _nanos_format_date(self, nanos: int) -> str:
-        """
-        Format the given time in nanos to a readable format.
-
-        :param nanos: the nano time to format
-        :return: the formatted date
-        """
-        dt = datetime.fromtimestamp(nanos / 1e9, timezone.utc)
-        return "{}{:03.0f}".format(dt.strftime("%Y-%m-%dT%H:%M:%S.%f"), nanos % 1e3)
+        return now > 0 and now > self._expires
 
     def __str__(self) -> str:
         return (
             f"LocalEntry(key={self.key}, value={self.value},"
-            f" ttl={self.ttl}ms, insert-time={self._nanos_format_date(self.insert_time)}"
-            f" last-access={self._nanos_format_date(self.last_access)},"
-            f" expired={self.expired(time.time_ns())})"
+            f" ttl={self.ttl}ms,"
+            f" last-access={millis_format_date(self.last_access)},"
+            f" expired={self.expired(cur_time_millis())})"
         )
 
 
@@ -118,10 +171,11 @@ class CacheStats:
         self._puts: int = 0
         self._memory: int = 0
         self._prunes: int = 0
+        self._pruned: int = 0
         self._expires: int = 0
-        self._expires_nanos: int = 0
-        self._prunes_nanos: int = 0
-        self._misses_nanos: int = 0
+        self._expires_millis: int = 0
+        self._prunes_millis: int = 0
+        self._misses_millis: int = 0
 
     @property
     def hits(self) -> int:
@@ -138,12 +192,19 @@ class CacheStats:
         return self._misses
 
     @property
+    def num_pruned(self) -> int:
+        """
+        :return: the number of entries pruned
+        """
+        return self._pruned
+
+    @property
     def misses_duration(self) -> int:
         """
-        :return: the accumulated total of nanos spent when a cache
+        :return: the accumulated total of millis spent when a cache
                  miss occurs and a remote get is made
         """
-        return self._misses_nanos
+        return self._misses_millis
 
     @property
     def hit_rate(self) -> float:
@@ -191,18 +252,18 @@ class CacheStats:
     @property
     def prunes_duration(self) -> int:
         """
-        :return: the accumulated total of nanos spent when a cache
+        :return: the accumulated total of millis spent when a cache
                  prune occurs
         """
-        return self._prunes_nanos
+        return self._prunes_millis
 
     @property
     def expires_duration(self) -> int:
         """
-        :return: the accumulated total of nanos spent when cache expiry
+        :return: the accumulated total of millis spent when cache expiry
                  occurs
         """
-        return self._expires_nanos
+        return self._expires_millis
 
     @property
     def size(self) -> int:
@@ -225,13 +286,13 @@ class CacheStats:
         :return: None
         """
         self._prunes = 0
-        self._prunes_nanos = 0
+        self._prunes_millis = 0
         self._misses = 0
-        self._misses_nanos = 0
+        self._misses_millis = 0
         self._hits = 0
         self._puts = 0
         self._expires = 0
-        self._expires_nanos = 0
+        self._expires_millis = 0
 
     def _register_hit(self) -> None:
         """
@@ -266,44 +327,46 @@ class CacheStats:
         """
         self._memory += size
 
-    def _register_prune_nanos(self, nanos: int) -> None:
+    def _register_prunes(self, count: int, millis: int) -> None:
         """
         Register prune statistics.
 
-        :param nanos: the nanos spent on a prune operation
+        :param count: the number of entries pruned
+        :param millis: the number of millis spent on a prune operation
         :return: None
         """
+        self._pruned += count
         self._prunes += 1
-        self._prunes_nanos += nanos
+        self._prunes_millis += millis if millis > 0 else 1
 
-    def _register_misses_nanos(self, nanos: int) -> None:
+    def _register_misses_millis(self, millis: int) -> None:
         """
-        Register miss nanos.
+        Register miss millis.
 
-        :param nanos: the nanos spent when a cache miss occurs
+        :param millis: the millis spent when a cache miss occurs
         :return: None
         """
-        self._misses_nanos += nanos
+        self._misses_millis += millis
 
-    def _register_expires(self, count: int, nanos: int) -> None:
+    def _register_expires(self, count: int, millis: int) -> None:
         """
-        Register the number of entries expired and the nanos spent processing
+        Register the number of entries expired and the millis spent processing
         the expiry logic.
 
         :param count: the number of entries expired
-        :param nanos: the time spent processing
+        :param millis: the time spent processing
         :return: None
         """
         self._expires += count
-        self._expires_nanos += nanos
+        self._expires_millis += millis if millis > 0 else 1
 
     def __str__(self) -> str:
         return (
             f"CacheStats(puts={self.puts}, gets={self.gets}, hits={self.hits}"
-            f", misses={self.misses}, misses-duration={self.misses_duration}ns"
-            f", hit-rate={self.hit_rate}, prunes={self.prunes}"
-            f", prunes-duration={self.prunes_duration}ns, size={self.size}"
-            f", expires={self.expires}, expires-duration={self.expires_duration}ns"
+            f", misses={self.misses}, misses-duration={self.misses_duration}ms"
+            f", hit-rate={self.hit_rate}, prunes={self.prunes}, num-pruned={self.num_pruned}"
+            f", prunes-duration={self.prunes_duration}ms, size={self.size}"
+            f", num-expired={self.expires}, expires-duration={self.expires_duration}ms"
             f", memory-bytes={self.bytes})"
         )
 
@@ -327,7 +390,9 @@ class LocalCache(Generic[K, V]):
         self._options: NearCacheOptions = options
         self._stats: CacheStats = CacheStats(self)
         self._storage: dict[K, Optional[LocalEntry[K, V]]] = dict()
+        self._expiries: dict[int, set[K]] = OrderedDict()
         self._lock: asyncio.Lock = asyncio.Lock()
+        self._next_expiry: int = 0
 
     async def put(self, key: K, value: V, ttl: Optional[int] = None) -> Optional[V]:
         """
@@ -353,6 +418,7 @@ class LocalCache(Generic[K, V]):
                 stats._update_memory(-old_entry.bytes)
 
             entry: LocalEntry[K, V] = LocalEntry(key, value, ttl if ttl is not None else self.options.ttl)
+            self._register_expiry(entry)
             stats._update_memory(entry.bytes)
 
             storage[key] = entry
@@ -499,28 +565,30 @@ class LocalCache(Generic[K, V]):
         high_units_mem: int = options.high_unit_memory
         mem_units_used: bool = high_units_mem > 0
         cur_size = len(storage)
-        start = time.time_ns()
 
         if (high_units_used and high_units < cur_size + 1) or (mem_units_used and high_units_mem < self.stats.bytes):
+            start = cur_time_millis()
             stats: CacheStats = self.stats
+            prune_count: int = 0
 
             to_sort: list[Tuple[int, K]] = []
             for key, value in storage.items():
                 to_sort.append((value.last_access, key))  # type: ignore
 
-            sorted(to_sort, key=lambda x: x[0])
+            to_sort = sorted(to_sort, key=lambda x: x[0])
 
             target_size: int = int(round(float((cur_size if high_units_used else stats.bytes) * prune_factor)))
 
             for item in to_sort:
                 entry: Optional[LocalEntry[K, V]] = storage.pop(item[1])
                 stats._update_memory(-entry.bytes)  # type: ignore
+                prune_count += 1
 
                 if (len(storage) if high_units_used else stats._memory) <= target_size:
                     break
 
-            end = time.time_ns()
-            stats._register_prune_nanos(end - start)
+            end = cur_time_millis()
+            stats._register_prunes(prune_count, end - start)
 
     def _expire(self) -> None:
         """
@@ -528,19 +596,54 @@ class LocalCache(Generic[K, V]):
 
         :return: None
         """
+        expires: dict[int, set[K]] = self._expiries
+        if len(expires) == 0:
+            return
+
+        now: int = cur_time_millis()
+        if self._next_expiry > 0 and now < self._next_expiry:
+            return
+
         storage: dict[K, Optional[LocalEntry[K, V]]] = self.storage
-        start = time.time_ns()
-        keys: list[K] = [key for key, entry in storage.items() if entry.expired(start)]  # type: ignore
         stats: CacheStats = self.stats
 
-        for key in keys:
-            entry: Optional[LocalEntry[K, V]] = storage.pop(key)
-            stats._update_memory(-entry.bytes)  # type: ignore
+        expired_count: int = 0
+        exp_buckets_to_remove: list[int] = []
 
-        size: int = len(keys)
-        if size > 0:
-            end = time.time_ns()
-            stats._register_expires(size, end - start)
+        for expire_time, keys in expires.items():
+            if expire_time < now:
+                print(f"Expiring keys in bucket {expire_time} {len(keys)}")
+                exp_buckets_to_remove.append(expire_time)
+                for key in keys:
+                    entry: Optional[LocalEntry[K, V]] = storage.pop(key, None)
+                    if entry is not None:
+                        expired_count += 1
+                        stats._update_memory(-entry.bytes)
+
+            break
+
+        if len(exp_buckets_to_remove) > 0:
+            for bucket in exp_buckets_to_remove:
+                expires.pop(bucket, None)
+
+        if expired_count > 0:
+            end = cur_time_millis()
+            stats._register_expires(expired_count, end - now)
+
+        # expiries have 1/4 second resolution, so only check
+        # expiry in the same interval
+        self._next_expiry = now + 256
+
+    def _register_expiry(self, entry: LocalEntry[K, V]) -> None:
+        if entry.ttl > 0:
+            expires_at = entry.expires_at
+            expires_map: dict[int, set[K]] = self._expiries
+
+            if expires_at in expires_map:
+                keys: set[K] = expires_map[expires_at]
+                keys.add(entry.key)
+            else:
+                expires_map[expires_at] = {entry.key}
 
     def __str__(self) -> str:
         return f"LocalCache(name={self.name}, options={self.options}, stats={self.stats})"

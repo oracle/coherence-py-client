@@ -14,7 +14,6 @@ import time
 import uuid
 from asyncio import Condition, Event, Task
 from contextlib import asynccontextmanager
-from threading import Lock
 from typing import (
     Any,
     AsyncIterator,
@@ -44,6 +43,7 @@ from .comparator import Comparator
 from .entry import MapEntry
 from .event import (
     MapEvent,
+    MapEventType,
     MapLifecycleEvent,
     MapListener,
     SessionLifecycleEvent,
@@ -53,6 +53,7 @@ from .event import (
 )
 from .extractor import ValueExtractor
 from .filter import Filter
+from .local_cache import CacheStats, LocalCache, NearCacheOptions
 from .messages_pb2 import PageRequest
 from .processor import EntryProcessor
 from .proxy_service_messages_v1_pb2 import ProxyRequest, ProxyResponse
@@ -67,6 +68,7 @@ from .util import (
     ResponseObserver,
     StreamingDispatcher,
     UnaryDispatcher,
+    cur_time_millis,
 )
 
 E = TypeVar("E")
@@ -183,63 +185,6 @@ def _pre_call_session(func):
     return inner
 
 
-class NearCacheOptions:
-
-    def __init__(
-        self, ttl: int = 0, high_units: int = 0, high_units_memory: int = 0, prune_factor: float = 0.80
-    ) -> None:
-        super().__init__()
-        if high_units < 0 or high_units_memory < 0:
-            raise ValueError("values for high_units and high_units_memory must be positive")
-        if ttl == 0 and high_units == 0 and high_units_memory == 0:
-            raise ValueError("at least one option must be specified and non-zero")
-        if high_units != 0 and high_units_memory != 0:
-            raise ValueError("high_units and high_units_memory cannot be used together; specify one or the other")
-        if prune_factor < 0.1 or prune_factor > 1:
-            raise ValueError("prune_factor must be between .1 and 1")
-
-        self._ttl = ttl if ttl >= 0 else -1
-        self._high_units = high_units
-        self._high_units_memory = high_units_memory
-        self._prune_factor = prune_factor
-
-    def __str__(self) -> str:
-        return (
-            f"NearCacheOptions(ttl={self.ttl}ms, high-units={self.high_units}"
-            f", high-units-memory={self.high_unit_memory}"
-            f", prune-factor={self.prune_factor:.2f})"
-        )
-
-    def __eq__(self, other: Any) -> bool:
-        if self is other:
-            return True
-
-        if isinstance(other, NearCacheOptions):
-            return (
-                self.ttl == other.ttl
-                and self.high_units == other.high_units
-                and self.high_unit_memory == other.high_unit_memory
-            )
-
-        return False
-
-    @property
-    def ttl(self) -> int:
-        return self._ttl
-
-    @property
-    def high_units(self) -> int:
-        return self._high_units
-
-    @property
-    def high_unit_memory(self) -> int:
-        return self._high_units_memory
-
-    @property
-    def prune_factor(self) -> float:
-        return self._prune_factor
-
-
 class CacheOptions:
     def __init__(self, default_expiry: int = 0, near_cache_options: Optional[NearCacheOptions] = None):
         super().__init__()
@@ -291,7 +236,19 @@ class NamedMap(abc.ABC, Generic[K, V]):
     @property
     @abc.abstractmethod
     def session(self) -> Session:
-        """Returns the Session associated with NamedMap"""
+        """Returns the Session associated with this NamedMap"""
+
+    @property
+    @abc.abstractmethod
+    def options(self) -> Optional[CacheOptions]:
+        """Returns the CacheOptions associated with this NamedMap"""
+
+    @property
+    def near_cache_stats(self) -> Optional[CacheStats]:
+        """
+        Returns the CacheStats of the near cache, if one has been configured.
+        """
+        return None
 
     @abc.abstractmethod
     def on(self, event: MapLifecycleEvent, callback: Callable[[str], None]) -> None:
@@ -719,6 +676,7 @@ class NamedCacheClient(NamedCache[K, V]):
         self._destroyed: bool = False
         self._released: bool = False
         self._session: Session = session
+        self._cache_options: Optional[CacheOptions] = cache_options
         self._default_expiry: int = cache_options.default_expiry if cache_options is not None else 0
 
         self._setup_event_handlers()
@@ -742,6 +700,10 @@ class NamedCacheClient(NamedCache[K, V]):
     @property
     def released(self) -> bool:
         return self._released
+
+    @property
+    def options(self) -> Optional[CacheOptions]:
+        return self._cache_options
 
     @_pre_call_cache
     def on(self, event: MapLifecycleEvent, callback: Callable[[str], None]) -> None:
@@ -1027,7 +989,10 @@ class NamedCacheClientV1(NamedCache[K, V]):
         self._destroyed: bool = False
         self._released: bool = False
         self._session: Session = session
+        self._cache_options: Optional[CacheOptions] = cache_options
         self._default_expiry: int = cache_options.default_expiry if cache_options is not None else 0
+        self._near_cache: Optional[LocalCache[K, V]] = None
+        self._near_cache_listener: Optional[MapListener[K, V]] = None
 
         self._events_manager: _MapEventsManagerV1[K, V] = _MapEventsManagerV1(
             self, session, serializer, self._internal_emitter, self._request_factory
@@ -1035,6 +1000,33 @@ class NamedCacheClientV1(NamedCache[K, V]):
 
         self._stream_handler: StreamHandler = StreamHandler(session, self._request_factory, self._events_manager)
         self._setup_event_handlers()
+
+        near_options: Optional[NearCacheOptions] = None if cache_options is None else cache_options.near_cache_options
+        if near_options is not None:
+            near: LocalCache[K, V] = LocalCache(cache_name, near_options)
+            self._near_cache = near
+
+            # setup lifecycle callbacks to clear the near cache
+            async def do_clear() -> None:
+                await near.clear()
+
+            self.on(MapLifecycleEvent.TRUNCATED, do_clear)  # type: ignore
+            self.on(MapLifecycleEvent.DESTROYED, do_clear)  # type: ignore
+
+            async def callback(event: MapEvent[K, V]) -> None:
+                if event.type == MapEventType.ENTRY_INSERTED or event.type == MapEventType.ENTRY_UPDATED:
+                    if await near.get(event.key) is not None:
+                        val: Optional[V] = event.new
+                        if val is not None:
+                            await near.put(event.key, val)
+                            return
+
+                # processing a remove
+                await near.remove(event.key)
+
+            # setup event listener
+            self._near_cache_listener = MapListener(synchronous=True).on_any(callback)  # type: ignore
+            self.add_map_listener(self._near_cache_listener)
 
     def _setup_event_handlers(self) -> None:
         """
@@ -1084,6 +1076,15 @@ class NamedCacheClientV1(NamedCache[K, V]):
     def session(self) -> Session:
         return self._session
 
+    @property
+    def options(self) -> Optional[CacheOptions]:
+        return self._cache_options
+
+    @property
+    def near_cache_stats(self) -> Optional[CacheStats]:
+        near_cache: Optional[LocalCache[K, V]] = self._near_cache
+        return None if near_cache is None else near_cache.stats
+
     def on(self, event: MapLifecycleEvent, callback: Callable[[str], None]) -> None:
         self._emitter.on(str(event.value), callback)
 
@@ -1104,9 +1105,26 @@ class NamedCacheClientV1(NamedCache[K, V]):
 
     @_pre_call_cache
     async def get(self, key: K) -> Optional[V]:
+        near_cache: Optional[LocalCache[K, V]] = self._near_cache
+
+        # check the near cache first
+        if near_cache is not None:
+            result: Optional[V] = await near_cache.get(key)
+            if result is not None:
+                return result
+
+        start: int = cur_time_millis()
         dispatcher: UnaryDispatcher[Optional[V]] = self._request_factory.get_request(key)
         await dispatcher.dispatch(self._stream_handler)
-        return dispatcher.result()
+        result = dispatcher.result()
+
+        if near_cache is not None:
+            # noinspection PyProtectedMember
+            near_cache.stats._register_misses_millis(cur_time_millis() - start)
+            if result is not None:
+                await near_cache.put(key, result)
+
+        return result
 
     @_pre_call_cache
     async def put(self, key: K, value: V, ttl: Optional[int] = None) -> Optional[V]:
@@ -1158,9 +1176,39 @@ class NamedCacheClientV1(NamedCache[K, V]):
 
     @_pre_call_cache
     async def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
-        dispatcher: StreamingDispatcher[MapEntry[K, V]] = self._request_factory.get_all_request(keys)
-        await dispatcher.dispatch(self._stream_handler)
-        return dispatcher
+        near_cache: Optional[LocalCache[K, V]] = self._near_cache
+        result: dict[K, V]
+
+        # check the near cache first
+        if near_cache is not None:
+            result = await near_cache.get_all(keys)
+            if result is not None:
+                if len(result) == len(keys):
+
+                    async def async_iter() -> AsyncIterator[MapEntry[K, V]]:
+                        for key, value in result.items():
+                            await asyncio.sleep(0)
+                            yield MapEntry(key, value)
+
+                    return async_iter()
+                else:
+                    remote_keys: set[K] = keys.difference(result)
+                    dispatcher: StreamingDispatcher[MapEntry[K, V]] = self._request_factory.get_all_request(remote_keys)
+                    await dispatcher.dispatch(self._stream_handler)
+
+                    async def async_iter() -> AsyncIterator[MapEntry[K, V]]:
+                        for key, value in result.items():
+                            await asyncio.sleep(0)
+                            yield MapEntry(key, value)
+                        async for entry in dispatcher:
+                            await near_cache.put(entry.key, entry.value)
+                            yield entry
+
+                    return async_iter()
+        else:
+            dispatcher = self._request_factory.get_all_request(keys)
+            await dispatcher.dispatch(self._stream_handler)
+            return dispatcher
 
     @_pre_call_cache
     async def put_all(self, kv_map: dict[K, V], ttl: Optional[int] = 0) -> None:
@@ -1171,6 +1219,8 @@ class NamedCacheClientV1(NamedCache[K, V]):
     async def clear(self) -> None:
         dispatcher: Dispatcher = self._request_factory.clear_request()
         await dispatcher.dispatch(self._stream_handler)
+        if self._near_cache is not None:
+            await self._near_cache.clear()
 
     async def destroy(self) -> None:
         self._internal_emitter.once(MapLifecycleEvent.DESTROYED.value)
@@ -1184,10 +1234,17 @@ class NamedCacheClientV1(NamedCache[K, V]):
             self._internal_emitter.once(MapLifecycleEvent.RELEASED.value)
             self._internal_emitter.emit(MapLifecycleEvent.RELEASED.value, self.name)
 
+            if self._near_cache is not None:
+                await self._near_cache.release()
+
     @_pre_call_cache
     async def truncate(self) -> None:
         dispatcher: Dispatcher = self._request_factory.truncate_request()
         await dispatcher.dispatch(self._stream_handler)
+
+        # clear the near cache as the lifecycle listeners are not synchronous
+        if self._near_cache is not None:
+            await self._near_cache.clear()
 
     @_pre_call_cache
     async def remove(self, key: K) -> Optional[V]:
@@ -1215,6 +1272,14 @@ class NamedCacheClientV1(NamedCache[K, V]):
 
     @_pre_call_cache
     async def contains_key(self, key: K) -> bool:
+        near_cache: Optional[LocalCache[K, V]] = self._near_cache
+
+        # check the near cache first
+        if near_cache is not None:
+            result: Optional[V] = await near_cache.get(key)
+            if result is not None:
+                return True
+
         dispatcher: UnaryDispatcher[bool] = self._request_factory.contains_key_request(key)
         await dispatcher.dispatch(self._stream_handler)
         return dispatcher.result()
@@ -1721,7 +1786,7 @@ class Session:
         self._initialized: bool = False
         self._ready_condition: Condition = Condition()
         self._caches: dict[str, NamedCache[Any, Any]] = dict()
-        self._lock: Lock = Lock()
+        self._lock: asyncio.Lock = asyncio.Lock()
         if session_options is not None:
             self._session_options = session_options
         else:
@@ -1894,25 +1959,25 @@ class Session:
         """
         serializer = SerializerRegistry.serializer(self._session_options.format)
 
-        if self._protocol_version == 0:
-            with self._lock:
-                c = self._caches.get(name)
-                if c is None:
+        async with self._lock:
+            c = self._caches.get(name)
+            if c is None:
+                if self._protocol_version == 0:
                     c = NamedCacheClient(name, self, serializer, cache_options)
                     # initialize the event stream now to ensure lifecycle listeners will work as expected
                     await c._events_manager._ensure_stream()
-                    self._setup_event_handlers(c)
-                    self._caches.update({name: c})
-                return c
-        else:  # Server is running grpc v1
-            with self._lock:
-                c = self._caches.get(name)
-                if c is None:
+                else:
                     c = NamedCacheClientV1(name, self, serializer, cache_options)
                     await c._ensure_cache()
-                    self._setup_event_handlers(c)
-                    self._caches.update({name: c})
-                return c
+
+                self._setup_event_handlers(c)
+                self._caches.update({name: c})
+            else:
+                if c.options != cache_options:
+                    raise ValueError(
+                        "A NamedMap or NamedCache with the same name already " "exists with different CacheOptions"
+                    )
+            return c
 
     # noinspection PyProtectedMember
     @_pre_call_session

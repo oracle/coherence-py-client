@@ -7,53 +7,54 @@ from typing import Any, Callable, Coroutine, Optional
 
 import pytest
 
-from coherence.client import NearCacheOptions
-from coherence.local_cache import CacheStats, LocalCache, LocalEntry
+from coherence.local_cache import CacheStats, LocalCache, LocalEntry, NearCacheOptions
+from coherence.util import cur_time_millis, millis_format_date
 
 
 def test_local_entry() -> None:
-    start: int = time.time_ns()
-    entry: LocalEntry[str, str] = LocalEntry("a", "b", 100)
+    start: int = cur_time_millis()
+    entry: LocalEntry[str, str] = LocalEntry("a", "b", 750)
 
     # check initial state after creation
     assert entry.key == "a"
     assert entry.value == "b"
-    assert entry.ttl == 100
-    assert entry.insert_time > start
-    assert entry.last_access == entry.insert_time
+    assert entry.ttl == 750
+    assert entry.last_access >= start
     assert entry.bytes > 0
 
     # touch the entry and ensure the last_access has increased
     # over the insert time
+    last: int = entry.last_access
+    time.sleep(0.3)
     entry.touch()
-    assert entry.last_access > entry.insert_time
+    assert entry.last_access > last
 
     # ensure the entry hasn't expired, then wait
     # for a period of time beyond the expiry time
     # and ensure it has expired
-    assert entry.expired(time.time_ns()) is False
-    time.sleep(0.2)
-    assert entry.expired(time.time_ns()) is True
+    assert entry.expired(cur_time_millis()) is False
+    time.sleep(0.7)
+    assert entry.expired(cur_time_millis()) is True
 
 
 def test_local_entry_str() -> None:
-    entry: LocalEntry[str, str] = LocalEntry("a", "b", 100)
+    entry: LocalEntry[str, str] = LocalEntry("a", "b", 500)
 
     result: str = str(entry)
     assert result == (
         f"LocalEntry(key=a, value=b,"
-        f" ttl=100ms, insert-time={entry._nanos_format_date(entry.insert_time)}"
-        f" last-access={entry._nanos_format_date(entry.last_access)},"
+        f" ttl=500ms,"
+        f" last-access={millis_format_date(entry.last_access)},"
         f" expired=False)"
     )
 
-    time.sleep(0.15)
+    time.sleep(0.6)
 
     result = str(entry)
     assert result == (
         f"LocalEntry(key=a, value=b,"
-        f" ttl=100ms, insert-time={entry._nanos_format_date(entry.insert_time)}"
-        f" last-access={entry._nanos_format_date(entry.last_access)},"
+        f" ttl=500ms,"
+        f" last-access={millis_format_date(entry.last_access)},"
         f" expired=True)"
     )
 
@@ -176,7 +177,7 @@ async def test_expiry() -> None:
 
     assert await cache.size() == 10
 
-    time.sleep(1.05)
+    time.sleep(1.3)
 
     for i in range(5):
         assert await cache.get(str(i)) is None
@@ -250,7 +251,7 @@ async def test_stats_reset() -> None:
 
     for i in range(210):
         key_value: str = str(i)
-        await cache.put(key_value, key_value, 100)
+        await cache.put(key_value, key_value, 500)
         await cache.get(key_value)
 
     await cache.get("none")
@@ -309,7 +310,7 @@ async def test_local_cache_str() -> None:
 
     for i in range(210):
         key_value: str = str(i)
-        await cache.put(key_value, key_value, 100)
+        await cache.put(key_value, key_value, 500)
         await cache.get(key_value)
 
     await cache.get("none")
@@ -318,8 +319,8 @@ async def test_local_cache_str() -> None:
     result: str = str(cache)
     stats: str = (
         f"CacheStats(puts=211, gets=211, hits=210, misses=1,"
-        f" misses-duration=0ns, hit-rate=0.995, prunes=0, prunes-duration=0ns,"
-        f" size=211, expires=0, expires-duration=0ns, memory-bytes={cache.stats.bytes})"
+        f" misses-duration=0ms, hit-rate=0.995, prunes=0, num-pruned=0, prunes-duration=0ms,"
+        f" size=211, num-expired=0, expires-duration=0ms, memory-bytes={cache.stats.bytes})"
     )
 
     assert result == f"LocalCache(name=test, options={str(options)}" f", stats={stats})"

@@ -232,8 +232,15 @@ class MapListener(Generic[K, V]):
     _emitter: EventEmitter
     """The internal emitter used to emit events."""
 
-    def __init__(self) -> None:
-        """Constructs a new MapListener."""
+    def __init__(self, synchronous: bool = False, priming: bool = False) -> None:
+        """
+        Constructs a new MapListener.
+
+        :param synchronous: if True, the listener will be registered as a synchronous listener
+        :param priming: if True, the listener will be registered as a synchronous listener
+        """
+        self._synchronous: bool = synchronous
+        self._priming: bool = priming
         self._emitter = EventEmitter()
 
     def _on(self, event: MapEventType, callback: MapListenerCallback[K, V]) -> MapListener[K, V]:
@@ -278,6 +285,20 @@ class MapListener(Generic[K, V]):
         """
         return self.on_deleted(callback).on_updated(callback).on_inserted(callback)
 
+    @property
+    def synchronous(self) -> bool:
+        """
+        :return: True if this listener is synchronous, otherwise False
+        """
+        return self._synchronous
+
+    @property
+    def priming(self) -> bool:
+        """
+        :return: True if this listener is priming, otherwise False
+        """
+        return self._priming
+
 
 class _ListenerGroup(Generic[K, V, RT], metaclass=ABCMeta):
     _key_or_filter: K | Filter
@@ -307,7 +328,7 @@ class _ListenerGroup(Generic[K, V, RT], metaclass=ABCMeta):
         self._unsubscribed_waiter = Event()
 
     @abstractmethod
-    async def _subscribe(self, lite: bool) -> None:
+    async def _subscribe(self, lite: bool, sync: bool = False, priming: bool = False) -> None:
         pass
 
     @abstractmethod
@@ -361,7 +382,7 @@ class _ListenerGroup(Generic[K, V, RT], metaclass=ABCMeta):
             if size > 1:
                 await self._unsubscribe()
 
-            await self._subscribe(lite)
+            await self._subscribe(lite, listener.synchronous, listener.priming)
 
     async def remove_listener(self, listener: MapListener[K, V]) -> None:
         """
@@ -449,7 +470,7 @@ class _ListenerGroupV0(_ListenerGroup[K, V, MapListenerRequest], metaclass=ABCMe
         await event_stream.write(request)
 
     # noinspection PyProtectedMember
-    async def _subscribe(self, lite: bool) -> None:
+    async def _subscribe(self, lite: bool, sync: bool = False, priming: bool = False) -> None:
         """
         Send a gRPC MapListener subscription request for a key or filter.
         :param lite:  `True` if the event should only include the key, or `False`
@@ -509,7 +530,7 @@ class _ListenerGroupV1(_ListenerGroup[K, V, NamedCacheRequest], ABC):
 
         self._manager = manager
 
-    async def _subscribe(self, lite: bool) -> None:
+    async def _subscribe(self, lite: bool, sync: bool = False, priming: bool = False) -> None:
         """
         Send a gRPC MapListener subscription request for a key or filter.
         :param lite:  `True` if the event should only include the key, or `False`
@@ -519,11 +540,11 @@ class _ListenerGroupV1(_ListenerGroup[K, V, NamedCacheRequest], ABC):
         filter_id: int
         if isinstance(self._key_or_filter, Filter):
             (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(
-                True, lite, filter=self._key_or_filter
+                True, lite, filter=self._key_or_filter, sync=sync, priming=priming
             )
         else:
             (dispatcher, request, filter_id) = self._manager.request_factory.map_listener_request(
-                True, lite, key=self._key_or_filter
+                True, lite, key=self._key_or_filter, sync=sync, priming=priming
             )
 
         self._request = request

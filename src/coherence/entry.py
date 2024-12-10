@@ -22,3 +22,6 @@ class MapEntry(Generic[K, V]):
     @property
     def value(self) -> V:
         return self._value
+
+    def __str__(self) -> str:
+        return f"MapEntry(key={self.key}, value={self.value})"

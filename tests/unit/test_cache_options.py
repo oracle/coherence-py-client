@@ -1,6 +1,7 @@
 import pytest
 
-from coherence.client import CacheOptions, NearCacheOptions
+from coherence.client import CacheOptions
+from coherence.local_cache import NearCacheOptions
 
 
 def test_cache_options_default_expiry() -> None:
@@ -74,8 +75,8 @@ def test_near_cache_options_str() -> None:
     options: NearCacheOptions = NearCacheOptions(high_units=100)
     assert str(options) == "NearCacheOptions(ttl=0ms, high-units=100, high-units-memory=0, prune-factor=0.80)"
 
-    options = NearCacheOptions(high_units=100, ttl=100)
-    assert str(options) == "NearCacheOptions(ttl=100ms, high-units=100, high-units-memory=0, prune-factor=0.80)"
+    options = NearCacheOptions(high_units=100, ttl=1000)
+    assert str(options) == "NearCacheOptions(ttl=1000ms, high-units=100, high-units-memory=0, prune-factor=0.80)"
 
     options = NearCacheOptions(high_units_memory=100 * 1024)
     assert str(options) == "NearCacheOptions(ttl=0ms, high-units=0, high-units-memory=102400, prune-factor=0.80)"
@@ -85,11 +86,24 @@ def test_near_cache_options_str() -> None:
 
 
 def test_near_cache_options_ttl() -> None:
-    options: NearCacheOptions = NearCacheOptions(ttl=-10)
-    assert options.ttl == -1
+    options = NearCacheOptions(ttl=1000)
+    assert options.ttl == 1000
 
-    options = NearCacheOptions(ttl=10)
-    assert options.ttl == 10
+    # ensure minimum can be set
+    options = NearCacheOptions(ttl=250)
+    assert options.ttl == 250
+
+
+def test_near_cache_ttl_negative() -> None:
+    with pytest.raises(ValueError) as err:
+        NearCacheOptions(ttl=-1)
+
+    assert str(err.value) == "ttl cannot be less than zero"
+
+    with pytest.raises(ValueError) as err:
+        NearCacheOptions(ttl=100)
+
+    assert str(err.value) == "ttl has 1/4 second resolution;  minimum TTL is 250"
 
 
 def test_near_cache_options_high_units() -> None:
