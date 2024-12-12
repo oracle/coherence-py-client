@@ -29,33 +29,20 @@ def test_local_entry() -> None:
     entry.touch()
     assert entry.last_access > last
 
-    # ensure the entry hasn't expired, then wait
-    # for a period of time beyond the expiry time
-    # and ensure it has expired
-    assert entry.expired(cur_time_millis()) is False
-    time.sleep(0.7)
-    assert entry.expired(cur_time_millis()) is True
-
 
 def test_local_entry_str() -> None:
     entry: LocalEntry[str, str] = LocalEntry("a", "b", 500)
 
     result: str = str(entry)
     assert result == (
-        f"LocalEntry(key=a, value=b,"
-        f" ttl=500ms,"
-        f" last-access={millis_format_date(entry.last_access)},"
-        f" expired=False)"
+        f"LocalEntry(key=a, value=b," f" ttl=500ms," f" last-access={millis_format_date(entry.last_access)})"
     )
 
     time.sleep(0.6)
 
     result = str(entry)
     assert result == (
-        f"LocalEntry(key=a, value=b,"
-        f" ttl=500ms,"
-        f" last-access={millis_format_date(entry.last_access)},"
-        f" expired=True)"
+        f"LocalEntry(key=a, value=b," f" ttl=500ms," f" last-access={millis_format_date(entry.last_access)})"
     )
 
 

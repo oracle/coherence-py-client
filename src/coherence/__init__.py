@@ -23,6 +23,7 @@ from .comparator import Comparator as Comparator
 from .entry import MapEntry as MapEntry
 from .extractor import Extractors as Extractors
 from .filter import Filters as Filters
+from .local_cache import CacheStats as CacheStats
 from .local_cache import NearCacheOptions as NearCacheOptions
 from .processor import Processors as Processors
 

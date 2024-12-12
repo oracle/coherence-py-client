@@ -408,7 +408,7 @@ class _ListenerGroup(Generic[K, V, RT], metaclass=ABCMeta):
                 await self._subscribe(True)
 
     # noinspection PyProtectedMember
-    def _notify_listeners(self, event: MapEvent[K, V]) -> None:
+    async def _notify_listeners(self, event: MapEvent[K, V]) -> None:
         """
         Notify all listeners within this group of the provided event.
         :param event:
@@ -416,7 +416,8 @@ class _ListenerGroup(Generic[K, V, RT], metaclass=ABCMeta):
         event_label: str = self._get_emitter_label(event)
         listener: MapListener[K, V]
         for listener in self._listeners.keys():
-            listener._emitter.emit(event_label, event)
+            await listener._emitter.emit_async(event_label, event)
+            await asyncio.sleep(0)
 
     # noinspection PyProtectedMember
     @staticmethod
@@ -986,11 +987,11 @@ class _MapEventsManagerV0(_MapEventsManager[K, V]):
                                 _id, None
                             )
                             if filter_group is not None:
-                                filter_group._notify_listeners(event)
+                                await filter_group._notify_listeners(event)
 
                         key_group = self._key_map.get(event.key, None)
                         if key_group is not None:
-                            key_group._notify_listeners(event)
+                            await key_group._notify_listeners(event)
             except asyncio.CancelledError:
                 return
 

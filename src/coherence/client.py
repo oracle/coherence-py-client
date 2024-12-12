@@ -11,6 +11,7 @@ import os
 import sys
 import textwrap
 import time
+import traceback
 import uuid
 from asyncio import Condition, Event, Task
 from contextlib import asynccontextmanager
@@ -1003,30 +1004,25 @@ class NamedCacheClientV1(NamedCache[K, V]):
 
         near_options: Optional[NearCacheOptions] = None if cache_options is None else cache_options.near_cache_options
         if near_options is not None:
-            near: LocalCache[K, V] = LocalCache(cache_name, near_options)
-            self._near_cache = near
+            self._near_cache = LocalCache(cache_name, near_options)
 
-            # setup lifecycle callbacks to clear the near cache
-            async def do_clear() -> None:
-                await near.clear()
-
-            self.on(MapLifecycleEvent.TRUNCATED, do_clear)  # type: ignore
-            self.on(MapLifecycleEvent.DESTROYED, do_clear)  # type: ignore
-
+    async def _post_create(self) -> None:
+        near: Optional[LocalCache[K, V]] = self._near_cache
+        if near is not None:
+            # setup event listener
             async def callback(event: MapEvent[K, V]) -> None:
                 if event.type == MapEventType.ENTRY_INSERTED or event.type == MapEventType.ENTRY_UPDATED:
-                    if await near.get(event.key) is not None:
+                    if await near.contains_key(event.key):
                         val: Optional[V] = event.new
                         if val is not None:
                             await near.put(event.key, val)
                             return
+                elif event.type == MapEventType.ENTRY_DELETED:
+                    # processing a remove
+                    await near.remove(event.key)
 
-                # processing a remove
-                await near.remove(event.key)
-
-            # setup event listener
             self._near_cache_listener = MapListener(synchronous=True).on_any(callback)  # type: ignore
-            self.add_map_listener(self._near_cache_listener)
+            await self.add_map_listener(self._near_cache_listener)
 
     def _setup_event_handlers(self) -> None:
         """
@@ -1059,6 +1055,15 @@ class NamedCacheClientV1(NamedCache[K, V]):
         internal_emitter.on(MapLifecycleEvent.DESTROYED.value, on_destroyed)
         internal_emitter.on(MapLifecycleEvent.RELEASED.value, on_released)
         internal_emitter.on(MapLifecycleEvent.TRUNCATED.value, on_truncated)
+
+        near: Optional[LocalCache[K, V]] = this._near_cache
+        if near is not None:
+            # setup lifecycle callbacks to clear the near cache
+            async def do_clear() -> None:
+                await near.clear()
+
+            self.on(MapLifecycleEvent.TRUNCATED, do_clear)  # type: ignore
+            self.on(MapLifecycleEvent.DESTROYED, do_clear)  # type: ignore
 
     @property
     def cache_id(self) -> int:
@@ -1969,6 +1974,7 @@ class Session:
                 else:
                     c = NamedCacheClientV1(name, self, serializer, cache_options)
                     await c._ensure_cache()
+                    await c._post_create()
 
                 self._setup_event_handlers(c)
                 self._caches.update({name: c})
@@ -2532,7 +2538,7 @@ class StreamHandler:
                 self._log_message(response, False)
 
                 if response_id == 0:
-                    self.handle_zero_id_response(response)
+                    await self.handle_zero_id_response(response)
                 else:
                     if response.HasField("message"):
                         observer = self._observers.get(response_id, None)
@@ -2562,7 +2568,7 @@ class StreamHandler:
                 COH_LOG.error("Received unexpected error from proxy: " + str(e))
 
     # noinspection PyUnresolvedReferences
-    def handle_zero_id_response(self, response: ProxyResponse) -> None:
+    async def handle_zero_id_response(self, response: ProxyResponse) -> None:
         if response.HasField("message"):
             named_cache_response = NamedCacheResponse()
             response.message.Unpack(named_cache_response)
@@ -2587,12 +2593,13 @@ class StreamHandler:
                             self._events_manager._filter_id_listener_group_map.get(_id, None)
                         )
                         if filter_group is not None:
-                            filter_group._notify_listeners(event)
+                            await filter_group._notify_listeners(event)
 
                     key_group = self._events_manager._key_map.get(event.key, None)
                     if key_group is not None:
-                        key_group._notify_listeners(event)
+                        await key_group._notify_listeners(event)
                 except Exception as e:
+                    traceback.print_exc()
                     COH_LOG.warning("Unhandled Event Message: " + str(e))
             elif response_type == ResponseType.Destroyed:
                 if self._events_manager._named_map.cache_id == named_cache_response.cacheId:

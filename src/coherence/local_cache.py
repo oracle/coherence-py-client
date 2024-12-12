@@ -100,6 +100,7 @@ class LocalEntry(MapEntry[K, V]):
         self._expires: int = ((now + ttl) & ~0xFF) if ttl > 0 else 0
         self._last_access: int = now
         self._size = asizeof.asizeof(self)
+        self._size += asizeof.asizeof(self._size)
 
     @property
     def bytes(self) -> int:
@@ -135,22 +136,11 @@ class LocalEntry(MapEntry[K, V]):
         """
         self._last_access = cur_time_millis()
 
-    def expired(self, now: int) -> bool:
-        """
-        Determines if this entry is expired relative to the given
-        time (in millis).
-
-        :param now:  the time to compare against (in millis)
-        :return: True if expired, otherwise False
-        """
-        return now > 0 and now > self._expires
-
     def __str__(self) -> str:
         return (
             f"LocalEntry(key={self.key}, value={self.value},"
             f" ttl={self.ttl}ms,"
-            f" last-access={millis_format_date(self.last_access)},"
-            f" expired={self.expired(cur_time_millis())})"
+            f" last-access={millis_format_date(self.last_access)})"
         )
 
 
@@ -486,14 +476,23 @@ class LocalCache(Generic[K, V]):
         """
         async with self._lock:
             self._expire()
-
-            entry: Optional[LocalEntry[K, V]] = self.storage.get(key, None)
+            entry: Optional[LocalEntry[K, V]] = self.storage.pop(key, None)
 
             if entry is None:
                 return None
 
+            self._remove_expiry(entry)
             self.stats._update_memory(-entry.bytes)
             return entry.value
+
+    async def contains_key(self, key: K) -> bool:
+        """
+        Returns `true` if the specified key is mapped a value within the cache.
+
+        :param key: the key whose presence in this cache is to be tested
+        :return: resolving to `true` if the key is mapped to a value, or `false` if it does not
+        """
+        return key in self._storage
 
     async def size(self) -> int:
         """
@@ -618,31 +617,39 @@ class LocalCache(Generic[K, V]):
                     if entry is not None:
                         expired_count += 1
                         stats._update_memory(-entry.bytes)
-
             break
 
         if len(exp_buckets_to_remove) > 0:
             for bucket in exp_buckets_to_remove:
                 expires.pop(bucket, None)
 
+        end = cur_time_millis()
         if expired_count > 0:
-            end = cur_time_millis()
             stats._register_expires(expired_count, end - now)
 
         # expiries have 1/4 second resolution, so only check
         # expiry in the same interval
-        self._next_expiry = now + 256
+        self._next_expiry = end + 250
 
     def _register_expiry(self, entry: LocalEntry[K, V]) -> None:
         if entry.ttl > 0:
             expires_at = entry.expires_at
             expires_map: dict[int, set[K]] = self._expiries
-
             if expires_at in expires_map:
                 keys: set[K] = expires_map[expires_at]
                 keys.add(entry.key)
             else:
                 expires_map[expires_at] = {entry.key}
+
+    def _remove_expiry(self, entry: LocalEntry[K, V]) -> None:
+        if entry.ttl > 0:
+            expires_at = entry.expires_at
+            expires_map: dict[int, set[K]] = self._expiries
+            if expires_at in expires_map:
+                keys: set[K] = expires_map[expires_at]
+                expire_key: K = entry.key
+                if expire_key in keys:
+                    keys.remove(expire_key)
 
     def __str__(self) -> str:
         return f"LocalCache(name={self.name}, options={self.options}, stats={self.stats})"
