@@ -70,6 +70,7 @@ $(info COMPOSE = $(COMPOSE))
 # List of unit tests
 # ----------------------------------------------------------------------------------------------------------------------
 UNIT_TESTS := tests/unit/test_cache_options.py \
+                tests/unit/test_local_cache.py \
 				tests/unit/test_environment.py \
 				tests/unit/test_serialization.py \
 				tests/unit/test_extractors.py
@@ -83,6 +84,7 @@ E2E_TESTS := tests/e2e/test_session.py \
 				tests/e2e/test_filters.py \
 				tests/e2e/test_processors.py \
 				tests/e2e/test_aggregators.py \
+				tests/e2e/test_near_caching.py \
 #				tests/e2e/test_ai.py \
 
 # ----------------------------------------------------------------------------------------------------------------------
