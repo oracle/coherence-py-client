@@ -245,15 +245,16 @@ class UnaryDispatcher(ResponseObserver, Dispatcher, ScalarResultProducer[T]):
 
         assert self._complete is False
 
+        stream_handler.register_observer(self)
+
         async def _dispatch_and_wait() -> None:
             await stream_handler.send_proxy_request(self._request)
+
+            await self._waiter.wait()
 
             if self._error is not None:
                 raise self._error
 
-            await self._waiter.wait()
-
-        stream_handler.register_observer(self)
         try:
             await asyncio.wait_for(_dispatch_and_wait(), _TIMEOUT_CONTEXT_VAR.get(self._timeout))
         except Exception as e:
@@ -282,6 +283,7 @@ class StreamingDispatcher(ResponseObserver, Dispatcher, AsyncIterator[T]):
     async def dispatch(self, stream_handler: Any) -> None:
         # noinspection PyAttributeOutsideInit
         self._stream_handler = stream_handler
+        stream_handler.register_observer(self)
 
         # setup deadline handling for this call
         async def deadline() -> None:
@@ -299,7 +301,6 @@ class StreamingDispatcher(ResponseObserver, Dispatcher, AsyncIterator[T]):
                 self._error = e
                 self._waiter.set()  # raise error to the caller
 
-        stream_handler.register_observer(self)
         asyncio.get_running_loop().create_task(deadline())
 
     def __aiter__(self) -> AsyncIterator[T]:
@@ -365,6 +366,7 @@ class PagingDispatcher(ResponseObserver, Dispatcher, AsyncIterator[T]):
     async def dispatch(self, stream_handler: Any) -> None:
         # noinspection PyAttributeOutsideInit
         self._stream_handler = stream_handler
+        stream_handler.register_observer(self)
 
         if self._in_progress is False:
             self._in_progress = True
@@ -385,7 +387,6 @@ class PagingDispatcher(ResponseObserver, Dispatcher, AsyncIterator[T]):
                     self._error = e
                     self._waiter.set()  # raise error to the caller
 
-            stream_handler.register_observer(self)
             asyncio.get_running_loop().create_task(deadline())
         else:
             stream_handler.register_observer(self)
