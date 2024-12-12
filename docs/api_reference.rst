@@ -11,6 +11,18 @@ Aggregators
 .. autoclass:: coherence.Aggregators
     :members:
 
+CacheOptions
+------------
+.. autoclass:: coherence.CacheOptions
+    :members:
+
+    .. automethod:: __init__
+
+CacheStats
+------------
+.. autoclass:: coherence.CacheStats
+    :members:
+
 Comparator
 ----------
 .. autoclass:: coherence.Comparator
@@ -57,6 +69,13 @@ NamedMap
 .. autoclass:: coherence.NamedMap
     :show-inheritance:
     :members:
+
+NearCacheOptions
+----------------
+.. autoclass:: coherence.NearCacheOptions
+    :members:
+
+    .. automethod:: __init__
 
 Options
 -------

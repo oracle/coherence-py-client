@@ -17,10 +17,30 @@ V = TypeVar("V")
 
 
 class NearCacheOptions:
-
     def __init__(
         self, ttl: int = 0, high_units: int = 0, high_units_memory: int = 0, prune_factor: float = 0.80
     ) -> None:
+        """
+        Constructs a new NearCacheOptions.  These options, when present, will configure
+        a NamedMap or NamedCache with a \"near cache\".  This near cache will locally
+        cache entries to reduce the need to go to the network for entries that are
+        frequently accessed.  Changes made to, or removal of entries from the remote
+        cache will be reflected in the near cache.
+
+        :param ttl: the time-to-live, in millis, for entries held in the near cache.
+         Expiration resolution is to the 1/4 second, thus the minimum positive
+         ttl value is 250
+        :param high_units: the maximum number of entries to be held by
+         the near cache.  If this value is exceeded, the cache will be pruned
+         down by the percentage defined by the prune_factor parameter
+        :param high_units_memory: the maximum number of entries, in bytes,
+         that may be held by the near cache.  If this value is exceeded, the
+         cache will be pruned down by the percentage defined by the
+         prune_factor parameter
+        :param prune_factor: the prune factor defines the target cache
+         size after exceeding the high_units or high_units_memory
+         high-water mark
+        """
         super().__init__()
         if high_units < 0 or high_units_memory < 0:
             raise ValueError("values for high_units and high_units_memory must be positive")
@@ -41,6 +61,11 @@ class NearCacheOptions:
         self._prune_factor = prune_factor
 
     def __str__(self) -> str:
+        """
+        Returns a string representation of this NearCacheOptions instance.
+
+        :return: string representation of this NearCacheOptions instance
+        """
         return (
             f"NearCacheOptions(ttl={self.ttl}ms, high-units={self.high_units}"
             f", high-units-memory={self.high_unit_memory}"
@@ -48,6 +73,12 @@ class NearCacheOptions:
         )
 
     def __eq__(self, other: Any) -> bool:
+        """
+        Compare two NearCacheOptions for equality.
+
+        :param other: the NearCacheOptions to compare against
+        :return: True if equal otherwise False
+        """
         if self is other:
             return True
 
@@ -63,18 +94,49 @@ class NearCacheOptions:
 
     @property
     def ttl(self) -> int:
+        """
+        The time-to-live to be applied to entries inserted into the
+        near cache.
+
+        :return: the ttl to be applied to entries inserted into the
+         near cache
+        """
         return self._ttl
 
     @property
     def high_units(self) -> int:
+        """
+        The maximum number of entries that may be held by the near cache.
+        If this value is exceeded, the cache will be pruned down by the
+        percentage defined by the prune_factor.
+
+        :return: the maximum number of entries that may be held by the
+         near cache
+        """
         return self._high_units
 
     @property
     def high_unit_memory(self) -> int:
+        """
+        The maximum number of entries, in bytes, that may be held in the near cache.
+        If this value is exceeded, the cache will be pruned down by the
+        percentage defined by the prune_factor.
+
+        :return: the maximum number of entries, in bytes, that may be held
+         by the near cache
+        """
         return self._high_units_memory
 
     @property
     def prune_factor(self) -> float:
+        """
+        This is percentage of units that will remain after a cache has
+        been pruned.  When high_units is configured, this will be the number
+        of entries.  When high_units_memory is configured, this will be the
+        size, in bytes, of the cache will be pruned down to.
+
+        :return: the target cache size after pruning occurs
+        """
         return self._prune_factor
 
 
@@ -171,6 +233,8 @@ class CacheStats:
     @property
     def hits(self) -> int:
         """
+        The number of times an entry was found in the near cache.
+
         :return: the number of cache hits
         """
         return self._hits
@@ -178,20 +242,17 @@ class CacheStats:
     @property
     def misses(self) -> int:
         """
+        The number of times an entry was not found in the near cache.
+
         :return: the number of cache misses
         """
         return self._misses
 
     @property
-    def num_pruned(self) -> int:
-        """
-        :return: the number of entries pruned
-        """
-        return self._pruned_count
-
-    @property
     def misses_duration(self) -> int:
         """
+        The accumulated time, in millis, spent for a cache miss.
+
         :return: the accumulated total of millis spent when a cache
                  miss occurs and a remote get is made
         """
@@ -200,6 +261,8 @@ class CacheStats:
     @property
     def hit_rate(self) -> float:
         """
+        The ration of hits to misses.
+
         :return: the ratio of hits to misses
         """
         hits: int = self.hits
@@ -214,6 +277,9 @@ class CacheStats:
     @property
     def puts(self) -> int:
         """
+        The total number of puts that have been made against the near
+        cache.
+
         :return: the total number of puts
         """
         return self._puts
@@ -221,6 +287,9 @@ class CacheStats:
     @property
     def gets(self) -> int:
         """
+        The total number of gets that have been made against the near
+        cache.
+
         :return: the total number of gets
         """
         return self.hits + self.misses
@@ -229,20 +298,35 @@ class CacheStats:
     def prunes(self) -> int:
         """
         :return: the number of times the cache was pruned due to exceeding
-                 configured limits
+                 the configured high-water mark
         """
         return self._prunes
 
     @property
     def expires(self) -> int:
         """
+        The number of times expiry of entries has been processed.
+
         :return: the number of times expiry was processed
         """
         return self._expires
 
     @property
+    def num_pruned(self) -> int:
+        """
+        The total number of entries that have been removed due to
+        exceeding the configured high-water mark.
+
+        :return: the number of entries pruned
+        """
+        return self._pruned_count
+
+    @property
     def num_expired(self) -> int:
         """
+        The total number of entries that have been removed due to
+        expiration.
+
         :return: the number of entries that was expired
         """
         return self._expired_count
@@ -250,22 +334,30 @@ class CacheStats:
     @property
     def prunes_duration(self) -> int:
         """
-        :return: the accumulated total of millis spent when a cache
-                 prune occurs
+        The accumulated total time, in millis, spent pruning the
+        near cache
+
+        :return: the accumulated total of millis spent pruning the near
+         cache
         """
         return self._prunes_millis
 
     @property
     def expires_duration(self) -> int:
         """
-        :return: the accumulated total of millis spent when cache expiry
-                 occurs
+        The accumulated total time, in millis, spent processing expiration
+        of entries in the near cache
+
+        :return: the accumulated total of millis spent expiring entries
+         in the near cache
         """
         return self._expires_millis
 
     @property
     def size(self) -> int:
         """
+        The total number of entries held by the near cache.
+
         :return: the number of local cache entries
         """
         return len(self._local_cache.storage)
@@ -273,7 +365,11 @@ class CacheStats:
     @property
     def bytes(self) -> int:
         """
-        :return: the total number of bytes the local cache is consuming
+        The total number of bytes the entries of the near cache is
+        consuming.
+
+        :return: The total number of bytes the entries of the near cache is
+         consuming
         """
         return self._memory
 

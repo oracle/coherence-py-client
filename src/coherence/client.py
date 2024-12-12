@@ -188,16 +188,32 @@ def _pre_call_session(func):
 
 class CacheOptions:
     def __init__(self, default_expiry: int = 0, near_cache_options: Optional[NearCacheOptions] = None):
+        """
+        Constructs a new CacheOptions which may be used in configuring the behavior of a NamedMap or NamedCache.
+
+        :param default_expiry: the default expiration time, in millis, that will be applied to entries
+         inserted into a NamedMap or NamedCache
+        :param near_cache_options: the near caching configuration this NamedMap or NamedCache should use
+        """
         super().__init__()
         self._default_expiry: int = default_expiry if default_expiry >= 0 else -1
         self._near_cache_options = near_cache_options
 
     def __str__(self) -> str:
+        """
+        :return: the string representation of this CacheOptions instance.
+        """
         result: str = f"CacheOptions(default-expiry={self._default_expiry}"
         result += ")" if self.near_cache_options is None else f", near-cache-options={self.near_cache_options})"
         return result
 
     def __eq__(self, other: Any) -> bool:
+        """
+        Compare two CacheOptions for equality.
+
+        :param other: the CacheOptions to compare against
+        :return: True if equal otherwise False
+        """
         if self is other:
             return True
 
@@ -212,10 +228,20 @@ class CacheOptions:
 
     @property
     def default_expiry(self) -> int:
+        """
+        The configured default entry time-to-live.
+
+        :return: the default entry ttl
+        """
         return self._default_expiry
 
     @property
     def near_cache_options(self) -> Optional[NearCacheOptions]:
+        """
+        The configured NearCacheOptions.
+
+        :return: the configured NearCacheOptions, if any
+        """
         return self._near_cache_options
 
 
