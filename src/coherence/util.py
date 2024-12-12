@@ -389,7 +389,6 @@ class PagingDispatcher(ResponseObserver, Dispatcher, AsyncIterator[T]):
 
             asyncio.get_running_loop().create_task(deadline())
         else:
-            stream_handler.register_observer(self)
             await stream_handler.send_proxy_request(self._request)
 
             if self._error is not None:
