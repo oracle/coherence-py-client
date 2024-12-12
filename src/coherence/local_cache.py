@@ -161,8 +161,9 @@ class CacheStats:
         self._puts: int = 0
         self._memory: int = 0
         self._prunes: int = 0
-        self._pruned: int = 0
+        self._pruned_count: int = 0
         self._expires: int = 0
+        self._expired_count: int = 0
         self._expires_millis: int = 0
         self._prunes_millis: int = 0
         self._misses_millis: int = 0
@@ -186,7 +187,7 @@ class CacheStats:
         """
         :return: the number of entries pruned
         """
-        return self._pruned
+        return self._pruned_count
 
     @property
     def misses_duration(self) -> int:
@@ -235,9 +236,16 @@ class CacheStats:
     @property
     def expires(self) -> int:
         """
-        :return: the number of entries that have been expired
+        :return: the number of times expiry was processed
         """
         return self._expires
+
+    @property
+    def num_expired(self) -> int:
+        """
+        :return: the number of entries that was expired
+        """
+        return self._expired_count
 
     @property
     def prunes_duration(self) -> int:
@@ -277,12 +285,14 @@ class CacheStats:
         """
         self._prunes = 0
         self._prunes_millis = 0
+        self._pruned_count = 0
         self._misses = 0
         self._misses_millis = 0
         self._hits = 0
         self._puts = 0
         self._expires = 0
         self._expires_millis = 0
+        self._expired_count = 0
 
     def _register_hit(self) -> None:
         """
@@ -325,8 +335,8 @@ class CacheStats:
         :param millis: the number of millis spent on a prune operation
         :return: None
         """
-        self._pruned += count
         self._prunes += 1
+        self._pruned_count += count
         self._prunes_millis += millis if millis > 0 else 1
 
     def _register_misses_millis(self, millis: int) -> None:
@@ -347,16 +357,21 @@ class CacheStats:
         :param millis: the time spent processing
         :return: None
         """
-        self._expires += count
+        self._expires += 1
+        self._expired_count += count
         self._expires_millis += millis if millis > 0 else 1
 
     def __str__(self) -> str:
+        """
+        :return: the string representation of this CacheStats instance.
+        """
         return (
             f"CacheStats(puts={self.puts}, gets={self.gets}, hits={self.hits}"
             f", misses={self.misses}, misses-duration={self.misses_duration}ms"
             f", hit-rate={self.hit_rate}, prunes={self.prunes}, num-pruned={self.num_pruned}"
             f", prunes-duration={self.prunes_duration}ms, size={self.size}"
-            f", num-expired={self.expires}, expires-duration={self.expires_duration}ms"
+            f", expires={self.num_expired}, num-expired={self.expires}"
+            f", expires-duration={self.expires_duration}ms"
             f", memory-bytes={self.bytes})"
         )
 
@@ -572,7 +587,8 @@ class LocalCache(Generic[K, V]):
 
             to_sort: list[Tuple[int, K]] = []
             for key, value in storage.items():
-                to_sort.append((value.last_access, key))  # type: ignore
+                if value is not None:
+                    to_sort.append((value.last_access, key))
 
             to_sort = sorted(to_sort, key=lambda x: x[0])
 
@@ -580,11 +596,13 @@ class LocalCache(Generic[K, V]):
 
             for item in to_sort:
                 entry: Optional[LocalEntry[K, V]] = storage.pop(item[1])
-                stats._update_memory(-entry.bytes)  # type: ignore
-                prune_count += 1
+                if entry is not None:
+                    self._remove_expiry(entry)
+                    stats._update_memory(-entry.bytes)
+                    prune_count += 1
 
-                if (len(storage) if high_units_used else stats._memory) <= target_size:
-                    break
+                    if (len(storage) if high_units_used else stats._memory) <= target_size:
+                        break
 
             end = cur_time_millis()
             stats._register_prunes(prune_count, end - start)
@@ -632,6 +650,12 @@ class LocalCache(Generic[K, V]):
         self._next_expiry = end + 250
 
     def _register_expiry(self, entry: LocalEntry[K, V]) -> None:
+        """
+        Register the expiry, if any, of provided entry.
+
+        :param entry: the entry to register
+        :return: None
+        """
         if entry.ttl > 0:
             expires_at = entry.expires_at
             expires_map: dict[int, set[K]] = self._expiries
@@ -642,6 +666,12 @@ class LocalCache(Generic[K, V]):
                 expires_map[expires_at] = {entry.key}
 
     def _remove_expiry(self, entry: LocalEntry[K, V]) -> None:
+        """
+        Removes the provided entry from expiry tracking.
+
+        :param entry: the entry to register
+        :return: None
+        """
         if entry.ttl > 0:
             expires_at = entry.expires_at
             expires_map: dict[int, set[K]] = self._expiries
@@ -652,4 +682,7 @@ class LocalCache(Generic[K, V]):
                     keys.remove(expire_key)
 
     def __str__(self) -> str:
+        """
+        :return: the string representation of this LocalCache.
+        """
         return f"LocalCache(name={self.name}, options={self.options}, stats={self.stats})"

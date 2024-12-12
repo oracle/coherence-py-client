@@ -2,6 +2,7 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
+import asyncio
 import time
 from typing import Any, Callable, Coroutine, Optional
 
@@ -164,7 +165,7 @@ async def test_expiry() -> None:
 
     assert await cache.size() == 10
 
-    time.sleep(1.3)
+    await asyncio.sleep(1.3)
 
     for i in range(5):
         assert await cache.get(str(i)) is None
@@ -173,17 +174,19 @@ async def test_expiry() -> None:
         assert await cache.get(str(i)) == str(i)
 
     duration: int = stats.expires_duration
-    assert stats.expires == 5
+    assert stats.expires == 1
+    assert stats.num_expired == 5
     assert duration > 0
 
-    time.sleep(1.05)
+    await asyncio.sleep(1.05)
 
     for i in range(10):
         assert await cache.get(str(i)) is None
 
     # assert correct expires count and
     # the duration has increased
-    assert stats.expires == 10
+    assert stats.expires == 2
+    assert stats.num_expired == 10
     assert stats.expires_duration > duration
 
 
@@ -307,7 +310,7 @@ async def test_local_cache_str() -> None:
     stats: str = (
         f"CacheStats(puts=211, gets=211, hits=210, misses=1,"
         f" misses-duration=0ms, hit-rate=0.995, prunes=0, num-pruned=0, prunes-duration=0ms,"
-        f" size=211, num-expired=0, expires-duration=0ms, memory-bytes={cache.stats.bytes})"
+        f" size=211, expires=0, num-expired=0, expires-duration=0ms, memory-bytes={cache.stats.bytes})"
     )
 
     assert result == f"LocalCache(name=test, options={str(options)}" f", stats={stats})"
