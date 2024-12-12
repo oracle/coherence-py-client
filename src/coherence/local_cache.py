@@ -622,6 +622,7 @@ class LocalCache(Generic[K, V]):
         """
         async with self._lock:
             self._storage = dict()
+            self._expiries = OrderedDict()
 
             self.stats._memory = 0
 
