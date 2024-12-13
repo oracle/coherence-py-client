@@ -247,7 +247,7 @@ async def test_stats_reset() -> None:
     await cache.get("none")
     await cache.put("A", "B", 0)
 
-    time.sleep(0.5)
+    time.sleep(1)
 
     assert await cache.size() == 1
 
