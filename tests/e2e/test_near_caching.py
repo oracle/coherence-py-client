@@ -353,11 +353,9 @@ async def test_concurrency(test_session: Session) -> None:
     await cache.put_all(cache_seed)
 
     begin_outer: int = time.time_ns()
-    async with asyncio.TaskGroup() as tg:
-        tasks = [tg.create_task(get_all_task()) for i in range(task_count)]
+    results: list[int] = await asyncio.gather(*[get_all_task() for _ in range(task_count)])
     end_outer: int = time.time_ns()
 
-    results: list[int] = [t.result() for t in tasks]
     print_and_validate(
         "get_all",
         num_entries,
@@ -373,18 +371,16 @@ async def test_concurrency(test_session: Session) -> None:
     await cache.put_all(cache_seed)
 
     begin_outer = time.time_ns()
-    async with asyncio.TaskGroup() as tg:
-        tasks = [tg.create_task(get_task()) for i in range(task_count)]
+    results2: list[int] = await asyncio.gather(*[get_task() for _ in range(task_count)])
     end_outer = time.time_ns()
 
-    results = [t.result() for t in tasks]
     print_and_validate(
         "get_all",
         num_entries,
         iterations,
         task_count,
         (end_outer - begin_outer),
-        reduce(lambda first, second: first + second, results),
+        reduce(lambda first, second: first + second, results2),
         stats,
     )
 
@@ -401,7 +397,7 @@ def print_and_validate(
     print()
     print(f"[{task_name}] 100 Tasks Completed!")
     print(f"[{task_name}] Stats at end -> {stats} -> {total_time // 1_000_000}ms")
-    print(f"[{task_name}] Tasks completion average: {total_time / task_count}")
+    print(f"[{task_name}] Tasks completion average: {task_time / task_count}")
 
     assert stats.puts == num_entries
     assert stats.gets == iterations * task_count * num_entries
