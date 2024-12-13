@@ -14,6 +14,9 @@ from coherence import CacheOptions, CacheStats, Filters, NamedCache, NearCacheOp
 
 @pytest.mark.asyncio
 async def test_basic_put_get_remove(test_session: Session) -> None:
+    if test_session._protocol_version < 1:
+        return
+
     cache: NamedCache[str, str] = await test_session.get_cache(
         "basic", CacheOptions(near_cache_options=NearCacheOptions(ttl=2000))
     )
@@ -116,6 +119,9 @@ async def test_basic_put_get_remove(test_session: Session) -> None:
 
 @pytest.mark.asyncio
 async def test_get_all(test_session: Session) -> None:
+    if test_session._protocol_version < 1:
+        return
+
     cache: NamedCache[str, str] = await test_session.get_cache(
         "basic", CacheOptions(near_cache_options=NearCacheOptions(ttl=2000))
     )
@@ -172,6 +178,9 @@ async def test_get_all(test_session: Session) -> None:
 
 @pytest.mark.asyncio
 async def test_remove(test_session: Session) -> None:
+    if test_session._protocol_version < 1:
+        return
+
     cache: NamedCache[str, str] = await test_session.get_cache(
         "basic", CacheOptions(near_cache_options=NearCacheOptions(ttl=2000))
     )
@@ -214,6 +223,9 @@ async def test_remove(test_session: Session) -> None:
 
 @pytest.mark.asyncio
 async def test_replace(test_session: Session) -> None:
+    if test_session._protocol_version < 1:
+        return
+
     cache: NamedCache[str, str] = await test_session.get_cache(
         "basic", CacheOptions(near_cache_options=NearCacheOptions(ttl=2000))
     )
@@ -266,6 +278,9 @@ async def test_replace(test_session: Session) -> None:
 
 @pytest.mark.asyncio
 async def test_clear(test_session: Session) -> None:
+    if test_session._protocol_version < 1:
+        return
+
     cache: NamedCache[str, str] = await test_session.get_cache(
         "basic", CacheOptions(near_cache_options=NearCacheOptions(ttl=2000))
     )
@@ -314,6 +329,9 @@ async def test_incompatible_near_cache_options(test_session: Session) -> None:
 
 @pytest.mark.asyncio
 async def test_concurrency(test_session: Session) -> None:
+    if test_session._protocol_version < 1:
+        return
+
     cache: NamedCache[str, str] = await test_session.get_cache(
         "basic", CacheOptions(near_cache_options=NearCacheOptions(ttl=0))
     )
