@@ -18,7 +18,7 @@ V = TypeVar("V")
 
 class NearCacheOptions:
     def __init__(
-        self, ttl: int = 0, high_units: int = 0, high_units_memory: int = 0, prune_factor: float = 0.80
+        self, ttl: Optional[int] = None, high_units: int = 0, high_units_memory: int = 0, prune_factor: float = 0.80
     ) -> None:
         """
         Constructs a new NearCacheOptions.  These options, when present, will configure
@@ -29,7 +29,7 @@ class NearCacheOptions:
 
         :param ttl: the time-to-live, in millis, for entries held in the near cache.
          Expiration resolution is to the 1/4 second, thus the minimum positive
-         ttl value is 250
+         ttl value is 250.  If the ttl is zero, then no expiry will be applied
         :param high_units: the maximum number of entries to be held by
          the near cache.  If this value is exceeded, the cache will be pruned
          down by the percentage defined by the prune_factor parameter
@@ -44,18 +44,18 @@ class NearCacheOptions:
         super().__init__()
         if high_units < 0 or high_units_memory < 0:
             raise ValueError("values for high_units and high_units_memory must be positive")
-        if ttl == 0 and high_units == 0 and high_units_memory == 0:
-            raise ValueError("at least one option must be specified and non-zero")
-        if ttl < 0:
+        if ttl is None and high_units == 0 and high_units_memory == 0:
+            raise ValueError("at least one option must be specified")
+        if ttl is not None and ttl < 0:
             raise ValueError("ttl cannot be less than zero")
-        if 0 < ttl < 250:
+        if ttl is not None and 0 < ttl < 250:
             raise ValueError("ttl has 1/4 second resolution;  minimum TTL is 250")
         if high_units != 0 and high_units_memory != 0:
             raise ValueError("high_units and high_units_memory cannot be used together; specify one or the other")
         if prune_factor < 0.1 or prune_factor > 1:
             raise ValueError("prune_factor must be between .1 and 1")
 
-        self._ttl = ttl if ttl >= 0 else -1
+        self._ttl = ttl if ttl is not None and ttl >= 0 else 0
         self._high_units = high_units
         self._high_units_memory = high_units_memory
         self._prune_factor = prune_factor

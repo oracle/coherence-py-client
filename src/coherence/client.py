@@ -1020,6 +1020,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
         self._default_expiry: int = cache_options.default_expiry if cache_options is not None else 0
         self._near_cache: Optional[LocalCache[K, V]] = None
         self._near_cache_listener: Optional[MapListener[K, V]] = None
+        self._near_cache_lock: asyncio.Lock = asyncio.Lock()
 
         self._events_manager: _MapEventsManagerV1[K, V] = _MapEventsManagerV1(
             self, session, serializer, self._internal_emitter, self._request_factory
@@ -1140,20 +1141,24 @@ class NamedCacheClientV1(NamedCache[K, V]):
 
         # check the near cache first
         if near_cache is not None:
-            result: Optional[V] = await near_cache.get(key)
-            if result is not None:
-                return result
+            async with self._near_cache_lock:
+                result: Optional[V] = await near_cache.get(key)
+                if result is not None:
+                    return result
 
-        start: int = cur_time_millis()
-        dispatcher: UnaryDispatcher[Optional[V]] = self._request_factory.get_request(key)
-        await dispatcher.dispatch(self._stream_handler)
-        result = dispatcher.result()
+                start: int = cur_time_millis()
+                dispatcher: UnaryDispatcher[Optional[V]] = self._request_factory.get_request(key)
+                await dispatcher.dispatch(self._stream_handler)
+                result = dispatcher.result()
 
-        if near_cache is not None:
-            # noinspection PyProtectedMember
-            near_cache.stats._register_misses_millis(cur_time_millis() - start)
-            if result is not None:
-                await near_cache.put(key, result)
+                if result is not None:
+                    await near_cache.put(key, result)
+                    # noinspection PyProtectedMember
+                    near_cache.stats._register_misses_millis(cur_time_millis() - start)
+        else:
+            dispatcher = self._request_factory.get_request(key)
+            await dispatcher.dispatch(self._stream_handler)
+            result = dispatcher.result()
 
         return result
 
@@ -1205,6 +1210,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
         else:
             return default_value
 
+    # noinspection PyProtectedMember
     @_pre_call_cache
     async def get_all(self, keys: set[K]) -> AsyncIterator[MapEntry[K, V]]:
         near_cache: Optional[LocalCache[K, V]] = self._near_cache
@@ -1212,30 +1218,56 @@ class NamedCacheClientV1(NamedCache[K, V]):
 
         # check the near cache first
         if near_cache is not None:
-            result = await near_cache.get_all(keys)
-            if result is not None:
-                if len(result) == len(keys):
+            async with self._near_cache_lock:
+                result = await near_cache.get_all(keys)
+                if result is not None:
+                    if len(result) == len(keys):
+                        # all keys were found, return an AsyncIterator
+                        # over those results
+                        async def async_iter() -> AsyncIterator[MapEntry[K, V]]:
+                            for key, value in result.items():
+                                yield MapEntry(key, value)
 
-                    async def async_iter() -> AsyncIterator[MapEntry[K, V]]:
-                        for key, value in result.items():
-                            await asyncio.sleep(0)
-                            yield MapEntry(key, value)
+                        return async_iter()
+                    else:
+                        # some keys are present within the near cache; make
+                        # a remote call to obtain the keys that are missing.
+                        stats: CacheStats = near_cache.stats
+                        remote_keys: set[K] = keys.difference(result)
+                        start: int = cur_time_millis()
+                        dispatcher: StreamingDispatcher[MapEntry[K, V]] = self._request_factory.get_all_request(
+                            remote_keys
+                        )
+                        await dispatcher.dispatch(self._stream_handler)
+                        stats._register_misses_millis(cur_time_millis() - start)
 
-                    return async_iter()
-                else:
-                    remote_keys: set[K] = keys.difference(result)
-                    dispatcher: StreamingDispatcher[MapEntry[K, V]] = self._request_factory.get_all_request(remote_keys)
-                    await dispatcher.dispatch(self._stream_handler)
-
-                    async def async_iter() -> AsyncIterator[MapEntry[K, V]]:
-                        for key, value in result.items():
-                            await asyncio.sleep(0)
-                            yield MapEntry(key, value)
+                        # we could return a composite AsyncIterator that would
+                        # yield the local keys followed by the results from the
+                        # remote call, but doing could result in additional
+                        # remote calls if there are concurrent get_all() calls
+                        # that start the same time.  Instead, populate the
+                        # near cache while locked and then return results
+                        # This is not the most memory efficient, but it makes
+                        # the stats more likely to make sense to the user.
+                        remote_entries: list[MapEntry[K, V]] = []
                         async for entry in dispatcher:
                             await near_cache.put(entry.key, entry.value)
-                            yield entry
+                            remote_entries.append(entry)
 
-                    return async_iter()
+                        stats._register_misses_millis(cur_time_millis() - start)
+
+                        # noinspection PyProtectedMember
+                        async def async_iter() -> AsyncIterator[MapEntry[K, V]]:
+                            for key, value in result.items():
+                                yield MapEntry(key, value)
+                            for remote_entry in remote_entries:
+                                yield remote_entry
+
+                        return async_iter()
+                else:
+                    dispatcher = self._request_factory.get_all_request(keys)
+                    await dispatcher.dispatch(self._stream_handler)
+                    return dispatcher
         else:
             dispatcher = self._request_factory.get_all_request(keys)
             await dispatcher.dispatch(self._stream_handler)
@@ -2450,6 +2482,7 @@ class _ListAsyncIterator(abc.ABC, AsyncIterator[T]):
 class StreamHandler:
     theStreamHandler = None
 
+    # noinspection PyTypeChecker
     def __init__(
         self,
         session: Session,
@@ -2473,6 +2506,7 @@ class StreamHandler:
         self._connected = Event()
         self._connected.clear()
         self._ensure_lock = asyncio.Lock()
+        self._write_lock = asyncio.Lock()
 
         task = asyncio.create_task(self.handle_response())
         task.add_done_callback(self._background_tasks.discard)
@@ -2484,6 +2518,7 @@ class StreamHandler:
 
         async def on_reconnect() -> None:
             self._connected.set()
+            # noinspection PyUnresolvedReferences
             await self._events_manager._named_map._ensure_cache()
             await self._events_manager._reconnect()
 
@@ -2543,7 +2578,8 @@ class StreamHandler:
 
         self._log_message(proxy_request)
 
-        await stream.write(proxy_request)
+        async with self._write_lock:
+            await stream.write(proxy_request)
 
     def register_observer(self, observer: ResponseObserver) -> None:
         assert observer.id not in self._observers

@@ -12,13 +12,13 @@ public class LongRunningProcessor
     {
     public Void process(InvocableMap.Entry<Object, Object> entry)
         {
-        Base.sleep(60000);
+        Base.sleep(5000);
         return null;
         }
 
     public Map<Object, Void> processAll(Set<? extends InvocableMap.Entry<Object, Object>> setEntries)
         {
-        Base.sleep(60000);
+        Base.sleep(5000);
         return InvocableMap.EntryProcessor.super.processAll(setEntries);
         }
     }

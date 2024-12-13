@@ -16,7 +16,7 @@ def test_near_cache_options_no_explicit_params() -> None:
     with pytest.raises(ValueError) as err:
         NearCacheOptions()
 
-    assert str(err.value) == "at least one option must be specified and non-zero"
+    assert str(err.value) == "at least one option must be specified"
 
 
 def test_near_cache_options_negative_units() -> None:
@@ -83,6 +83,17 @@ def test_near_cache_options_str() -> None:
 
     options = NearCacheOptions(high_units_memory=100 * 1024, prune_factor=0.25)
     assert str(options) == "NearCacheOptions(ttl=0ms, high-units=0, high-units-memory=102400, prune-factor=0.25)"
+
+
+def test_near_cache_eq() -> None:
+    options: NearCacheOptions = NearCacheOptions(high_units=100)
+    options2: NearCacheOptions = NearCacheOptions(high_units=100, ttl=1000)
+    options3: NearCacheOptions = NearCacheOptions(high_units=100)
+
+    assert options == options
+    assert options != options2
+    assert options == options3
+    assert options != "some string"
 
 
 def test_near_cache_options_ttl() -> None:

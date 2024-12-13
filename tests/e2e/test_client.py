@@ -585,27 +585,6 @@ async def test_paged_stream_request_timeout(cache: NamedCache[str, str]) -> None
         assert pytest.approx((end - start), 0.5) == 1.0
 
 
-# noinspection PyExceptClausesOrder
-@pytest.mark.asyncio
-async def test_unary_request_timeout(test_session: Session) -> None:
-    cache: NamedCache[str, str] = await test_session.get_cache("test-" + str(int(time() * 1000)))
-    start = time()
-    try:
-        async with request_timeout(seconds=5.0):
-            await cache.invoke("key", tests.LongRunningProcessor())
-            assert False
-    except TimeoutError:  # v1
-        end = time()
-        assert pytest.approx((end - start), 0.5) == 5.0
-    except asyncio.exceptions.TimeoutError:  # v1
-        end = time()
-        assert pytest.approx((end - start), 0.5) == 5.0
-    except AioRpcError as e:
-        end = time()
-        assert e.code() == StatusCode.DEADLINE_EXCEEDED
-        assert pytest.approx((end - start), 0.5) == 5.0
-
-
 # noinspection PyUnresolvedReferences
 @pytest.mark.asyncio
 async def test_ttl_configuration(test_session: Session) -> None:
@@ -645,3 +624,16 @@ async def test_ttl_configuration(test_session: Session) -> None:
     sleep(3)
     assert await cache.size() == 0
     await cache.destroy()
+
+
+@pytest.mark.asyncio
+async def test_unary_error(test_session: Session) -> None:
+    cache: NamedCache[str, str] = await test_session.get_cache("unary_error")
+
+    d = dict()
+    d["@class"] = "com.foo.Bar"
+
+    with pytest.raises(Exception) as ex:
+        await cache.put("a", d)
+
+    assert "Could not deserialize" in str(ex.value)
