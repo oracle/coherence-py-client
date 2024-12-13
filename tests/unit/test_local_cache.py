@@ -235,19 +235,19 @@ async def test_pruning_memory() -> None:
 @pytest.mark.asyncio
 async def test_stats_reset() -> None:
     upper_bound_mem: int = 110 * 1024  # 110KB
-    options: NearCacheOptions = NearCacheOptions(high_units_memory=upper_bound_mem)
+    options: NearCacheOptions = NearCacheOptions(ttl=500, high_units_memory=upper_bound_mem)
     cache: LocalCache[str, str] = LocalCache("test", options)
     stats: CacheStats = cache.stats
 
     for i in range(210):
         key_value: str = str(i)
-        await cache.put(key_value, key_value, 500)
+        await cache.put(key_value, key_value)
         await cache.get(key_value)
 
     await cache.get("none")
     await cache.put("A", "B", 0)
 
-    await asyncio.sleep(3.0)
+    await asyncio.sleep(2.0)
 
     assert await cache.size() == 1
 
