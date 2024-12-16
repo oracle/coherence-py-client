@@ -257,10 +257,15 @@ async def test_stats_reset() -> None:
     print(f"### DEBUG2 {stats}")
     print(f"### DEBUG2 {cache._expiries}")
 
-    assert await cache.size() == 1
+    assert await cache.size()
 
     print(f"### DEBUG3 {stats}")
     print(f"### DEBUG3 {cache._expiries}")
+
+    assert await cache.size() == 1
+
+    print(f"### DEBUG4 {stats}")
+    print(f"### DEBUG4 {cache._expiries}")
 
     memory: int = stats.bytes
     assert stats.puts == 211
