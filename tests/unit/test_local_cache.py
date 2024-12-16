@@ -247,25 +247,9 @@ async def test_stats_reset() -> None:
     await cache.get("none")
     await cache.put("A", "B", 0)
 
-    print(f"### DEBUG {time.time_ns() // 1_000_000}")
-    print(f"### DEBUG {stats}")
-    print(f"### DEBUG {cache._expiries}")
-
-    await asyncio.sleep(2.0)
-
-    print(f"### DEBUG {time.time_ns() // 1_000_000}")
-    print(f"### DEBUG2 {stats}")
-    print(f"### DEBUG2 {cache._expiries}")
-
-    assert await cache.size()
-
-    print(f"### DEBUG3 {stats}")
-    print(f"### DEBUG3 {cache._expiries}")
+    await asyncio.sleep(0.75)
 
     assert await cache.size() == 1
-
-    print(f"### DEBUG4 {stats}")
-    print(f"### DEBUG4 {cache._expiries}")
 
     memory: int = stats.bytes
     assert stats.puts == 211

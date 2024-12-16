@@ -725,7 +725,6 @@ class LocalCache(Generic[K, V]):
         exp_buckets_to_remove: list[int] = []
 
         for expire_time, keys in expires.items():
-            print(f"### DEBUG PROCESSING BUCKET {expire_time}, current={now}")
             if expire_time < now:
                 exp_buckets_to_remove.append(expire_time)
                 for key in keys:
@@ -738,7 +737,6 @@ class LocalCache(Generic[K, V]):
 
         if len(exp_buckets_to_remove) > 0:
             for bucket in exp_buckets_to_remove:
-                print(f"### DEBUG REMOVING BUCKET {bucket}, current={now}")
                 expires.pop(bucket, None)
 
         end = cur_time_millis()
