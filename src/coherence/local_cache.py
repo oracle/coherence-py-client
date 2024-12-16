@@ -733,6 +733,7 @@ class LocalCache(Generic[K, V]):
                     if entry is not None:
                         expired_count += 1
                         stats._update_memory(-entry.bytes)
+                continue
             break
 
         if len(exp_buckets_to_remove) > 0:
