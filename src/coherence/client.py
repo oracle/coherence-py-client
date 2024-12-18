@@ -34,7 +34,7 @@ from typing import (
 
 # noinspection PyPackageRequirements
 import grpc
-from google.protobuf.json_format import MessageToJson  # type:ignore
+from google.protobuf.json_format import MessageToJson
 from grpc.aio import Channel, StreamStreamMultiCallable
 from pymitter import EventEmitter
 

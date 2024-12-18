@@ -13,8 +13,8 @@ from asyncio import Event
 from datetime import datetime, timezone
 from typing import Any, AsyncIterator, Callable, Generic, Optional, Tuple, TypeVar
 
-from google.protobuf.any_pb2 import Any as GrpcAny  # type: ignore
-from google.protobuf.wrappers_pb2 import BoolValue, BytesValue, Int32Value  # type: ignore
+from google.protobuf.any_pb2 import Any as GrpcAny
+from google.protobuf.wrappers_pb2 import BoolValue, BytesValue, Int32Value
 
 from .aggregator import EntryAggregator
 from .cache_service_messages_v1_pb2 import EnsureCacheRequest, ExecuteRequest, IndexRequest, KeyOrFilter, KeysOrFilter
