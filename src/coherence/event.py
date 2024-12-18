@@ -1026,4 +1026,4 @@ class _MapEventsManagerV1(_MapEventsManager[K, V]):
         return _FilterListenerGroupV1(self, filter)
 
     def _close(self) -> None:
-        pass
+        return

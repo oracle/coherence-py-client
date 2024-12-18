@@ -11,7 +11,7 @@ import time
 from abc import ABC, abstractmethod
 from asyncio import Event
 from datetime import datetime, timezone
-from typing import Any, AsyncIterator, Callable, Generic, Optional, Tuple, TypeVar
+from typing import Any, AsyncIterator, Callable, Final, Generic, Optional, Tuple, TypeVar
 
 from google.protobuf.any_pb2 import Any as GrpcAny
 from google.protobuf.wrappers_pb2 import BoolValue, BytesValue, Int32Value
@@ -61,6 +61,9 @@ from .messages_pb2 import (
 from .processor import EntryProcessor
 from .proxy_service_messages_v1_pb2 import InitRequest, ProxyRequest
 from .serialization import Serializer
+
+_FILTER_REQUIRED: Final[str] = "Filter cannot be None"
+_KEYS_FILTERS_EXCLUSIVE: Final[str] = "keys and filter are mutually exclusive"
 
 E = TypeVar("E")
 K = TypeVar("K")
@@ -570,7 +573,7 @@ class RequestFactory:
         self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> InvokeAllRequest:
         if keys is not None and filter is not None:
-            raise ValueError("keys and filter are mutually exclusive")
+            raise ValueError(_KEYS_FILTERS_EXCLUSIVE)
 
         r = InvokeAllRequest(
             scope=self._scope,
@@ -591,7 +594,7 @@ class RequestFactory:
         self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> AggregateRequest:
         if keys is not None and filter is not None:
-            raise ValueError("keys and filter are mutually exclusive")
+            raise ValueError(_KEYS_FILTERS_EXCLUSIVE)
 
         r: AggregateRequest = AggregateRequest(
             scope=self._scope,
@@ -610,7 +613,7 @@ class RequestFactory:
 
     def values_request(self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None) -> ValuesRequest:
         if filter is None and comparator is not None:
-            raise ValueError("Filter cannot be None")
+            raise ValueError(_FILTER_REQUIRED)
 
         r: ValuesRequest = ValuesRequest(
             scope=self._scope,
@@ -642,7 +645,7 @@ class RequestFactory:
         self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None
     ) -> EntrySetRequest:
         if filter is None and comparator is not None:
-            raise ValueError("Filter cannot be None")
+            raise ValueError(_FILTER_REQUIRED)
 
         r: EntrySetRequest = EntrySetRequest(
             scope=self._scope,
@@ -1044,7 +1047,7 @@ class RequestFactoryV1:
         self, processor: EntryProcessor[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> StreamingDispatcher[MapEntry[K, R]]:
         if keys is not None and filter is not None:
-            raise ValueError("keys and filter are mutually exclusive")
+            raise ValueError(_KEYS_FILTERS_EXCLUSIVE)
 
         if keys is not None:
             cache_request = ExecuteRequest(
@@ -1079,7 +1082,7 @@ class RequestFactoryV1:
         self, aggregator: EntryAggregator[R], keys: Optional[set[K]] = None, filter: Optional[Filter] = None
     ) -> UnaryDispatcher[Optional[R]]:
         if keys is not None and filter is not None:
-            raise ValueError("keys and filter are mutually exclusive")
+            raise ValueError(_KEYS_FILTERS_EXCLUSIVE)
 
         if keys is not None:
             cache_request = ExecuteRequest(
@@ -1115,7 +1118,7 @@ class RequestFactoryV1:
         self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None
     ) -> StreamingDispatcher[V]:
         if filter is None and comparator is not None:
-            raise ValueError("Filter cannot be None")
+            raise ValueError(_FILTER_REQUIRED)
 
         if filter is not None:
             query_request = QueryRequest(filter=self._serializer.serialize(filter))
@@ -1155,7 +1158,7 @@ class RequestFactoryV1:
         self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None
     ) -> StreamingDispatcher[MapEntry[K, V]]:
         if filter is None and comparator is not None:
-            raise ValueError("Filter cannot be None")
+            raise ValueError(_FILTER_REQUIRED)
 
         if filter is not None:
             query_request = QueryRequest(filter=self._serializer.serialize(filter))
@@ -1242,7 +1245,7 @@ class RequestFactoryV1:
             raise AssertionError("Must specify a key or a filter")
 
         if key is None:  # registering a Filter listener
-            filter_local: Filter = filter if filter is not None else Filters.always()
+            filter_local: Filter = filter  # type: ignore
             if not isinstance(filter_local, MapEventFilter):
                 # noinspection PyUnresolvedReferences
                 filter_local = MapEventFilter.from_filter(filter_local)

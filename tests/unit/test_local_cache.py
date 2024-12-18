@@ -35,16 +35,12 @@ def test_local_entry_str() -> None:
     entry: LocalEntry[str, str] = LocalEntry("a", "b", 500)
 
     result: str = str(entry)
-    assert result == (
-        f"LocalEntry(key=a, value=b," f" ttl=500ms," f" last-access={millis_format_date(entry.last_access)})"
-    )
+    assert result == (f"LocalEntry(key=a, value=b, ttl=500ms, last-access={millis_format_date(entry.last_access)})")
 
     time.sleep(0.6)
 
     result = str(entry)
-    assert result == (
-        f"LocalEntry(key=a, value=b," f" ttl=500ms," f" last-access={millis_format_date(entry.last_access)})"
-    )
+    assert result == (f"LocalEntry(key=a, value=b, ttl=500ms, last-access={millis_format_date(entry.last_access)})")
 
 
 @pytest.mark.asyncio
@@ -313,7 +309,7 @@ async def test_local_cache_str() -> None:
         f" size=211, expires=0, num-expired=0, expires-duration=0ms, memory-bytes={cache.stats.bytes})"
     )
 
-    assert result == f"LocalCache(name=test, options={str(options)}" f", stats={stats})"
+    assert result == f"LocalCache(name=test, options={str(options)}, stats={stats})"
 
 
 async def _validate_clear_reset(reset: Callable[[LocalCache], Coroutine[Any, Any, None]]) -> None:

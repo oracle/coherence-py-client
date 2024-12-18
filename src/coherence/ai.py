@@ -15,7 +15,7 @@ import jsonpickle
 from coherence.aggregator import EntryAggregator
 from coherence.extractor import ValueExtractor
 from coherence.filter import Filter
-from coherence.serialization import JavaProxyUnpickler, proxy
+from coherence.serialization import _META_CLASS, JavaProxyUnpickler, proxy
 
 E = TypeVar("E")
 T = TypeVar("T")
@@ -140,36 +140,34 @@ class DocumentChunkHandler(jsonpickle.handlers.BaseHandler):
     def flatten(self, obj: object, data: Dict[str, Any]) -> Dict[str, Any]:
         dc: DocumentChunk = cast(DocumentChunk, obj)
         result_dict: Dict[Any, Any] = dict()
-        result_dict["@class"] = "ai.DocumentChunk"
+        result_dict[_META_CLASS] = "ai.DocumentChunk"
         result_dict["dataVersion"] = dc.dataVersion
-        if hasattr(dc, "binFuture"):
-            if dc.binFuture is not None:
-                result_dict["binFuture"] = dc.binFuture
-        if hasattr(dc, "metadata"):
-            if dc.metadata is not None:
-                result_dict["metadata"] = dict()
-                if isinstance(dc.metadata, OrderedDict):
-                    result_dict["metadata"]["@ordered"] = True
-                entries = list()
-                for k, v in dc.metadata.items():
-                    entries.append({"key": k, "value": v})
-                result_dict["metadata"]["entries"] = entries
+        if hasattr(dc, "binFuture") and dc.binFuture is not None:
+            result_dict["binFuture"] = dc.binFuture
+        if hasattr(dc, "metadata") and dc.metadata is not None:
+            result_dict["metadata"] = dict()
+            if isinstance(dc.metadata, OrderedDict):
+                result_dict["metadata"]["@ordered"] = True
+            entries = list()
+            for k, v in dc.metadata.items():
+                entries.append({"key": k, "value": v})
+            result_dict["metadata"]["entries"] = entries
         if hasattr(dc, "vector"):
             v = dc.vector
             if v is not None:
                 if isinstance(v, BitVector):
                     result_dict["vector"] = dict()
-                    result_dict["vector"]["@class"] = "ai.BitVector"
+                    result_dict["vector"][_META_CLASS] = "ai.BitVector"
                     # noinspection PyUnresolvedReferences
                     result_dict["vector"]["bits"] = v.bits
                 elif isinstance(v, ByteVector):
                     result_dict["vector"] = dict()
-                    result_dict["vector"]["@class"] = "ai.Int8Vector"
+                    result_dict["vector"][_META_CLASS] = "ai.Int8Vector"
                     # noinspection PyUnresolvedReferences
                     result_dict["vector"]["array"] = v.array
                 elif isinstance(v, FloatVector):
                     result_dict["vector"] = dict()
-                    result_dict["vector"]["@class"] = "ai.Float32Vector"
+                    result_dict["vector"][_META_CLASS] = "ai.Float32Vector"
                     # noinspection PyUnresolvedReferences
                     result_dict["vector"]["array"] = v.array
         result_dict["text"] = dc.text

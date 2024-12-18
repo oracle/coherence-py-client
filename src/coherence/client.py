@@ -72,6 +72,9 @@ from .util import (
     cur_time_millis,
 )
 
+_SPECIFY_EXTRACTOR: Final[str] = "A ValueExtractor must be specified"
+_SPECIFY_MAP_LISTENER: Final[str] = "A MapListener must be specified"
+
 E = TypeVar("E")
 K = TypeVar("K")
 V = TypeVar("V")
@@ -120,7 +123,7 @@ class _Handshake:
                 error_code == grpc.StatusCode.UNIMPLEMENTED.value[0]
                 or error_code == grpc.StatusCode.INTERNAL.value[0]
             ):
-                pass
+                return
             else:
                 raise RuntimeError(
                     f"Unexpected error, {e}, when attempting to handshake with proxy: {e.details()}"
@@ -928,7 +931,7 @@ class NamedCacheClient(NamedCache[K, V]):
         self, listener: MapListener[K, V], listener_for: Optional[K | Filter] = None, lite: bool = False
     ) -> None:
         if listener is None:
-            raise ValueError("A MapListener must be specified")
+            raise ValueError(_SPECIFY_MAP_LISTENER)
 
         if listener_for is None or isinstance(listener_for, Filter):
             await self._events_manager._register_filter_listener(listener, listener_for, lite)
@@ -939,7 +942,7 @@ class NamedCacheClient(NamedCache[K, V]):
     @_pre_call_cache
     async def remove_map_listener(self, listener: MapListener[K, V], listener_for: Optional[K | Filter] = None) -> None:
         if listener is None:
-            raise ValueError("A MapListener must be specified")
+            raise ValueError(_SPECIFY_MAP_LISTENER)
 
         if listener_for is None or isinstance(listener_for, Filter):
             await self._events_manager._remove_filter_listener(listener, listener_for)
@@ -951,14 +954,14 @@ class NamedCacheClient(NamedCache[K, V]):
         self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
     ) -> None:
         if extractor is None:
-            raise ValueError("A ValueExtractor must be specified")
+            raise ValueError(_SPECIFY_EXTRACTOR)
         r = self._request_factory.add_index_request(extractor, ordered, comparator)
         await self._client_stub.addIndex(r)
 
     @_pre_call_cache
     async def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
         if extractor is None:
-            raise ValueError("A ValueExtractor must be specified")
+            raise ValueError(_SPECIFY_EXTRACTOR)
         r = self._request_factory.remove_index_request(extractor)
         await self._client_stub.removeIndex(r)
 
@@ -1043,7 +1046,6 @@ class NamedCacheClientV1(NamedCache[K, V]):
                         val: Optional[V] = event.new
                         if val is not None:
                             await near.put(event.key, val)
-                            return
                 elif event.type == MapEventType.ENTRY_DELETED:
                     # processing a remove
                     await near.remove(event.key)
@@ -1184,7 +1186,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
         self, listener: MapListener[K, V], listener_for: Optional[K | Filter] = None, lite: bool = False
     ) -> None:
         if listener is None:
-            raise ValueError("A MapListener must be specified")
+            raise ValueError(_SPECIFY_MAP_LISTENER)
 
         if listener_for is None or isinstance(listener_for, Filter):
             await self._events_manager._register_filter_listener(listener, listener_for, lite)
@@ -1195,7 +1197,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
     @_pre_call_cache
     async def remove_map_listener(self, listener: MapListener[K, V], listener_for: Optional[K | Filter] = None) -> None:
         if listener is None:
-            raise ValueError("A MapListener must be specified")
+            raise ValueError(_SPECIFY_MAP_LISTENER)
 
         if listener_for is None or isinstance(listener_for, Filter):
             await self._events_manager._remove_filter_listener(listener, listener_for)
@@ -1389,7 +1391,6 @@ class NamedCacheClientV1(NamedCache[K, V]):
         await dispatcher.dispatch(self._stream_handler)
         return dispatcher.result()
 
-    # TODO
     @_pre_call_cache
     async def values(
         self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False
@@ -1415,7 +1416,6 @@ class NamedCacheClientV1(NamedCache[K, V]):
             await dispatcher.dispatch(self._stream_handler)
             return dispatcher
 
-    # TODO
     @_pre_call_cache
     async def entries(
         self, filter: Optional[Filter] = None, comparator: Optional[Comparator] = None, by_page: bool = False
@@ -1434,7 +1434,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
         self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
     ) -> None:
         if extractor is None:
-            raise ValueError("A ValueExtractor must be specified")
+            raise ValueError(_SPECIFY_EXTRACTOR)
 
         dispatcher: Dispatcher = self._request_factory.add_index_request(extractor, ordered, comparator)
         await dispatcher.dispatch(self._stream_handler)
@@ -1442,7 +1442,7 @@ class NamedCacheClientV1(NamedCache[K, V]):
     @_pre_call_cache
     async def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
         if extractor is None:
-            raise ValueError("A ValueExtractor must be specified")
+            raise ValueError(_SPECIFY_EXTRACTOR)
 
         dispatcher: Dispatcher = self._request_factory.remove_index_request(extractor)
         await dispatcher.dispatch(self._stream_handler)
@@ -2039,7 +2039,7 @@ class Session:
             else:
                 if c.options != cache_options:
                     raise ValueError(
-                        "A NamedMap or NamedCache with the same name already " "exists with different CacheOptions"
+                        "A NamedMap or NamedCache with the same name already exists with different CacheOptions"
                     )
             return c
 
@@ -2480,8 +2480,6 @@ class _ListAsyncIterator(abc.ABC, AsyncIterator[T]):
 
 # noinspection PyProtectedMember
 class StreamHandler:
-    theStreamHandler = None
-
     # noinspection PyTypeChecker
     def __init__(
         self,
@@ -2636,7 +2634,7 @@ class StreamHandler:
             response.message.Unpack(named_cache_response)
             response_type = named_cache_response.type
             if response_type == ResponseType.Message:
-                pass
+                return
             elif response_type == ResponseType.MapEvent:
                 # Handle MapEvent Response
                 event_response = MapEventMessage()
@@ -2673,5 +2671,3 @@ class StreamHandler:
                     self._events_manager._emitter.emit(
                         MapLifecycleEvent.TRUNCATED.value, self._events_manager._named_map.name
                     )
-            else:
-                pass

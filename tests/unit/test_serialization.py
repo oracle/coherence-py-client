@@ -112,7 +112,7 @@ def _verify_round_trip(obj: Any, should_have_class: bool) -> None:
     assert deser_result == obj
 
 
-def test_BitVector_serialization() -> None:
+def test_bit_vector_serialization() -> None:
     coh_bv = BitVector(hex_string="AABBCC")
     ser = s.serialize(coh_bv)
     assert ser == b'\x15{"@class": "ai.BitVector", "bits": "0xAABBCC"}'
@@ -138,7 +138,7 @@ def test_BitVector_serialization() -> None:
     assert isinstance(o, BitVector)
 
 
-def test_ByteVector_serialization() -> None:
+def test_byte_vector_serialization() -> None:
     coh_int8v = ByteVector(bytes([1, 2, 3, 4]))
     ser = s.serialize(coh_int8v)
     assert ser == b'\x15{"@class": "ai.Int8Vector", "array": "AQIDBA=="}'
@@ -146,7 +146,7 @@ def test_ByteVector_serialization() -> None:
     assert isinstance(o, ByteVector)
 
 
-def test_FloatVector_serialization() -> None:
+def test_float_vector_serialization() -> None:
     coh_fv = FloatVector([1.0, 2.0, 3.0])
     ser = s.serialize(coh_fv)
     assert ser == b'\x15{"@class": "ai.Float32Vector", "array": [1.0, 2.0, 3.0]}'
@@ -154,7 +154,7 @@ def test_FloatVector_serialization() -> None:
     assert isinstance(o, FloatVector)
 
 
-def test_DocumentChunk_serialization() -> None:
+def test_document_chunk_serialization() -> None:
     dc = DocumentChunk("test")
     ser = s.serialize(dc)
     assert ser == (
@@ -189,7 +189,7 @@ def test_DocumentChunk_serialization() -> None:
 
 
 # noinspection PyUnresolvedReferences
-def test_SimilaritySearch_serialization() -> None:
+def test_similarity_search_serialization() -> None:
     coh_fv = FloatVector([1.0, 2.0, 3.0])
     ve = Extractors.extract("foo")
     f = Filters.equals("foo", "bar")
@@ -229,7 +229,7 @@ def test_SimilaritySearch_serialization() -> None:
 
 
 # noinspection PyUnresolvedReferences
-def test_QueryResult_serialization() -> None:
+def test_query_result_serialization() -> None:
     bqr = QueryResult(3.0, 1, "abc")
     ser = s.serialize(bqr)
     assert ser == b'\x15{"@class": "ai.results.QueryResult", "distance": 3.0, "key": 1, "value": "abc"}'
@@ -242,7 +242,7 @@ def test_QueryResult_serialization() -> None:
 
 
 # noinspection PyUnresolvedReferences
-def test_BinaryQuantIndex_serialization() -> None:
+def test_binary_quant_index_serialization() -> None:
     bqi = BinaryQuantIndex(Extractors.extract("foo"))
     ser = s.serialize(bqi)
     assert ser == (

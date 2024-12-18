@@ -48,7 +48,7 @@ async def _insert_large_number_of_entries(cache: NamedCache[str, str]) -> int:
 async def test_get_and_put(cache: NamedCache[str, Union[str, int, Person]]) -> None:
     k: str = "one"
     v: str = "only-one"
-    # c.put(k, v, 60000)
+
     await cache.put(k, v)
     r = await cache.get(k)
     assert r == v
@@ -254,7 +254,6 @@ async def test_get_all(cache: NamedCache[str, str]) -> None:
     await cache.put(k3, v3)
 
     r: Dict[str, str] = {}
-    # result = await cache.get_all({k1, k3})
     async for e in await cache.get_all({k1, k3}):
         r[e.key] = e.value
 
@@ -501,37 +500,13 @@ async def test_cache_release_event() -> None:
 async def test_add_remove_index(person_cache: NamedCache[str, Person]) -> None:
     await person_cache.add_index(Extractors.extract("age"))
     result = await person_cache.aggregate(Aggregators.record(), None, Filters.greater("age", 25))
-    # print(result)
-    # {'@class': 'util.SimpleQueryRecord', 'results': [{'@class': 'util.SimpleQueryRecord.PartialResult',
-    # 'partitionSet': {'@class': 'net.partition.PartitionSet', 'bits': [2147483647], 'markedCount': -1,
-    # 'partitionCount': 31, 'tailMask': 2147483647}, 'steps': [{'@class': 'util.SimpleQueryRecord.PartialResult.Step',
-    # 'efficiency': 5, 'filter': 'GreaterFilter(.age, 25)',
-    # 'indexLookupRecords': [{'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord',
-    # 'bytes': 6839, 'distinctValues': 5, 'extractor': '.age', 'index': 'Partitioned: Footprint=6.67KB, Size=5',
-    # 'indexDesc': 'Partitioned: ', 'ordered': False}], 'keySetSizePost': 0, 'keySetSizePre': 7, 'millis': 0,
-    # 'subSteps': []}]}], 'type': {'@class': 'aggregator.QueryRecorder.RecordType', 'enum': 'EXPLAIN'}}
 
     idx_rec = result["results"][0].get("steps")[0].get("indexLookupRecords")[0]
-    # print(idx_rec)
-    # {'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord', 'bytes': 6839, 'distinctValues': 5,
-    # 'extractor': '.age', 'index': 'Partitioned: Footprint=6.67KB, Size=5', 'indexDesc': 'Partitioned: ',
-    # 'ordered': False}
     assert "index" in idx_rec
 
     await person_cache.remove_index(Extractors.extract("age"))
     result2 = await person_cache.aggregate(Aggregators.record(), None, Filters.greater("age", 25))
-    print(result2)
-    # {'@class': 'util.SimpleQueryRecord', 'results': [{'@class': 'util.SimpleQueryRecord.PartialResult',
-    # 'partitionSet': {'@class': 'net.partition.PartitionSet', 'bits': [2147483647], 'markedCount': -1,
-    # 'partitionCount': 31, 'tailMask': 2147483647}, 'steps': [{'@class': 'util.SimpleQueryRecord.PartialResult.Step',
-    # 'efficiency': 7000, 'filter': 'GreaterFilter(.age, 25)',
-    # 'indexLookupRecords': [{'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord', 'bytes': -1,
-    # 'distinctValues': -1, 'extractor': '.age', 'ordered': False}], 'keySetSizePost': 0, 'keySetSizePre': 7,
-    # 'millis': 0, 'subSteps': []}]}], 'type': {'@class': 'aggregator.QueryRecorder.RecordType', 'enum': 'EXPLAIN'}}
     idx_rec = result2["results"][0].get("steps")[0].get("indexLookupRecords")[0]
-    # print(idx_rec)
-    # {'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord', 'bytes': -1, 'distinctValues': -1,
-    # 'extractor': '.age', 'ordered': False}
     assert "index" not in idx_rec
 
 

@@ -353,7 +353,7 @@ async def test_concurrency(test_session: Session) -> None:
     async def get_all_task() -> int:
         begin = time.time_ns()
 
-        for i in range(iterations):
+        for _ in range(iterations):
             async for _ in await cache.get_all(cache_seed_keys):
                 continue
 
@@ -362,7 +362,7 @@ async def test_concurrency(test_session: Session) -> None:
     async def get_task() -> int:
         begin = time.time_ns()
 
-        for i in range(iterations):
+        for _ in range(iterations):
             for key in cache_seed_keys:
                 await cache.get(key)
 
