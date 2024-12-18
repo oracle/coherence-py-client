@@ -66,9 +66,8 @@ async def populate_vectors(vectors: NamedCache[int, ValueWithVector]) -> ValueWi
 
 
 @pytest.mark.asyncio
-async def test_SimilaritySearch_with_Index() -> None:
-    session: Session = await Session.create()
-    cache: NamedCache[int, ValueWithVector] = await session.get_cache("vector_cache")
+async def test_SimilaritySearch_with_Index(test_session: Session) -> None:
+    cache: NamedCache[int, ValueWithVector] = await test_session.get_cache("vector_cache")
     cache.add_index(BinaryQuantIndex(Extractors.extract("vector")))
     value_with_vector = await populate_vectors(cache)
 
@@ -105,7 +104,6 @@ async def test_SimilaritySearch_with_Index() -> None:
 
     await cache.truncate()
     await cache.destroy()
-    await session.close()
 
 
 async def populate_documentchunk_vectors(vectors: NamedCache[int, DocumentChunk]) -> DocumentChunk:
@@ -136,9 +134,8 @@ async def populate_documentchunk_vectors(vectors: NamedCache[int, DocumentChunk]
 
 
 @pytest.mark.asyncio
-async def test_SimilaritySearch_with_DocumentChunk() -> None:
-    session: Session = await Session.create()
-    cache: NamedCache[int, DocumentChunk] = await session.get_cache("vector_cache")
+async def test_SimilaritySearch_with_DocumentChunk(test_session: Session) -> None:
+    cache: NamedCache[int, DocumentChunk] = await test_session.get_cache("vector_cache")
     dc: DocumentChunk = await populate_documentchunk_vectors(cache)
 
     # Create a SimilaritySearch aggregator
@@ -156,4 +153,3 @@ async def test_SimilaritySearch_with_DocumentChunk() -> None:
 
     await cache.truncate()
     await cache.destroy()
-    await session.close()
