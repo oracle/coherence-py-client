@@ -123,7 +123,7 @@ class _Handshake:
                 pass
             else:
                 raise RuntimeError(
-                    f"Unexpected error: {e}" "Unexpected error attempting to handshake with proxy: " + str(e.details())
+                    f"Unexpected error, {e}, when attempting to handshake with proxy: {e.details()}"
                 ) from e
         except asyncio.TimeoutError as e:
             raise RuntimeError("Handshake with proxy timed out") from e

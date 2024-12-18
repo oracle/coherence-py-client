@@ -393,7 +393,7 @@ async def test_concurrency(test_session: Session) -> None:
     end_outer = time.time_ns()
 
     print_and_validate(
-        "get_all",
+        "individual_gets",
         num_entries,
         iterations,
         task_count,
@@ -413,7 +413,7 @@ def print_and_validate(
     stats: CacheStats,
 ) -> None:
     print()
-    print(f"[{task_name}] 100 Tasks Completed!")
+    print(f"[{task_name}] {task_count} Tasks Completed!")
     print(f"[{task_name}] Stats at end -> {stats} -> {total_time // 1_000_000}ms")
     print(f"[{task_name}] Tasks completion average: {task_time / task_count}")
 
