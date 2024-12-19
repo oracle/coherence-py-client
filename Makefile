@@ -169,24 +169,21 @@ generate-proto:  ## Generate Proto Files
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test
 test:  ##
-	pytest --setup-show
-	pytest -s -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS) $(E2E_TESTS)
+	pytest --setup-show -s -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS) $(E2E_TESTS)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run unit tests with code coverage
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-unit
 test-unit:  ##
-	pytest --setup-show
-	pytest -s -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS)
+	pytest --setup-show -s -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run e2e tests with code coverage
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-e2e
 test-e2e:  ##
-	pytest --setup-show
-	pytest -s -W error --cov src/coherence --cov-report=term --cov-report=html $(E2E_TESTS)
+	pytest --setup-show -s -W error --cov src/coherence --cov-report=term --cov-report=html $(E2E_TESTS)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run standards validation across project
