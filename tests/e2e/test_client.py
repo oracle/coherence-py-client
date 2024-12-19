@@ -2,15 +2,18 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
+import asyncio
 from asyncio import Event
 from time import sleep, time
-from typing import Any, AsyncGenerator, Dict, Final, List, Optional, Set, TypeVar, Union
+from typing import Dict, Final, List, Optional, Set, TypeVar, Union
 
 import pytest
-import pytest_asyncio
+from grpc import StatusCode
+from grpc.aio import AioRpcError
 
 import tests
-from coherence import Aggregators, Filters, MapEntry, NamedCache, Session
+from coherence import Aggregators, Filters, MapEntry, NamedCache, Session, request_timeout
+from coherence.client import CacheOptions
 from coherence.event import MapLifecycleEvent
 from coherence.extractor import ChainedExtractor, Extractors, UniversalExtractor
 from coherence.processor import ExtractorProcessor
@@ -40,39 +43,12 @@ async def _insert_large_number_of_entries(cache: NamedCache[str, str]) -> int:
     return num_entries
 
 
-@pytest_asyncio.fixture
-async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
-    session: Session = await tests.get_session()
-
-    cache: NamedCache[Any, Any] = await session.get_cache("test")
-
-    yield cache  # this is what is returned to the test functions
-
-    await cache.truncate()
-    await session.close()
-
-
-@pytest_asyncio.fixture
-async def setup_and_teardown_person_cache() -> AsyncGenerator[NamedCache[str, Person], None]:
-    session: Session = await tests.get_session()
-    cache: NamedCache[str, Person] = await session.get_cache("test")
-
-    await Person.populate_named_map(cache)
-
-    yield cache
-
-    await cache.truncate()
-    await session.close()
-
-
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_get_and_put(setup_and_teardown: NamedCache[str, Union[str, int, Person]]) -> None:
-    cache: NamedCache[str, Union[str, int, Person]] = setup_and_teardown
-
+async def test_get_and_put(cache: NamedCache[str, Union[str, int, Person]]) -> None:
     k: str = "one"
     v: str = "only-one"
-    # c.put(k, v, 60000)
+
     await cache.put(k, v)
     r = await cache.get(k)
     assert r == v
@@ -94,9 +70,7 @@ async def test_get_and_put(setup_and_teardown: NamedCache[str, Union[str, int, P
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_put_with_ttl(setup_and_teardown: NamedCache[str, Union[str, int]]) -> None:
-    cache: NamedCache[str, Union[str, int, Person]] = setup_and_teardown
-
+async def test_put_with_ttl(cache: NamedCache[str, Union[str, int]]) -> None:
     k: str = "one"
     v: str = "only-one"
     await cache.put(k, v, 5000)  # TTL of 5 seconds
@@ -110,9 +84,7 @@ async def test_put_with_ttl(setup_and_teardown: NamedCache[str, Union[str, int]]
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_put_if_absent(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_put_if_absent(cache: NamedCache[str, str]) -> None:
     k: str = "one"
     v: str = "only-one"
     await cache.put(k, v)
@@ -127,9 +99,7 @@ async def test_put_if_absent(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_keys_filtered(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_keys_filtered(cache: NamedCache[str, str]) -> None:
     k: str = "one"
     v: str = "only-one"
     await cache.put(k, v)
@@ -141,7 +111,7 @@ async def test_keys_filtered(setup_and_teardown: NamedCache[str, str]) -> None:
     await cache.put(k2, v2)
 
     local_set: Set[str] = set()
-    async for e in cache.keys(Filters.equals("length()", 8)):
+    async for e in await cache.keys(Filters.equals("length()", 8)):
         local_set.add(e)
 
     assert len(local_set) == 2
@@ -151,16 +121,14 @@ async def test_keys_filtered(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_keys_paged(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_keys_paged(cache: NamedCache[str, str]) -> None:
     # insert enough data into the cache to ensure results will be paged
     # by the proxy.
     num_entries: int = await _insert_large_number_of_entries(cache)
 
     # Stream the keys and locally cache the results
     local_set: Set[str] = set()
-    async for e in cache.keys(by_page=True):
+    async for e in await cache.keys(by_page=True):
         local_set.add(e)
 
     assert len(local_set) == num_entries
@@ -168,9 +136,7 @@ async def test_keys_paged(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_entries_filtered(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_entries_filtered(cache: NamedCache[str, str]) -> None:
     k: str = "one"
     v: str = "only-one"
     await cache.put(k, v)
@@ -182,7 +148,7 @@ async def test_entries_filtered(setup_and_teardown: NamedCache[str, str]) -> Non
     await cache.put(k2, v2)
 
     local_dict: Dict[str, str] = {}
-    async for e in cache.entries(Filters.equals("length()", 8)):
+    async for e in await cache.entries(Filters.equals("length()", 8)):
         local_dict[e.key] = e.value
 
     assert len(local_dict) == 2
@@ -192,9 +158,7 @@ async def test_entries_filtered(setup_and_teardown: NamedCache[str, str]) -> Non
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_entries_paged(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_entries_paged(cache: NamedCache[str, str]) -> None:
     # insert enough data into the cache to ensure results will be paged
     # by the proxy.
     num_entries = await _insert_large_number_of_entries(cache)
@@ -203,16 +167,14 @@ async def test_entries_paged(setup_and_teardown: NamedCache[str, str]) -> None:
 
     # Stream the keys and locally cache the results
     local_dict: Dict[str, str] = {}
-    async for e in cache.entries(by_page=True):
+    async for e in await cache.entries(by_page=True):
         local_dict[e.key] = e.value
 
     assert len(local_dict) == num_entries
 
 
 @pytest.mark.asyncio
-async def test_values_filtered(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_values_filtered(cache: NamedCache[str, str]) -> None:
     k: str = "one"
     v: str = "only-one"
     await cache.put(k, v)
@@ -224,7 +186,7 @@ async def test_values_filtered(setup_and_teardown: NamedCache[str, str]) -> None
     await cache.put(k2, v2)
 
     local_list: List[str] = []
-    async for e in cache.values(Filters.equals("length()", 8)):
+    async for e in await cache.values(Filters.equals("length()", 8)):
         local_list.append(e)
 
     assert len(local_list) == 2
@@ -234,16 +196,14 @@ async def test_values_filtered(setup_and_teardown: NamedCache[str, str]) -> None
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_values_paged(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_values_paged(cache: NamedCache[str, str]) -> None:
     # insert enough data into the cache to ensure results will be paged
     # by the proxy.
     num_entries: int = await _insert_large_number_of_entries(cache)
 
     # Stream the keys and locally cache the results
     local_list: List[str] = []
-    async for e in cache.values(by_page=True):
+    async for e in await cache.values(by_page=True):
         local_list.append(e)
 
     assert len(local_list) == num_entries
@@ -251,9 +211,7 @@ async def test_values_paged(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_put_all(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_put_all(cache: NamedCache[str, str]) -> None:
     k1: str = "three"
     v1: str = "only-three"
     k2: str = "four"
@@ -268,9 +226,7 @@ async def test_put_all(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_get_or_default(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_get_or_default(cache: NamedCache[str, str]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -284,9 +240,7 @@ async def test_get_or_default(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_get_all(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_get_all(cache: NamedCache[str, str]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -300,7 +254,7 @@ async def test_get_all(setup_and_teardown: NamedCache[str, str]) -> None:
     await cache.put(k3, v3)
 
     r: Dict[str, str] = {}
-    async for e in cache.get_all({k1, k3}):
+    async for e in await cache.get_all({k1, k3}):
         r[e.key] = e.value
 
     assert r == {k1: v1, k3: v3}
@@ -308,9 +262,7 @@ async def test_get_all(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_get_all_no_keys_raises_error(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_get_all_no_keys_raises_error(cache: NamedCache[str, str]) -> None:
     with pytest.raises(ValueError):
         # noinspection PyTypeChecker
         await cache.get_all(None)
@@ -318,9 +270,7 @@ async def test_get_all_no_keys_raises_error(setup_and_teardown: NamedCache[str, 
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_remove(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_remove(cache: NamedCache[str, str]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -334,9 +284,7 @@ async def test_remove(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_remove_mapping(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_remove_mapping(cache: NamedCache[str, str]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -350,9 +298,7 @@ async def test_remove_mapping(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_replace(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_replace(cache: NamedCache[str, str]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -364,9 +310,7 @@ async def test_replace(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_replace_mapping(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_replace_mapping(cache: NamedCache[str, str]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -378,9 +322,7 @@ async def test_replace_mapping(setup_and_teardown: NamedCache[str, str]) -> None
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_contains_key(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_contains_key(cache: NamedCache[str, str]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -394,9 +336,7 @@ async def test_contains_key(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_contains_value(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_contains_value(cache: NamedCache[str, str]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -410,9 +350,7 @@ async def test_contains_value(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_is_empty(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_is_empty(cache: NamedCache[str, str]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -427,9 +365,7 @@ async def test_is_empty(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_size(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_size(cache: NamedCache[str, str]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -449,9 +385,7 @@ async def test_size(setup_and_teardown: NamedCache[str, str]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_invoke(setup_and_teardown: NamedCache[str, Union[str, Person]]) -> None:
-    cache: NamedCache[str, Union[str, Person]] = setup_and_teardown
-
+async def test_invoke(cache: NamedCache[str, Union[str, Person]]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -482,9 +416,7 @@ async def test_invoke(setup_and_teardown: NamedCache[str, Union[str, Person]]) -
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_invoke_all_keys(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_invoke_all_keys(cache: NamedCache[str, str]) -> None:
     k1: str = "one"
     v1: str = "only-one"
     await cache.put(k1, v1)
@@ -499,7 +431,7 @@ async def test_invoke_all_keys(setup_and_teardown: NamedCache[str, str]) -> None
 
     r: Dict[str, int] = {}
     e: MapEntry[str, int]
-    async for e in cache.invoke_all(ExtractorProcessor(UniversalExtractor("length()")), keys={k1, k3}):
+    async for e in await cache.invoke_all(ExtractorProcessor(UniversalExtractor("length()")), keys={k1, k3}):
         r[e.key] = e.value
 
     assert r == {k1: 8, k3: 10}
@@ -509,9 +441,8 @@ EVENT_TIMEOUT: Final[float] = 20.0
 
 
 # noinspection PyShadowingNames
-@pytest.mark.asyncio
-async def test_cache_truncate_event(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
+@pytest.mark.asyncio(loop_scope="function")
+async def test_cache_truncate_event(cache: NamedCache[str, str]) -> None:
     name: str = "UNSET"
     event: Event = Event()
 
@@ -534,7 +465,7 @@ async def test_cache_truncate_event(setup_and_teardown: NamedCache[str, str]) ->
 
 
 # noinspection PyShadowingNames,DuplicatedCode
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="function")
 async def test_cache_release_event() -> None:
     session: Session = await tests.get_session()
     cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
@@ -553,7 +484,7 @@ async def test_cache_release_event() -> None:
         await cache.put("C", "D")
         assert await cache.size() == 2
 
-        cache.release()
+        await cache.release()
         await tests.wait_for(event, EVENT_TIMEOUT)
 
         assert name == cache.name
@@ -566,40 +497,118 @@ async def test_cache_release_event() -> None:
 
 # noinspection PyShadowingNames,DuplicatedCode,PyUnresolvedReferences
 @pytest.mark.asyncio
-async def test_add_remove_index(setup_and_teardown_person_cache: NamedCache[str, Person]) -> None:
-    cache: NamedCache[str, Person] = setup_and_teardown_person_cache
-
-    await cache.add_index(Extractors.extract("age"))
-    result = await cache.aggregate(Aggregators.record(), None, Filters.greater("age", 25))
-    # print(result)
-    # {'@class': 'util.SimpleQueryRecord', 'results': [{'@class': 'util.SimpleQueryRecord.PartialResult',
-    # 'partitionSet': {'@class': 'net.partition.PartitionSet', 'bits': [2147483647], 'markedCount': -1,
-    # 'partitionCount': 31, 'tailMask': 2147483647}, 'steps': [{'@class': 'util.SimpleQueryRecord.PartialResult.Step',
-    # 'efficiency': 5, 'filter': 'GreaterFilter(.age, 25)',
-    # 'indexLookupRecords': [{'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord',
-    # 'bytes': 6839, 'distinctValues': 5, 'extractor': '.age', 'index': 'Partitioned: Footprint=6.67KB, Size=5',
-    # 'indexDesc': 'Partitioned: ', 'ordered': False}], 'keySetSizePost': 0, 'keySetSizePre': 7, 'millis': 0,
-    # 'subSteps': []}]}], 'type': {'@class': 'aggregator.QueryRecorder.RecordType', 'enum': 'EXPLAIN'}}
+async def test_add_remove_index(person_cache: NamedCache[str, Person]) -> None:
+    await person_cache.add_index(Extractors.extract("age"))
+    result = await person_cache.aggregate(Aggregators.record(), None, Filters.greater("age", 25))
 
     idx_rec = result["results"][0].get("steps")[0].get("indexLookupRecords")[0]
-    # print(idx_rec)
-    # {'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord', 'bytes': 6839, 'distinctValues': 5,
-    # 'extractor': '.age', 'index': 'Partitioned: Footprint=6.67KB, Size=5', 'indexDesc': 'Partitioned: ',
-    # 'ordered': False}
     assert "index" in idx_rec
 
-    await cache.remove_index(Extractors.extract("age"))
-    result2 = await cache.aggregate(Aggregators.record(), None, Filters.greater("age", 25))
-    print(result2)
-    # {'@class': 'util.SimpleQueryRecord', 'results': [{'@class': 'util.SimpleQueryRecord.PartialResult',
-    # 'partitionSet': {'@class': 'net.partition.PartitionSet', 'bits': [2147483647], 'markedCount': -1,
-    # 'partitionCount': 31, 'tailMask': 2147483647}, 'steps': [{'@class': 'util.SimpleQueryRecord.PartialResult.Step',
-    # 'efficiency': 7000, 'filter': 'GreaterFilter(.age, 25)',
-    # 'indexLookupRecords': [{'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord', 'bytes': -1,
-    # 'distinctValues': -1, 'extractor': '.age', 'ordered': False}], 'keySetSizePost': 0, 'keySetSizePre': 7,
-    # 'millis': 0, 'subSteps': []}]}], 'type': {'@class': 'aggregator.QueryRecorder.RecordType', 'enum': 'EXPLAIN'}}
+    await person_cache.remove_index(Extractors.extract("age"))
+    result2 = await person_cache.aggregate(Aggregators.record(), None, Filters.greater("age", 25))
     idx_rec = result2["results"][0].get("steps")[0].get("indexLookupRecords")[0]
-    # print(idx_rec)
-    # {'@class': 'util.SimpleQueryRecord.PartialResult.IndexLookupRecord', 'bytes': -1, 'distinctValues': -1,
-    # 'extractor': '.age', 'ordered': False}
     assert "index" not in idx_rec
+
+
+# noinspection PyExceptClausesOrder
+@pytest.mark.asyncio
+async def test_stream_request_timeout(cache: NamedCache[str, str]) -> None:
+    # insert enough data into the cache to ensure results will be paged
+    # by the proxy.
+    await _insert_large_number_of_entries(cache)
+
+    start = time()
+    try:
+        async with request_timeout(seconds=1.0):
+            async for e in await cache.values():
+                continue
+            assert False
+    except TimeoutError:  # v1
+        end = time()
+        assert pytest.approx((end - start), 0.5) == 1.0
+    except asyncio.exceptions.TimeoutError:  # v1
+        end = time()
+        assert pytest.approx((end - start), 0.5) == 1.0
+    except AioRpcError as e:  # noqa: F841
+        end = time()
+        assert e.code() == StatusCode.DEADLINE_EXCEEDED
+        assert pytest.approx((end - start), 0.5) == 1.0
+
+
+# noinspection PyExceptClausesOrder
+@pytest.mark.asyncio
+async def test_paged_stream_request_timeout(cache: NamedCache[str, str]) -> None:
+    # insert enough data into the cache to ensure results will be paged
+    # by the proxy.
+    await _insert_large_number_of_entries(cache)
+
+    start = time()
+    try:
+        async with request_timeout(seconds=1.0):
+            async for e in await cache.values(by_page=True):
+                continue
+            assert False
+    except TimeoutError:
+        end = time()
+        assert pytest.approx((end - start), 0.5) == 1.0
+    except asyncio.exceptions.TimeoutError:  # v1
+        end = time()
+        assert pytest.approx((end - start), 0.5) == 1.0
+    except AioRpcError as e:  # noqa: F841
+        end = time()
+        assert e.code() == StatusCode.DEADLINE_EXCEEDED
+        assert pytest.approx((end - start), 0.5) == 1.0
+
+
+# noinspection PyUnresolvedReferences
+@pytest.mark.asyncio
+async def test_ttl_configuration(test_session: Session) -> None:
+    cache: NamedCache[str, str] = await test_session.get_cache("none")
+    assert cache._default_expiry == 0
+    await cache.destroy()
+
+    options: CacheOptions = CacheOptions()
+    cache = await test_session.get_cache("default", options)
+    assert cache._default_expiry == options.default_expiry
+    await cache.destroy()
+
+    options = CacheOptions(default_expiry=2000)
+    cache = await test_session.get_cache("defined", options)
+    assert cache._default_expiry == options.default_expiry
+
+    await cache.put("a", "b")
+    assert await cache.size() == 1
+
+    sleep(2.5)
+    assert await cache.size() == 0
+    await cache.destroy()
+
+    options = CacheOptions(default_expiry=2000)
+    cache = await test_session.get_cache("override", options)
+
+    await cache.put("a", "b", 5000)
+
+    assert await cache.size() == 1
+
+    sleep(2.5)
+    assert await cache.size() == 1
+
+    sleep(1)
+    assert await cache.size() == 1
+
+    sleep(3)
+    assert await cache.size() == 0
+    await cache.destroy()
+
+
+@pytest.mark.asyncio
+async def test_unary_error(test_session: Session) -> None:
+    cache: NamedCache[str, str] = await test_session.get_cache("unary_error")
+
+    d = dict()
+    d["@class"] = "com.foo.Bar"
+
+    with pytest.raises(Exception) as ex:
+        await cache.put("a", d)
+
+    assert "Could not deserialize" in str(ex.value)

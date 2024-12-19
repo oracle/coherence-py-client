@@ -1,33 +1,18 @@
 # Copyright (c) 2022, 2023, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
-
-from typing import Any, AsyncGenerator
+from typing import Any
 
 import pytest
-import pytest_asyncio
 
-import tests
-from coherence import NamedCache, Session
+from coherence import NamedCache
 from coherence.filter import Filters
 from coherence.processor import ConditionalRemove, EntryProcessor
 
 
-@pytest_asyncio.fixture
-async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
-    session: Session = await tests.get_session()
-    cache: NamedCache[Any, Any] = await session.get_cache("test")
-
-    yield cache
-
-    await cache.clear()
-    await session.close()
-
-
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_and(setup_and_teardown: NamedCache[str, Any]) -> None:
-    cache = setup_and_teardown
+async def test_and(cache: NamedCache[str, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -45,8 +30,7 @@ async def test_and(setup_and_teardown: NamedCache[str, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_or(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_or(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -64,8 +48,7 @@ async def test_or(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_xor(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_xor(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -89,8 +72,7 @@ async def test_xor(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_all(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_all(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -114,8 +96,7 @@ async def test_all(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_any(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_any(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -139,8 +120,7 @@ async def test_any(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_greater(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_greater(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -158,8 +138,7 @@ async def test_greater(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_greater_equals(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_greater_equals(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -177,8 +156,7 @@ async def test_greater_equals(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_less(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_less(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -196,8 +174,7 @@ async def test_less(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_less_equals(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_less_equals(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -215,8 +192,7 @@ async def test_less_equals(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_between(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_between(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -240,8 +216,7 @@ async def test_between(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_not_equals(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_not_equals(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -259,8 +234,7 @@ async def test_not_equals(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_not(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_not(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -278,8 +252,7 @@ async def test_not(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_is_none(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_is_none(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -297,8 +270,7 @@ async def test_is_none(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_is_not_none(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_is_not_none(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -316,8 +288,7 @@ async def test_is_not_none(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_contains_any(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_contains_any(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -335,8 +306,7 @@ async def test_contains_any(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_contains_all(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_contains_all(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -354,8 +324,7 @@ async def test_contains_all(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_contains(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_contains(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -373,8 +342,7 @@ async def test_contains(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_in(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_in(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -392,8 +360,7 @@ async def test_in(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_like(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_like(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123-my-test-string", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -417,8 +384,7 @@ async def test_like(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_present(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_present(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123-my-test-string", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -436,8 +402,7 @@ async def test_present(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_regex(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache = setup_and_teardown
+async def test_regex(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "test", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)

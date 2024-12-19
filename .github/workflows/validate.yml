@@ -17,11 +17,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8.x", "3.9.x", "3.10.x", "3.11.x"]
-        poetry-version: ["1.5.0"]
+        python-version: ["3.9.x", "3.10.x", "3.11.x", "3.12.x", "3.13.x"]
+        poetry-version: ["1.8.4"]
         os: [ubuntu-latest]
         coherenceVersion:
-          - 24.03
+          - 24.09
           - 22.06.10
         base-image:
           - gcr.io/distroless/java17-debian11
@@ -29,7 +29,7 @@ jobs:
           - ",-jakarta,javax"
           - ",jakarta,-javax"
         exclude:
-          - coherenceVersion: 24.03
+          - coherenceVersion: 24.09
             profile: ",-jakarta,javax"
           - coherenceVersion: 22.06.10
             profile: ",jakarta,-javax"

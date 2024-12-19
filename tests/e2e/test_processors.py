@@ -2,13 +2,11 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
-from typing import Any, AsyncGenerator
+from typing import Any
 
 import pytest
-import pytest_asyncio
 
-import tests
-from coherence import NamedCache, Session
+from coherence import NamedCache
 from coherence.filter import Filter, Filters
 from coherence.processor import EntryProcessor, Numeric, PreloadRequest, Processors, ScriptProcessor, TouchProcessor
 from coherence.serialization import _META_VERSION, JSONSerializer
@@ -16,22 +14,9 @@ from tests.address import Address
 from tests.person import Person
 
 
-@pytest_asyncio.fixture
-async def setup_and_teardown() -> AsyncGenerator[NamedCache[Any, Any], None]:
-    session: Session = await tests.get_session()
-    cache: NamedCache[Any, Any] = await session.get_cache("test")
-
-    yield cache
-
-    await cache.clear()
-    await session.close()
-
-
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_extractor(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_extractor(cache: NamedCache[Any, Any]) -> None:
     k1 = "one"
     v1 = "only-one"
     await cache.put(k1, v1)
@@ -62,9 +47,7 @@ async def test_extractor(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_composite(setup_and_teardown: NamedCache[str, Any]) -> None:
-    cache: NamedCache[str, Any] = setup_and_teardown
-
+async def test_composite(cache: NamedCache[str, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -82,9 +65,7 @@ async def test_composite(setup_and_teardown: NamedCache[str, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_conditional(setup_and_teardown: NamedCache[str, Any]) -> None:
-    cache: NamedCache[str, Any] = setup_and_teardown
-
+async def test_conditional(cache: NamedCache[str, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -101,9 +82,7 @@ async def test_conditional(setup_and_teardown: NamedCache[str, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_null(setup_and_teardown: NamedCache[str, Any]) -> None:
-    cache: NamedCache[str, Any] = setup_and_teardown
-
+async def test_null(cache: NamedCache[str, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -114,9 +93,7 @@ async def test_null(setup_and_teardown: NamedCache[str, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_multiplier(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_multiplier(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -127,9 +104,7 @@ async def test_multiplier(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_incrementor(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_incrementor(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -140,9 +115,7 @@ async def test_incrementor(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_conditional_put(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_conditional_put(cache: NamedCache[Any, Any]) -> None:
     k1 = "one"
     v1 = "only-one"
     await cache.put(k1, v1)
@@ -163,9 +136,7 @@ async def test_conditional_put(setup_and_teardown: NamedCache[Any, Any]) -> None
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_conditional_put_all(cache: NamedCache[Any, Any]) -> None:
     k1 = "one"
     v1 = "only-one"
     await cache.put(k1, v1)
@@ -176,7 +147,7 @@ async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> 
 
     f = Filters.always()  # This will always return True
     cp = Processors.conditional_put_all(f, dict([(k1, "only-one-one"), (k2, "only-two-two")]))
-    async for _ in cache.invoke_all(cp):
+    async for _ in await cache.invoke_all(cp):
         break  # ignore the results
 
     assert await cache.get(k1) == "only-one-one"
@@ -184,7 +155,7 @@ async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> 
 
     pf = Filters.present()
     cp = Processors.conditional_put_all(Filters.negate(pf), dict([("three", "only-three")]))
-    async for _ in cache.invoke_all(cp, {"one", "three"}):
+    async for _ in await cache.invoke_all(cp, {"one", "three"}):
         break  # ignore the results
 
     assert await cache.get(k1) == "only-one-one"
@@ -194,9 +165,7 @@ async def test_conditional_put_all(setup_and_teardown: NamedCache[Any, Any]) -> 
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_conditional_remove(setup_and_teardown: NamedCache[str, str]) -> None:
-    cache: NamedCache[str, str] = setup_and_teardown
-
+async def test_conditional_remove(cache: NamedCache[str, str]) -> None:
     k1 = "one"
     v1 = "only-one"
     await cache.put(k1, v1)
@@ -220,9 +189,7 @@ async def test_conditional_remove(setup_and_teardown: NamedCache[str, str]) -> N
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_method_invocation(setup_and_teardown: NamedCache[str, Any]) -> None:
-    cache: NamedCache[str, Any] = setup_and_teardown
-
+async def test_method_invocation(cache: NamedCache[str, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -281,9 +248,7 @@ async def test_preload() -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_updater(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_updater(cache: NamedCache[Any, Any]) -> None:
     k = "k1"
     v = {"id": 123, "my_str": "123", "ival": 123, "fval": 12.3, "iarr": [1, 2, 3], "group:": 1}
     await cache.put(k, v)
@@ -294,9 +259,7 @@ async def test_updater(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_versioned_put(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
-
+async def test_versioned_put(cache: NamedCache[Any, Any]) -> None:
     k = "123"
     versioned123 = {
         _META_VERSION: 1,
@@ -337,8 +300,7 @@ async def test_versioned_put(setup_and_teardown: NamedCache[Any, Any]) -> None:
 
 # noinspection PyShadowingNames
 @pytest.mark.asyncio
-async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> None:
-    cache: NamedCache[Any, Any] = setup_and_teardown
+async def test_versioned_put_all(cache: NamedCache[Any, Any]) -> None:
     k1 = "123"
     versioned123 = {
         _META_VERSION: 1,
@@ -406,7 +368,7 @@ async def test_versioned_put_all(setup_and_teardown: NamedCache[Any, Any]) -> No
 
     vpa = Processors.versioned_put_all(dict([(k1, versioned123_update), (k2, versioned234_update)]))
 
-    async for _ in cache.invoke_all(vpa):
+    async for _ in await cache.invoke_all(vpa):
         break
 
     assert await cache.get(k1) == expected_versioned123_update

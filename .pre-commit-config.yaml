@@ -8,7 +8,7 @@ exclude: \w*(_pb2)\w*
 
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
@@ -16,21 +16,21 @@ repos:
     -   id: check-added-large-files
 
 -   repo: https://github.com/PyCQA/flake8
-    rev: 7.1.1
+    rev: e43806be3607110919eff72939fda031776e885a  # frozen: 7.1.1
     hooks:
         - id: flake8
 
 -   repo: https://github.com/psf/black
-    rev: 24.8.0
+    rev: 1b2427a2b785cc4aac97c19bb4b9a0de063f9547  # frozen: 24.10.0
     hooks:
         - id: black
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.11.2
+    rev: f56614daa94d5cd733d3b7004c5df9caad267b4a  # frozen: v1.13.0
     hooks:
         - id: mypy
 
 -   repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
+    rev: c235f5e450b4b84e58d114ed4c589cbf454175a3  # frozen: 5.13.2
     hooks:
         - id: isort

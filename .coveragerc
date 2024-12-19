@@ -4,3 +4,11 @@ omit =
   src/coherence/messages_pb2_grpc.py
   src/coherence/services_pb2.py
   src/coherence/services_pb2_grpc.py
+  src/coherence/cache_service_messages_v1_pb2.py
+  src/coherence/cache_service_messages_v1_pb2_grpc.py
+  src/coherence/common_messages_v1_pb2.py
+  src/coherence/common_messages_v1_pb2_grpc.py
+  src/coherence/proxy_service_messages_v1_pb2.py
+  src/coherence/proxy_service_messages_v1_pb2_grpc.py
+  src/coherence/proxy_service_v1_pb2.py
+  src/coherence/proxy_service_v1_pb2_grpc.py
