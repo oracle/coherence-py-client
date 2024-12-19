@@ -1,0 +1,98 @@
+# Copyright 2022, 2024, Oracle Corporation and/or its affiliates.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# https://oss.oracle.com/licenses/upl.
+
+name: CI nslookup Build
+on:
+  workflow_dispatch:
+#  schedule:
+#    - cron: "0 5 * * *"
+#  push:
+#    branches:
+#      - '*'
+#  pull_request:
+#    branches: [ main ]
+jobs:
+  ci-nslookup:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9.x"]
+        poetry-version: ["1.8.4"]
+        os: [ubuntu-latest]
+        coherenceVersion:
+          - 24.09
+          - 22.06.10
+        base-image:
+          - gcr.io/distroless/java17-debian11
+#        profile:
+#          - ",-jakarta,javax"
+#          - ",jakarta,-javax"
+#        exclude:
+#          - coherenceVersion: 24.09
+#            profile: ",-jakarta,javax"
+#          - coherenceVersion: 22.06.10
+#            profile: ",jakarta,-javax"
+
+    runs-on: ${{ matrix.os }}
+    steps:
+#      - name: Get Docker Images
+#        shell: bash
+#        run: |
+#          docker pull ${{ matrix.base-image }}
+#          uname -a
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Install Poetry
+        shell: bash
+        run: |
+          pip install poetry==${{ matrix.poetry-version }}
+
+      - name: Install Dependencies
+        run: python -m poetry install
+
+      - name: Configure Validation
+        run: python -m poetry run make validate-setup
+
+      - name: Validate Sources
+        run: python -m poetry run make validate
+
+      - name: Run Coherence Server
+        shell: bash
+        run: |
+          export COHERENCE_VERSION=${{ matrix.coherenceVersion }}
+          curl -sL https://raw.githubusercontent.com/oracle/coherence-cli/main/scripts/install.sh | bash
+          cohctl version
+          cohctl create cluster grpc-cluster -v ${{ matrix.coherenceVersion }} -y -a coherence-grpc-proxy
+          sleep 20
+          cohctl monitor health -n localhost:7574 -T 40 -w
+
+      - name: Run test
+        shell: bash
+        run: |
+          python -m poetry run make test
+
+      - name: Archive server logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-logs-${{matrix.python-version}}-${{ matrix.coherenceVersion }}
+          path: ./tests/utils/*.txt
+          retention-days: 10
