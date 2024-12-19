@@ -28,7 +28,7 @@ grpcio-tools = "1.68.1"
 jsonpickle = ">=3.0,<4.1"
 pymitter = ">=0.4,<0.6"
 typing-extensions = ">=4.11,<4.13"
-types-protobuf = "5.27.0.20240626"
+types-protobuf = "5.29.1.20241207"
 pympler = "1.1"
 
 [tool.poetry.dev-dependencies]
