@@ -9,6 +9,7 @@
 
    installation
    sessions
+   caches
    basics
    querying
    aggregation
