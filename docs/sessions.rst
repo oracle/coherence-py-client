@@ -1,5 +1,5 @@
 ..
-   Copyright (c) 2022, 2023, Oracle and/or its affiliates.
+   Copyright (c) 2022, 2024, Oracle and/or its affiliates.
    Licensed under the Universal Permissive License v 1.0 as shown at
    https://oss.oracle.com/licenses/upl.
 
@@ -37,7 +37,7 @@ The currently supported arguments foe `Options` are:
     import asyncio
 
        # create a new Session to the Coherence server
-        session: Session = Session(None)
+        session: Session = await Session.create()
 
 This is the simplest invocation which assumes the following defaults:
     - `address` is `localhost:1408`
@@ -55,7 +55,7 @@ and pass it to the constructor of the `Session`:
        # create a new Session to the Coherence server
         addr: str = 'example.com:4444'
         opt: Options = Options(addr, default_scope, default_request_timeout, default_format)
-        session: Session = Session(opt)
+        session: Session = await Session.create(opt)
 
 It's also possible to control the default address the session will bind to by providing
 an address via the `COHERENCE_SERVER_ADDRESS` environment variable.  The format of the value would
