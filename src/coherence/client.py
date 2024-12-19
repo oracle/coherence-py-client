@@ -1031,9 +1031,15 @@ class Options:
         """
         addr = os.getenv(Options.ENV_SERVER_ADDRESS)
         if addr is not None:
-            self._address = addr
+            if addr.startswith("coherence:///"):
+                pass  # nslookup
+            else:
+                self._address = addr
         else:
-            self._address = address
+            if address.startswith("coherence:///"):
+                pass  # nslookup
+            else:
+                self._address = address
 
         self._request_timeout_seconds = Options._get_float_from_env(
             Options.ENV_REQUEST_TIMEOUT, request_timeout_seconds
