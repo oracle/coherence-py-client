@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
 #  schedule:
 #    - cron: "0 5 * * *"
-#  push:
-#    branches:
-#      - '*'
+  push:
+    branches:
+      - '*'
 #  pull_request:
 #    branches: [ main ]
 jobs:
