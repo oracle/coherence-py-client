@@ -82,7 +82,7 @@ jobs:
                   ${{ matrix.base-image }} \
                   ${{ matrix.profile }}
       - name: Archive server logs
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: server-logs-${{matrix.python-version}}-${{ matrix.coherenceVersion }}
