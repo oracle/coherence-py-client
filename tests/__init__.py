@@ -179,7 +179,7 @@ class CountingMapListener(MapListener[K, V]):
 
 
 async def get_session(wait_for_ready: float = 0) -> Session:
-    default_address: Final[str] = "localhost:1408"
+    default_address: Final[str] = os.getenv(Options.ENV_SERVER_ADDRESS, "localhost:1408")
     default_scope: Final[str] = ""
     default_request_timeout: Final[float] = 30.0
     default_format: Final[str] = "json"
