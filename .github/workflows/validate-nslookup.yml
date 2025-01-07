@@ -87,6 +87,7 @@ jobs:
       - name: Run test
         shell: bash
         run: |
+          export COHERENCE_SERVER_ADDRESS="coherence:///localhost:7574"
           python -m poetry run make test
 
       - name: Archive server logs
