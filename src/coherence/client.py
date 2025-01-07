@@ -56,6 +56,7 @@ from .extractor import ValueExtractor
 from .filter import Filter
 from .local_cache import CacheStats, LocalCache, NearCacheOptions
 from .messages_pb2 import PageRequest
+from .nslookup import AsyncNSLookup
 from .processor import EntryProcessor
 from .proxy_service_messages_v1_pb2 import ProxyRequest, ProxyResponse
 from .proxy_service_v1_pb2_grpc import ProxyServiceStub
@@ -1648,7 +1649,13 @@ class Options:
             https://github.com/grpc/grpc/blob/master/include/grpc/impl/grpc_types.h
         :param tls_options: Optional TLS configuration.
         """
-        self._address = os.getenv(Options.ENV_SERVER_ADDRESS, address)
+        address_string = os.getenv(Options.ENV_SERVER_ADDRESS, address)
+        if address_string.startswith("coherence:///"):
+            # Remove the prefix and split into host and port
+            _, rest = address_string.split("coherence:///", 1)
+            self._address = AsyncNSLookup.resolve_nslookup(rest)
+        else:
+            self._address = address_string
 
         self._request_timeout_seconds = Options._get_float_from_env(
             Options.ENV_REQUEST_TIMEOUT, request_timeout_seconds
