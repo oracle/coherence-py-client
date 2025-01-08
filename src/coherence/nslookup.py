@@ -231,33 +231,29 @@ class AsyncNSLookup:
         return list_clusters
 
     @staticmethod
-    async def do_resolution(name: str) -> Optional[DiscoveredCluster]:
+    async def resolve_nslookup_address(name: str) -> str:
+
         nslookup = None
+        cluster_info = None
         try:
             nslookup = await AsyncNSLookup.open(name)
             cluster_info = await nslookup.discover_cluster_info()
-            return cluster_info
         except Exception as e:
             print(f"Error: {e}")
         finally:
             if nslookup is not None:
                 await nslookup.close()
-            return None
 
-    @staticmethod
-    def resolve_nslookup(name: str) -> str:
-        cluster = asyncio.run(AsyncNSLookup.do_resolution(name))
-
-        if cluster is not None:
+        if cluster_info is not None:
             # Combine the list into host:port pairs
             pairs = [
-                f"{cluster.grpc_proxy_endpoints[i]}:{cluster.grpc_proxy_endpoints[i + 1]}"
-                for i in range(0, len(cluster.grpc_proxy_endpoints), 2)
+                f"{cluster_info.grpc_proxy_endpoints[i]}:{cluster_info.grpc_proxy_endpoints[i + 1]}"
+                for i in range(0, len(cluster_info.grpc_proxy_endpoints), 2)
             ]
             # Return a random pair
             return random.choice(pairs)
         else:
-            # Return default address
+            # return default target address
             return "localhost:1408"
 
 

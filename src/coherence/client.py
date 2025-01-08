@@ -1649,13 +1649,7 @@ class Options:
             https://github.com/grpc/grpc/blob/master/include/grpc/impl/grpc_types.h
         :param tls_options: Optional TLS configuration.
         """
-        address_string = os.getenv(Options.ENV_SERVER_ADDRESS, address)
-        if address_string.startswith("coherence:///"):
-            # Remove the prefix and split into host and port
-            _, rest = address_string.split("coherence:///", 1)
-            self._address = AsyncNSLookup.resolve_nslookup(rest)
-        else:
-            self._address = address_string
+        self._address = os.getenv(Options.ENV_SERVER_ADDRESS, address)
 
         self._request_timeout_seconds = Options._get_float_from_env(
             Options.ENV_REQUEST_TIMEOUT, request_timeout_seconds
@@ -1673,6 +1667,14 @@ class Options:
 
         if tls_options is not None:
             self._tls_options = tls_options
+
+    async def init(self) -> None:
+        if self.address.startswith("coherence:///"):
+            # Remove the prefix and split into host and port
+            _, ns_addr = self._address.split("coherence:///", 1)
+
+            # Resolve to grpc address from nameservice address
+            self._address = await AsyncNSLookup.resolve_nslookup_address(ns_addr)
 
     @property
     def tls_options(self) -> Optional[TlsOptions]:
@@ -1915,6 +1917,9 @@ class Session:
 
     @staticmethod
     async def create(session_options: Optional[Options] = None) -> Session:
+        if session_options is None:
+            session_options = Options()
+        await session_options.init()
         session: Session = Session(session_options)
         await session._set_ready(False)
         await session._handshake.handshake()
