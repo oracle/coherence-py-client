@@ -1575,7 +1575,9 @@ class Options:
     """
     Environment variable to specify the Coherence gRPC server address for the client to connect to. The
     environment variable is used if address is not passed as an argument in the constructor. If the environment
-    variable is not set and address is not passed as an argument then `DEFAULT_ADDRESS` is used
+    variable is not set and address is not passed as an argument then `DEFAULT_ADDRESS` is used. One can also
+    use the 'coherence' gRPC resolver address of "coherence:///host:port" to connect to the Coherence Name
+    Service, running on the cluster port, and automatically discover the gRPC endpoints.
     """
     ENV_REQUEST_TIMEOUT = "COHERENCE_CLIENT_REQUEST_TIMEOUT"
     """
@@ -1628,9 +1630,11 @@ class Options:
         """
         Construct a new :func:`coherence.client.Options`
 
-        :param address: Address of the target Coherence cluster.  If not explicitly set, this defaults
-          to :func:`coherence.client.Options.DEFAULT_ADDRESS`. See
-          also :func:`coherence.client.Options.ENV_SERVER_ADDRESS`
+        :param address: Address of the target Coherence cluster gRPC endpoint of the form "host:port" to connect to.
+          If not explicitly set, this defaults to :func:`coherence.client.Options.DEFAULT_ADDRESS`. See
+          also :func:`coherence.client.Options.ENV_SERVER_ADDRESS`. One can also use the 'coherence' gRPC resolver
+          address of "coherence:///host:port" to connect to the Coherence Name Service, running on the
+          cluster port, and automatically discover the gRPC endpoints.
         :param scope: scope name used to link this :func:`coherence.client.Options` to the
           corresponding `ConfigurableCacheFactory` on the server.
         :param request_timeout_seconds: Defines the request timeout, in `seconds`, that will be applied to each

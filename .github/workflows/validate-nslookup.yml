@@ -5,13 +5,13 @@
 name: CI nslookup Build
 on:
   workflow_dispatch:
-#  schedule:
-#    - cron: "0 5 * * *"
+  schedule:
+    - cron: "0 5 * * *"
   push:
     branches:
       - '*'
-#  pull_request:
-#    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 jobs:
   ci-nslookup:
     strategy:
@@ -25,23 +25,8 @@ jobs:
           - 22.06.10
         base-image:
           - gcr.io/distroless/java17-debian11
-#        profile:
-#          - ",-jakarta,javax"
-#          - ",jakarta,-javax"
-#        exclude:
-#          - coherenceVersion: 24.09
-#            profile: ",-jakarta,javax"
-#          - coherenceVersion: 22.06.10
-#            profile: ",jakarta,-javax"
-
     runs-on: ${{ matrix.os }}
     steps:
-#      - name: Get Docker Images
-#        shell: bash
-#        run: |
-#          docker pull ${{ matrix.base-image }}
-#          uname -a
-
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
