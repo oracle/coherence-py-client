@@ -1668,7 +1668,7 @@ class Options:
         if tls_options is not None:
             self._tls_options = tls_options
 
-    async def init(self) -> None:
+    async def resolve_ns_address(self) -> None:
         if self.address.startswith("coherence:///"):
             # Remove the prefix and split into host and port
             _, ns_addr = self._address.split("coherence:///", 1)
@@ -1919,7 +1919,7 @@ class Session:
     async def create(session_options: Optional[Options] = None) -> Session:
         if session_options is None:
             session_options = Options()
-        await session_options.init()
+        await session_options.resolve_ns_address()
         session: Session = Session(session_options)
         await session._set_ready(False)
         await session._handshake.handshake()

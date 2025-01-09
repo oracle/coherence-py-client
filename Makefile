@@ -172,6 +172,17 @@ test:  ##
 	pytest -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS) $(E2E_TESTS)
 
 # ----------------------------------------------------------------------------------------------------------------------
+# Run nslookup tests with code coverage
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-nslookup
+test-nslookup:  ##
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html \
+		--deselect tests/e2e/test_session.py::test_basics \
+		--deselect tests/e2e/test_session.py::test_session_lifecycle \
+		--deselect tests/e2e/test_session.py::test_fail_fast \
+		$(UNIT_TESTS) $(E2E_TESTS)
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Run unit tests with code coverage
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: test-unit

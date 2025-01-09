@@ -88,7 +88,7 @@ jobs:
         shell: bash
         run: |
           export COHERENCE_SERVER_ADDRESS=coherence:///localhost:7574
-          python -m poetry run make test
+          python -m poetry run make nslookup
 
       - name: Archive server logs
         if: failure()
