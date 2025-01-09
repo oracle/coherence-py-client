@@ -1672,13 +1672,13 @@ class Options:
         if tls_options is not None:
             self._tls_options = tls_options
 
-    async def resolve_ns_address(self) -> None:
+    async def _resolve_ns_address(self) -> None:
         if self.address.startswith("coherence:///"):
             # Remove the prefix and split into host and port
             _, ns_addr = self._address.split("coherence:///", 1)
 
             # Resolve to grpc address from nameservice address
-            self._address = await AsyncNSLookup.resolve_nslookup_address(ns_addr)
+            self._address = await AsyncNSLookup._resolve_nslookup_address(ns_addr)
 
     @property
     def tls_options(self) -> Optional[TlsOptions]:
@@ -1923,7 +1923,7 @@ class Session:
     async def create(session_options: Optional[Options] = None) -> Session:
         if session_options is None:
             session_options = Options()
-        await session_options.resolve_ns_address()
+        await session_options._resolve_ns_address()
         session: Session = Session(session_options)
         await session._set_ready(False)
         await session._handshake.handshake()
