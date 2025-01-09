@@ -1,4 +1,4 @@
-# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2025, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 import asyncio
@@ -6,8 +6,6 @@ import logging.config
 import os
 from asyncio import Event
 from typing import Any, Final, List, TypeVar
-
-import pytest
 
 from coherence import Options, Session, TlsOptions
 from coherence.event import MapEvent, MapListener
@@ -179,7 +177,7 @@ class CountingMapListener(MapListener[K, V]):
 
 
 async def get_session(wait_for_ready: float = 0) -> Session:
-    default_address: Final[str] = "localhost:1408"
+    default_address: Final[str] = os.getenv(Options.ENV_SERVER_ADDRESS, "localhost:1408")
     default_scope: Final[str] = ""
     default_request_timeout: Final[float] = 30.0
     default_format: Final[str] = "json"

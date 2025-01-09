@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------------------------------------------
-# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2025, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 #
@@ -170,6 +170,17 @@ generate-proto:  ## Generate Proto Files
 .PHONY: test
 test:  ##
 	pytest -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS) $(E2E_TESTS)
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Run nslookup tests with code coverage
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-nslookup
+test-nslookup:  ##
+	pytest -W error \
+		--deselect tests/e2e/test_session.py::test_basics \
+		--deselect tests/e2e/test_session.py::test_session_lifecycle \
+		--deselect tests/e2e/test_session.py::test_fail_fast \
+		$(UNIT_TESTS) $(E2E_TESTS)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run unit tests with code coverage
