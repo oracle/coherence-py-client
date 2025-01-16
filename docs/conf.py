@@ -27,7 +27,7 @@ release = "1.1.1"
 
 # -- Project information -----------------------------------------------------
 
-project = "Coherence Python Client. v%s" % release
+project = "Python Client for Oracle Coherence. v%s" % release
 copyright = "(c) 2022, 2024, Oracle and/or its affiliates."
 author = "Oracle"
 

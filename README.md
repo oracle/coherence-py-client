@@ -1,4 +1,4 @@
-# Coherence Python Client
+# Python Client for Oracle Coherence
 
 ![CI/CD](https://github.com/oracle/coherence-py-client/actions/workflows/validate.yml/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=oracle_coherence-py-client&metric=alert_status)](https://sonarcloud.io/project/overview?id=oracle_coherence-py-client)
