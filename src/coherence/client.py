@@ -1927,6 +1927,17 @@ class Session:
         session: Session = Session(session_options)
         await session._set_ready(False)
         await session._handshake.handshake()
+        if session._protocol_version > 0:
+            COH_LOG.info(
+                f"Session(id={session.session_id}, connected to [{session._session_options.address}]"
+                f" proxy-version={session._proxy_version}, protocol-version={session._protocol_version}"
+                f" proxy-member-id={session._proxy_member_id})"
+            )
+        else:
+            COH_LOG.info(
+                f"Session(id={session.session_id}, connected to [{session._session_options.address}]"
+                f" protocol-version={session._protocol_version})"
+            )
         return session
 
     # noinspection PyTypeHints
