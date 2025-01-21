@@ -10,7 +10,7 @@ python3 -m pip install coherence-client
 Be sure a Coherence gRPC proxy is available for the examples to work against.
 
 ```bash
-docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:22.06.10
+docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:22.06.11
 ```
 
 ### The Examples
