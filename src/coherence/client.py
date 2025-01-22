@@ -2283,6 +2283,7 @@ async def watch_channel_state(session: Session) -> None:
                 COH_LOG.debug(f"Waiting for state change from [{state}]")
             await channel.wait_for_state_change(state)
     except asyncio.CancelledError:
+        print("### DEBUG CANCELLED")
         return
 
 
