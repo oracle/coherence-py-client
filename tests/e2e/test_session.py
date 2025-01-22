@@ -151,6 +151,8 @@ async def test_session_lifecycle() -> None:
 async def test_wait_for_ready() -> None:
     session: Session = await tests.get_session(10.0)
 
+    asyncio.get_running_loop().set_debug(True)
+
     print(f"Session (pre-cache) -> {session}")
 
     logging.debug("Getting cache ...")
