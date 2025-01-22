@@ -179,9 +179,9 @@ async def test_wait_for_ready() -> None:
         COH_LOG.debug("Waiting for session disconnect ...")
         try:
             await asyncio.wait_for(disc_event.wait(), 10)
-        except TimeoutError:
+        except asyncio.TimeoutError:
             s = "Deadline [10 seconds] exceeded for session disconnect"
-            raise TimeoutError(s)
+            raise asyncio.TimeoutError(s)
 
         # start inserting values as soon as disconnect occurs to ensure
         # that we properly wait for the session to reconnect before
@@ -231,9 +231,9 @@ async def test_fail_fast() -> None:
         COH_LOG.debug("Waiting for session disconnect ...")
         try:
             await asyncio.wait_for(disc_event.wait(), 10)
-        except TimeoutError:
+        except asyncio.TimeoutError:
             s = "Deadline [10 seconds] exceeded for session disconnect"
-            raise TimeoutError(s)
+            raise asyncio.TimeoutError(s)
 
         # start inserting values as soon as disconnect occurs to ensure
         # that we properly wait for the session to reconnect before
@@ -249,9 +249,9 @@ async def test_fail_fast() -> None:
         COH_LOG.debug("Waiting for session reconnect ...")
         try:
             await asyncio.wait_for(reconn_event.wait(), 10)
-        except TimeoutError:
+        except asyncio.TimeoutError:
             s = "Deadline [10 seconds] exceeded for session reconnect"
-            raise TimeoutError(s)
+            raise asyncio.TimeoutError(s)
 
     finally:
         await session.close()
