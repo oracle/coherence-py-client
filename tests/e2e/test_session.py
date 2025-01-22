@@ -227,7 +227,8 @@ async def test_fail_fast() -> None:
         session.on(SessionLifecycleEvent.DISCONNECTED, disc)
         session.on(SessionLifecycleEvent.RECONNECTED, reconn)
 
-        await _shutdown_proxy()
+        shutdown_task = asyncio.create_task(_shutdown_proxy())
+        await shutdown_task
         COH_LOG.debug("Proxy down ...")
 
         COH_LOG.debug("Waiting for session disconnect ...")
