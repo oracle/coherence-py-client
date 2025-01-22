@@ -77,6 +77,8 @@ jobs:
       - name: Run test
         shell: bash
         run: |
+          export GRPC_TRACE=all
+          export GRPC_VERBOSITY=DEBUG
           python -m poetry run ./tests/scripts/run-tests.sh \
                   ${{ matrix.coherenceVersion }} \
                   ${{ matrix.base-image }} \
