@@ -179,9 +179,9 @@ async def test_wait_for_ready() -> None:
         COH_LOG.debug("Waiting for session disconnect ...")
         try:
             await asyncio.wait_for(disc_event.wait(), 10)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             s = "Deadline [10 seconds] exceeded for session disconnect"
-            raise asyncio.TimeoutError(s)
+            raise TimeoutError(s)
 
         # start inserting values as soon as disconnect occurs to ensure
         # that we properly wait for the session to reconnect before
@@ -231,9 +231,9 @@ async def test_fail_fast() -> None:
         COH_LOG.debug("Waiting for session disconnect ...")
         try:
             await asyncio.wait_for(disc_event.wait(), 10)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             s = "Deadline [10 seconds] exceeded for session disconnect"
-            raise asyncio.TimeoutError(s)
+            raise TimeoutError(s)
 
         # start inserting values as soon as disconnect occurs to ensure
         # that we properly wait for the session to reconnect before
@@ -249,9 +249,9 @@ async def test_fail_fast() -> None:
         COH_LOG.debug("Waiting for session reconnect ...")
         try:
             await asyncio.wait_for(reconn_event.wait(), 10)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             s = "Deadline [10 seconds] exceeded for session reconnect"
-            raise asyncio.TimeoutError(s)
+            raise TimeoutError(s)
 
     finally:
         await session.close()
@@ -318,4 +318,6 @@ async def _shutdown_proxy() -> None:
         "http://127.0.0.1:30000/management/coherence/cluster/services/$GRPC:GrpcProxy/members/1/stop", method="POST"
     )
     with urllib.request.urlopen(req) as response:
-        response.read()
+        COH_LOG.debug(f"Response headers -> {response.getHeaders()}")
+        COH_LOG.debug(f"Response Body -> {response.read()}")
+        await asyncio.sleep(0.1)
