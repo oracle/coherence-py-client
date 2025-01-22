@@ -151,8 +151,6 @@ async def test_session_lifecycle() -> None:
 async def test_wait_for_ready() -> None:
     session: Session = await tests.get_session(10.0)
 
-    asyncio.get_running_loop().set_debug(True)
-
     print(f"Session (pre-cache) -> {session}")
 
     logging.debug("Getting cache ...")
@@ -202,6 +200,7 @@ async def test_wait_for_ready() -> None:
 
 @pytest.mark.asyncio
 async def test_fail_fast() -> None:
+    asyncio.get_running_loop().set_debug(True)
     session: Session = await tests.get_session()
     logging.debug("Getting cache ...")
 
@@ -229,6 +228,7 @@ async def test_fail_fast() -> None:
         session.on(SessionLifecycleEvent.RECONNECTED, reconn)
 
         await _shutdown_proxy()
+        COH_LOG.debug("Proxy down ...")
 
         COH_LOG.debug("Waiting for session disconnect ...")
         try:
