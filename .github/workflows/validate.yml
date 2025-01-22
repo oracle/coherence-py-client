@@ -77,6 +77,7 @@ jobs:
       - name: Run test
         shell: bash
         run: |
+          PYTHONASYNCIODEBUG=1
           python -m poetry run ./tests/scripts/run-tests.sh \
                   ${{ matrix.coherenceVersion }} \
                   ${{ matrix.base-image }} \

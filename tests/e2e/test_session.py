@@ -320,5 +320,6 @@ async def _shutdown_proxy() -> None:
         "http://127.0.0.1:30000/management/coherence/cluster/services/$GRPC:GrpcProxy/members/1/stop", method="POST"
     )
     with urllib.request.urlopen(req) as response:
-        COH_LOG.debug(f"Response Body -> {response.read()}")
+        response.read()
         await asyncio.sleep(0.1)
+        COH_LOG.debug("Proxy stopped")
