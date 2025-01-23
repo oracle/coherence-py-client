@@ -5,12 +5,11 @@
 import asyncio
 import logging
 import os
-import urllib
-import urllib.request
 from asyncio import Event
 from time import time
 from typing import Final
 
+import aiohttp
 import pytest
 
 import tests
@@ -227,8 +226,7 @@ async def test_fail_fast() -> None:
         session.on(SessionLifecycleEvent.DISCONNECTED, disc)
         session.on(SessionLifecycleEvent.RECONNECTED, reconn)
 
-        shutdown_task = asyncio.create_task(_shutdown_proxy())
-        await shutdown_task
+        await _shutdown_proxy()
         COH_LOG.debug("Proxy down ...")
 
         COH_LOG.debug("Waiting for session disconnect ...")
@@ -317,10 +315,10 @@ async def _validate_cache_event(lifecycle_event: MapLifecycleEvent) -> None:
 
 async def _shutdown_proxy() -> None:
     COH_LOG.debug("Shutting down the gRPC Proxy ...")
-    req: urllib.request.Request = urllib.request.Request(
-        "http://127.0.0.1:30000/management/coherence/cluster/services/$GRPC:GrpcProxy/members/1/stop", method="POST"
-    )
-    with urllib.request.urlopen(req) as response:
-        response.read()
-        await asyncio.sleep(0.1)
-        COH_LOG.debug("Proxy stopped")
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            "http://127.0.0.1:30000/management/coherence/cluster/services/$GRPC:GrpcProxy/members/1/stop"
+        ) as resp:
+            print(resp.status)
+            print(await resp.text())
+    COH_LOG.debug("Proxy stopped")
