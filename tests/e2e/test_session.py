@@ -181,6 +181,9 @@ async def test_wait_for_ready() -> None:
         except asyncio.TimeoutError:
             s = "Deadline [10 seconds] exceeded for session disconnect"
             raise asyncio.TimeoutError(s)
+        except TimeoutError:
+            s = "Deadline [10 seconds] exceeded for session disconnect"
+            raise TimeoutError(s)
 
         # start inserting values as soon as disconnect occurs to ensure
         # that we properly wait for the session to reconnect before
@@ -235,6 +238,9 @@ async def test_fail_fast() -> None:
         except asyncio.TimeoutError:
             s = "Deadline [10 seconds] exceeded for session disconnect"
             raise asyncio.TimeoutError(s)
+        except TimeoutError:
+            s = "Deadline [10 seconds] exceeded for session disconnect"
+            raise TimeoutError(s)
 
         # start inserting values as soon as disconnect occurs to ensure
         # that we properly wait for the session to reconnect before
@@ -253,6 +259,9 @@ async def test_fail_fast() -> None:
         except asyncio.TimeoutError:
             s = "Deadline [10 seconds] exceeded for session reconnect"
             raise asyncio.TimeoutError(s)
+        except TimeoutError:
+            s = "Deadline [10 seconds] exceeded for session disconnect"
+            raise TimeoutError(s)
 
     finally:
         await session.close()
