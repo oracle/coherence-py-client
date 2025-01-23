@@ -125,21 +125,24 @@ async def test_session_lifecycle() -> None:
     session.on(SessionLifecycleEvent.RECONNECTED, reconn_callback)
     session.on(SessionLifecycleEvent.CLOSED, close_callback)
 
-    # await tests.wait_for(conn_event, EVENT_TIMEOUT)
-    assert session.is_ready()
+    try:
+        # await tests.wait_for(conn_event, EVENT_TIMEOUT)
+        assert session.is_ready()
 
-    await _shutdown_proxy()
+        await _shutdown_proxy()
 
-    await tests.wait_for(disconn_event, EVENT_TIMEOUT)
-    assert session.is_ready()
-    await tests.wait_for(reconn_event, EVENT_TIMEOUT)
-    assert session.is_ready()
+        await tests.wait_for(disconn_event, EVENT_TIMEOUT)
+        assert session.is_ready()
+        await tests.wait_for(reconn_event, EVENT_TIMEOUT)
+        assert session.is_ready()
 
-    await session.close()
-    assert not session.is_ready()
+        await session.close()
+        assert not session.is_ready()
 
-    await tests.wait_for(close_event, EVENT_TIMEOUT)
-    assert not session.is_ready()
+        await tests.wait_for(close_event, EVENT_TIMEOUT)
+        assert not session.is_ready()
+    finally:
+        await session.close()
 
 
 @pytest.mark.skip(
