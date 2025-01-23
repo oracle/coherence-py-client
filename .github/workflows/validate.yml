@@ -80,7 +80,7 @@ jobs:
           export GRPC_TRACE=all
           export GRPC_VERBOSITY=DEBUG
           export PYTHONASYNCIODEBUG=1
-          sudo tcpdump --immediate-mode -w /tmp/coh.pcap -v -i lo dst port '(1408 or 30000)' &
+          sudo tcpdump --immediate-mode -w /tmp/coh.pcap -v -i lo port '(1408 or 30000)' &
           TCPDUMP_PID=$!
           python -m poetry run ./tests/scripts/run-tests.sh \
                   ${{ matrix.coherenceVersion }} \
