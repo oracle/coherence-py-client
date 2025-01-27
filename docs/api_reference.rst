@@ -112,6 +112,7 @@ Modules
    :maxdepth: 3
    :titlesonly:
 
+   api_reference/ai.rst
    api_reference/aggregator.rst
    api_reference/comparator.rst
    api_reference/event.rst
