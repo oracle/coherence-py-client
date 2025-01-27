@@ -232,14 +232,14 @@ async def test_fail_fast() -> None:
         session.on(SessionLifecycleEvent.DISCONNECTED, disc)
         session.on(SessionLifecycleEvent.RECONNECTED, reconn)
 
-        def dump_threads() -> None:
+        async def dump_threads() -> None:
             async with aiohttp.ClientSession() as session:
                 while (True):
                     async with session.post(
                         "http://127.0.0.1:30000/management/coherence/cluster/logClusterState"
                     ) as resp:
                         COH_LOG.debug(f"Thread state dump -> {resp}")
-                        asyncio.sleep(5.0)
+                        await asyncio.sleep(5.0)
 
         task = asyncio.create_task(dump_threads())
 
