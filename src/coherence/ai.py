@@ -25,7 +25,9 @@ V = TypeVar("V")
 
 class Vector(ABC):
     """
-    Base class that represents a Vector
+    Base class that represents a Vector.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(self) -> None:
@@ -38,7 +40,9 @@ class Vector(ABC):
 @proxy("ai.BitVector")
 class BitVector(Vector):
     """
-    Class that represents a Vector of Bits
+    Class that represents a Vector of Bits.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(
@@ -48,11 +52,11 @@ class BitVector(Vector):
         int_array: Optional[List[int]] = None,
     ):
         """
-        Creates an instance of BitVector
+        Creates an instance of BitVector.
 
-        :param hex_string: hexadecimal string used to create the BitVector
-        :param byte_array: optional byte array used to create the BitVector
-        :param int_array: optional int array used to create the BitVector
+        :param hex_string: hexadecimal string used to create the BitVector.
+        :param byte_array: optional byte array used to create the BitVector.
+        :param int_array: optional int array used to create the BitVector.
         """
         super().__init__()
         if hex_string is not None:
@@ -72,14 +76,16 @@ class BitVector(Vector):
 @proxy("ai.Int8Vector")
 class ByteVector(Vector):
     """
-    Class that represents Vector of bytes
+    Class that represents Vector of bytes.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(self, byte_array: bytes):
         """
-        Creates an instance of ByteVector
+        Creates an instance of ByteVector.
 
-        :param byte_array: byte array used to create a ByteVector
+        :param byte_array: byte array used to create a ByteVector.
         """
         super().__init__()
         self.array = base64.b64encode(byte_array).decode("UTF-8")
@@ -88,14 +94,16 @@ class ByteVector(Vector):
 @proxy("ai.Float32Vector")
 class FloatVector(Vector):
     """
-    Class that represents Vector of floats
+    Class that represents Vector of floats.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(self, float_array: List[float]):
         """
-        Creates an instance of FloatVector
+        Creates an instance of FloatVector.
 
-        :param float_array: array of floats used to create a FloatVector
+        :param float_array: array of floats used to create a FloatVector.
         """
         super().__init__()
         self.array = float_array
@@ -111,20 +119,22 @@ class AbstractEvolvable(ABC):
 class DocumentChunk(AbstractEvolvable):
     """
     Class that represents a chunk of text extracted from a document.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(
         self,
         text: str,
-        metadata: Optional[Dict[str, Any] | OrderedDict[str, Any]] = None,
+        metadata: Optional[Union[Dict[str, Any], OrderedDict[str, Any]]] = None,
         vector: Optional[Vector] = None,
     ):
         """
-        Creates an instance of DocumentChunk class
+        Creates an instance of DocumentChunk class.
 
-        :param text: the chunk of text extracted from a document
-        :param metadata: optional document metadata
-        :param vector: the vector associated with the document chunk
+        :param text: the chunk of text extracted from a document.
+        :param metadata: optional document metadata.
+        :param vector: the vector associated with the document chunk.
         """
         super().__init__()
         self.text = text
@@ -182,7 +192,9 @@ class DocumentChunkHandler(jsonpickle.handlers.BaseHandler):
 
 class DistanceAlgorithm(ABC):
     """
-    Base class that represents algorithm that can calculate distance to a given vector
+    Base class that represents algorithm that can calculate distance to a given vector.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(self) -> None:
@@ -198,6 +210,8 @@ class CosineDistance(DistanceAlgorithm):
     between two vectors and determines whether two vectors are pointing in
     roughly the same direction. It is often used to measure document similarity
     in text analysis.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(self) -> None:
@@ -209,6 +223,8 @@ class InnerProductDistance(DistanceAlgorithm):
     """
     Represents a DistanceAlgorithm that performs inner product distance
     calculation between two vectors.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(self) -> None:
@@ -220,6 +236,8 @@ class L2SquaredDistance(DistanceAlgorithm):
     """
     Represents a DistanceAlgorithm that performs an L2 squared distance
     calculation between two vectors.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(self) -> None:
@@ -230,6 +248,8 @@ class L2SquaredDistance(DistanceAlgorithm):
 class SimilaritySearch(EntryAggregator):
     """
     This class represents an aggregator to execute a similarity query.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(
@@ -247,10 +267,10 @@ class SimilaritySearch(EntryAggregator):
         specified `vector`.
 
         :param extractor_or_property: the ValueExtractor to extract the vector
-         from the cache value
-        :param vector: the vector to calculate similarity with
-        :param max_results: the maximum number of results to return
-        :param algorithm: the distance algorithm to use
+         from the cache value.
+        :param vector: the vector to calculate similarity with.
+        :param max_results: the maximum number of results to return.
+        :param algorithm: the distance algorithm to use.
         :param filter: filter to use to limit the set of entries to search.
         :param brute_force: Force brute force search, ignoring any available indexes.
         """
@@ -264,7 +284,9 @@ class SimilaritySearch(EntryAggregator):
 
 class BaseQueryResult(ABC):
     """
-    A base class for QueryResult implementation
+    A base class for QueryResult implementation.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(self, result: float, key: K, value: V) -> None:
@@ -276,16 +298,18 @@ class BaseQueryResult(ABC):
 @proxy("ai.results.QueryResult")
 class QueryResult(BaseQueryResult):
     """
-    QueryResult class
+    QueryResult class.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(self, result: float, key: K, value: V) -> None:
         """
-        Creates an instance of the QueryResult class
+        Creates an instance of the QueryResult class.
 
-        :param result: the query result
-        :param key: the key of the vector the result applies to
-        :param value:  the optional result value
+        :param result: the query result.
+        :param key: the key of the vector the result applies to.
+        :param value:  the optional result value.
         """
         super().__init__(result, key, value)
 
@@ -296,15 +320,17 @@ class QueryResult(BaseQueryResult):
 @proxy("ai.index.BinaryQuantIndex")
 class BinaryQuantIndex(AbstractEvolvable):
     """
-    This class represents a custom index using binary quantization of vectors
+    This class represents a custom index using binary quantization of vectors.
+
+    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
     """
 
     def __init__(self, extractor: Union[ValueExtractor[T, E], str], over_sampling_factor: int = 3) -> None:
         """
-        Creates an instance of BinaryQuantIndex class
+        Creates an instance of BinaryQuantIndex class.
 
-        :param extractor: the ValueExtractor to use to extract the Vector
-        :param over_sampling_factor: the oversampling factor
+        :param extractor: the ValueExtractor to use to extract the Vector.
+        :param over_sampling_factor: the oversampling factor.
         """
         super().__init__()
         self.extractor = extractor

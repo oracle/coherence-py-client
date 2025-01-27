@@ -1,4 +1,4 @@
-# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2025, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 [tool.poetry]
@@ -37,6 +37,7 @@ pytest-asyncio = "~0.25"
 pytest-cov = "~6.0"
 pytest-unordered = "~0.6"
 pre-commit = "~4.1"
+docutils="~0.20"
 Sphinx = "~7.4"
 sphinx-rtd-theme = "~3.0"
 sphinxcontrib-napoleon = "~0.7"
