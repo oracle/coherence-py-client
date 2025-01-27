@@ -235,12 +235,14 @@ async def test_fail_fast() -> None:
         async def dump_threads() -> None:
             async with aiohttp.ClientSession() as session:
                 while True:
+                    COH_LOG.debug("Sending thread dump POST")
                     async with session.post(
                         "http://127.0.0.1:30000/management/coherence/cluster/logClusterState"
                     ) as resp:
                         COH_LOG.debug(f"Thread state dump -> {resp}")
-                        await asyncio.sleep(5.0)
+                        await asyncio.sleep(1.0)
 
+        COH_LOG.debug("Starting background task to gather thread dumps...")
         task = asyncio.create_task(dump_threads())
 
         await _shutdown_proxy()
