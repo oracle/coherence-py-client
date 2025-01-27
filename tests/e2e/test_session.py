@@ -205,6 +205,7 @@ async def test_wait_for_ready() -> None:
 
 @pytest.mark.asyncio
 async def test_fail_fast() -> None:
+    logging.basicConfig(level=logging.DEBUG)
     asyncio.get_running_loop().set_debug(True)
     session: Session = await tests.get_session()
     logging.debug("Getting cache ...")
@@ -232,19 +233,6 @@ async def test_fail_fast() -> None:
         session.on(SessionLifecycleEvent.DISCONNECTED, disc)
         session.on(SessionLifecycleEvent.RECONNECTED, reconn)
 
-        async def dump_threads() -> None:
-            async with aiohttp.ClientSession() as session:
-                while True:
-                    COH_LOG.debug("Sending thread dump POST")
-                    async with session.post(
-                        "http://127.0.0.1:30000/management/coherence/cluster/logClusterState"
-                    ) as resp:
-                        COH_LOG.debug(f"Thread state dump -> {resp}")
-                        await asyncio.sleep(1.0)
-
-        COH_LOG.debug("Starting background task to gather thread dumps...")
-        task = asyncio.create_task(dump_threads())
-
         await _shutdown_proxy()
         COH_LOG.debug("Proxy down ...")
 
@@ -257,8 +245,6 @@ async def test_fail_fast() -> None:
         except TimeoutError:
             s = "Deadline [10 seconds] exceeded for session disconnect"
             raise TimeoutError(s)
-
-        task.cancel()
 
         # start inserting values as soon as disconnect occurs to ensure
         # that we properly wait for the session to reconnect before

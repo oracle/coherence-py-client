@@ -77,8 +77,6 @@ jobs:
       - name: Run test
         shell: bash
         run: |
-          export GRPC_TRACE=all
-          export GRPC_VERBOSITY=DEBUG
           export PYTHONASYNCIODEBUG=1
           sudo tcpdump --immediate-mode -w /tmp/coh.pcap -v -i lo port '(1408 or 30000)' &
           TCPDUMP_PID=$!
