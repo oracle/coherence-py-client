@@ -234,7 +234,7 @@ async def test_fail_fast() -> None:
 
         async def dump_threads() -> None:
             async with aiohttp.ClientSession() as session:
-                while (True):
+                while True:
                     async with session.post(
                         "http://127.0.0.1:30000/management/coherence/cluster/logClusterState"
                     ) as resp:
