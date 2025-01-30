@@ -31,7 +31,7 @@ For local development, we recommend using the Coherence CE Docker image; it cont
 everything necessary for the client to operate correctly.
 
 ```bash
-docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:24.09
+docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:24.09.02
 ```
 
 ## Installation
@@ -112,7 +112,7 @@ Please consult the [security guide](./SECURITY.md) for our responsible security 
 
 ## License
 
-Copyright (c) 2023, 2024, Oracle and/or its affiliates.
+Copyright (c) 2023, 2025, Oracle and/or its affiliates.
 
 Released under the Universal Permissive License v1.0 as shown at
 <https://oss.oracle.com/licenses/upl/>.
