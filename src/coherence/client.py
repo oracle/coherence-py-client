@@ -1577,7 +1577,7 @@ class Options:
     environment variable is used if address is not passed as an argument in the constructor. If the environment
     variable is not set and address is not passed as an argument then `DEFAULT_ADDRESS` is used. One can also
     use the 'coherence' resolver address of "coherence:///host:port" to connect to the Coherence Name
-    Service, running on the cluster port, and automatically discover the gRPC proxy addresse and one of them
+    Service, running on the cluster port, and automatically discover the gRPC proxy addresses and one of them
     will be randomly picked.
     """
     ENV_REQUEST_TIMEOUT = "COHERENCE_CLIENT_REQUEST_TIMEOUT"
