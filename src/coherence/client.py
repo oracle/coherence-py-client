@@ -408,7 +408,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def put_all(self, map: dict[K, V], ttl: Optional[int] = 0) -> None:
+    async def put_all(self, map: dict[K, V], ttl: Optional[int] = None) -> None:
         """
         Copies all mappings from the specified map to this map
 
@@ -669,7 +669,7 @@ class NamedCache(NamedMap[K, V]):
 
         :param key: the key with which the specified value is to be associated
         :param value: the value to be associated with the specified key
-        :param ttl: the expiry time in millis (optional).  If not specific, it will default to the default
+        :param ttl: the expiry time in millis (optional).  If not specified, it will default to the default
           ttl defined in the cache options provided when the cache was obtained
         :return: resolving to the previous value associated with specified key, or `None` if there was no mapping for
          key. A `None` return can also indicate that the map previously associated `None` with the specified key
@@ -685,7 +685,7 @@ class NamedCache(NamedMap[K, V]):
 
         :param key: the key with which the specified value is to be associated
         :param value: the value to be associated with the specified key
-        :param ttl: the expiry time in millis (optional).  If not specific, it will default to the default
+        :param ttl: the expiry time in millis (optional).  If not specified, it will default to the default
           ttl defined in the cache options provided when the cache was obtained.
         :return: resolving to the previous value associated with specified key, or `None` if there was no mapping for
          key. A `None` return can also indicate that the map previously associated `None` with the specified key
@@ -1576,8 +1576,9 @@ class Options:
     Environment variable to specify the Coherence gRPC server address for the client to connect to. The
     environment variable is used if address is not passed as an argument in the constructor. If the environment
     variable is not set and address is not passed as an argument then `DEFAULT_ADDRESS` is used. One can also
-    use the 'coherence' gRPC resolver address of "coherence:///host:port" to connect to the Coherence Name
-    Service, running on the cluster port, and automatically discover the gRPC endpoints.
+    use the 'coherence' resolver address of "coherence:///host:port" to connect to the Coherence Name
+    Service, running on the cluster port, and automatically discover the gRPC proxy addresse and one of them
+    will be randomly picked.
     """
     ENV_REQUEST_TIMEOUT = "COHERENCE_CLIENT_REQUEST_TIMEOUT"
     """
