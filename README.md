@@ -20,8 +20,9 @@ The Coherence Python Client allows Python applications to act as cache clients t
 * Support for storing Python objects as JSON as well as the ability to serialize to Java objects on the server for access from other Coherence language API's
 
 #### Requirements
-* [Coherence CE](https://github.com/oracle/coherence) 22.06.11+ or Coherence 14.1.1.2206.11+ Commercial edition with a configured [gRPCProxy](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html).
-* Python 3.9.x
+* [Coherence CE](https://github.com/oracle/coherence) 22.06.11+ or Coherence 14.1.1.2206.11+, 14.1.2.0+ Commercial edition with a configured [gRPCProxy](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html).
+* Usage of module `coherence.ai` requires [Coherence CE](https://github.com/oracle/coherence) 24.09.2+
+* Python 3.9.x or later
 
 
 #### Starting a Coherence Cluster
@@ -31,7 +32,7 @@ For local development, we recommend using the Coherence CE Docker image; it cont
 everything necessary for the client to operate correctly.
 
 ```bash
-docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:24.09
+docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:24.09.02
 ```
 
 ## Installation
@@ -112,7 +113,7 @@ Please consult the [security guide](./SECURITY.md) for our responsible security 
 
 ## License
 
-Copyright (c) 2023, 2024, Oracle and/or its affiliates.
+Copyright (c) 2023, 2025, Oracle and/or its affiliates.
 
 Released under the Universal Permissive License v1.0 as shown at
 <https://oss.oracle.com/licenses/upl/>.

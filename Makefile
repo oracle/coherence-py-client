@@ -84,8 +84,12 @@ E2E_TESTS := tests/e2e/test_session.py \
 				tests/e2e/test_filters.py \
 				tests/e2e/test_processors.py \
 				tests/e2e/test_aggregators.py \
-				tests/e2e/test_near_caching.py \
-#				tests/e2e/test_ai.py \
+				tests/e2e/test_near_caching.py
+
+#----------------------------------------------------------------------------------------------------------------------
+# AI tests
+# ----------------------------------------------------------------------------------------------------------------------
+AI_TESTS := tests/e2e/test_ai.py
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Clean-up all of the build artifacts
@@ -170,6 +174,13 @@ generate-proto:  ## Generate Proto Files
 .PHONY: test
 test:  ##
 	pytest -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS) $(E2E_TESTS)
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Run tests with code coverage
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: test-with-ai
+test-with-ai:  ##
+	pytest -W error --cov src/coherence --cov-report=term --cov-report=html $(UNIT_TESTS) $(E2E_TESTS) $(AI_TESTS)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Run nslookup tests with code coverage

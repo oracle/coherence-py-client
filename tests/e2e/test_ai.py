@@ -1,4 +1,4 @@
-# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2025, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 import random
@@ -93,6 +93,7 @@ async def populate_document_chunk_vectors(vectors: NamedCache[int, DocumentChunk
 
 
 @pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 async def test_similarity_search_with_index(test_session: Session) -> None:
     cache: NamedCache[int, ValueWithVector] = await test_session.get_cache("vector_cache")
     cache.add_index(BinaryQuantIndex(Extractors.extract("vector")))
@@ -134,6 +135,7 @@ async def test_similarity_search_with_index(test_session: Session) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 async def test_similarity_search_with_document_chunk(test_session: Session) -> None:
     cache: NamedCache[int, DocumentChunk] = await test_session.get_cache("vector_cache")
     dc: DocumentChunk = await populate_document_chunk_vectors(cache)
