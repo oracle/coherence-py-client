@@ -30,7 +30,7 @@ if [ -z "${PROFILE_STR}" ] ; then
   exit 1
 fi
 
-if [[ "${COH_VER}" =~ "22.06" ]] || [[ "${COH_VER}" =~ "14.1.1.2206" ]] || [[ "${COH_VER}" =~ "14.1.2" ]]; then
+if [[ "${COH_VER}" =~ "22.06" ]] || [[ "${COH_VER}" =~ "14.1.1-2206" ]] || [[ "${COH_VER}" =~ "14.1.2" ]]; then
   echo "Coherence CE ${COH_VER}"
   COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 \
     COHERENCE_VERSION=$COH_VER \
@@ -47,7 +47,7 @@ else
 fi
 
 # Run tests with SSL
-if [[ "${COH_VER}" =~ "22.06" ]] || [[ "${COH_VER}" =~ "14.1.1.2206" ]] || [[ "${COH_VER}" =~ "14.1.2" ]]; then
+if [[ "${COH_VER}" =~ "22.06" ]] || [[ "${COH_VER}" =~ "14.1.1-2206" ]] || [[ "${COH_VER}" =~ "14.1.2" ]]; then
   echo "Coherence CE ${COH_VER} with SSL"
   RUN_SECURE=true COHERENCE_IGNORE_INVALID_CERTS=true \
     COHERENCE_TLS_CERTS_PATH=$(pwd)/tests/utils/certs/guardians-ca.crt \
