@@ -21,7 +21,7 @@ jobs:
         poetry-version: ["1.8.4"]
         os: [ubuntu-latest]
         coherenceVersion:
-          - 24.09.2
+          - 24.09.3
           - 22.06.11
         base-image:
           - gcr.io/distroless/java17-debian11
