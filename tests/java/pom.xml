@@ -48,7 +48,7 @@
     <version.plugin.helidon-build-tools>2.0.0-M3</version.plugin.helidon-build-tools>
     <version.plugin.jib>3.4.4</version.plugin.jib>
     <version.plugin.maven.assembly>3.7.1</version.plugin.maven.assembly>
-    <version.plugin.maven.compiler>3.13.0</version.plugin.maven.compiler>
+    <version.plugin.maven.compiler>3.14.0</version.plugin.maven.compiler>
     <version.plugin.maven.dependency>3.8.1</version.plugin.maven.dependency>
     <version.plugin.maven.jar>3.4.2</version.plugin.maven.jar>
     <version.plugin.maven.shade>3.2.4</version.plugin.maven.shade>
