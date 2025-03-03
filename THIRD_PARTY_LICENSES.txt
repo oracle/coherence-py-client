@@ -954,3 +954,15 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
 ----------------------------------------
+
+Package: pympler
+License: Apache-2.0
+Requires: n/a
+Author: Jean Brouwers, Ludwig Haehne, Robert Schuppenies
+Home page: https://github.com/pympler/pympler
+
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
+
+----------------------------------------
