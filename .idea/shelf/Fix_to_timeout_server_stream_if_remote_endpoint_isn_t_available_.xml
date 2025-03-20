@@ -1,0 +1,4 @@
+<changelist name="Fix_to_timeout_server_stream_if_remote_endpoint_isn't_available_" date="1685576086944" recycled="false">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Fix_to_timeout_server_stream_if_remote_endpoint_isn't_available_/shelved.patch" />
+  <option name="DESCRIPTION" value="Fix to timeout server stream if remote endpoint isn't available." />
+</changelist>

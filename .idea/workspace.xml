@@ -1,0 +1,1141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3c9116c0-3fce-4f03-aec7-b96b6996d1c4" name="Changes" comment="Bump Coherence testing from 24.09.2 to 24.09.3" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Unit Test" />
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="main" />
+    <option name="OPTIONS">
+      <set>
+        <option value="SQUASH" />
+        <option value="NO_COMMIT" />
+      </set>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="main" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;history&quot;: [
+    {
+      &quot;state&quot;: &quot;OPEN&quot;
+    }
+  ],
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;
+  }
+}</component>
+  <component name="GitLabMergeRequestsSettings">{}</component>
+  <component name="GithubPullRequestsUISettings">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;configuredContexts&quot;: [
+    {
+      &quot;name&quot;: &quot;rancher-desktop&quot;,
+      &quot;kubeConfigUrl&quot;: &quot;file:///Users/rlubke/.kube/config&quot;
+    }
+  ],
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2QLBTtEPyg2elzG9EPhEoQQcaUx" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Makefile Target.test.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_client.test_cache_truncate_event.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for e2e.test_client.test_get_and_put.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for e2e.test_client.test_paged_stream_request_timeout.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_client.test_request_timeout.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_client.test_size.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_client.test_stream_request_timeout.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_client.test_ttl_configuration.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_client.test_unary_request_timeout.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_client.test_values_filtered.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for e2e.test_client.test_values_paged.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_near_caching.test_basic_put_get_remove.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_near_caching.test_clear.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_near_caching.test_concurrency.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_near_caching.test_get_all.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_near_caching.test_incompatible_near_cache_options.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_near_caching.test_remove.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_near_caching.test_replace.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_near_caching.test_wrapper.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_session.test_basics.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_session.test_session_lifecycle.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for e2e.test_session.test_wait_for_ready.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_contains_key.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_contains_value.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_entries_paged.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_get_all.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_get_all_no_keys_raises_error.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_get_and_put.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_get_or_default.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_is_empty.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_keys_filtered.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_keys_paged.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_put_all.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_put_if_absent.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_put_with_expiry.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_put_with_ttl.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_remove.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_remove_mapping.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_replace.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_replace_mapping.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_size.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_values_filtered.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_client.test_values_paged.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_events.test_all.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_events.test_inserts_only.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for test_session.test_cache_destroy_event.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for tests.e2e.test_client.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.e2e.test_client.test_cache_truncate_event.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.e2e.test_client.test_get_and_put.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.e2e.test_session.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.e2e.test_session.test_basics.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.e2e.test_session.test_cache_destroy_event.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.e2e.test_session.test_fail_fast.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.e2e.test_session.test_session_lifecycle.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.e2e.test_session.test_wait_for_ready.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.test_client.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.test_client.test_get_and_put.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.test_client.test_invoke.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for tests.test_client.test_put_with_ttl.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.test_events.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.test_events.test_custom_filter_listener.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.test_session.test_cache_release_event.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.test_session.test_wait_for_ready.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.unit.test_local_cache.test_clear.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.unit.test_local_cache.test_expiry.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.unit.test_local_cache.test_local_entry.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.unit.test_local_cache.test_local_entry_str.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.unit.test_local_cache.test_pruning_memory.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest for tests.unit.test_local_cache.test_pruning_units.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for tests.unit.test_local_cache.test_stats_reset.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.local_cache.test_local_entry.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_cache_options.test_cache_options_eq.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_cache_options.test_cache_options_str.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_cache_options.test_near_cache_eq.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_cache_options.test_near_cache_options_prune_factor.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_cache_options.test_near_cache_options_str.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_cache_options.test_near_cache_ttl_negative.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_environment.test_disconnect_timeout.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_environment.test_options.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_environment.test_options_ready_timeout.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_environment.test_options_req_timeout.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_environment.test_tls_options.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_basic_expiry.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_basic_get.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_basic_put_get.executor&quot;: &quot;Profiler&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_basic_put_get_remove.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_expiry.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_get_all.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_junk.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_local_cache_str.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_local_entry.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_local_entry_str.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_pruning.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_pruning_memory.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_local_cache.test_stats_reset.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_near_cache.test_near_cache_options.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_near_cache.test_near_cache_options_both_units.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_near_cache.test_near_cache_options_negative_units.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_near_cache.test_near_cache_options_no_explicit_params.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest for unit.test_near_cache.test_near_cache_options_ttl.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in /Users/rlubke/files/github/coherence-py-client/tests/test_session.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in e2e.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_aggregators.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_cache_options.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_client.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_events.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_extractors.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_filters.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_local_cache.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_near_cache.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_near_caching.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_processors.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_serialization.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_session.py (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_session.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in tests.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in unit.executor&quot;: &quot;Run&quot;,
+    &quot;Python.nslookup.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;24.09.3&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/rlubke/files/github/coherence-py-client&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.5609195&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;TEXT&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/tests/e2e" />
+      <recent name="$PROJECT_DIR$/tests/unit" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.nslookup">
+    <configuration name="nslookup" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="coherence-py-client" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/coherence" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/coherence/nslookup.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for tests.test_session.test_wait_for_ready" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="coherence-py-client" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;tests.test_session.test_wait_for_ready&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest in test_events.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="coherence-py-client" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_events.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest in test_session.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="coherence-py-client" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_session.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest in tests" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="coherence-py-client" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.nslookup" />
+      <item itemvalue="Python tests.pytest for tests.test_session.test_wait_for_ready" />
+      <item itemvalue="Python tests.pytest in test_events.py" />
+      <item itemvalue="Python tests.pytest in tests" />
+      <item itemvalue="Python tests.pytest in test_session.py" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.nslookup" />
+        <item itemvalue="Python tests.pytest in tests" />
+        <item itemvalue="Python tests.pytest in test_session.py" />
+        <item itemvalue="Python tests.pytest in test_events.py" />
+        <item itemvalue="Python tests.pytest for tests.test_session.test_wait_for_ready" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.24978.46" />
+        <option value="bundled-js-predefined-d6986cc7102b-76f8388c3a79-JavaScript-IU-243.24978.46" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3c9116c0-3fce-4f03-aec7-b96b6996d1c4" name="Changes" comment="" />
+      <created>1685122993499</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1685122993499</updated>
+      <workItem from="1685122994971" duration="143000" />
+      <workItem from="1685123144826" duration="24897000" />
+      <workItem from="1685460173615" duration="21000" />
+      <workItem from="1685460202815" duration="48600000" />
+      <workItem from="1685583476789" duration="3191000" />
+      <workItem from="1686069295393" duration="58000" />
+      <workItem from="1686083121132" duration="2000" />
+      <workItem from="1686085335810" duration="13265000" />
+      <workItem from="1686161280762" duration="12160000" />
+      <workItem from="1686238981022" duration="11000" />
+      <workItem from="1687286304872" duration="641000" />
+      <workItem from="1687294308214" duration="3568000" />
+      <workItem from="1687317845465" duration="8263000" />
+      <workItem from="1687327393856" duration="21860000" />
+      <workItem from="1687447588335" duration="5235000" />
+      <workItem from="1687468892416" duration="24304000" />
+      <workItem from="1687632151042" duration="75000" />
+      <workItem from="1687632246027" duration="33000" />
+      <workItem from="1687632287239" duration="13854000" />
+      <workItem from="1687792380984" duration="130000" />
+      <workItem from="1687794189127" duration="1884000" />
+      <workItem from="1687896161330" duration="357000" />
+      <workItem from="1687896529853" duration="3142000" />
+      <workItem from="1687905327418" duration="4412000" />
+      <workItem from="1687966634901" duration="14000" />
+      <workItem from="1687966657550" duration="25000" />
+      <workItem from="1687966689232" duration="1120000" />
+      <workItem from="1688092027892" duration="5882000" />
+      <workItem from="1688101412412" duration="10803000" />
+      <workItem from="1688354648411" duration="23000" />
+      <workItem from="1688354726479" duration="109000" />
+      <workItem from="1688354861528" duration="146000" />
+      <workItem from="1689263211545" duration="4000" />
+      <workItem from="1689719029678" duration="782000" />
+      <workItem from="1689953909703" duration="1233000" />
+      <workItem from="1690230916514" duration="1025000" />
+      <workItem from="1690411709425" duration="210000" />
+      <workItem from="1690499701098" duration="912000" />
+      <workItem from="1692231167141" duration="574000" />
+      <workItem from="1692231807521" duration="599000" />
+      <workItem from="1692649553969" duration="7780000" />
+      <workItem from="1694461417683" duration="5089000" />
+      <workItem from="1694466545082" duration="2158000" />
+      <workItem from="1694541164940" duration="476000" />
+      <workItem from="1694551290998" duration="301000" />
+      <workItem from="1696258306739" duration="909000" />
+      <workItem from="1696266421657" duration="598000" />
+      <workItem from="1696285334245" duration="600000" />
+      <workItem from="1704757285237" duration="2955000" />
+      <workItem from="1705708853464" duration="1536000" />
+      <workItem from="1705944124023" duration="6000" />
+      <workItem from="1706621739024" duration="1869000" />
+      <workItem from="1711058301024" duration="758000" />
+      <workItem from="1712340702216" duration="9296000" />
+      <workItem from="1718386044972" duration="375000" />
+      <workItem from="1718390134223" duration="2408000" />
+      <workItem from="1718733542601" duration="1654000" />
+      <workItem from="1719594368246" duration="3997000" />
+      <workItem from="1722441871820" duration="794000" />
+      <workItem from="1722445901309" duration="3000" />
+      <workItem from="1722463940949" duration="77000" />
+      <workItem from="1725473208227" duration="966000" />
+      <workItem from="1725474315893" duration="3655000" />
+      <workItem from="1725485185425" duration="358000" />
+      <workItem from="1725485549461" duration="2467000" />
+      <workItem from="1725488027810" duration="206000" />
+      <workItem from="1725488240615" duration="19481000" />
+      <workItem from="1725573205760" duration="8643000" />
+      <workItem from="1725640437572" duration="101538000" />
+      <workItem from="1726609067646" duration="40590000" />
+      <workItem from="1726765368031" duration="1375000" />
+      <workItem from="1726767712811" duration="44533000" />
+      <workItem from="1727715582240" duration="28383000" />
+      <workItem from="1727822458112" duration="5791000" />
+      <workItem from="1727966752178" duration="14104000" />
+      <workItem from="1728313648610" duration="1296000" />
+      <workItem from="1728315833018" duration="36000" />
+      <workItem from="1728315879212" duration="8282000" />
+      <workItem from="1728334890782" duration="16225000" />
+      <workItem from="1728409909276" duration="1000" />
+      <workItem from="1728424861721" duration="3648000" />
+      <workItem from="1728488649054" duration="95000" />
+      <workItem from="1728488755041" duration="1459000" />
+      <workItem from="1728577942104" duration="881000" />
+      <workItem from="1728582060073" duration="44572000" />
+      <workItem from="1728927507714" duration="615000" />
+      <workItem from="1728931190899" duration="18871000" />
+      <workItem from="1729104685886" duration="35658000" />
+      <workItem from="1729285627526" duration="4441000" />
+      <workItem from="1729881867128" duration="7568000" />
+      <workItem from="1730130073150" duration="4439000" />
+      <workItem from="1730238740177" duration="4358000" />
+      <workItem from="1730254212345" duration="598000" />
+      <workItem from="1730255063295" duration="1831000" />
+      <workItem from="1730329041363" duration="1644000" />
+      <workItem from="1730477769190" duration="19978000" />
+      <workItem from="1730766192464" duration="3786000" />
+      <workItem from="1731458324776" duration="704000" />
+      <workItem from="1731514760148" duration="12000" />
+      <workItem from="1732141500347" duration="4457000" />
+      <workItem from="1732220095002" duration="9079000" />
+      <workItem from="1732731644637" duration="581000" />
+      <workItem from="1733163961682" duration="6161000" />
+      <workItem from="1733170155528" duration="38000" />
+      <workItem from="1733170202021" duration="12570000" />
+      <workItem from="1733243801856" duration="49953000" />
+      <workItem from="1733352000869" duration="37470000" />
+      <workItem from="1733761131702" duration="33716000" />
+      <workItem from="1733861948369" duration="4116000" />
+      <workItem from="1733956985695" duration="60750000" />
+      <workItem from="1734479704242" duration="7784000" />
+      <workItem from="1734561060366" duration="139000" />
+      <workItem from="1734561207835" duration="8048000" />
+      <workItem from="1734625171424" duration="18541000" />
+      <workItem from="1734711534818" duration="5421000" />
+      <workItem from="1736364998587" duration="687000" />
+      <workItem from="1736455170137" duration="875000" />
+      <workItem from="1736543932884" duration="3391000" />
+      <workItem from="1737068646413" duration="1793000" />
+      <workItem from="1737079854734" duration="5000" />
+      <workItem from="1737494306963" duration="9131000" />
+      <workItem from="1737515516231" duration="3319000" />
+      <workItem from="1737561548528" duration="8938000" />
+      <workItem from="1737640897801" duration="166000" />
+      <workItem from="1737641072566" duration="18184000" />
+      <workItem from="1737991879561" duration="3340000" />
+      <workItem from="1738012682315" duration="70000" />
+      <workItem from="1738013731960" duration="26000" />
+      <workItem from="1738016049880" duration="696000" />
+      <workItem from="1738019541785" duration="9174000" />
+      <workItem from="1738190547230" duration="84000" />
+      <workItem from="1738266556141" duration="54000" />
+      <workItem from="1738291622303" duration="609000" />
+      <workItem from="1738606583380" duration="2211000" />
+      <workItem from="1738630033825" duration="1528000" />
+      <workItem from="1738864947842" duration="1906000" />
+      <workItem from="1740451410477" duration="1236000" />
+    </task>
+    <task id="LOCAL-00001" summary="Fix to timeout server stream if remote endpoint isn't available.">
+      <created>1685136745055</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1685136745055</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Fix to timeout server stream if remote endpoint isn't available.">
+      <created>1685137084478</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1685137084478</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Fix to timeout server stream if remote endpoint isn't available.">
+      <created>1685566053173</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1685566053173</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Fix to timeout server stream if remote endpoint isn't available.">
+      <created>1685566234240</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1685566234240</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Fix to timeout server stream if remote endpoint isn't available.">
+      <created>1685570053769</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1685570053769</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Fix to timeout server stream if remote endpoint isn't available.">
+      <created>1685572708048</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1685572708048</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Fix to timeout server stream if remote endpoint isn't available.">
+      <created>1685576086981</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1685576086981</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Fix to timeout server stream if remote endpoint isn't available.">
+      <created>1686164511980</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1686164511981</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Fix to timeout server stream if remote endpoint isn't available.">
+      <created>1686164536491</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1686164536491</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Fix to timeout server stream if remote endpoint isn't available.">
+      <created>1686165022675</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1686165022675</updated>
+    </task>
+    <task id="LOCAL-00119" summary="Diagnosing test_stats_reset test failures">
+      <option name="closed" value="true" />
+      <created>1734312587278</created>
+      <option name="number" value="00119" />
+      <option name="presentableId" value="LOCAL-00119" />
+      <option name="project" value="LOCAL" />
+      <updated>1734312587279</updated>
+    </task>
+    <task id="LOCAL-00120" summary="Diagnosing test_stats_reset test failures">
+      <option name="closed" value="true" />
+      <created>1734313429031</created>
+      <option name="number" value="00120" />
+      <option name="presentableId" value="LOCAL-00120" />
+      <option name="project" value="LOCAL" />
+      <updated>1734313429032</updated>
+    </task>
+    <task id="LOCAL-00121" summary="Diagnosing test_stats_reset test failures">
+      <option name="closed" value="true" />
+      <created>1734313852011</created>
+      <option name="number" value="00121" />
+      <option name="presentableId" value="LOCAL-00121" />
+      <option name="project" value="LOCAL" />
+      <updated>1734313852011</updated>
+    </task>
+    <task id="LOCAL-00122" summary="Diagnosing test_stats_reset test failures">
+      <option name="closed" value="true" />
+      <created>1734315573028</created>
+      <option name="number" value="00122" />
+      <option name="presentableId" value="LOCAL-00122" />
+      <option name="project" value="LOCAL" />
+      <updated>1734315573028</updated>
+    </task>
+    <task id="LOCAL-00123" summary="Fix test_stats_reset.">
+      <option name="closed" value="true" />
+      <created>1734316220802</created>
+      <option name="number" value="00123" />
+      <option name="presentableId" value="LOCAL-00123" />
+      <option name="project" value="LOCAL" />
+      <updated>1734316220802</updated>
+    </task>
+    <task id="LOCAL-00124" summary="Minor cleanup.">
+      <option name="closed" value="true" />
+      <created>1734538585833</created>
+      <option name="number" value="00124" />
+      <option name="presentableId" value="LOCAL-00124" />
+      <option name="project" value="LOCAL" />
+      <updated>1734538585833</updated>
+    </task>
+    <task id="LOCAL-00125" summary="Use session fixture in ai tests.">
+      <option name="closed" value="true" />
+      <created>1734561959062</created>
+      <option name="number" value="00125" />
+      <option name="presentableId" value="LOCAL-00125" />
+      <option name="project" value="LOCAL" />
+      <updated>1734561959062</updated>
+    </task>
+    <task id="LOCAL-00126" summary="Update validation tools.">
+      <option name="closed" value="true" />
+      <created>1734562211445</created>
+      <option name="number" value="00126" />
+      <option name="presentableId" value="LOCAL-00126" />
+      <option name="project" value="LOCAL" />
+      <updated>1734562211445</updated>
+    </task>
+    <task id="LOCAL-00127" summary="Fix validation errors.">
+      <option name="closed" value="true" />
+      <created>1734562368844</created>
+      <option name="number" value="00127" />
+      <option name="presentableId" value="LOCAL-00127" />
+      <option name="project" value="LOCAL" />
+      <updated>1734562368844</updated>
+    </task>
+    <task id="LOCAL-00128" summary="Fix Sonar Cloud validation issues.">
+      <option name="closed" value="true" />
+      <created>1734565489558</created>
+      <option name="number" value="00128" />
+      <option name="presentableId" value="LOCAL-00128" />
+      <option name="project" value="LOCAL" />
+      <updated>1734565489558</updated>
+    </task>
+    <task id="LOCAL-00129" summary="Merge main.">
+      <option name="closed" value="true" />
+      <created>1734565943780</created>
+      <option name="number" value="00129" />
+      <option name="presentableId" value="LOCAL-00129" />
+      <option name="project" value="LOCAL" />
+      <updated>1734565943780</updated>
+    </task>
+    <task id="LOCAL-00130" summary="Fix pytest/asyncio warning.">
+      <option name="closed" value="true" />
+      <created>1734569084993</created>
+      <option name="number" value="00130" />
+      <option name="presentableId" value="LOCAL-00130" />
+      <option name="project" value="LOCAL" />
+      <updated>1734569084993</updated>
+    </task>
+    <task id="LOCAL-00131" summary="Diagnosing pytest hang.">
+      <option name="closed" value="true" />
+      <created>1734629231420</created>
+      <option name="number" value="00131" />
+      <option name="presentableId" value="LOCAL-00131" />
+      <option name="project" value="LOCAL" />
+      <updated>1734629231420</updated>
+    </task>
+    <task id="LOCAL-00132" summary="Diagnosing pytest hang.">
+      <option name="closed" value="true" />
+      <created>1734636262746</created>
+      <option name="number" value="00132" />
+      <option name="presentableId" value="LOCAL-00132" />
+      <option name="project" value="LOCAL" />
+      <updated>1734636262746</updated>
+    </task>
+    <task id="LOCAL-00133" summary="Diagnosing pytest hang.">
+      <option name="closed" value="true" />
+      <created>1734636696946</created>
+      <option name="number" value="00133" />
+      <option name="presentableId" value="LOCAL-00133" />
+      <option name="project" value="LOCAL" />
+      <updated>1734636696946</updated>
+    </task>
+    <task id="LOCAL-00134" summary="Add documentation for cache options and near caching.&#10;Added example for near caching.">
+      <option name="closed" value="true" />
+      <created>1734647419926</created>
+      <option name="number" value="00134" />
+      <option name="presentableId" value="LOCAL-00134" />
+      <option name="project" value="LOCAL" />
+      <updated>1734647419926</updated>
+    </task>
+    <task id="LOCAL-00135" summary="Test failure diagnostics">
+      <option name="closed" value="true" />
+      <created>1734711614229</created>
+      <option name="number" value="00135" />
+      <option name="presentableId" value="LOCAL-00135" />
+      <option name="project" value="LOCAL" />
+      <updated>1734711614229</updated>
+    </task>
+    <task id="LOCAL-00136" summary="Test failure diagnostics">
+      <option name="closed" value="true" />
+      <created>1734713965941</created>
+      <option name="number" value="00136" />
+      <option name="presentableId" value="LOCAL-00136" />
+      <option name="project" value="LOCAL" />
+      <updated>1734713965941</updated>
+    </task>
+    <task id="LOCAL-00137" summary="Ignore additional tests.">
+      <option name="closed" value="true" />
+      <created>1736545518301</created>
+      <option name="number" value="00137" />
+      <option name="presentableId" value="LOCAL-00137" />
+      <option name="project" value="LOCAL" />
+      <updated>1736545518301</updated>
+    </task>
+    <task id="LOCAL-00138" summary="Update 22.06.10 -&gt; 22.06.11">
+      <option name="closed" value="true" />
+      <created>1737494517116</created>
+      <option name="number" value="00138" />
+      <option name="presentableId" value="LOCAL-00138" />
+      <option name="project" value="LOCAL" />
+      <updated>1737494517117</updated>
+    </task>
+    <task id="LOCAL-00139" summary="Update 22.06.10 -&gt; 22.06.11">
+      <option name="closed" value="true" />
+      <created>1737495144931</created>
+      <option name="number" value="00139" />
+      <option name="presentableId" value="LOCAL-00139" />
+      <option name="project" value="LOCAL" />
+      <updated>1737495144931</updated>
+    </task>
+    <task id="LOCAL-00140" summary="Rollback skips.">
+      <option name="closed" value="true" />
+      <created>1737500482186</created>
+      <option name="number" value="00140" />
+      <option name="presentableId" value="LOCAL-00140" />
+      <option name="project" value="LOCAL" />
+      <updated>1737500482186</updated>
+    </task>
+    <task id="LOCAL-00141" summary="Enable debug logging">
+      <option name="closed" value="true" />
+      <created>1737502871847</created>
+      <option name="number" value="00141" />
+      <option name="presentableId" value="LOCAL-00141" />
+      <option name="project" value="LOCAL" />
+      <updated>1737502871847</updated>
+    </task>
+    <task id="LOCAL-00142" summary="Minor test edits.">
+      <option name="closed" value="true" />
+      <created>1737516555675</created>
+      <option name="number" value="00142" />
+      <option name="presentableId" value="LOCAL-00142" />
+      <option name="project" value="LOCAL" />
+      <updated>1737516555675</updated>
+    </task>
+    <task id="LOCAL-00143" summary="Minor test edits.">
+      <option name="closed" value="true" />
+      <created>1737562877667</created>
+      <option name="number" value="00143" />
+      <option name="presentableId" value="LOCAL-00143" />
+      <option name="project" value="LOCAL" />
+      <updated>1737562877668</updated>
+    </task>
+    <task id="LOCAL-00144" summary="Minor test edits.">
+      <option name="closed" value="true" />
+      <created>1737563405079</created>
+      <option name="number" value="00144" />
+      <option name="presentableId" value="LOCAL-00144" />
+      <option name="project" value="LOCAL" />
+      <updated>1737563405079</updated>
+    </task>
+    <task id="LOCAL-00145" summary="Add grpc debugging.">
+      <option name="closed" value="true" />
+      <created>1737567237126</created>
+      <option name="number" value="00145" />
+      <option name="presentableId" value="LOCAL-00145" />
+      <option name="project" value="LOCAL" />
+      <updated>1737567237126</updated>
+    </task>
+    <task id="LOCAL-00146" summary="Add grpc debugging.">
+      <option name="closed" value="true" />
+      <created>1737641486213</created>
+      <option name="number" value="00146" />
+      <option name="presentableId" value="LOCAL-00146" />
+      <option name="project" value="LOCAL" />
+      <updated>1737641486213</updated>
+    </task>
+    <task id="LOCAL-00147" summary="Add grpc debugging.">
+      <option name="closed" value="true" />
+      <created>1737643269145</created>
+      <option name="number" value="00147" />
+      <option name="presentableId" value="LOCAL-00147" />
+      <option name="project" value="LOCAL" />
+      <updated>1737643269145</updated>
+    </task>
+    <task id="LOCAL-00148" summary="Add grpc debugging.">
+      <option name="closed" value="true" />
+      <created>1737643429802</created>
+      <option name="number" value="00148" />
+      <option name="presentableId" value="LOCAL-00148" />
+      <option name="project" value="LOCAL" />
+      <updated>1737643429802</updated>
+    </task>
+    <task id="LOCAL-00149" summary=".">
+      <option name="closed" value="true" />
+      <created>1737644582573</created>
+      <option name="number" value="00149" />
+      <option name="presentableId" value="LOCAL-00149" />
+      <option name="project" value="LOCAL" />
+      <updated>1737644582573</updated>
+    </task>
+    <task id="LOCAL-00150" summary=".">
+      <option name="closed" value="true" />
+      <created>1737645692558</created>
+      <option name="number" value="00150" />
+      <option name="presentableId" value="LOCAL-00150" />
+      <option name="project" value="LOCAL" />
+      <updated>1737645692558</updated>
+    </task>
+    <task id="LOCAL-00151" summary="Diagnostics">
+      <option name="closed" value="true" />
+      <created>1737648608848</created>
+      <option name="number" value="00151" />
+      <option name="presentableId" value="LOCAL-00151" />
+      <option name="project" value="LOCAL" />
+      <updated>1737648608848</updated>
+    </task>
+    <task id="LOCAL-00152" summary="Diagnostics">
+      <option name="closed" value="true" />
+      <created>1737661113770</created>
+      <option name="number" value="00152" />
+      <option name="presentableId" value="LOCAL-00152" />
+      <option name="project" value="LOCAL" />
+      <updated>1737661113770</updated>
+    </task>
+    <task id="LOCAL-00153" summary="Diagnostics">
+      <option name="closed" value="true" />
+      <created>1737668834048</created>
+      <option name="number" value="00153" />
+      <option name="presentableId" value="LOCAL-00153" />
+      <option name="project" value="LOCAL" />
+      <updated>1737668834048</updated>
+    </task>
+    <task id="LOCAL-00154" summary="Diagnostics">
+      <option name="closed" value="true" />
+      <created>1737671103717</created>
+      <option name="number" value="00154" />
+      <option name="presentableId" value="LOCAL-00154" />
+      <option name="project" value="LOCAL" />
+      <updated>1737671103717</updated>
+    </task>
+    <task id="LOCAL-00155" summary="Diagnostics">
+      <option name="closed" value="true" />
+      <created>1737992049931</created>
+      <option name="number" value="00155" />
+      <option name="presentableId" value="LOCAL-00155" />
+      <option name="project" value="LOCAL" />
+      <updated>1737992049931</updated>
+    </task>
+    <task id="LOCAL-00156" summary="Bump Coherence testing from 24.09.2 to 24.09.3">
+      <option name="closed" value="true" />
+      <created>1738865068579</created>
+      <option name="number" value="00156" />
+      <option name="presentableId" value="LOCAL-00156" />
+      <option name="project" value="LOCAL" />
+      <updated>1738865068579</updated>
+    </task>
+    <task id="LOCAL-00157" summary="Bump Coherence testing from 24.09.2 to 24.09.3">
+      <option name="closed" value="true" />
+      <created>1738866917513</created>
+      <option name="number" value="00157" />
+      <option name="presentableId" value="LOCAL-00157" />
+      <option name="project" value="LOCAL" />
+      <updated>1738866917513</updated>
+    </task>
+    <option name="localTasksCounter" value="158" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.conf" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+        <option value="Space.CommitStatus" />
+        <option value="GitHub.CommitStatus" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="origin/main" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <MESSAGE value="NearCache checkpoint&#10; - Switch from TaskGroup to asyncio.gather for compatibility with 3.9/3.10" />
+    <MESSAGE value="NearCache checkpoint&#10; - Skip near caching tests when protocol version is 0." />
+    <MESSAGE value="NearCache checkpoint&#10; - Fix stats reset test" />
+    <MESSAGE value="Diagnosing test_stats_reset test failures" />
+    <MESSAGE value="Fix test_stats_reset." />
+    <MESSAGE value="Minor cleanup." />
+    <MESSAGE value="Use session fixture in ai tests." />
+    <MESSAGE value="Update validation tools." />
+    <MESSAGE value="Fix validation errors." />
+    <MESSAGE value="Fix Sonar Cloud validation issues." />
+    <MESSAGE value="Merge main." />
+    <MESSAGE value="Fix pytest/asyncio warning." />
+    <MESSAGE value="Diagnosing pytest hang." />
+    <MESSAGE value="docs" />
+    <MESSAGE value="Add documentation for cache options and near caching.&#10;Added example for near caching." />
+    <MESSAGE value="Test failure diagnostics" />
+    <MESSAGE value="Ignore additional tests." />
+    <MESSAGE value="Update 22.06.10 -&gt; 22.06.11" />
+    <MESSAGE value="Rollback skips." />
+    <MESSAGE value="Enable debug logging" />
+    <MESSAGE value="Minor test edits." />
+    <MESSAGE value="Add grpc debugging." />
+    <MESSAGE value="." />
+    <MESSAGE value="Diagnostics" />
+    <MESSAGE value="Bump Coherence testing from 24.09.2 to 24.09.3" />
+    <option name="LAST_COMMIT_MESSAGE" value="Bump Coherence testing from 24.09.2 to 24.09.3" />
+  </component>
+  <component name="VgoProject">
+    <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/coherence/nslookup.py</url>
+          <line>140</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_contains_key.coverage" NAME="pytest for test_client.test_contains_key Coverage Results" MODIFIED="1726787294596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_events_py.coverage" NAME="pytest in test_events.py Coverage Results" MODIFIED="1733961506540" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_client_test_invoke.coverage" NAME="pytest for tests.test_client.test_invoke Coverage Results" MODIFIED="1726615257245" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_session_test_wait_for_ready.coverage" NAME="pytest for e2e.test_session.test_wait_for_ready Coverage Results" MODIFIED="1728340580796" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_keys_filtered.coverage" NAME="pytest for test_client.test_keys_filtered Coverage Results" MODIFIED="1726860843515" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_basic_expiry.coverage" NAME="pytest for unit.test_local_cache.test_basic_expiry Coverage Results" MODIFIED="1733263438582" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_events_test_remove_no_listener.coverage" NAME="pytest for test_events.test_remove_no_listener Coverage Results" MODIFIED="1688129404516" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_near_cache_py.coverage" NAME="pytest in test_cache_options.py Coverage Results" MODIFIED="1730502005870" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_session_test_basics.coverage" NAME="pytest for tests.test_session.test_basics Coverage Results" MODIFIED="1687636722328" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_near_caching_test_clear.coverage" NAME="pytest for e2e.test_near_caching.test_clear Coverage Results" MODIFIED="1734036400775" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_client_test_keys_filtered.coverage" NAME="pytest for tests.test_client.test_keys_filtered Coverage Results" MODIFIED="1685125677145" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_client_test_unary_request_timeout.coverage" NAME="pytest for e2e.test_client.test_unary_request_timeout Coverage Results" MODIFIED="1734038826145" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_put_with_ttl.coverage" NAME="pytest for test_client.test_put_with_ttl Coverage Results" MODIFIED="1726774540162" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_near_cache_test_near_cache_options_no_explicit_params.coverage" NAME="pytest for unit.test_near_cache.test_near_cache_options_no_explicit_params Coverage Results" MODIFIED="1730497474681" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_client.coverage" NAME="pytest for tests.test_client Coverage Results" MODIFIED="1727724762811" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_client_test_cache_truncate_event.coverage" NAME="pytest for e2e.test_client.test_cache_truncate_event Coverage Results" MODIFIED="1729188239523" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_session_py.coverage" NAME="pytest in test_session.py Coverage Results" MODIFIED="1737500282019" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_client_test_stream_request_timeout.coverage" NAME="pytest for e2e.test_client.test_stream_request_timeout Coverage Results" MODIFIED="1730492257380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_session_reconnect_wait_for_ready.coverage" NAME="pytest for test_client.test_session_reconnect_wait_for_ready Coverage Results" MODIFIED="1687499057544" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_get_all.coverage" NAME="pytest for test_client.test_get_all Coverage Results" MODIFIED="1726686918364" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_e2e_test_session_test_fail_fast.coverage" NAME="pytest for tests.e2e.test_session.test_fail_fast Coverage Results" MODIFIED="1728598314671" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_near_cache_test_near_cache_options.coverage" NAME="pytest for unit.test_near_cache.test_near_cache_options Coverage Results" MODIFIED="1730497417055" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_client_test_get_and_put.coverage" NAME="pytest for tests.test_client.test_get_and_put Coverage Results" MODIFIED="1727971252900" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_extractors_test_extract_method_with_parens.coverage" NAME="pytest for test_extractors.test_extract_method_with_parens Coverage Results" MODIFIED="1688126311430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_serialization_py.coverage" NAME="pytest in test_serialization.py Coverage Results" MODIFIED="1726012862821" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_session_test_cache_destroy_event.coverage" NAME="pytest for tests.test_session.test_cache_destroy_event Coverage Results" MODIFIED="1687635241424" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_cache_options_test_cache_options_str.coverage" NAME="pytest for unit.test_cache_options.test_cache_options_str Coverage Results" MODIFIED="1730500990686" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_session_test_session_lifecycle.coverage" NAME="pytest for e2e.test_session.test_session_lifecycle Coverage Results" MODIFIED="1737641045641" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_events.coverage" NAME="pytest for tests.test_events Coverage Results" MODIFIED="1712355655813" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_session_stuff.coverage" NAME="pytest for -s test_client.test_session_stuff Coverage Results" MODIFIED="1685133807392" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_cache_options_py.coverage" NAME="pytest in test_cache_options.py Coverage Results" MODIFIED="1734123052227" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_local_cache_test_local_entry.coverage" NAME="pytest for unit.local_cache.test_local_entry Coverage Results" MODIFIED="1733171790315" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_keys_paged.coverage" NAME="pytest for test_client.test_keys_paged Coverage Results" MODIFIED="1727822094853" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_local_entry_str.coverage" NAME="pytest for unit.test_local_cache.test_local_entry_str Coverage Results" MODIFIED="1733781359963" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_extractors_test_extrac_method_no_params.coverage" NAME="pytest for test_extractors.test_extrac_method_no_params Coverage Results" MODIFIED="1688126249775" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_serialization_test_custom_object.coverage" NAME="pytest for test_serialization.test_custom_object Coverage Results" MODIFIED="1687633226795" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_environment_test_options_req_timeout.coverage" NAME="pytest for unit.test_environment.test_options_req_timeout Coverage Results" MODIFIED="1728682104282" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_basic_put_get_remove.coverage" NAME="pytest for unit.test_local_cache.test_basic_put_get_remove Coverage Results" MODIFIED="1733782918488" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_environment_test_tls_options.coverage" NAME="pytest for unit.test_environment.test_tls_options Coverage Results" MODIFIED="1728684700764" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_environment_test_options_ready_timeout.coverage" NAME="pytest for unit.test_environment.test_options_ready_timeout Coverage Results" MODIFIED="1728325325158" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_near_caching_test_wrapper.coverage" NAME="pytest for e2e.test_near_caching.test_wrapper Coverage Results" MODIFIED="1733784373592" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_client_test_cache_truncate_event.coverage" NAME="pytest for tests.test_client.test_cache_truncate_event Coverage Results" MODIFIED="1685564826403" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_extractors_test_compose.coverage" NAME="pytest for tests.test_extractors.test_compose Coverage Results" MODIFIED="1688127264680" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_session_test_cache_release_event.coverage" NAME="pytest for tests.test_session.test_cache_release_event Coverage Results" MODIFIED="1727979010634" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_unit_test_local_cache_test_pruning_memory.coverage" NAME="pytest for tests.unit.test_local_cache.test_pruning_memory Coverage Results" MODIFIED="1733267905845" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_client_test_ttl_configuration.coverage" NAME="pytest for e2e.test_client.test_ttl_configuration Coverage Results" MODIFIED="1734123570617" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_cache_options_test_near_cache_options_str.coverage" NAME="pytest for unit.test_cache_options.test_near_cache_options_str Coverage Results" MODIFIED="1733345516229" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_session_test_session_basics.coverage" NAME="pytest for test_session.test_session_basics Coverage Results" MODIFIED="1687634137146" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_events_test_inserts_only.coverage" NAME="pytest for test_events.test_inserts_only Coverage Results" MODIFIED="1726094884290" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_client_test_values_filtered.coverage" NAME="pytest for e2e.test_client.test_values_filtered Coverage Results" MODIFIED="1729118231648" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_near_caching_test_replace.coverage" NAME="pytest for e2e.test_near_caching.test_replace Coverage Results" MODIFIED="1734035419265" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_tests.coverage" NAME="pytest in tests Coverage Results" MODIFIED="1727967796636" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_filters_py.coverage" NAME="pytest in test_filters.py Coverage Results" MODIFIED="1729005833485" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_session_reconnect.coverage" NAME="pytest for test_client.test_session_reconnect Coverage Results" MODIFIED="1687470645026" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_cache_options_test_cache_options_eq.coverage" NAME="pytest for unit.test_cache_options.test_cache_options_eq Coverage Results" MODIFIED="1730501664598" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_session_py__1_.coverage" NAME="pytest in test_session.py (1) Coverage Results" MODIFIED="1737499481682" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_e2e_test_session_test_basics.coverage" NAME="pytest for tests.e2e.test_session.test_basics Coverage Results" MODIFIED="1733380490196" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_processors_test_null.coverage" NAME="pytest for tests.test_processors.test_null Coverage Results" MODIFIED="1685126702630" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_extractors_py.coverage" NAME="pytest in test_extractors.py Coverage Results" MODIFIED="1727823474140" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in__Users_rlubke_files_github_coherence_py_client_tests_test_session_py.coverage" NAME="pytest in /Users/rlubke/files/github/coherence-py-client/tests/test_session.py Coverage Results" MODIFIED="1737499721253" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_events_test_custom_filter_listener.coverage" NAME="pytest for tests.test_events.test_custom_filter_listener Coverage Results" MODIFIED="1726012783236" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_unit_test_local_cache_test_clear.coverage" NAME="pytest for tests.unit.test_local_cache.test_clear Coverage Results" MODIFIED="1733340477279" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_basic_get.coverage" NAME="pytest for unit.test_local_cache.test_basic_get Coverage Results" MODIFIED="1733180234452" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_local_cache_py.coverage" NAME="pytest in test_local_cache.py Coverage Results" MODIFIED="1734037116691" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_e2e_test_session_test_session_lifecycle.coverage" NAME="pytest for tests.e2e.test_session.test_session_lifecycle Coverage Results" MODIFIED="1728339852845" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_e2e_test_client.coverage" NAME="pytest for tests.e2e.test_client Coverage Results" MODIFIED="1728677751244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_client_test_put_with_ttl.coverage" NAME="pytest for tests.test_client.test_put_with_ttl Coverage Results" MODIFIED="1726864531507" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_unit.coverage" NAME="pytest in unit Coverage Results" MODIFIED="1733962192295" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/unit" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_client_test_values_paged.coverage" NAME="pytest for e2e.test_client.test_values_paged Coverage Results" MODIFIED="1729118241939" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_session_test_basics.coverage" NAME="pytest for test_session.test_basics Coverage Results" MODIFIED="1688128325625" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_cache_options_test_near_cache_ttl_negative.coverage" NAME="pytest for unit.test_cache_options.test_near_cache_ttl_negative Coverage Results" MODIFIED="1733804423028" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_local_cache_str.coverage" NAME="pytest for unit.test_local_cache.test_local_cache_str Coverage Results" MODIFIED="1733771037146" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_replace.coverage" NAME="pytest for test_client.test_replace Coverage Results" MODIFIED="1726787283840" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_near_cache_test_near_cache_options_negative_units.coverage" NAME="pytest for unit.test_near_cache.test_near_cache_options_negative_units Coverage Results" MODIFIED="1730497569694" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_unit_test_local_cache_test_local_entry.coverage" NAME="pytest for tests.unit.test_local_cache.test_local_entry Coverage Results" MODIFIED="1733781103717" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_extractors_test_extract_multi.coverage" NAME="pytest for test_extractors.test_extract_multi Coverage Results" MODIFIED="1688127082842" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_remove.coverage" NAME="pytest for test_client.test_remove Coverage Results" MODIFIED="1726787242443" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_e2e_test_session_test_cache_destroy_event.coverage" NAME="pytest for tests.e2e.test_session.test_cache_destroy_event Coverage Results" MODIFIED="1728337915603" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_extractors_test_extract_chained.coverage" NAME="pytest for test_extractors.test_extract_chained Coverage Results" MODIFIED="1688126107103" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_expiry.coverage" NAME="pytest for unit.test_local_cache.test_expiry Coverage Results" MODIFIED="1733770520143" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_remove_mapping.coverage" NAME="pytest for test_client.test_remove_mapping Coverage Results" MODIFIED="1726787252501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_junk.coverage" NAME="pytest for unit.test_local_cache.test_junk Coverage Results" MODIFIED="1734134283717" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_get_or_default.coverage" NAME="pytest for test_client.test_get_or_default Coverage Results" MODIFIED="1726787154921" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_entries_paged.coverage" NAME="pytest for test_client.test_entries_paged Coverage Results" MODIFIED="1727822085431" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_unit_test_local_cache_test_expiry.coverage" NAME="pytest for tests.unit.test_local_cache.test_expiry Coverage Results" MODIFIED="1733800587717" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_put_with_expiry.coverage" NAME="pytest for test_client.test_put_with_expiry Coverage Results" MODIFIED="1704761183025" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_serialization_test_python_numerics_in_object.coverage" NAME="pytest for test_serialization.test_python_numerics_in_object Coverage Results" MODIFIED="1687629873820" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_e2e_test_session.coverage" NAME="pytest for tests.e2e.test_session Coverage Results" MODIFIED="1733380497934" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_near_caching_py.coverage" NAME="pytest in test_near_caching.py Coverage Results" MODIFIED="1734122013075" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_size.coverage" NAME="pytest for test_client.test_size Coverage Results" MODIFIED="1726787304676" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_contains_value.coverage" NAME="pytest for test_client.test_contains_value Coverage Results" MODIFIED="1726787297839" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_client_py.coverage" NAME="pytest in test_client.py Coverage Results" MODIFIED="1734043181933" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_processors_py.coverage" NAME="pytest in test_processors.py Coverage Results" MODIFIED="1728596798027" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_events_test_add_no_listener.coverage" NAME="pytest for test_events.test_add_no_listener Coverage Results" MODIFIED="1688128666496" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_session_auto_reconnect.coverage" NAME="pytest for test_client.test_session_auto_reconnect Coverage Results" MODIFIED="1686173714080" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_unit_test_local_cache_test_stats_reset.coverage" NAME="pytest for tests.unit.test_local_cache.test_stats_reset Coverage Results" MODIFIED="1733274431434" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_extractors_test_extract_no_expression.coverage" NAME="pytest for test_extractors.test_extract_no_expression Coverage Results" MODIFIED="1688125325901" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_session_test_session_lifecycle.coverage" NAME="pytest for test_session.test_session_lifecycle Coverage Results" MODIFIED="1687637636662" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_e2e_test_client_test_get_and_put.coverage" NAME="pytest for tests.e2e.test_client.test_get_and_put Coverage Results" MODIFIED="1728595552485" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_cache_options_test_near_cache_options_prune_factor.coverage" NAME="pytest for unit.test_cache_options.test_near_cache_options_prune_factor Coverage Results" MODIFIED="1733346067530" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_stats_reset.coverage" NAME="pytest for unit.test_local_cache.test_stats_reset Coverage Results" MODIFIED="1734133087121" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_session_reconnect_fail_fast.coverage" NAME="pytest for test_client.test_session_reconnect_fail_fast Coverage Results" MODIFIED="1687466844621" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_put_if_absent.coverage" NAME="pytest for test_client.test_put_if_absent Coverage Results" MODIFIED="1726786933906" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_session_test_cache_destroy_event.coverage" NAME="pytest for test_session.test_cache_destroy_event Coverage Results" MODIFIED="1727980407219" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_cache_options_test_near_cache_eq.coverage" NAME="pytest for unit.test_cache_options.test_near_cache_eq Coverage Results" MODIFIED="1734124528835" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_get_and_put.coverage" NAME="pytest for test_client.test_get_and_put Coverage Results" MODIFIED="1726774532872" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_unit_test_local_cache_test_pruning_units.coverage" NAME="pytest for tests.unit.test_local_cache.test_pruning_units Coverage Results" MODIFIED="1733280578649" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_get_all.coverage" NAME="pytest for unit.test_local_cache.test_get_all Coverage Results" MODIFIED="1733770280496" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_near_caching_test_remove.coverage" NAME="pytest for e2e.test_near_caching.test_remove Coverage Results" MODIFIED="1734035105292" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_extractors_test_extract_simple.coverage" NAME="pytest for test_extractors.test_extract_simple Coverage Results" MODIFIED="1688126100172" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_near_caching_test_concurrency.coverage" NAME="pytest for e2e.test_near_caching.test_concurrency Coverage Results" MODIFIED="1734567739401" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_near_cache_test_near_cache_options_ttl.coverage" NAME="pytest for unit.test_near_cache.test_near_cache_options_ttl Coverage Results" MODIFIED="1730498014699" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$nslookup.coverage" NAME="nslookup Coverage Results" MODIFIED="1738026038771" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/coherence" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_get_all_no_keys_raises_error.coverage" NAME="pytest for test_client.test_get_all_no_keys_raises_error Coverage Results" MODIFIED="1726787162587" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_test_session_test_wait_for_ready.coverage" NAME="pytest for tests.test_session.test_wait_for_ready Coverage Results" MODIFIED="1734645461230" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_session_test_wait_for_ready.coverage" NAME="pytest for test_session.test_wait_for_ready Coverage Results" MODIFIED="1694463915961" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_session_test_basics.coverage" NAME="pytest for e2e.test_session.test_basics Coverage Results" MODIFIED="1728337607318" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_pruning.coverage" NAME="pytest for unit.test_local_cache.test_pruning Coverage Results" MODIFIED="1733264716031" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_near_cache_test_near_cache_options_both_units.coverage" NAME="pytest for unit.test_near_cache.test_near_cache_options_both_units Coverage Results" MODIFIED="1730497781977" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_events_test_all.coverage" NAME="pytest for test_events.test_all Coverage Results" MODIFIED="1712340878092" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_session_basics.coverage" NAME="pytest for test_client.test_session_basics Coverage Results" MODIFIED="1685572004372" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_client_test_paged_stream_request_timeout.coverage" NAME="pytest for e2e.test_client.test_paged_stream_request_timeout Coverage Results" MODIFIED="1729881905398" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_values_filtered.coverage" NAME="pytest for test_client.test_values_filtered Coverage Results" MODIFIED="1726860768452" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_e2e_test_client_test_cache_truncate_event.coverage" NAME="pytest for tests.e2e.test_client.test_cache_truncate_event Coverage Results" MODIFIED="1728668172008" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_client_test_size.coverage" NAME="pytest for e2e.test_client.test_size Coverage Results" MODIFIED="1730241408778" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_extractors_test_compose.coverage" NAME="pytest for test_extractors.test_compose Coverage Results" MODIFIED="1688127006528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_environment_test_options.coverage" NAME="pytest for unit.test_environment.test_options Coverage Results" MODIFIED="1728324011898" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_unit_test_local_cache_test_local_entry_str.coverage" NAME="pytest for tests.unit.test_local_cache.test_local_entry_str Coverage Results" MODIFIED="1733963231956" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/unit" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_near_caching_test_incompatible_near_cache_options.coverage" NAME="pytest for e2e.test_near_caching.test_incompatible_near_cache_options Coverage Results" MODIFIED="1734035873207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_replace_mapping.coverage" NAME="pytest for test_client.test_replace_mapping Coverage Results" MODIFIED="1726787290827" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_values_paged.coverage" NAME="pytest for test_client.test_values_paged Coverage Results" MODIFIED="1727822102260" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_tests_e2e_test_session_test_wait_for_ready.coverage" NAME="pytest for tests.e2e.test_session.test_wait_for_ready Coverage Results" MODIFIED="1728681835132" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_near_caching_test_get_all.coverage" NAME="pytest for e2e.test_near_caching.test_get_all Coverage Results" MODIFIED="1734122009237" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_pruning_memory.coverage" NAME="pytest for unit.test_local_cache.test_pruning_memory Coverage Results" MODIFIED="1733268132086" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_client_test_get_and_put.coverage" NAME="pytest for e2e.test_client.test_get_and_put Coverage Results" MODIFIED="1737071029860" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_put_all.coverage" NAME="pytest for test_client.test_put_all Coverage Results" MODIFIED="1726787149087" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_is_empty.coverage" NAME="pytest for test_client.test_is_empty Coverage Results" MODIFIED="1726787301173" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_test_aggregators_py.coverage" NAME="pytest in test_aggregators.py Coverage Results" MODIFIED="1728596720483" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_test_client_test_session_destroy_event.coverage" NAME="pytest for test_client.test_session_destroy_event Coverage Results" MODIFIED="1687466383627" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_local_entry.coverage" NAME="pytest for unit.test_local_cache.test_local_entry Coverage Results" MODIFIED="1733769993939" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_client_test_request_timeout.coverage" NAME="pytest for e2e.test_client.test_request_timeout Coverage Results" MODIFIED="1729117604475" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_environment_test_disconnect_timeout.coverage" NAME="pytest for unit.test_environment.test_disconnect_timeout Coverage Results" MODIFIED="1728325438281" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_e2e_test_near_caching_test_basic_put_get_remove.coverage" NAME="pytest for e2e.test_near_caching.test_basic_put_get_remove Coverage Results" MODIFIED="1734032127198" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_for_unit_test_local_cache_test_basic_put_get.coverage" NAME="pytest for unit.test_local_cache.test_basic_put_get Coverage Results" MODIFIED="1733254658868" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/coherence_py_client$pytest_in_e2e.coverage" NAME="pytest in e2e Coverage Results" MODIFIED="1733961591341" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests/e2e" />
+  </component>
+</project>

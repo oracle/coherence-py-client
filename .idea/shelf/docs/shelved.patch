@@ -1,0 +1,35 @@
+Index: docs/sessions.rst
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>..\n   Copyright (c) 2022, 2023, Oracle and/or its affiliates.\n   Licensed under the Universal Permissive License v 1.0 as shown at\n   https://oss.oracle.com/licenses/upl.\n\nSessions\n========\n\nCoherence uses the concept of a `Session` to manage a set of related Coherence resources,\nsuch as maps and/or caches. When using the Coherence Python Client, a `Session` connects to a specific\ngRPC endpoint and uses a specific serialization format to marshal requests and responses.\nThis means that different sessions using different serializers may connect to the same server endpoint. Typically,\nfor efficiency the client and server would be configured to use matching serialization formats to avoid\ndeserialization of data on the server, but this does not have to be the case. If the server is using a different\nserializer for the server-side caches, it must be able to deserialize the client's requests, so there must be\na serializer configured on the server to match that used by the client.\n\n.. note::\n  Currently, the Coherence Python client only supports JSON serialization\n\nA `Session` is constructed using an `Options` instance, or a generic object with the same keys and values.\n\nThe currently supported arguments foe `Options` are:\n    - `address` - the address of the Coherence gRPC proxy.  This defaults to `localhost:1408`.\n    - `request_timeout_seconds` - the gRPC request timeout in seconds.  This defaults to `30.0`.\n    - `channel_options` - per-request gRPC channel options.\n    - `tls_options` - options related to the configuration of TLS.\n\n        - `enabled` - determines if TLS is enabled or not.  This defaults to `false` (NOTE: assumes `true` if all three `COHERENCE_TLS_*` (see subsequent bullets) environment variables are defined)\n        - `ca_cert_path` - the path to the CA certificate.  This may be configured using the environment variable `COHERENCE_TLS_CERTS_PATH`\n        - `client_cert_path` - the path to the client certificate. This may be configured with the environment variable `COHERENCE_TLS_CLIENT_CERT`\n        - `client_key_path` - the path to the client certificate key. This may be configured with the environment variable `COHERENCE_TLS_CLIENT_KEY`\n\n.. code-block:: python\n\n    from coherence import NamedCache, Session\n    import asyncio\n\n       # create a new Session to the Coherence server\n        session: Session = Session(None)\n\nThis is the simplest invocation which assumes the following defaults:\n    - `address` is `localhost:1408`\n    - `request_timeout_seconds` is `30.0`\n    - `tls_options` is `disabled`\n\nTo use values other than the default, create a new `Options` instance, configure as desired,\nand pass it to the constructor of the `Session`:\n\n.. code-block:: python\n\n    from coherence import NamedCache, Session\n    import asyncio\n\n       # create a new Session to the Coherence server\n        addr: str = 'example.com:4444'\n        opt: Options = Options(addr, default_scope, default_request_timeout, default_format)\n        session: Session = Session(opt)\n\nIt's also possible to control the default address the session will bind to by providing\nan address via the `COHERENCE_SERVER_ADDRESS` environment variable.  The format of the value would\nbe the same as if you configured it programmatically as the above example shows. The default timeout\ncan also be configured using `COHERENCE_CLIENT_REQUEST_TIMEOUT` environment variable.\n\nOnce the session has been constructed, it will now be possible to create maps and caches.\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/docs/sessions.rst b/docs/sessions.rst
+--- a/docs/sessions.rst	(revision 62d91cf7dfb5bb72462229a948affe34d3537ef1)
++++ b/docs/sessions.rst	(date 1734639464837)
+@@ -1,5 +1,5 @@
+ ..
+-   Copyright (c) 2022, 2023, Oracle and/or its affiliates.
++   Copyright (c) 2022, 2024, Oracle and/or its affiliates.
+    Licensed under the Universal Permissive License v 1.0 as shown at
+    https://oss.oracle.com/licenses/upl.
+ 
+@@ -37,7 +37,7 @@
+     import asyncio
+ 
+        # create a new Session to the Coherence server
+-        session: Session = Session(None)
++        session: Session = await Session.create()
+ 
+ This is the simplest invocation which assumes the following defaults:
+     - `address` is `localhost:1408`
+@@ -55,7 +55,7 @@
+        # create a new Session to the Coherence server
+         addr: str = 'example.com:4444'
+         opt: Options = Options(addr, default_scope, default_request_timeout, default_format)
+-        session: Session = Session(opt)
++        session: Session = await Session.create(opt)
+ 
+ It's also possible to control the default address the session will bind to by providing
+ an address via the `COHERENCE_SERVER_ADDRESS` environment variable.  The format of the value would

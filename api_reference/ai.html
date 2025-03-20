@@ -1,0 +1,430 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coherence.ai [24.09.2+ server required] &mdash; Python Client for Oracle Coherence. v2.0.0 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=51b770b3"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="coherence.aggregator" href="aggregator.html" />
+    <link rel="prev" title="Python Client API Reference for Oracle Coherence" href="../api_reference.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Python Client for Oracle Coherence. v2.0.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sessions.html">Sessions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../caches.html">Caches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../caches.html#near-caches">Near Caches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basics.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../querying.html">Querying</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../aggregation.html">Aggregation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../entryprocessing.html">Entry Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../serialization.html">Serialization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">Python Client API Reference for Oracle Coherence</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#aggregators">Aggregators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#cacheoptions">CacheOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#cachestats">CacheStats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#comparator">Comparator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#extractors">Extractors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#filters">Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapentry">MapEntry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapevent">MapEvent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#maplistener">MapListener</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedcache">NamedCache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedmap">NamedMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#nearcacheoptions">NearCacheOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#processors">Processors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#session">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tlsoptions">TlsOptions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">coherence.ai [24.09.2+ server required]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#vector">Vector</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bitvector">BitVector</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bytevector">ByteVector</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#floatvector">FloatVector</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#documentchunk">DocumentChunk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#distancealgorithm">DistanceAlgorithm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cosinedistance">CosineDistance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#innerproductdistance">InnerProductDistance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#l2squareddistance">L2SquaredDistance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#similaritysearch">SimilaritySearch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#queryresult">QueryResult</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#binaryquantindex">BinaryQuantIndex</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aggregator.html">coherence.aggregator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="comparator.html">coherence.comparator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="event.html">coherence.event</a></li>
+<li class="toctree-l3"><a class="reference internal" href="extractor.html">coherence.extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html">coherence.filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="processor.html">coherence.processor</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Python Client for Oracle Coherence. v2.0.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api_reference.html">Python Client API Reference for Oracle Coherence</a></li>
+      <li class="breadcrumb-item active">coherence.ai [24.09.2+ server required]</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api_reference/ai.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="coherence-ai-24-09-2-server-required">
+<h1>coherence.ai [24.09.2+ server required]<a class="headerlink" href="#coherence-ai-24-09-2-server-required" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<section id="vector">
+<h2>Vector<a class="headerlink" href="#vector" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.Vector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">Vector</span></span><a class="headerlink" href="#coherence.ai.Vector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class that represents a Vector.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.Vector.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.ai.Vector.__init__" title="Link to this definition"></a></dt>
+<dd><p>Constructs a new <cite>Vector</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="bitvector">
+<h2>BitVector<a class="headerlink" href="#bitvector" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.BitVector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">BitVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hex_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byte_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.ai.BitVector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.ai.Vector" title="coherence.ai.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a></p>
+<p>Class that represents a Vector of Bits.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.BitVector.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hex_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byte_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.ai.BitVector.__init__" title="Link to this definition"></a></dt>
+<dd><p>Creates an instance of BitVector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hex_string</strong> – hexadecimal string used to create the BitVector.</p></li>
+<li><p><strong>byte_array</strong> – optional byte array used to create the BitVector.</p></li>
+<li><p><strong>int_array</strong> – optional int array used to create the BitVector.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="bytevector">
+<h2>ByteVector<a class="headerlink" href="#bytevector" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.ByteVector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">ByteVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">byte_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.ai.ByteVector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.ai.Vector" title="coherence.ai.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a></p>
+<p>Class that represents Vector of bytes.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.ByteVector.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">byte_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.ai.ByteVector.__init__" title="Link to this definition"></a></dt>
+<dd><p>Creates an instance of ByteVector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>byte_array</strong> – byte array used to create a ByteVector.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="floatvector">
+<h2>FloatVector<a class="headerlink" href="#floatvector" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.FloatVector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">FloatVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">float_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.ai.FloatVector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.ai.Vector" title="coherence.ai.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vector</span></code></a></p>
+<p>Class that represents Vector of floats.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.FloatVector.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">float_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.ai.FloatVector.__init__" title="Link to this definition"></a></dt>
+<dd><p>Creates an instance of FloatVector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>float_array</strong> – array of floats used to create a FloatVector.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="documentchunk">
+<h2>DocumentChunk<a class="headerlink" href="#documentchunk" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.DocumentChunk">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">DocumentChunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">OrderedDict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.ai.Vector" title="coherence.ai.Vector"><span class="pre">Vector</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.ai.DocumentChunk" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractEvolvable</span></code></p>
+<p>Class that represents a chunk of text extracted from a document.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.DocumentChunk.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">OrderedDict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.ai.Vector" title="coherence.ai.Vector"><span class="pre">Vector</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.ai.DocumentChunk.__init__" title="Link to this definition"></a></dt>
+<dd><p>Creates an instance of DocumentChunk class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> – the chunk of text extracted from a document.</p></li>
+<li><p><strong>metadata</strong> – optional document metadata.</p></li>
+<li><p><strong>vector</strong> – the vector associated with the document chunk.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="distancealgorithm">
+<h2>DistanceAlgorithm<a class="headerlink" href="#distancealgorithm" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.DistanceAlgorithm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">DistanceAlgorithm</span></span><a class="headerlink" href="#coherence.ai.DistanceAlgorithm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class that represents algorithm that can calculate distance to a given vector.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.DistanceAlgorithm.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.ai.DistanceAlgorithm.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="cosinedistance">
+<h2>CosineDistance<a class="headerlink" href="#cosinedistance" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.CosineDistance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">CosineDistance</span></span><a class="headerlink" href="#coherence.ai.CosineDistance" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.ai.DistanceAlgorithm" title="coherence.ai.DistanceAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">DistanceAlgorithm</span></code></a></p>
+<p>Represents a DistanceAlgorithm that performs a cosine similarity calculation
+between two vectors. Cosine similarity measures the similarity between two
+vectors of an inner product space. It is measured by the cosine of the angle
+between two vectors and determines whether two vectors are pointing in
+roughly the same direction. It is often used to measure document similarity
+in text analysis.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.CosineDistance.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.ai.CosineDistance.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="innerproductdistance">
+<h2>InnerProductDistance<a class="headerlink" href="#innerproductdistance" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.InnerProductDistance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">InnerProductDistance</span></span><a class="headerlink" href="#coherence.ai.InnerProductDistance" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.ai.DistanceAlgorithm" title="coherence.ai.DistanceAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">DistanceAlgorithm</span></code></a></p>
+<p>Represents a DistanceAlgorithm that performs inner product distance
+calculation between two vectors.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.InnerProductDistance.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.ai.InnerProductDistance.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="l2squareddistance">
+<h2>L2SquaredDistance<a class="headerlink" href="#l2squareddistance" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.L2SquaredDistance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">L2SquaredDistance</span></span><a class="headerlink" href="#coherence.ai.L2SquaredDistance" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.ai.DistanceAlgorithm" title="coherence.ai.DistanceAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">DistanceAlgorithm</span></code></a></p>
+<p>Represents a DistanceAlgorithm that performs an L2 squared distance
+calculation between two vectors.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.L2SquaredDistance.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.ai.L2SquaredDistance.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="similaritysearch">
+<h2>SimilaritySearch<a class="headerlink" href="#similaritysearch" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.SimilaritySearch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">SimilaritySearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property:</span> <span class="pre">~coherence.extractor.ValueExtractor[~coherence.ai.T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~coherence.ai.E]</span> <span class="pre">|</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector:</span> <span class="pre">~coherence.ai.Vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_results:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm:</span> <span class="pre">~coherence.ai.DistanceAlgorithm</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;coherence.ai.CosineDistance</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter:</span> <span class="pre">~coherence.filter.Filter</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">brute_force:</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.ai.SimilaritySearch" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="aggregator.html#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntryAggregator</span></code></a></p>
+<p>This class represents an aggregator to execute a similarity query.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.SimilaritySearch.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property:</span> <span class="pre">~coherence.extractor.ValueExtractor[~coherence.ai.T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~coherence.ai.E]</span> <span class="pre">|</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector:</span> <span class="pre">~coherence.ai.Vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_results:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm:</span> <span class="pre">~coherence.ai.DistanceAlgorithm</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">&lt;coherence.ai.CosineDistance</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter:</span> <span class="pre">~coherence.filter.Filter</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">brute_force:</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.ai.SimilaritySearch.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create a SimilaritySearch aggregator that will use cosine distance to
+calculate and return up to <cite>max_results</cite> results that are closest to the
+specified <cite>vector</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extractor_or_property</strong> – the ValueExtractor to extract the vector
+from the cache value.</p></li>
+<li><p><strong>vector</strong> – the vector to calculate similarity with.</p></li>
+<li><p><strong>max_results</strong> – the maximum number of results to return.</p></li>
+<li><p><strong>algorithm</strong> – the distance algorithm to use.</p></li>
+<li><p><strong>filter</strong> – filter to use to limit the set of entries to search.</p></li>
+<li><p><strong>brute_force</strong> – Force brute force search, ignoring any available indexes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="queryresult">
+<h2>QueryResult<a class="headerlink" href="#queryresult" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.QueryResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">QueryResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.ai.QueryResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseQueryResult</span></code></p>
+<p>QueryResult class.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.QueryResult.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">V</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.ai.QueryResult.__init__" title="Link to this definition"></a></dt>
+<dd><p>Creates an instance of the QueryResult class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>result</strong> – the query result.</p></li>
+<li><p><strong>key</strong> – the key of the vector the result applies to.</p></li>
+<li><p><strong>value</strong> – the optional result value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="binaryquantindex">
+<h2>BinaryQuantIndex<a class="headerlink" href="#binaryquantindex" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.ai.BinaryQuantIndex">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.ai.</span></span><span class="sig-name descname"><span class="pre">BinaryQuantIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">over_sampling_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.ai.BinaryQuantIndex" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractEvolvable</span></code></p>
+<p>This class represents a custom index using binary quantization of vectors.</p>
+<p><strong>NOTE:</strong> This requires using Coherence CE 24.09.2+ on the server side.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.ai.BinaryQuantIndex.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">over_sampling_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.ai.BinaryQuantIndex.__init__" title="Link to this definition"></a></dt>
+<dd><p>Creates an instance of BinaryQuantIndex class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extractor</strong> – the ValueExtractor to use to extract the Vector.</p></li>
+<li><p><strong>over_sampling_factor</strong> – the oversampling factor.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../api_reference.html" class="btn btn-neutral float-left" title="Python Client API Reference for Oracle Coherence" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="aggregator.html" class="btn btn-neutral float-right" title="coherence.aggregator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright (c) 2022, 2025, Oracle and/or its affiliates..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
