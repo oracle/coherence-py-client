@@ -1,0 +1,969 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coherence.aggregator &mdash; Python Client for Oracle Coherence. v2.0.0 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=51b770b3"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="coherence.comparator" href="comparator.html" />
+    <link rel="prev" title="coherence.ai [24.09.2+ server required]" href="ai.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Python Client for Oracle Coherence. v2.0.0
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sessions.html">Sessions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../caches.html">Caches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../caches.html#near-caches">Near Caches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../basics.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../querying.html">Querying</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../aggregation.html">Aggregation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../entryprocessing.html">Entry Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../serialization.html">Serialization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">Python Client API Reference for Oracle Coherence</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#aggregators">Aggregators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#cacheoptions">CacheOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#cachestats">CacheStats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#comparator">Comparator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#extractors">Extractors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#filters">Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapentry">MapEntry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#mapevent">MapEvent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#maplistener">MapListener</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedcache">NamedCache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#namedmap">NamedMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#nearcacheoptions">NearCacheOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#processors">Processors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#session">Session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_reference.html#tlsoptions">TlsOptions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api_reference.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ai.html">coherence.ai [24.09.2+ server required]</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">coherence.aggregator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#entryaggregator">EntryAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#abstractcomparableaggregator">AbstractComparableAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#abstractdoubleaggregator">AbstractDoubleAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compositeaggregator">CompositeAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#maxaggregator">MaxAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#minaggregator">MinAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sumaggregator">SumAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#averageaggregator">AverageAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#countaggregator">CountAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#distinctvaluesaggregator">DistinctValuesAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#topaggregator">TopAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#groupaggregator">GroupAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#timeout">Timeout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#schedule">Schedule</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#priorityaggregator">PriorityAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#queryrecorder">QueryRecorder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reduceraggregator">ReducerAggregator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#aggregators">Aggregators</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="comparator.html">coherence.comparator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="event.html">coherence.event</a></li>
+<li class="toctree-l3"><a class="reference internal" href="extractor.html">coherence.extractor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="filter.html">coherence.filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="processor.html">coherence.processor</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Python Client for Oracle Coherence. v2.0.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api_reference.html">Python Client API Reference for Oracle Coherence</a></li>
+      <li class="breadcrumb-item active">coherence.aggregator</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api_reference/aggregator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="coherence-aggregator">
+<h1>coherence.aggregator<a class="headerlink" href="#coherence-aggregator" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<section id="entryaggregator">
+<h2>EntryAggregator<a class="headerlink" href="#entryaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.EntryAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">EntryAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.EntryAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>]</p>
+<p>An EntryAggregator represents processing that can be directed to occur against some subset of the entries in
+n cache, resulting in an aggregated result. Common examples of aggregation include functions such as min(),
+max() and avg(). However, the concept of aggregation applies to any process that needs to evaluate a group of
+entries to come up with a single answer.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.EntryAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.EntryAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Construct an AbstractAggregator that will aggregate values extracted from the cache entries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor that provides values to aggregate or the name of the method that
+could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
+dot-delimited sequence of method names which would result in an aggregator based on the
+<a class="reference internal" href="extractor.html#coherence.extractor.ChainedExtractor" title="coherence.extractor.ChainedExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ChainedExtractor</span></code></a> that is based on an array of corresponding
+<a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> objects; must not be <cite>None</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.EntryAggregator.and_then">
+<span class="sig-name descname"><span class="pre">and_then</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggregator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.EntryAggregator.and_then" title="Link to this definition"></a></dt>
+<dd><p>Returns a <a class="reference internal" href="#coherence.aggregator.CompositeAggregator" title="coherence.aggregator.CompositeAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.CompositeAggregator</span></code></a> comprised of this and the provided aggregator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>aggregator</strong> – the next aggregator</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="#coherence.aggregator.CompositeAggregator" title="coherence.aggregator.CompositeAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.CompositeAggregator</span></code></a> comprised of this and the provided aggregator</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="abstractcomparableaggregator">
+<h2>AbstractComparableAggregator<a class="headerlink" href="#abstractcomparableaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.AbstractComparableAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">AbstractComparableAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.AbstractComparableAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntryAggregator</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>]</p>
+<p>Abstract aggregator that processes values extracted from a set of entries in a Map, with knowledge of how to
+compare those values. There are two-way to use the AbstractComparableAggregator:</p>
+<ul class="simple">
+<li><p>All the extracted objects must implement the Java Comparable interface, or</p></li>
+<li><p>The AbstractComparableAggregator has to be provided with a <a class="reference internal" href="../api_reference.html#coherence.Comparator" title="coherence.comparator.Comparator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.comparator.Comparator</span></code></a> object.
+This <a class="reference internal" href="../api_reference.html#coherence.Comparator" title="coherence.comparator.Comparator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.comparator.Comparator</span></code></a> must exist on the server in order to be usable.</p></li>
+</ul>
+<p>If there are no entries to aggregate, the returned result will be <cite>None</cite>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.AbstractComparableAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.AbstractComparableAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Construct an AbstractComparableAggregator that will aggregate Java-Comparable values extracted from the cache
+entries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor that provides values to aggregate or the name of the method that
+could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
+dot-delimited sequence of method names which would result in an aggregator based on the
+<a class="reference internal" href="extractor.html#coherence.extractor.ChainedExtractor" title="coherence.extractor.ChainedExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ChainedExtractor</span></code></a> that is based on an array of corresponding
+<a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> objects; must not be <cite>None</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="abstractdoubleaggregator">
+<h2>AbstractDoubleAggregator<a class="headerlink" href="#abstractdoubleaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.AbstractDoubleAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">AbstractDoubleAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.AbstractDoubleAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntryAggregator</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Decimal</span></code>]</p>
+<p>Abstract aggregator that processes numeric values extracted from a set of entries in a Map. All the extracted
+Number objects will be treated as Java <cite>double</cite> values and the result of the aggregator is a Double. If
+the set of entries is empty, a <cite>None</cite> result is returned.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.AbstractDoubleAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.AbstractDoubleAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Construct an AbstractDoubleAggregator that will aggregate numeric values extracted from the cache entries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor that provides values to aggregate or the name of the method that
+could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
+dot-delimited sequence of method names which would result in an aggregator based on the
+<a class="reference internal" href="extractor.html#coherence.extractor.ChainedExtractor" title="coherence.extractor.ChainedExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ChainedExtractor</span></code></a> that is based on an array of corresponding
+<a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> objects; must not be <cite>None</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="compositeaggregator">
+<h2>CompositeAggregator<a class="headerlink" href="#compositeaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.CompositeAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">CompositeAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggregators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.CompositeAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntryAggregator</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>]]</p>
+<p><cite>CompositeAggregator</cite> provides an ability to execute a collection of aggregators against the same subset of
+the entries in a Map, resulting in a list of corresponding aggregation results. The size of the returned list
+will always be equal to the length of the aggregators list.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.CompositeAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggregators</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.CompositeAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Construct a CompositeAggregator based on a specified <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a> list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>aggregators</strong> – an array of <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a> objects; may not be <cite>None</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="maxaggregator">
+<h2>MaxAggregator<a class="headerlink" href="#maxaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.MaxAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">MaxAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.MaxAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.AbstractComparableAggregator" title="coherence.aggregator.AbstractComparableAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractComparableAggregator</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>]</p>
+<p>Calculates a maximum of numeric values extracted from a set of entries in a Map in a form of a numerical
+value. All the extracted objects will be treated as numerical values. If the set of entries is empty,
+a <cite>None</cite> result is returned.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.MaxAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.MaxAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Constructs a new <cite>MaxAggregator</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor that provides values to aggregate or the name of the method that
+could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
+dot-delimited sequence of method names which would result in an aggregator based on the
+<a class="reference internal" href="extractor.html#coherence.extractor.ChainedExtractor" title="coherence.extractor.ChainedExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ChainedExtractor</span></code></a> that is based on an array of corresponding
+<a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> objects; must not be <cite>None</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="minaggregator">
+<h2>MinAggregator<a class="headerlink" href="#minaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.MinAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">MinAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.MinAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.AbstractComparableAggregator" title="coherence.aggregator.AbstractComparableAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractComparableAggregator</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>]</p>
+<p>Calculates a minimum of numeric values extracted from a set of entries in a Map in a form of a numerical
+value. All the extracted objects will be treated as numerical values. If the set of entries is empty,
+a <cite>None</cite> result is returned.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.MinAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.MinAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Constructs a new <cite>MinAggregator</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor that provides values to aggregate or the name of the method that
+could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
+dot-delimited sequence of method names which would result in an aggregator based on the
+<a class="reference internal" href="extractor.html#coherence.extractor.ChainedExtractor" title="coherence.extractor.ChainedExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ChainedExtractor</span></code></a> that is based on an array of corresponding
+<a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> objects; must not be <cite>None</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="sumaggregator">
+<h2>SumAggregator<a class="headerlink" href="#sumaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.SumAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">SumAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.SumAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.AbstractDoubleAggregator" title="coherence.aggregator.AbstractDoubleAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractDoubleAggregator</span></code></a></p>
+<p>Calculates a sum for values of any numeric type extracted from a set of entries in a Map in a form of a
+numeric value.</p>
+<p>If the set of entries is empty, a ‘None’ result is returned.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.SumAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.SumAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Constructs a new <cite>SumAggregator</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor that provides values to aggregate or the name of the method that
+could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
+dot-delimited sequence of method names which would result in an aggregator based on the
+<a class="reference internal" href="extractor.html#coherence.extractor.ChainedExtractor" title="coherence.extractor.ChainedExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ChainedExtractor</span></code></a> that is based on an array of corresponding
+<a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> objects; must not be <cite>None</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="averageaggregator">
+<h2>AverageAggregator<a class="headerlink" href="#averageaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.AverageAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">AverageAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.AverageAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.AbstractDoubleAggregator" title="coherence.aggregator.AbstractDoubleAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractDoubleAggregator</span></code></a></p>
+<p>Calculates an average for values of any numeric type extracted from a set of entries in a Map in a form of a
+numerical value. All the extracted objects will be treated as numerical values. If the set of entries is empty,
+a <cite>None</cite> result is returned.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.AverageAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.AverageAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Construct an <cite>AverageAggregator</cite> that will sum numeric values extracted from the cache entries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor that provides values to aggregate or the name of the method that
+could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
+dot-delimited sequence of method names which would result in an aggregator based on the
+<a class="reference internal" href="extractor.html#coherence.extractor.ChainedExtractor" title="coherence.extractor.ChainedExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ChainedExtractor</span></code></a> that is based on an array of corresponding
+<a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> objects; must not be <cite>None</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="countaggregator">
+<h2>CountAggregator<a class="headerlink" href="#countaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.CountAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">CountAggregator</span></span><a class="headerlink" href="#coherence.aggregator.CountAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntryAggregator</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+<p>Calculates a number of values in an entry set.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.CountAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#coherence.aggregator.CountAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Constructs a new <cite>CountAggregator</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="distinctvaluesaggregator">
+<h2>DistinctValuesAggregator<a class="headerlink" href="#distinctvaluesaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.DistinctValuesAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">DistinctValuesAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.DistinctValuesAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntryAggregator</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>]</p>
+<p>Return the set of unique values extracted from a set of entries in a Map. If the set of entries is empty,
+an empty array is returned.</p>
+<p>This aggregator could be used in combination with <a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> allowing to
+collect all unique combinations (tuples) of a given set of attributes.</p>
+<p>The DistinctValues aggregator covers a simple case of a more generic aggregation pattern implemented by the
+<cite>GroupAggregator</cite>, which in addition to collecting all distinct values or tuples, runs an aggregation against
+each distinct entry set (group).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.DistinctValuesAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.DistinctValuesAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Construct a DistinctValuesAggregator that will aggregate numeric values extracted from the cache entries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor that provides values to aggregate or the name of the method that
+could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
+dot-delimited sequence of method names which would result in an aggregator based on the
+<a class="reference internal" href="extractor.html#coherence.extractor.ChainedExtractor" title="coherence.extractor.ChainedExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ChainedExtractor</span></code></a> that is based on an array of corresponding
+<a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> objects; must not be <cite>None</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="topaggregator">
+<h2>TopAggregator<a class="headerlink" href="#topaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.TopAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">TopAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extractor:</span> <span class="pre">~coherence.extractor.ValueExtractor[~typing.Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Any]</span> <span class="pre">=</span> <span class="pre">&lt;coherence.extractor.IdentityExtractor</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparator:</span> <span class="pre">~coherence.comparator.Comparator</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">property_name:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.TopAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">E</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>], <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntryAggregator</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>]]</p>
+<p><cite>TopAggregator</cite> aggregates the top <em>N</em> extracted values into an array.  The extracted values must not be
+<cite>None</cite>, but do not need to be unique.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.TopAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extractor:</span> <span class="pre">~coherence.extractor.ValueExtractor[~typing.Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Any]</span> <span class="pre">=</span> <span class="pre">&lt;coherence.extractor.IdentityExtractor</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparator:</span> <span class="pre">~coherence.comparator.Comparator</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">property_name:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.TopAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Constructs a new <cite>TopAggregator</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> – the maximum number of results to include in the aggregation result.</p></li>
+<li><p><strong>inverse</strong> – Result order.  By default, results will be ordered in descending order.</p></li>
+<li><p><strong>extractor</strong> – The extractor to obtain the values to aggregate.  If not explicitly set, this will default
+to an <a class="reference internal" href="extractor.html#coherence.extractor.IdentityExtractor" title="coherence.extractor.IdentityExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.IdentityExtractor</span></code></a>.</p></li>
+<li><p><strong>comparator</strong> – The <a class="reference internal" href="../api_reference.html#coherence.Comparator" title="coherence.comparator.Comparator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.comparator.Comparator</span></code></a> to apply against the extracted values.</p></li>
+<li><p><strong>property_name</strong> – The property that results will be ordered by.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="coherence.aggregator.TopAggregator.ascending">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ascending</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#coherence.aggregator.TopAggregator" title="coherence.aggregator.TopAggregator"><span class="pre">TopAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">E</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#coherence.aggregator.TopAggregator.ascending" title="Link to this definition"></a></dt>
+<dd><p>Sort the returned values in ascending order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>an instance of <a class="reference internal" href="#coherence.aggregator.TopAggregator" title="coherence.aggregator.TopAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.TopAggregator</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="coherence.aggregator.TopAggregator.descending">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">descending</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#coherence.aggregator.TopAggregator" title="coherence.aggregator.TopAggregator"><span class="pre">TopAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">E</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#coherence.aggregator.TopAggregator.descending" title="Link to this definition"></a></dt>
+<dd><p>Sort the returned values in descending order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>an instance of <a class="reference internal" href="#coherence.aggregator.TopAggregator" title="coherence.aggregator.TopAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.TopAggregator</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.TopAggregator.extract">
+<span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.TopAggregator" title="coherence.aggregator.TopAggregator"><span class="pre">TopAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">E</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.TopAggregator.extract" title="Link to this definition"></a></dt>
+<dd><p>The property name of the value to extract.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>property_name</strong> – the property name</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.TopAggregator.order_by">
+<span class="sig-name descname"><span class="pre">order_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.TopAggregator" title="coherence.aggregator.TopAggregator"><span class="pre">TopAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">E</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.TopAggregator.order_by" title="Link to this definition"></a></dt>
+<dd><p>Order the results based on the values of the specified property.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>property_name</strong> – the property name</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an instance of <a class="reference internal" href="#coherence.aggregator.TopAggregator" title="coherence.aggregator.TopAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.TopAggregator</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="groupaggregator">
+<h2>GroupAggregator<a class="headerlink" href="#groupaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.GroupAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">GroupAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">Filter</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.GroupAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntryAggregator</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>]</p>
+<p>The <cite>GroupAggregator</cite> provides an ability to split a subset of entries in a Map into a collection of
+non-intersecting subsets and then aggregate them separately and independently. The splitting (grouping) is
+performed using the results of the underlying <a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> in such a way that
+two entries will belong to the same group if and only if the result of the corresponding extract call produces
+the same value or tuple (list of values). After the entries are split into the groups, the underlying aggregator
+is applied separately to each group. The result of the aggregation by the` GroupAggregator` is a Map that has
+distinct values (or tuples) as keys and results of the individual aggregation as values. Additionally,
+those results could be further reduced using an optional <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> object.</p>
+<p>Informally speaking, this aggregator is analogous to the SQL <cite>group by</cite> and <cite>having</cite> clauses. Note that the
+<cite>having</cite> Filter is applied independently on each server against the partial aggregation results; this generally
+implies that data affinity is required to ensure that all required data used to generate a given result exists
+within a single cache partition. In other words, the <cite>group by</cite> predicate should not span multiple partitions if
+the <cite>having</cite> clause is used.</p>
+<p>The <cite>GroupAggregator</cite> is somewhat similar to the DistinctValues aggregator, which returns back a list of distinct
+values (tuples) without performing any additional aggregation work.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.GroupAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">Filter</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.GroupAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Construct a <cite>GroupAggregator</cite> based on a specified <a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> and underlying
+<a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extractor_or_property</strong> – a <a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a> object that is used to split
+entries into non-intersecting subsets; may not be <cite>None</cite>. This parameter can also be a dot-delimited sequence
+of method names which would result in an aggregator based on the <a class="reference internal" href="extractor.html#coherence.extractor.ChainedExtractor" title="coherence.extractor.ChainedExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ChainedExtractor</span></code></a>
+that is based on an array of corresponding <a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> objects; may not be
+<cite>NONE</cite></p></li>
+<li><p><strong>aggregator</strong> – an EntryAggregator object; may not be null</p></li>
+<li><p><strong>filter</strong> – an optional Filter object used to filter out results
+of individual group aggregation results</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="timeout">
+<h2>Timeout<a class="headerlink" href="#timeout" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.Timeout">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">Timeout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.Timeout" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="coherence.aggregator.Timeout.DEFAULT">
+<span class="sig-name descname"><span class="pre">DEFAULT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#coherence.aggregator.Timeout.DEFAULT" title="Link to this definition"></a></dt>
+<dd><p>A special timeout value to indicate that the corresponding service’s default timeout value should be used.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="coherence.aggregator.Timeout.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#coherence.aggregator.Timeout.NONE" title="Link to this definition"></a></dt>
+<dd><p>A special timeout value to indicate that this task or request can run indefinitely.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="schedule">
+<h2>Schedule<a class="headerlink" href="#schedule" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.Schedule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">Schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.Schedule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="coherence.aggregator.Schedule.FIRST">
+<span class="sig-name descname"><span class="pre">FIRST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#coherence.aggregator.Schedule.FIRST" title="Link to this definition"></a></dt>
+<dd><p>Scheduling value indicating that this task is to be queued in front of any equal or lower scheduling priority
+tasks and executed as soon as any of the worker threads become available.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="coherence.aggregator.Schedule.IMMEDIATE">
+<span class="sig-name descname"><span class="pre">IMMEDIATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#coherence.aggregator.Schedule.IMMEDIATE" title="Link to this definition"></a></dt>
+<dd><p>Scheduling value indicating that this task is to be immediately executed by any idle worker thread; if all
+of them are active, a new thread will be created to execute this task.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="coherence.aggregator.Schedule.STANDARD">
+<span class="sig-name descname"><span class="pre">STANDARD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#coherence.aggregator.Schedule.STANDARD" title="Link to this definition"></a></dt>
+<dd><p>Scheduling value indicating that this task is to be queued and execute in a natural (based on the request
+arrival time) order.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="priorityaggregator">
+<h2>PriorityAggregator<a class="headerlink" href="#priorityaggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.PriorityAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">PriorityAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggregator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Timeout.DEFAULT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Timeout.DEFAULT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduling_priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.Schedule" title="coherence.aggregator.Schedule"><span class="pre">Schedule</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Schedule.STANDARD</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.PriorityAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>], <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntryAggregator</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>]</p>
+<p>A <cite>PriorityAggregator</cite> is used to explicitly control the scheduling priority and timeouts for execution of
+EntryAggregator-based methods.</p>
+<p>For example, lets assume that there is an <cite>Orders</cite> cache that belongs to a partitioned cache service configured
+with a <em>request-timeout</em> and <em>task-timeout</em> of 5 seconds. Also assume that we are willing to wait longer for a
+particular aggregation request that scans the entire cache. Then we could override the default timeout values by
+using the PriorityAggregator as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sumAggr</span> <span class="o">=</span> <span class="n">SumAggregator</span><span class="p">(</span><span class="s2">&quot;cost&quot;</span><span class="p">)</span>
+<span class="n">priorityAgg</span> <span class="o">=</span> <span class="n">PriorityAggregator</span><span class="p">(</span><span class="n">sumAggr</span><span class="p">)</span>
+<span class="n">priorityAgg</span><span class="o">.</span><span class="n">executionTimeout</span> <span class="o">=</span> <span class="n">Timeout</span><span class="o">.</span><span class="n">NONE</span>
+<span class="n">priorityAgg</span><span class="o">.</span><span class="n">requestTimeout</span> <span class="o">=</span> <span class="n">Timeout</span><span class="o">.</span><span class="n">NONE</span>
+<span class="n">cacheOrders</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">aFilter</span><span class="p">,</span> <span class="n">priorityAgg</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is an advanced feature which should be used judiciously.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.PriorityAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggregator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Timeout.DEFAULT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Timeout.DEFAULT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduling_priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.Schedule" title="coherence.aggregator.Schedule"><span class="pre">Schedule</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Schedule.STANDARD</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.PriorityAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Construct a new <cite>PriorityAggregator</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>aggregator</strong> – The wrapped <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a>.</p></li>
+<li><p><strong>execution_timeout</strong> – The task execution timeout value.</p></li>
+<li><p><strong>request_timeout</strong> – The request timeout value.</p></li>
+<li><p><strong>scheduling_priority</strong> – The scheduling priority.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="coherence.aggregator.PriorityAggregator.execution_timeout_in_millis">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">execution_timeout_in_millis</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#coherence.aggregator.PriorityAggregator.execution_timeout_in_millis" title="Link to this definition"></a></dt>
+<dd><p>Return the execution timeout in milliseconds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the execution timeout</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="coherence.aggregator.PriorityAggregator.request_timeout_in_millis">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">request_timeout_in_millis</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#coherence.aggregator.PriorityAggregator.request_timeout_in_millis" title="Link to this definition"></a></dt>
+<dd><p>Return the request timeout in milliseconds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the request timeout</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="coherence.aggregator.PriorityAggregator.scheduling_priority">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scheduling_priority</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#coherence.aggregator.Schedule" title="coherence.aggregator.Schedule"><span class="pre">Schedule</span></a></em><a class="headerlink" href="#coherence.aggregator.PriorityAggregator.scheduling_priority" title="Link to this definition"></a></dt>
+<dd><p>Return the scheduling priority or, if not explicitly set, the default is
+<a class="reference internal" href="#coherence.aggregator.Schedule.STANDARD" title="coherence.aggregator.Schedule.STANDARD"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.Schedule.STANDARD</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the scheduling priority</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="queryrecorder">
+<h2>QueryRecorder<a class="headerlink" href="#queryrecorder" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.QueryRecorder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">QueryRecorder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RecordType</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.QueryRecorder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntryAggregator</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code>]</p>
+<p>This aggregator is used to produce an object that contains an estimated or actual cost of the query execution
+for a given <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a>.</p>
+<p>For example, the following code will print a <em>QueryRecord</em>,
+containing the estimated query cost and corresponding execution steps:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">agent</span>  <span class="o">=</span> <span class="n">QueryRecorder</span><span class="p">(</span><span class="n">RecordType</span><span class="o">.</span><span class="n">EXPLAIN</span><span class="p">);</span>
+<span class="n">record</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">someFilter</span><span class="p">,</span> <span class="n">agent</span><span class="p">);</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">record</span><span class="p">));</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.QueryRecorder.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RecordType</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.QueryRecorder.__init__" title="Link to this definition"></a></dt>
+<dd><p>Construct a new <cite>QueryRecorder</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>query_type</strong> – the type for this aggregator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="coherence.aggregator.QueryRecorder.EXPLAIN">
+<span class="sig-name descname"><span class="pre">EXPLAIN</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'EXPLAIN'</span></em><a class="headerlink" href="#coherence.aggregator.QueryRecorder.EXPLAIN" title="Link to this definition"></a></dt>
+<dd><p>String constant for serialization purposes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="coherence.aggregator.QueryRecorder.TRACE">
+<span class="sig-name descname"><span class="pre">TRACE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TRACE'</span></em><a class="headerlink" href="#coherence.aggregator.QueryRecorder.TRACE" title="Link to this definition"></a></dt>
+<dd><p>String constant for serialization purposes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="reduceraggregator">
+<h2>ReducerAggregator<a class="headerlink" href="#reduceraggregator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.ReducerAggregator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">ReducerAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.ReducerAggregator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EntryAggregator</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code>]</p>
+<p>The <cite>ReducerAggregator</cite> is used to implement functionality similar to <code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.client.NamedMap.getAll(</span>
+<span class="pre">)</span></code> API.  Instead of returning the complete set of values, it will return a portion of value attributes based on
+the provided <a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ValueExtractor</span></code></a>.</p>
+<p>This aggregator could be used in combination with <a class="reference external" href="mailto:{&#37;&#52;&#48;link">{<span>&#64;</span>link</a> MultiExtractor} allowing one to collect tuples that are
+a subset of the attributes of each object stored in the cache.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.ReducerAggregator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#coherence.aggregator.ReducerAggregator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Creates a new <cite>ReducerAggregator</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor that provides values to aggregate or the name of the method that
+could be invoked via Java reflection and that returns values to aggregate; this parameter can also be a
+dot-delimited sequence of method names which would result in an aggregator based on the
+<a class="reference internal" href="extractor.html#coherence.extractor.ChainedExtractor" title="coherence.extractor.ChainedExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.ChainedExtractor</span></code></a> that is based on an array of corresponding
+<a class="reference internal" href="extractor.html#coherence.extractor.UniversalExtractor" title="coherence.extractor.UniversalExtractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.extractor.UniversalExtractor</span></code></a> objects; must not be <cite>None</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="aggregators">
+<h2>Aggregators<a class="headerlink" href="#aggregators" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">coherence.aggregator.</span></span><span class="sig-name descname"><span class="pre">Aggregators</span></span><a class="headerlink" href="#coherence.aggregator.Aggregators" title="Link to this definition"></a></dt>
+<dd><p>Simple Aggregator DSL.</p>
+<p>The methods in this class are for the most part simple factory methods for various
+<a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a>  classes, but in some cases provide additional type safety. They
+also tend to make the code more readable, especially if imported statically, so their use is strongly encouraged
+in lieu of direct construction of <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a>  classes.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.average">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Decimal</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.average" title="Link to this definition"></a></dt>
+<dd><p>Return an aggregator that calculates an average of the numeric values extracted from a set of entries in a Map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor or method/property name to provide values for aggregation</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an aggregator that calculates an average of the numeric values extracted from a
+set of entries in a Map.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.count">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.count" title="Link to this definition"></a></dt>
+<dd><p>Return an aggregator that calculates a number of values in an entry set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>an aggregator that calculates a number of values in an entry set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.distinct">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">distinct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.distinct" title="Link to this definition"></a></dt>
+<dd><p>Return an aggregator that calculates the set of distinct values from the entries in a Map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor or method/property name to provide values for aggregation</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an aggregator that calculates the set of distinct values from the entries in a Map.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.group_by">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">group_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><span class="pre">Filter</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">G</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.group_by" title="Link to this definition"></a></dt>
+<dd><p>Return a <a class="reference internal" href="#coherence.aggregator.GroupAggregator" title="coherence.aggregator.GroupAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.GroupAggregator</span></code></a> based on a specified property or method name(s) and an
+<a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extractor_or_property</strong> – the extractor or method/property name to provide values for aggregation</p></li>
+<li><p><strong>aggregator</strong> – the underlying <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a></p></li>
+<li><p><strong>filter</strong> – an optional <a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a> object used to filter out results
+of individual group aggregation results</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="#coherence.aggregator.GroupAggregator" title="coherence.aggregator.GroupAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.GroupAggregator</span></code></a> based on a specified property or method name(s) and an
+<a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.max">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.max" title="Link to this definition"></a></dt>
+<dd><p>Return an aggregator that calculates a maximum of the numeric values extracted from a set of entries in a Map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor or method/property name to provide values for aggregation</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an aggregator that calculates a maximum of the numeric values extracted from a set of entries in a Map</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.min">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.min" title="Link to this definition"></a></dt>
+<dd><p>Return an aggregator that calculates a minimum of the numeric values extracted from a set of entries in a Map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor or method/property name to provide values for aggregation</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an aggregator that calculates a minimum of the numeric values extracted from a set of entries in a Map.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.priority">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">priority</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggregator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.Timeout" title="coherence.aggregator.Timeout"><span class="pre">Timeout</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Timeout.DEFAULT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.Timeout" title="coherence.aggregator.Timeout"><span class="pre">Timeout</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Timeout.DEFAULT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduling_priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#coherence.aggregator.Schedule" title="coherence.aggregator.Schedule"><span class="pre">Schedule</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Schedule.STANDARD</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.priority" title="Link to this definition"></a></dt>
+<dd><p>Return a new <a class="reference internal" href="#coherence.aggregator.PriorityAggregator" title="coherence.aggregator.PriorityAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.PriorityAggregator</span></code></a> to control scheduling priority of an aggregation
+operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>aggregator</strong> – the underlying <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a></p></li>
+<li><p><strong>execution_timeout</strong> – the execution <a class="reference internal" href="#coherence.aggregator.Timeout" title="coherence.aggregator.Timeout"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.Timeout</span></code></a></p></li>
+<li><p><strong>request_timeout</strong> – the request <a class="reference internal" href="#coherence.aggregator.Timeout" title="coherence.aggregator.Timeout"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.Timeout</span></code></a></p></li>
+<li><p><strong>scheduling_priority</strong> – the <a class="reference internal" href="#coherence.aggregator.Schedule" title="coherence.aggregator.Schedule"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.Schedule</span></code></a> priority</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a new <a class="reference internal" href="#coherence.aggregator.PriorityAggregator" title="coherence.aggregator.PriorityAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.PriorityAggregator</span></code></a> to control scheduling priority of an aggregation
+operation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.record">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RecordType</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">RecordType.EXPLAIN</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.record" title="Link to this definition"></a></dt>
+<dd><p>Returns a new <a class="reference internal" href="#coherence.aggregator.QueryRecorder" title="coherence.aggregator.QueryRecorder"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.QueryRecorder</span></code></a> aggregator which may be used is used to produce an
+object that contains an estimated or actual cost of the query execution for a given
+<a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>query_type</strong> – the <code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.RecordType</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a new <a class="reference internal" href="#coherence.aggregator.QueryRecorder" title="coherence.aggregator.QueryRecorder"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.QueryRecorder</span></code></a> aggregator which may be used is used to produce an
+object that contains an estimated or actual cost of the query execution for a given
+<a class="reference internal" href="filter.html#coherence.filter.Filter" title="coherence.filter.Filter"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.filter.Filter</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.reduce">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">K</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.reduce" title="Link to this definition"></a></dt>
+<dd><p>Return an aggregator that will return the extracted value for each entry in the map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor or method/property name to provide values for aggregation</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an aggregator that will return the extracted value for each entry in the map.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.script">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">characteristics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.script" title="Link to this definition"></a></dt>
+<dd><p>Return an aggregator that is implemented in a script using the specified language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>language</strong> – The language with which the script is written in.</p></li>
+<li><p><strong>script_name</strong> – The name of the <a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><code class="xref py py-class docutils literal notranslate"><span class="pre">coherence.aggregator.EntryAggregator</span></code></a> that needs to be evaluated.</p></li>
+<li><p><strong>characteristics</strong> – Present only for serialization purposes.</p></li>
+<li><p><strong>args</strong> – The arguments to be passed to the script for evaluation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an aggregator that is implemented in a script using the specified language.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.sum">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor_or_property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="extractor.html#coherence.extractor.ValueExtractor" title="coherence.extractor.ValueExtractor"><span class="pre">ValueExtractor</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">E</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.EntryAggregator" title="coherence.aggregator.EntryAggregator"><span class="pre">EntryAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Decimal</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.sum" title="Link to this definition"></a></dt>
+<dd><p>Return an aggregator that calculates a sum of the numeric values extracted from a set of entries in a Map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor_or_property</strong> – the extractor or method/property name to provide values for aggregation</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an aggregator that calculates a sum of the numeric values extracted from a set of entries in a Map.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="coherence.aggregator.Aggregators.top">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">top</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#coherence.aggregator.TopAggregator" title="coherence.aggregator.TopAggregator"><span class="pre">TopAggregator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#coherence.aggregator.Aggregators.top" title="Link to this definition"></a></dt>
+<dd><p>Return an aggregator that aggregates the top <em>N</em> extracted values into an array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>count</strong> – the maximum number of results to include in the aggregation result</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an aggregator that aggregates the top <em>N</em> extracted values into an array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ai.html" class="btn btn-neutral float-left" title="coherence.ai [24.09.2+ server required]" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="comparator.html" class="btn btn-neutral float-right" title="coherence.comparator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright (c) 2022, 2025, Oracle and/or its affiliates..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
