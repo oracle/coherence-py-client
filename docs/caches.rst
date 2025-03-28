@@ -41,7 +41,7 @@ ensures updates made to, or removal of, an entry are properly
 reflected thus ensuring stale data isn't mistakenly returned.
 
 .. note::
-  Near caching will only work with Coherence CE `24.09` or later.  Attempting
+  Near caching will only work with Coherence CE `25.03` or later.  Attempting
   to use near caching features with older versions will have no effect.
 
 A near cache is configured via `NearCacheOptions` which provides several

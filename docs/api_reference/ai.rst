@@ -4,7 +4,7 @@
    https://oss.oracle.com/licenses/upl.
 
 =======================================
-coherence.ai [24.09.2+ server required]
+coherence.ai [25.03+ server required]
 =======================================
 .. toctree::
    :maxdepth: 4

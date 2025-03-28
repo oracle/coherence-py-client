@@ -27,7 +27,7 @@ class Vector(ABC):
     """
     Base class that represents a Vector.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(self) -> None:
@@ -42,7 +42,7 @@ class BitVector(Vector):
     """
     Class that represents a Vector of Bits.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(
@@ -78,7 +78,7 @@ class ByteVector(Vector):
     """
     Class that represents Vector of bytes.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(self, byte_array: bytes):
@@ -96,7 +96,7 @@ class FloatVector(Vector):
     """
     Class that represents Vector of floats.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(self, float_array: List[float]):
@@ -120,7 +120,7 @@ class DocumentChunk(AbstractEvolvable):
     """
     Class that represents a chunk of text extracted from a document.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(
@@ -194,7 +194,7 @@ class DistanceAlgorithm(ABC):
     """
     Base class that represents algorithm that can calculate distance to a given vector.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(self) -> None:
@@ -211,7 +211,7 @@ class CosineDistance(DistanceAlgorithm):
     roughly the same direction. It is often used to measure document similarity
     in text analysis.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(self) -> None:
@@ -224,7 +224,7 @@ class InnerProductDistance(DistanceAlgorithm):
     Represents a DistanceAlgorithm that performs inner product distance
     calculation between two vectors.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(self) -> None:
@@ -237,7 +237,7 @@ class L2SquaredDistance(DistanceAlgorithm):
     Represents a DistanceAlgorithm that performs an L2 squared distance
     calculation between two vectors.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(self) -> None:
@@ -249,7 +249,7 @@ class SimilaritySearch(EntryAggregator):
     """
     This class represents an aggregator to execute a similarity query.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(
@@ -286,7 +286,7 @@ class BaseQueryResult(ABC):
     """
     A base class for QueryResult implementation.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(self, result: float, key: K, value: V) -> None:
@@ -300,7 +300,7 @@ class QueryResult(BaseQueryResult):
     """
     QueryResult class.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(self, result: float, key: K, value: V) -> None:
@@ -322,7 +322,7 @@ class BinaryQuantIndex(AbstractEvolvable):
     """
     This class represents a custom index using binary quantization of vectors.
 
-    **NOTE:** This requires using Coherence CE 24.09.2+ on the server side.
+    **NOTE:** This requires using Coherence CE 25.03+ on the server side.
     """
 
     def __init__(self, extractor: Union[ValueExtractor[T, E], str], over_sampling_factor: int = 3) -> None:
