@@ -21,7 +21,7 @@ The Coherence Python Client allows Python applications to act as cache clients t
 
 #### Requirements
 * [Coherence CE](https://github.com/oracle/coherence) 22.06.11+ or Coherence 14.1.1.2206.11+, 14.1.2.0+ Commercial edition with a configured [gRPCProxy](https://docs.oracle.com/en/middleware/standalone/coherence/14.1.1.2206/develop-remote-clients/using-coherence-grpc-server.html).
-* Usage of module `coherence.ai` requires [Coherence CE](https://github.com/oracle/coherence) 25.03+
+* Usage of module `coherence.ai` requires [Coherence CE](https://github.com/oracle/coherence) 24.09.2+
 * Python 3.9.x or later
 
 
