@@ -54,12 +54,12 @@ async def populate_vectors(vectors: NamedCache[int, ValueWithVector]) -> ValueWi
 
     # Assign normalized vectors to the first 5 entries
     for i in range(5):
-        values[i] = ValueWithVector(FloatVector(Vectors.normalize(matches[i])), str(i), i)
+        values[i] = ValueWithVector(FloatVector(Vectors.normalize_numpy(matches[i])), str(i), i)
         await vectors.put(i, values[i])
 
     # Fill the remaining values with random vectors
     for i in range(5, count):
-        values[i] = ValueWithVector(FloatVector(Vectors.normalize(random_floats(DIMENSIONS))), str(i), i)
+        values[i] = ValueWithVector(FloatVector(Vectors.normalize_numpy(random_floats(DIMENSIONS))), str(i), i)
         await vectors.put(i, values[i])
 
     return cast(ValueWithVector, values[0])
@@ -79,13 +79,13 @@ async def populate_document_chunk_vectors(vectors: NamedCache[int, DocumentChunk
 
     # Assign normalized vectors to the first 5 entries
     for i in range(5):
-        values[i] = DocumentChunk(str(i), metadata=None, vector=FloatVector(Vectors.normalize(matches[i])))
+        values[i] = DocumentChunk(str(i), metadata=None, vector=FloatVector(Vectors.normalize_numpy(matches[i])))
         await vectors.put(i, values[i])
 
     # Fill the remaining values with random vectors
     for i in range(5, count):
         values[i] = DocumentChunk(
-            str(i), metadata=None, vector=FloatVector(Vectors.normalize(random_floats(DIMENSIONS)))
+            str(i), metadata=None, vector=FloatVector(Vectors.normalize_numpy(random_floats(DIMENSIONS)))
         )
         await vectors.put(i, values[i])
 
