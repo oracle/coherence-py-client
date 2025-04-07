@@ -1,16 +1,16 @@
-# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2025, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 from __future__ import annotations
 
 import base64
-import math
 from abc import ABC
 from collections import OrderedDict
 from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 
 import jsonpickle
+import numpy as np
 
 from coherence.aggregator import EntryAggregator
 from coherence.extractor import ValueExtractor
@@ -342,19 +342,8 @@ class Vectors:
     EPSILON = 1e-30  # Python automatically handles float precision
 
     @staticmethod
-    def normalize(array: List[float]) -> List[float]:
-        norm = 0.0
-        c_dim = len(array)
-
-        # Calculate the norm (sum of squares)
-        for v in array:
-            norm += v * v
-
-        # Compute the normalization factor (inverse of the square root of the sum of squares)
-        norm = 1.0 / (math.sqrt(norm) + Vectors.EPSILON)
-
-        # Apply the normalization factor to each element in the array
-        for i in range(c_dim):
-            array[i] = array[i] * norm
-
-        return array
+    def normalize(array: list[float]) -> list[float]:
+        np_array = np.array(array, dtype=np.float64)
+        norm = np.linalg.norm(np_array) + Vectors.EPSILON
+        normalized_array = np_array / norm
+        return normalized_array.tolist()
