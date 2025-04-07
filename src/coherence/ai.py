@@ -8,9 +8,9 @@ import base64
 from abc import ABC
 from collections import OrderedDict
 from typing import Any, Dict, List, Optional, TypeVar, Union, cast
-import numpy as np
 
 import jsonpickle
+import numpy as np
 
 from coherence.aggregator import EntryAggregator
 from coherence.extractor import ValueExtractor
