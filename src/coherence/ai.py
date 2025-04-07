@@ -342,7 +342,7 @@ class Vectors:
     EPSILON = 1e-30  # Python automatically handles float precision
 
     @staticmethod
-    def normalize_numpy(array: list[float]) -> list[float]:
+    def normalize(array: list[float]) -> list[float]:
         np_array = np.array(array, dtype=np.float64)
         norm = np.linalg.norm(np_array) + Vectors.EPSILON
         normalized_array = np_array / norm
