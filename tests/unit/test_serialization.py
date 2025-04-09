@@ -15,6 +15,7 @@ from coherence.ai import (
     CosineDistance,
     DocumentChunk,
     FloatVector,
+    HnswIndex,
     QueryResult,
     SimilaritySearch,
 )
@@ -253,3 +254,19 @@ def test_binary_quant_index_serialization() -> None:
 
     o = s.deserialize(ser)
     assert isinstance(o, BinaryQuantIndex)
+
+
+# noinspection PyUnresolvedReferences
+def test_HnswIndex_serialization() -> None:
+    bqi = HnswIndex(Extractors.extract("foo"), 384)
+    ser = s.serialize(bqi)
+    assert ser == (
+        b'\x15{"@class": "coherence.hnsw.HnswIndex", "dataVersion": 0, '
+        b'"binFuture": null, "extractor": {"@class": "extractor.UniversalExtractor", '
+        b'"name": "foo", "params": null}, "dimensions": 384, "spaceName": "COSINE", '
+        b'"maxElements": 4096, "m": 16, "efConstruction": 200, "efSearch": 50, '
+        b'"randomSeed": 100}'
+    )
+
+    o = s.deserialize(ser)
+    assert isinstance(o, HnswIndex)
