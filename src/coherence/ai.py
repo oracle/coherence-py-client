@@ -341,6 +341,7 @@ class BinaryQuantIndex(AbstractEvolvable):
 class HnswIndex(AbstractEvolvable):
     DEFAULT_SPACE_NAME: Final[str] = "COSINE"
     """The default index space name."""
+
     DEFAULT_MAX_ELEMENTS: Final[int] = 4096
     """
     The default maximum number of elements the index can contain is 4096
@@ -348,6 +349,7 @@ class HnswIndex(AbstractEvolvable):
     reaches approximately 8m elements, at which point it will grow by 50%
     whenever it gets full.
     """
+
     DEFAULT_M: Final[int] = 16
     """
     The default number of bidirectional links created for every new
@@ -365,6 +367,7 @@ class HnswIndex(AbstractEvolvable):
     by assuming that M*ef_{construction} is a constant. The default value is
     16.
     """
+
     DEFAULT_EF_CONSTRUCTION: Final[int] = 200
     """
     The parameter has the same meaning as ef, which controls the
@@ -376,11 +379,13 @@ class HnswIndex(AbstractEvolvable):
     lower than 0.9, than there is room for improvement. The default value is
     200.
     """
+
     DEFAULT_EF_SEARCH: Final[int] = 50
     """
     The parameter controlling query time/accuracy trade-off. The default
     value is 50.
     """
+
     DEFAULT_RANDOM_SEED: Final[int] = 100
     """The default random seed used for the index."""
 
@@ -396,6 +401,7 @@ class HnswIndex(AbstractEvolvable):
         random_seed: int = DEFAULT_RANDOM_SEED,
     ) -> None:
         """
+        Creates an instance of HnswIndex class.
 
         :param extractor: The ValueExtractor to use to extract the Vector.
         :param dimensions: The number of dimensions in the vector.

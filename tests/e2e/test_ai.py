@@ -8,7 +8,7 @@ from typing import List, Optional, cast
 import pytest
 
 from coherence import COH_LOG, Extractors, NamedCache, Session
-from coherence.ai import BinaryQuantIndex, DocumentChunk, FloatVector, SimilaritySearch, Vectors
+from coherence.ai import BinaryQuantIndex, DocumentChunk, FloatVector, HnswIndex, SimilaritySearch, Vectors
 
 
 class ValueWithVector:
@@ -152,6 +152,48 @@ async def test_similarity_search_with_document_chunk(test_session: Session) -> N
     COH_LOG.info("Results below for test_SimilaritySearch_with_DocumentChunk:")
     for e in hnsw_result:
         COH_LOG.info(e)
+
+    await cache.truncate()
+    await cache.destroy()
+
+
+@pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
+async def test_similarity_search_with_hnsw_index(test_session: Session) -> None:
+    cache: NamedCache[int, ValueWithVector] = await test_session.get_cache("vector_cache")
+    cache.add_index(HnswIndex(Extractors.extract("vector"), DIMENSIONS))
+    value_with_vector = await populate_vectors(cache)
+
+    # Create a SimilaritySearch aggregator
+    value_extractor = Extractors.extract("vector")
+    k = 10
+    ss = SimilaritySearch(value_extractor, value_with_vector.vector, k)
+
+    ss.bruteForce = True  # Set bruteForce to True
+    start_time_bf = time.perf_counter()
+    hnsw_result = await cache.aggregate(ss)
+    end_time_bf = time.perf_counter()
+    elapsed_time = end_time_bf - start_time_bf
+    COH_LOG.info("Results below for test_SimilaritySearch with BruteForce true:")
+    for e in hnsw_result:
+        COH_LOG.info(e)
+    COH_LOG.info(f"Elapsed time for brute force: {elapsed_time} seconds")
+
+    assert hnsw_result is not None
+    assert len(hnsw_result) == k
+
+    ss.bruteForce = False
+    start_time = time.perf_counter()
+    hnsw_result = await cache.aggregate(ss)
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    COH_LOG.info("Results below for test_SimilaritySearch with HnswIndex:")
+    for e in hnsw_result:
+        COH_LOG.info(e)
+    COH_LOG.info(f"Elapsed time: {elapsed_time} seconds")
+
+    assert hnsw_result is not None
+    assert len(hnsw_result) == k
 
     await cache.truncate()
     await cache.destroy()
