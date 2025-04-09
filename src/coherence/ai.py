@@ -7,7 +7,7 @@ from __future__ import annotations
 import base64
 from abc import ABC
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, TypeVar, Union, cast
+from typing import Any, Dict, Final, List, Optional, TypeVar, Union, cast
 
 import jsonpickle
 import numpy as np
@@ -335,6 +335,87 @@ class BinaryQuantIndex(AbstractEvolvable):
         super().__init__()
         self.extractor = extractor
         self.oversamplingFactor = over_sampling_factor
+
+
+@proxy("coherence.hnsw.HnswIndex")
+class HnswIndex(AbstractEvolvable):
+    DEFAULT_SPACE_NAME: Final[str] = "COSINE"
+    """The default index space name."""
+    DEFAULT_MAX_ELEMENTS: Final[int] = 4096
+    """
+    The default maximum number of elements the index can contain is 4096
+    but the index will grow automatically by doubling its capacity until it
+    reaches approximately 8m elements, at which point it will grow by 50%
+    whenever it gets full.
+    """
+    DEFAULT_M: Final[int] = 16
+    """
+    The default number of bidirectional links created for every new
+    element during construction is 2-100. Higher M work better on datasets
+    with high intrinsic dimensionality and/or high recall, while low M work
+    better for datasets with low intrinsic dimensionality and/or low recalls.
+    The parameter also determines the algorithm's memory consumption,
+    which is roughly M * 8-10 bytes per stored element. As an example for
+    dim=4 random vectors optimal M for search is somewhere around 6,
+    while for high dimensional datasets (word embeddings, good face
+    descriptors), higher M are required (e.g. M=48-64) for optimal
+    performance at high recall. The range M=12-48 is ok for the most of the
+    use cases. When M is changed one has to update the other parameters.
+    Nonetheless, ef and ef_construction parameters can be roughly estimated
+    by assuming that M*ef_{construction} is a constant. The default value is
+    16.
+    """
+    DEFAULT_EF_CONSTRUCTION: Final[int] = 200
+    """
+    The parameter has the same meaning as ef, which controls the
+    index_time/index_accuracy. Bigger ef_construction leads to longer
+    construction, but better index quality. At some point, increasing
+    ef_construction does not improve the quality of the index. One way to
+    check if the selection of ef_construction was ok is to measure a recall
+    for M nearest neighbor search when ef =ef_construction: if the recall is
+    lower than 0.9, than there is room for improvement. The default value is
+    200.
+    """
+    DEFAULT_EF_SEARCH: Final[int] = 50
+    """
+    The parameter controlling query time/accuracy trade-off. The default
+    value is 50.
+    """
+    DEFAULT_RANDOM_SEED: Final[int] = 100
+    """The default random seed used for the index."""
+
+    def __init__(
+        self,
+        extractor: Union[ValueExtractor[T, E], str],
+        dimensions: int,
+        space_name: str = DEFAULT_SPACE_NAME,
+        max_elements: int = DEFAULT_MAX_ELEMENTS,
+        m: int = DEFAULT_M,
+        ef_construction: int = DEFAULT_EF_CONSTRUCTION,
+        ef_search: int = DEFAULT_EF_SEARCH,
+        random_seed: int = DEFAULT_RANDOM_SEED,
+    ) -> None:
+        """
+
+        :param extractor: The ValueExtractor to use to extract the Vector.
+        :param dimensions: The number of dimensions in the vector.
+        :param space_name: The index space name.
+        :param max_elements: The maximum number of elements the index can contain.
+        :param m: The number of bidirectional links created for every new element during construction.
+        :param ef_construction: The parameter controlling the index_time/index_accuracy.
+        :param ef_search: The parameter controlling query time/accuracy trade-off.
+        :param random_seed: The random seed used for the index.
+        """
+
+        super().__init__()
+        self.extractor = extractor
+        self.dimensions = dimensions
+        self.spaceName = space_name if space_name else ""
+        self.maxElements = max_elements
+        self.m = m
+        self.efConstruction = ef_construction
+        self.efSearch = ef_search
+        self.randomSeed = random_seed
 
 
 class Vectors:
