@@ -10,11 +10,12 @@ from typing import Final, List
 from light_embed import TextEmbedding
 
 from coherence import NamedMap, Session
-from coherence.ai import FloatVector, QueryResult, SimilaritySearch, Vectors
+from coherence.ai import FloatVector, HnswIndex, QueryResult, SimilaritySearch, Vectors
 from coherence.extractor import Extractors, ValueExtractor
 from coherence.filter import Filter, Filters
 
-"""This example shows how to use some of the Coherence AI features to store
+"""
+This example shows how to use some of the Coherence AI features to store
 vectors and perform a k-nearest neighbors (k-nn) search on those vectors to
 find matches for search text.
 
@@ -25,9 +26,9 @@ Coherence is only a vector store so in order to actually create vectors from
 text snippets this example uses the `light-embed` package to integrate with a
 model and produce vector embeddings from text.
 
-This example shows just some basic usages of vectors in Coherence including
-using Coherence HNSW indexes. It has not been optimised at all for speed of
-loading vector data or searches.
+This example has shows how easy it is to add vector search capabilities to
+cache data in Coherence and how to easily add HNSW indexes to those searches.
+It has not been optimised at all for speed of loading vector data or searches.
 
 Coherence Vectors
 =================
@@ -88,6 +89,30 @@ This example uses the fullplot to create the vector embeddings for each
 movie. Other fields can be used by normal Coherence filters to further narrow
 down vector searches.
 
+Searching Vectors
+=================
+
+A common way to search data in Coherence caches is to use Coherence
+aggregators. The aggregator feature has been used to implement k-nearest
+neighbour (k-nn) vector searching using a new built-in aggregator named
+SimilaritySearch. When invoking a SimilaritySearch aggregator on a cache
+the results are returned as a list of QueryResult instances.
+
+The SimilaritySearch aggregator is used to perform a Knn vector search on a
+cache in the same way that normal Coherence aggregators are used.
+
+HNSW Indexing =============
+
+Coherence includes an implementation of the HNSW index that can be used to
+speed up searches. The hierarchical navigable small world (HNSW) algorithm is
+a graph-based approximate nearest neighbor search technique
+
+An index is added to a cache in Coherence by calling the add_index method on
+the cache. In this example, a HNSWIndex is created with a ValueExtractor that
+will extract the vector field from the cache value and an int parameter that
+specifies the number of dimensions the vector has.
+
+
 """
 
 
@@ -101,6 +126,9 @@ class MovieRepository:
     for generating text embeddings.
     See https://huggingface.co/onnx-models/all-MiniLM-L6-v2-onnx
     """
+
+    EMBEDDING_DIMENSIONS: Final[int] = 384
+    """Embedding dimension for onnx-models/all-MiniLM-L6-v2-onnx"""
 
     VECTOR_FIELD: Final[str] = "embeddings"
     """The name of the field in the json containing the embeddings."""
@@ -117,7 +145,8 @@ class MovieRepository:
 
         """
         self.movies = movies
-        self.model = TextEmbedding(self.MODEL_NAME)  # embedding model to generate embeddings
+        # embedding model to generate embeddings
+        self.model = TextEmbedding(self.MODEL_NAME)
 
     async def load(self, filename: str) -> None:
         """
@@ -128,8 +157,8 @@ class MovieRepository:
         """
         try:
             with gzip.open(filename, "rt", encoding="utf-8") as f:
-                # the JSON data should be a JSON list of movie objects in the
-                # format described above.
+                # the JSON data should be a JSON list of movie objects (dictionary)
+                # in the format described above.
                 data = json.load(f)
         except FileNotFoundError:
             print("Error: The file was not found.")
@@ -143,24 +172,57 @@ class MovieRepository:
             except Exception as e:
                 print(f"An error occurred while closing the file: {e}")
 
+        # iterate over list of movie objects (dictionary) to load them into
+        # Coherence cache
         for movie in data:
+            # get the title of the movie
             title: str = movie.get("title")
-            plot: str = movie.get("fullplot")
+            # get the full plot of the movie
+            full_plot: str = movie.get("fullplot")
             key: str = title
-            vector: FloatVector = self.vectorize(plot)
+            # text of the full_plot converted to a vector
+            vector: FloatVector = self.vectorize(full_plot)
+            # vector is added to the movie object
             movie[self.VECTOR_FIELD] = vector
+            # The movie object is added to the cache using the "title" field as the cache key
             await self.movies.put(key, movie)
 
     def vectorize(self, input_string: str) -> FloatVector:
+        """vectorize method takes a String value and returns a FloatVector"""
+
+        # model used to creat embeddings for the input_string
+        # in this example model used is onnx-models/all-MiniLM-L6-v2-onnx
         embeddings: List[float] = self.model.encode(input_string).tolist()
+
+        # The vector returned is normalized, which makes future operations on
+        # the vector more efficient
         return FloatVector(Vectors.normalize(embeddings))
 
     async def search(self, search_text: str, count: int, filter: Filter = Filters.always()) -> List[QueryResult]:
+        """
+        Searches the movies cache by converting the search_text into a vector
+        and then using SimilaritySearch for nearest matches to the embeddings
+        vector in the cached object. The count parameter is a count of the
+        number of nearest neighbours to search for. An optional filter
+        parameter can be The filter is used to reduce the cache entries used
+        to perform the k-nn search.
+
+        :param search_text:  the text to nearest match on the movie full plot
+        :param count: the count of the nearest matches to return :param
+        filter: an optional  Filter to use to further reduce the movies to be
+        queried
+        :return: a List of QueryResult objects
+        """
+
+        # create a FloatVector of the search_text
         vector: FloatVector = self.vectorize(search_text)
+        # create the SimilaritySearch aggregator using the above vector and count
         search: SimilaritySearch = SimilaritySearch(self.VALUE_EXTRACTOR, vector, count)
+        # perform the k-nn search using the above aggregator and optional filter
         return await self.movies.aggregate(search, filter=filter)
 
 
+# Name of the compressed gzip json file that has data for the movies
 MOVIE_JSON_FILENAME: Final[str] = "movies.json.gzip"
 
 
@@ -170,6 +232,7 @@ async def do_run() -> None:
     movie_db: NamedMap[str, dict] = await session.get_map("movies")
     try:
         movies_repo = MovieRepository(movie_db)
+        await movie_db.add_index(HnswIndex(MovieRepository.VALUE_EXTRACTOR, MovieRepository.EMBEDDING_DIMENSIONS))
 
         await movies_repo.load(MOVIE_JSON_FILENAME)
         results = await movies_repo.search("star travel and space ships", 5)
@@ -178,12 +241,12 @@ async def do_run() -> None:
 
         cast_extractor = Extractors.extract("cast")
         filter = Filters.contains(cast_extractor, "Harrison Ford")
-        results = await movies_repo.search("star travel and space ships", 5, filter)
+        results = await movies_repo.search("star travel and space ships", 2, filter)
         for e in results:
             print(f"key = {e.key}, distance = {e.distance}, plot = {e.value.get('plot')}")
 
     finally:
-        await movie_db.truncate()
+        await movie_db.destroy()
         await session.close()
 
 

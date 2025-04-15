@@ -130,9 +130,9 @@ async def test_similarity_search_with_hnsw_index(test_session: Session) -> None:
 async def _run_similarity_search_with_index(test_session: Session, index_type: str) -> None:
     cache: NamedCache[int, ValueWithVector] = await test_session.get_cache("vector_cache")
     if index_type == "BinaryQuantIndex":
-        cache.add_index(BinaryQuantIndex(Extractors.extract("vector")))
+        await cache.add_index(BinaryQuantIndex(Extractors.extract("vector")))
     elif index_type == "HnswIndex":
-        cache.add_index(HnswIndex(Extractors.extract("vector"), DIMENSIONS))
+        await cache.add_index(HnswIndex(Extractors.extract("vector"), DIMENSIONS))
     else:
         COH_LOG.error("NO index_type specified")
         return
