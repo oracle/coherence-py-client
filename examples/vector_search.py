@@ -10,7 +10,7 @@ from typing import Final, List
 from light_embed import TextEmbedding
 
 from coherence import NamedMap, Session
-from coherence.ai import FloatVector, HnswIndex, QueryResult, SimilaritySearch, Vectors
+from coherence.ai import FloatVector, QueryResult, SimilaritySearch, Vectors
 from coherence.extractor import Extractors, ValueExtractor
 from coherence.filter import Filter, Filters
 
@@ -232,7 +232,7 @@ async def do_run() -> None:
     movie_db: NamedMap[str, dict] = await session.get_map("movies")
     try:
         movies_repo = MovieRepository(movie_db)
-        await movie_db.add_index(HnswIndex(MovieRepository.VALUE_EXTRACTOR, MovieRepository.EMBEDDING_DIMENSIONS))
+        # await movie_db.add_index(HnswIndex(MovieRepository.VALUE_EXTRACTOR, MovieRepository.EMBEDDING_DIMENSIONS))
 
         await movies_repo.load(MOVIE_JSON_FILENAME)
         results = await movies_repo.search("star travel and space ships", 5)

@@ -621,7 +621,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def add_index(
+    def add_index(
         self, extractor: ValueExtractor[T, E], ordered: bool = False, comparator: Optional[Comparator] = None
     ) -> None:
         """
@@ -638,7 +638,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
-    async def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
+    def remove_index(self, extractor: ValueExtractor[T, E]) -> None:
         """
         Removes an index on this `NamedMap`.
 
