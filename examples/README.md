@@ -14,10 +14,10 @@ docker run -d -p 1408:1408 ghcr.io/oracle/coherence-ce:22.06.11
 ```
 
 > [!NOTE]
-> Coherence AI  [vector_search.py](vector_search.py) example requires installation of `light-embed` package so that the example code can use the `onnx-models/all-MiniLM-L6-v2-onnx` model for generating text embeddings
+> Coherence AI  [vector_search.py](vector_search.py) example requires installation of `sentence-transformers` package so that the example code can use the `all-MiniLM-L6-v2` model for generating text embeddings
 >
 > ```bash
-> python3 -m pip install light-embed
+> python3 -m pip install sentence-transformers
 > ```
 
 

@@ -7,7 +7,7 @@ import gzip
 import json
 from typing import Final, List
 
-from light_embed import TextEmbedding
+from sentence_transformers import SentenceTransformer
 
 from coherence import NamedMap, Session
 from coherence.ai import FloatVector, QueryResult, SimilaritySearch, Vectors
@@ -23,8 +23,8 @@ Coherence includes an implementation of the HNSW index which can be used to
 index vectors to improve search times.
 
 Coherence is only a vector store so in order to actually create vectors from
-text snippets this example uses the `light-embed` package to integrate with a
-model and produce vector embeddings from text.
+text snippets this example uses the `sentence-transformers` package to
+integrate with a model and produce vector embeddings from text.
 
 This example has shows how easy it is to add vector search capabilities to
 cache data in Coherence and how to easily add HNSW indexes to those searches.
@@ -101,7 +101,8 @@ the results are returned as a list of QueryResult instances.
 The SimilaritySearch aggregator is used to perform a Knn vector search on a
 cache in the same way that normal Coherence aggregators are used.
 
-HNSW Indexing =============
+HNSW Indexing
+=============
 
 Coherence includes an implementation of the HNSW index that can be used to
 speed up searches. The hierarchical navigable small world (HNSW) algorithm is
@@ -120,15 +121,14 @@ class MovieRepository:
     """This class represents the repository of movies. It contains all the
     code to load and search movie data."""
 
-    MODEL_NAME: Final[str] = "onnx-models/all-MiniLM-L6-v2-onnx"
+    MODEL_NAME: Final[str] = "all-MiniLM-L6-v2"
     """
-    The ONNX-ported version of the sentence-transformers/all-MiniLM-L6-v2
-    for generating text embeddings.
-    See https://huggingface.co/onnx-models/all-MiniLM-L6-v2-onnx
+    This is a sentence-transformers model used for generating text embeddings.
+    See https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
     """
 
     EMBEDDING_DIMENSIONS: Final[int] = 384
-    """Embedding dimension for onnx-models/all-MiniLM-L6-v2-onnx"""
+    """Embedding dimension for all-MiniLM-L6-v2"""
 
     VECTOR_FIELD: Final[str] = "embeddings"
     """The name of the field in the json containing the embeddings."""
@@ -146,7 +146,7 @@ class MovieRepository:
         """
         self.movies = movies
         # embedding model to generate embeddings
-        self.model = TextEmbedding(self.MODEL_NAME)
+        self.model = SentenceTransformer(self.MODEL_NAME)
 
     async def load(self, filename: str) -> None:
         """
@@ -236,17 +236,20 @@ async def do_run() -> None:
 
         await movies_repo.load(MOVIE_JSON_FILENAME)
         results = await movies_repo.search("star travel and space ships", 5)
+        print("Search results:")
+        print("================")
         for e in results:
             print(f"key = {e.key}, distance = {e.distance}, plot = {e.value.get('plot')}")
 
         cast_extractor = Extractors.extract("cast")
         filter = Filters.contains(cast_extractor, "Harrison Ford")
         results = await movies_repo.search("star travel and space ships", 2, filter)
+        print("\nResults with a filter of movies with cast as Harrison Ford")
+        print("===========================================================")
         for e in results:
             print(f"key = {e.key}, distance = {e.distance}, plot = {e.value.get('plot')}")
 
     finally:
-        await movie_db.destroy()
         await session.close()
 
 
