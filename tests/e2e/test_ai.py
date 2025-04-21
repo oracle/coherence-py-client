@@ -162,7 +162,7 @@ async def _run_similarity_search_with_index(test_session: Session, index_type: s
     hnsw_result = await cache.aggregate(ss)
     end_time = time.perf_counter()
     elapsed_time = end_time - start_time
-    COH_LOG.info("Results below for test_SimilaritySearch with HnswIndex:")
+    COH_LOG.info("Results below for test_SimilaritySearch with " + index_type + ":")
     for e in hnsw_result:
         COH_LOG.info(e)
     COH_LOG.info(f"Elapsed time: {elapsed_time} seconds")
