@@ -251,7 +251,7 @@ async def do_run() -> None:
         # Below any movie with a plot similar to "star travel and space
         # ships" was searched for. In addition a Filter is used to narrow down
         # the search i.e. movies that starred "Harrison Ford". The filter
-        # will be applied to the cast field of the JsonObject.
+        # will be applied to the cast field of the json object.
         cast_extractor = Extractors.extract("cast")
         filter = Filters.contains(cast_extractor, "Harrison Ford")
         results = await movies_repo.search("star travel and space ships", 2, filter)
