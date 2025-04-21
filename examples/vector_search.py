@@ -33,8 +33,8 @@ It has not been optimised at all for speed of loading vector data or searches.
 Coherence Vectors
 =================
 
-Coherence Python client can handle few different types of vector,
-this example will use the FloatVector type
+Coherence Python client can handle a few different types of vector,
+this example will use the FloatVector type.
 
 Just like any other data type in Coherence, vectors are stored in normal
 Coherence caches. The vector may be stored as the actual cache value,
@@ -57,7 +57,7 @@ This example is not going to use an specialized classes to store the data in
 the cache. The dataset is a json file and the example will use Coherence json
 support to read and store the data.
 
-The schema of the JSON movie data looks like this
+The schema of the JSON movie data looks like this:
 
 +--------------------+-------------------------------------------------------+
 | Field Name	     |    Description                                        |
@@ -100,7 +100,6 @@ the results are returned as a list of QueryResult instances.
 
 The SimilaritySearch aggregator is used to perform a Knn vector search on a
 cache in the same way that normal Coherence aggregators are used.
-
 """
 
 
@@ -115,7 +114,7 @@ class MovieRepository:
     """
 
     EMBEDDING_DIMENSIONS: Final[int] = 384
-    """Embedding dimension for all-MiniLM-L6-v2"""
+    """Embedding dimension for all-MiniLM-L6-v2."""
 
     VECTOR_FIELD: Final[str] = "embeddings"
     """The name of the field in the json containing the embeddings."""
@@ -125,7 +124,7 @@ class MovieRepository:
 
     def __init__(self, movies: NamedMap) -> None:
         """
-        Creates an instance of the MovieRepository
+        Creates an instance of the MovieRepository.
 
         :param movies: The Coherence NamedMap is the cache used to store the
         movie data.
@@ -137,10 +136,10 @@ class MovieRepository:
 
     async def load(self, filename: str) -> None:
         """
-        Loads the movie data into the NamedMao using the specified zip file
+        Loads the movie data into the NamedMao using the specified zip file.
 
-        :param filename: Name of the movies json zip file
-        :return: None
+        :param filename: Name of the movies json zip file.
+        :return: None.
         """
         try:
             with gzip.open(filename, "rt", encoding="utf-8") as f:
@@ -155,34 +154,35 @@ class MovieRepository:
             try:
                 f.close()
             except NameError:
-                pass  # File was never opened, so nothing to close
+                pass  # File was never opened, so nothing to close.
             except Exception as e:
                 print(f"An error occurred while closing the file: {e}")
 
         # iterate over list of movie objects (dictionary) to load them into
-        # Coherence cache
+        # Coherence cache.
         for movie in data:
             # get the title of the movie
             title: str = movie.get("title")
             # get the full plot of the movie
             full_plot: str = movie.get("fullplot")
             key: str = title
-            # text of the full_plot converted to a vector
+            # text of the full_plot converted to a vector.
             vector: FloatVector = self.vectorize(full_plot)
-            # vector is added to the movie object
+            # vector is added to the movie object.
             movie[self.VECTOR_FIELD] = vector
-            # The movie object is added to the cache using the "title" field as the cache key
+            # The movie object is added to the cache using the "title" field
+            # as the cache key.
             await self.movies.put(key, movie)
 
     def vectorize(self, input_string: str) -> FloatVector:
-        """vectorize method takes a String value and returns a FloatVector"""
+        """vectorize method takes a String value and returns a FloatVector."""
 
         # model used to creat embeddings for the input_string
-        # in this example model used is onnx-models/all-MiniLM-L6-v2-onnx
+        # in this example model used is onnx-models/all-MiniLM-L6-v2-onnx.
         embeddings: List[float] = self.model.encode(input_string).tolist()
 
         # The vector returned is normalized, which makes future operations on
-        # the vector more efficient
+        # the vector more efficient.
         return FloatVector(Vectors.normalize(embeddings))
 
     async def search(self, search_text: str, count: int, filter: Filter = Filters.always()) -> List[QueryResult]:
@@ -194,23 +194,23 @@ class MovieRepository:
         parameter can be The filter is used to reduce the cache entries used
         to perform the k-nn search.
 
-        :param search_text:  the text to nearest match on the movie full plot
-        :param count: the count of the nearest matches to return :param
-        filter: an optional  Filter to use to further reduce the movies to be
-        queried
-        :return: a List of QueryResult objects
+        :param search_text: the text to nearest match on the movie full plot.
+        :param count: the count of the nearest matches to return.
+        :param filter: an optional Filter to use to further reduce the movies
+        to be queried.
+        :return: a List of QueryResult objects.
         """
 
         # create a FloatVector of the search_text
         vector: FloatVector = self.vectorize(search_text)
-        # create the SimilaritySearch aggregator using the above vector and count
+        # create the SimilaritySearch aggregator using the above vector and count.
         search: SimilaritySearch = SimilaritySearch(self.VALUE_EXTRACTOR, vector, count)
         # perform the k-nn search using the above aggregator and optional filter and
-        # returns a list of QueryResults
+        # returns a list of QueryResults.
         return await self.movies.aggregate(search, filter=filter)
 
 
-# Name of the compressed gzip json file that has data for the movies
+# Name of the compressed gzip json file that has data for the movies.
 MOVIE_JSON_FILENAME: Final[str] = "movies.json.gzip"
 
 
@@ -219,7 +219,7 @@ async def do_run() -> None:
     # Create a new session to the Coherence server using the default host and
     # port i.e. localhost:1408
     session: Session = await Session.create()
-    # Create a NamedMao called movies with key of str and value of dict
+    # Create a NamedMap called movies with key of str and value of dict
     movie_db: NamedMap[str, dict] = await session.get_map("movies")
     try:
         # an instance of class MovieRepository is create passing the above
@@ -236,7 +236,7 @@ async def do_run() -> None:
         # the nearest matches. The second parameter is a count of the number
         # of nearest neighbours to search for.
         #
-        # Below a search for five movies roughly based on "star travel and space ships"
+        # Below, a search for five movies roughly based on "star travel and space ships"
         # is being done
         results = await movies_repo.search("star travel and space ships", 5)
         print("Search results:")
@@ -248,8 +248,8 @@ async def do_run() -> None:
         # to reduce the cache entries used to perform the nearest neighbours
         # (k-nn) search.
         #
-        # Below any movie with a plot similar to "star travel and space
-        # ships" was searched for. In addition a Filter is used to narrow down
+        # Below, any movie with a plot similar to "star travel and space
+        # ships" was searched for. In addition, a Filter is used to narrow down
         # the search i.e. movies that starred "Harrison Ford". The filter
         # will be applied to the cast field of the json object.
         cast_extractor = Extractors.extract("cast")
