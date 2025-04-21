@@ -101,19 +101,6 @@ the results are returned as a list of QueryResult instances.
 The SimilaritySearch aggregator is used to perform a Knn vector search on a
 cache in the same way that normal Coherence aggregators are used.
 
-HNSW Indexing
-=============
-
-Coherence includes an implementation of the HNSW index that can be used to
-speed up searches. The hierarchical navigable small world (HNSW) algorithm is
-a graph-based approximate nearest neighbor search technique
-
-An index is added to a cache in Coherence by calling the add_index method on
-the cache. In this example, a HNSWIndex is created with a ValueExtractor that
-will extract the vector field from the cache value and an int parameter that
-specifies the number of dimensions the vector has.
-
-
 """
 
 
@@ -218,7 +205,8 @@ class MovieRepository:
         vector: FloatVector = self.vectorize(search_text)
         # create the SimilaritySearch aggregator using the above vector and count
         search: SimilaritySearch = SimilaritySearch(self.VALUE_EXTRACTOR, vector, count)
-        # perform the k-nn search using the above aggregator and optional filter
+        # perform the k-nn search using the above aggregator and optional filter and
+        # returns a list of QueryResults
         return await self.movies.aggregate(search, filter=filter)
 
 
@@ -228,19 +216,42 @@ MOVIE_JSON_FILENAME: Final[str] = "movies.json.gzip"
 
 async def do_run() -> None:
 
+    # Create a new session to the Coherence server using the default host and
+    # port i.e. localhost:1408
     session: Session = await Session.create()
+    # Create a NamedMao called movies with key of str and value of dict
     movie_db: NamedMap[str, dict] = await session.get_map("movies")
     try:
+        # an instance of class MovieRepository is create passing the above
+        # NamedMap as a parameter
         movies_repo = MovieRepository(movie_db)
-        # await movie_db.add_index(HnswIndex(MovieRepository.VALUE_EXTRACTOR, MovieRepository.EMBEDDING_DIMENSIONS))
 
+        # All of the movies data from filename  MOVIE_JSON_FILENAME is
+        # processed and loaded into the movies_repo
         await movies_repo.load(MOVIE_JSON_FILENAME)
+
+        # Search method is called on the movies_repo instance of class
+        # MovieRepository that takes a search_text parameter which is the
+        # text to use to convert to a vector and search the movie plot for
+        # the nearest matches. The second parameter is a count of the number
+        # of nearest neighbours to search for.
+        #
+        # Below a search for five movies roughly based on "star travel and space ships"
+        # is being done
         results = await movies_repo.search("star travel and space ships", 5)
         print("Search results:")
         print("================")
         for e in results:
             print(f"key = {e.key}, distance = {e.distance}, plot = {e.value.get('plot')}")
 
+        # Search method on the movies_repo instance can also include a filter
+        # to reduce the cache entries used to perform the nearest neighbours
+        # (k-nn) search.
+        #
+        # Below any movie with a plot similar to "star travel and space
+        # ships" was searched for. In addition a Filter is used to narrow down
+        # the search i.e. movies that starred "Harrison Ford". The filter
+        # will be applied to the cast field of the JsonObject.
         cast_extractor = Extractors.extract("cast")
         filter = Filters.contains(cast_extractor, "Harrison Ford")
         results = await movies_repo.search("star travel and space ships", 2, filter)
