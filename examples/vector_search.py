@@ -10,7 +10,7 @@ from typing import Final, List
 from sentence_transformers import SentenceTransformer
 
 from coherence import NamedMap, Session
-from coherence.ai import FloatVector, QueryResult, SimilaritySearch, Vectors
+from coherence.ai import FloatVector, HnswIndex, QueryResult, SimilaritySearch, Vectors
 from coherence.extractor import Extractors, ValueExtractor
 from coherence.filter import Filter, Filters
 
@@ -100,6 +100,18 @@ the results are returned as a list of QueryResult instances.
 
 The SimilaritySearch aggregator is used to perform a Knn vector search on a
 cache in the same way that normal Coherence aggregators are used.
+
+HNSW Indexing
+=============
+
+Coherence includes an implementation of the HNSW index that can be used to
+speed up searches. The hierarchical navigable small world (HNSW) algorithm is
+a graph-based approximate nearest neighbor search technique.
+
+An index is added to a cache in Coherence by calling the add_index method on
+the cache. In this example, a HNSWIndex is created with a ValueExtractor that
+will extract the vector field from the cache value and an int parameter that
+specifies the number of dimensions the vector has.
 """
 
 
@@ -225,6 +237,11 @@ async def do_run() -> None:
         # an instance of class MovieRepository is create passing the above
         # NamedMap as a parameter
         movies_repo = MovieRepository(movie_db)
+
+        # To speed up the search, HNSW index is added to the cache using the
+        # VALUE_EXTRACTOR for the full plot vector and the dimensions of the
+        # vector.
+        await movie_db.add_index(HnswIndex(MovieRepository.VALUE_EXTRACTOR, MovieRepository.EMBEDDING_DIMENSIONS))
 
         # All of the movies data from filename  MOVIE_JSON_FILENAME is
         # processed and loaded into the movies_repo
