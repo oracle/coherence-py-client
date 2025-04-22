@@ -392,7 +392,7 @@ class HnswIndex(AbstractEvolvable):
     def __init__(
         self,
         extractor: Union[ValueExtractor[T, E], str],
-        dimensions: int,
+        dimension: int,
         space_name: str = DEFAULT_SPACE_NAME,
         max_elements: int = DEFAULT_MAX_ELEMENTS,
         m: int = DEFAULT_M,
@@ -404,7 +404,7 @@ class HnswIndex(AbstractEvolvable):
         Creates an instance of HnswIndex class.
 
         :param extractor: The ValueExtractor to use to extract the Vector.
-        :param dimensions: The number of dimensions in the vector.
+        :param dimension: The number of dimensions in the vector.
         :param space_name: The index space name.
         :param max_elements: The maximum number of elements the index can contain.
         :param m: The number of bidirectional links created for every new element during construction.
@@ -415,7 +415,7 @@ class HnswIndex(AbstractEvolvable):
 
         super().__init__()
         self.extractor = extractor
-        self.dimensions = dimensions
+        self.dimension = dimension
         self.spaceName = space_name if space_name else ""
         self.maxElements = max_elements
         self.m = m
