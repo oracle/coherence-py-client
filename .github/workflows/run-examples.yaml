@@ -50,5 +50,6 @@ jobs:
       - name: Run the example
         shell: bash
         run: |
+          cd examples
           python3 basics.py
           
