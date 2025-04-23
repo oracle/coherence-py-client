@@ -46,6 +46,7 @@ jobs:
         shell: bash
         run: |
           docker run -d -p 1408:1408 ${{ matrix.coherence-image }}:${{ matrix.coherenceVersion }}
+          sleep 30
 
       - name: Run the example
         shell: bash
