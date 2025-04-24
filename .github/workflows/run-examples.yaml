@@ -53,5 +53,7 @@ jobs:
         run: |
           cd examples
           for file in *.py; do
-            python3 $file
+            echo "Run example ${file}"
+            COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 python3 $file
+            echo "==== Done running example ${file} ======"
           done
