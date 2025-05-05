@@ -1289,10 +1289,11 @@ class NamedCacheClientV1(NamedCache[K, V]):
             await self._near_cache.clear()
 
     async def destroy(self) -> None:
-        self._internal_emitter.once(MapLifecycleEvent.DESTROYED.value)
-        self._internal_emitter.emit(MapLifecycleEvent.DESTROYED.value, self.name)
-        dispatcher: Dispatcher = self._request_factory.destroy_request()
-        await dispatcher.dispatch(self._stream_handler)
+        if not self._stream_handler._closed:
+            dispatcher: Dispatcher = self._request_factory.destroy_request()
+            await dispatcher.dispatch(self._stream_handler)
+        else:
+            COH_LOG.info("Cache destroy cannot be done since the cache has been released")
 
     async def release(self) -> None:
         if self.active:
