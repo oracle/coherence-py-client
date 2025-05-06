@@ -501,14 +501,22 @@ async def test_cache_destroy_event() -> None:
     session: Session = await tests.get_session()
     cache: NamedCache[str, str] = await session.get_cache("test-" + str(int(time() * 1000)))
     name: str = "UNSET"
-    event: Event = Event()
+    destroy_event: Event = Event()
+    release_event: Event = Event()
 
-    def callback(n: str) -> None:
+    def destroy_callback(n: str) -> None:
         nonlocal name
         name = n
-        event.set()
+        destroy_event.set()
 
-    cache.on(MapLifecycleEvent.DESTROYED, callback)
+    cache.on(MapLifecycleEvent.DESTROYED, destroy_callback)
+
+    def release_callback(n: str) -> None:
+        nonlocal name
+        name = n
+        release_event.set()
+
+    cache.on(MapLifecycleEvent.RELEASED, release_callback)
 
     try:
         await cache.put("A", "B")
@@ -516,7 +524,8 @@ async def test_cache_destroy_event() -> None:
         assert await cache.size() == 2
 
         await cache.destroy()
-        await tests.wait_for(event, EVENT_TIMEOUT)
+        await tests.wait_for(destroy_event, EVENT_TIMEOUT)
+        await tests.wait_for(release_event, EVENT_TIMEOUT)
 
         assert name == cache.name
         assert cache.destroyed
