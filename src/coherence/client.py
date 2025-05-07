@@ -1068,7 +1068,6 @@ class NamedCacheClientV1(NamedCache[K, V]):
             if name == cache_name and not this.destroyed:
                 this._events_manager._close()
                 this._destroyed = True
-                this._released = True
                 emitter.emit(MapLifecycleEvent.DESTROYED.value, name)
 
         # noinspection PyProtectedMember
