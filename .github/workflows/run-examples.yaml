@@ -107,6 +107,6 @@ jobs:
           cd examples
           for file in *.py; do
             echo "Run example ${file}"
-            COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 python3 $file
+            COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 python -m poetry run python3 $file
             echo "==== Done running example ${file} ======"
           done
