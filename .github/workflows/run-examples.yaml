@@ -13,7 +13,7 @@ on:
   pull_request:
     branches: [ main ]
 jobs:
-  run-examples:
+  run-examples-with-latest-release:
     strategy:
       fail-fast: false
       matrix:
@@ -22,7 +22,7 @@ jobs:
         coherence-image:
           - ghcr.io/oracle/coherence-ce
         coherenceVersion:
-          - 25.03
+          - 25.03.1
     runs-on: ${{ matrix.os }}
     steps:
       - name: Get Docker Images
@@ -40,6 +40,59 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install coherence-client
+          pip install sentence-transformers    # required for vector_search example
+
+      - name: Start the Server using image
+        shell: bash
+        run: |
+          docker run -d -p 1408:1408 ${{ matrix.coherence-image }}:${{ matrix.coherenceVersion }}
+          sleep 20
+
+      - name: Run the example
+        shell: bash
+        run: |
+          cd examples
+          for file in *.py; do
+            echo "Run example ${file}"
+            COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 python3 $file
+            echo "==== Done running example ${file} ======"
+          done
+  # Now run example with main
+  run-examples-with-main:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9.x"]
+        poetry-version: ["1.8.4"]
+        os: [ubuntu-latest]
+        coherence-image:
+          - ghcr.io/oracle/coherence-ce
+        coherenceVersion:
+          - 25.03.1
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Get Docker Images
+        shell: bash
+        run: |
+          docker pull ${{ matrix.coherence-image }}:${{ matrix.coherenceVersion }}
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        shell: bash
+        run: |
+          pip install poetry==${{ matrix.poetry-version }}
+
+      - name: Install Dependencies
+        run: python -m poetry install
+
+      - name: Install Coherence Python Client
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
           pip install sentence-transformers    # required for vector_search example
 
       - name: Start the Server using image
