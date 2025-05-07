@@ -93,7 +93,7 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          pip install sentence-transformers    # required for vector_search example
+          python -m poetry run pip install sentence-transformers    # required for vector_search example
 
       - name: Start the Server using image
         shell: bash
