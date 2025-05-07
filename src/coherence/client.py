@@ -1068,7 +1068,6 @@ class NamedCacheClientV1(NamedCache[K, V]):
             if name == cache_name and not this.destroyed:
                 this._events_manager._close()
                 this._destroyed = True
-                this._released = True
                 emitter.emit(MapLifecycleEvent.DESTROYED.value, name)
 
         # noinspection PyProtectedMember
@@ -1289,10 +1288,13 @@ class NamedCacheClientV1(NamedCache[K, V]):
             await self._near_cache.clear()
 
     async def destroy(self) -> None:
-        self._internal_emitter.once(MapLifecycleEvent.DESTROYED.value)
-        self._internal_emitter.emit(MapLifecycleEvent.DESTROYED.value, self.name)
-        dispatcher: Dispatcher = self._request_factory.destroy_request()
-        await dispatcher.dispatch(self._stream_handler)
+        if not self._stream_handler._closed:
+            dispatcher: Dispatcher = self._request_factory.destroy_request()
+            await dispatcher.dispatch(self._stream_handler)
+            # Now do everything that is done for release
+            self._internal_emitter.once(MapLifecycleEvent.RELEASED.value)
+            self._internal_emitter.emit(MapLifecycleEvent.RELEASED.value, self.name)
+            await self._stream_handler.close()
 
     async def release(self) -> None:
         if self.active:
