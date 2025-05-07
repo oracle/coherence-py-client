@@ -21,8 +21,8 @@ jobs:
         poetry-version: ["1.8.4"]
         os: [ubuntu-latest]
         coherenceVersion:
-          - 25.03
-          - 22.06.11
+          - 25.03.1
+          - 22.06.12
         base-image:
           - gcr.io/distroless/java17-debian11
     runs-on: ${{ matrix.os }}
