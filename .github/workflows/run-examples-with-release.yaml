@@ -2,21 +2,17 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
-name: Run Examples
+name: Run Examples with released client
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - '*'
-  pull_request:
-    branches: [ main ]
+  schedule:
+    - cron: "0 5 * * *"
 jobs:
-  run-examples:
+  run-examples-with-latest-release:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9.x"]
-        poetry-version: ["1.8.4"]
+        python-version: ["3.9.x", "3.10.x", "3.11.x", "3.12.x", "3.13.x"]
         os: [ubuntu-latest]
         coherence-image:
           - ghcr.io/oracle/coherence-ce
@@ -34,19 +30,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
-        shell: bash
-        run: |
-          pip install poetry==${{ matrix.poetry-version }}
-
-      - name: Install Dependencies
-        run: python -m poetry install
-
       - name: Install Coherence Python Client
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          python -m poetry run pip install sentence-transformers    # required for vector_search example
+          pip install coherence-client
+          pip install sentence-transformers    # required for vector_search example
 
       - name: Start the Server using image
         shell: bash
@@ -60,6 +49,6 @@ jobs:
           cd examples
           for file in *.py; do
             echo "Run example ${file}"
-            COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 python -m poetry run python3 $file
+            COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 python3 $file
             echo "==== Done running example ${file} ======"
           done
