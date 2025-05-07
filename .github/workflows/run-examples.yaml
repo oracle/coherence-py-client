@@ -57,7 +57,7 @@ jobs:
             COHERENCE_CLIENT_REQUEST_TIMEOUT=180.0 python3 $file
             echo "==== Done running example ${file} ======"
           done
-  # Now run example with main
+  # Now run example with current branch
   run-examples-with-main:
     strategy:
       fail-fast: false
