@@ -43,17 +43,17 @@ async def do_run() -> None:
         print("NamedMap size is :", await named_map.size())
 
         print("Retrieve the Hobbits between the ages of 17 and 21 ...")
-        async for entry in named_map.entries(Filters.between("age", 17, 21)):
+        async for entry in await named_map.entries(Filters.between("age", 17, 21)):
             print("Key :", entry.key, ", Value :", entry.value)
 
         print("Retrieve the Hobbits between the ages of 17 and 30 and live in Hobbiton ...")
         query_filter: Filter = Filters.between("age", 17, 30).And(Filters.equals("home", "Hobbiton"))
-        async for entry in named_map.entries(query_filter):
+        async for entry in await named_map.entries(query_filter):
             print("Key :", entry.key, ", Value :", entry.value)
 
         print("Retrieve the Hobbits between the ages of 17 and 25 who live in Hobbiton or Frogmorton")
         query_filter = Filters.between("age", 17, 25).And(Filters.is_in("home", {"Hobbiton", "Frogmorton"}))
-        async for entry in named_map.entries(query_filter):
+        async for entry in await named_map.entries(query_filter):
             print("Key :", entry.key, ", Value :", entry.value)
 
     finally:

@@ -54,12 +54,12 @@ async def do_run() -> None:
 
         print("Sending all Hobbits ten years into the future!")
         keys: List[int] = []
-        async for entry in named_map.invoke_all(Processors.increment("age", 10)):
+        async for entry in await named_map.invoke_all(Processors.increment("age", 10)):
             keys.append(entry.key)
             print("Updated age of Hobbit with id ", entry.key, "to", entry.value)
 
         print("Displaying all updated Hobbits ...")
-        async for result in named_map.get_all(set(keys)):
+        async for result in await named_map.get_all(set(keys)):
             print(result.value)
 
         await named_map.remove(hobbit.id)
