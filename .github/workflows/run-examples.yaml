@@ -21,6 +21,7 @@ jobs:
         coherence-image:
           - ghcr.io/oracle/coherence-ce
         coherenceVersion:
+          - 22.06.12
           - 25.03.1
     runs-on: ${{ matrix.os }}
     steps:
