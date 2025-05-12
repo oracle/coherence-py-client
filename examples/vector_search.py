@@ -231,6 +231,16 @@ async def do_run() -> None:
     # Create a new session to the Coherence server using the default host and
     # port i.e. localhost:1408
     session: Session = await Session.create()
+    # Check if the example cmn be run against the server
+    if (session._protocol_version == 1) and (
+        (session._proxy_version > "24.09.2") or (session._proxy_version > "15.0.0")
+    ):
+        # Server supports vector search - continue on
+        pass
+    else:
+        # Server does not support vector search - exit out
+        return
+
     # Create a NamedMap called movies with key of str and value of dict
     movie_db: NamedMap[str, dict] = await session.get_map("movies")
     try:
