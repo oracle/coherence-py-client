@@ -28,7 +28,7 @@ grpcio-tools = "1.70.0"
 jsonpickle = ">=3.0,<4.1"
 pymitter = ">=0.4,<1.1"
 typing-extensions = ">=4.11,<4.14"
-types-protobuf = "6.30.2.20250506"
+types-protobuf = "6.30.2.20250516"
 pympler = "1.1"
 numpy = "2.0.2"
 
