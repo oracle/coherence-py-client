@@ -34,7 +34,7 @@ numpy = "2.0.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "~8.4"
-pytest-asyncio = "~0.26"
+pytest-asyncio = "~1.0"
 pytest-cov = "~6.2"
 pytest-unordered = "~0.7"
 pre-commit = "~4.2"
