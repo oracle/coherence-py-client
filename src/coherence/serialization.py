@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import collections
+import json
 from abc import ABC, abstractmethod
 from decimal import Decimal
 from typing import Any, Callable, Dict, Final, Optional, Type, TypeVar, cast
@@ -70,10 +71,18 @@ class JSONSerializer(Serializer):
         self._pickler = JavaProxyPickler()
         self._unpickler = JavaProxyUnpickler()
 
+    def _to_json_from_object(self, obj: object) -> str:
+        jsn = jsonpickle.encode(obj, context=self._pickler)
+        return jsn
+
     def serialize(self, obj: object) -> bytes:
-        jsn: str = jsonpickle.encode(obj, context=self._pickler)
+        jsn: str = self._to_json_from_object(obj)
         b: bytes = MAGIC_BYTE + jsn.encode()
         return b
+
+    def _to_object_from_json(self, json_str: str) -> T:  # type: ignore
+        o = jsonpickle.decode(json_str, context=self._unpickler)
+        return o
 
     def deserialize(self, value: bytes) -> T:  # type: ignore
         if isinstance(value, bytes):
@@ -82,12 +91,22 @@ class JSONSerializer(Serializer):
                 return cast(T, None)
             else:
                 if ord(s[0]) == ord(MAGIC_BYTE):
-                    r = jsonpickle.decode(s[1:], context=self._unpickler)
+                    r: T = self._to_object_from_json(s[1:])
                     return r
                 else:
                     raise ValueError("Invalid JSON serialization format")
         else:
             return cast(T, value)
+
+    def flatten_to_dict(self, o: object) -> dict[Any, Any]:
+        jsn = self._to_json_from_object(o)
+        d = json.loads(jsn)
+        return d
+
+    def restore_to_object(self, the_dict: dict[Any, Any]) -> T:  # type: ignore
+        jsn = json.dumps(the_dict)
+        o: T = self._to_object_from_json(jsn)
+        return o
 
 
 class SerializerRegistry:
