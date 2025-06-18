@@ -1,10 +1,11 @@
-# Copyright (c) 2022, 2023, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2025, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
 from __future__ import annotations
 
 import collections
+import json
 from abc import ABC, abstractmethod
 from decimal import Decimal
 from typing import Any, Callable, Dict, Final, Optional, Type, TypeVar, cast
@@ -29,16 +30,16 @@ _JSON_PICKLE_OBJ = "py/object"
 
 MAGIC_BYTE: Final[bytes] = b"\x15"
 
-_type_to_alias: Final[Dict[Type[Any], str]] = dict()
+_type_to_alias: Final[Dict[Type[Any], str]] = {}
 """A mapping of proxied Python types to their alias."""
 
-_alias_to_type: Final[Dict[str, Type[Any]]] = dict()
+_alias_to_type: Final[Dict[str, Type[Any]]] = {}
 """A mapping of aliases to their proxied Python type."""
 
-_attribute_mappings: Final[Dict[Type[Any], Dict[str, str]]] = dict()
+_attribute_mappings: Final[Dict[Type[Any], Dict[str, str]]] = {}
 """A mapping of object attributes that require a different name when serialized/deserialized."""
 
-_attribute_mappings_rev: Final[Dict[Type[Any], Dict[str, str]]] = dict()
+_attribute_mappings_rev: Final[Dict[Type[Any], Dict[str, str]]] = {}
 """The same mapping as _attribute_mappings, but in reverse for deserialization."""
 
 
@@ -70,10 +71,18 @@ class JSONSerializer(Serializer):
         self._pickler = JavaProxyPickler()
         self._unpickler = JavaProxyUnpickler()
 
+    def _to_json_from_object(self, obj: object) -> str:
+        jsn = jsonpickle.encode(obj, context=self._pickler)
+        return jsn
+
     def serialize(self, obj: object) -> bytes:
-        jsn: str = jsonpickle.encode(obj, context=self._pickler)
+        jsn: str = self._to_json_from_object(obj)
         b: bytes = MAGIC_BYTE + jsn.encode()
         return b
+
+    def _to_object_from_json(self, json_str: str) -> T:  # type: ignore
+        o = jsonpickle.decode(json_str, context=self._unpickler)
+        return o
 
     def deserialize(self, value: bytes) -> T:  # type: ignore
         if isinstance(value, bytes):
@@ -82,12 +91,22 @@ class JSONSerializer(Serializer):
                 return cast(T, None)
             else:
                 if ord(s[0]) == ord(MAGIC_BYTE):
-                    r = jsonpickle.decode(s[1:], context=self._unpickler)
+                    r: T = self._to_object_from_json(s[1:])
                     return r
                 else:
                     raise ValueError("Invalid JSON serialization format")
         else:
             return cast(T, value)
+
+    def flatten_to_dict(self, o: object) -> dict[Any, Any]:
+        jsn = self._to_json_from_object(o)
+        d = json.loads(jsn)
+        return d
+
+    def restore_to_object(self, the_dict: dict[Any, Any]) -> T:  # type: ignore
+        jsn = json.dumps(the_dict)
+        o: T = self._to_object_from_json(jsn)
+        return o
 
 
 class SerializerRegistry:
@@ -146,7 +165,7 @@ class JavaProxyPickler(jsonpickle.Pickler):
         if alias is not None:
             marker = result.get(_JSON_PICKLE_OBJ, None)
             if marker is not None:
-                actual: dict[str, Any] = dict()
+                actual: dict[str, Any] = {}
                 actual[_META_CLASS] = alias
                 for key, value in result.items():
                     # ignore jsonpickle specific content as well as protected keys
@@ -171,11 +190,11 @@ class JavaProxyPickler(jsonpickle.Pickler):
                         and _META_VERSION not in value_
                         and _META_ENUM not in value_
                     ):
-                        entries = list()
+                        entries = []
                         for key_inner, value_inner in value.items():
                             entries.append({_JSON_KEY: key_inner, _JSON_VALUE: value_inner})
 
-                        padding: dict[str, Any] = dict()
+                        padding: dict[str, Any] = {}
                         padding["entries"] = entries
                         value_ = padding
 
@@ -211,7 +230,7 @@ class JavaProxyUnpickler(jsonpickle.Unpickler):
             metadata: Any = obj.get(_META_CLASS, None)
             if metadata is not None:
                 type_: Optional[Type[Any]] = _type_for(metadata)
-                actual: dict[Any, Any] = dict()
+                actual: dict[Any, Any] = {}
                 if type_ is None:
                     if "map" in metadata.lower():
                         for entry in obj[_JSON_ENTRIES]:
@@ -245,7 +264,7 @@ class JavaProxyUnpickler(jsonpickle.Unpickler):
             if len(obj) == 1:
                 entries = obj.get(_JSON_ENTRIES, None)
                 if entries is not None:
-                    actual = dict()
+                    actual = {}
                     for entry in obj[_JSON_ENTRIES]:
                         actual[entry[_JSON_KEY]] = entry[_JSON_VALUE]
                     return super().restore(actual, reset=False)
