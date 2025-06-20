@@ -22,13 +22,13 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
-protobuf = "5.29.4"
-grpcio = "1.70.0"
-grpcio-tools = "1.70.0"
-jsonpickle = ">=3.0,<4.1"
+protobuf = "5.29.5"
+grpcio = "1.73.0"
+grpcio-tools = "1.71.0"
+jsonpickle = ">=3.0,<4.2"
 pymitter = ">=0.4,<1.1"
-typing-extensions = ">=4.11,<4.14"
-types-protobuf = "6.30.2.20250506"
+typing-extensions = ">=4.11,<4.15"
+types-protobuf = "6.30.2.20250516"
 pympler = "1.1"
 numpy = [
     {version = ">=1.26.4", python = "<3.13"},
@@ -36,18 +36,18 @@ numpy = [
 ]
 
 [tool.poetry.dev-dependencies]
-pytest = "~8.3"
-pytest-asyncio = "~0.26"
-pytest-cov = "~6.1"
-pytest-unordered = "~0.6"
+pytest = "~8.4"
+pytest-asyncio = "~1.0"
+pytest-cov = "~6.2"
+pytest-unordered = "~0.7"
 pre-commit = "~4.2"
 docutils="~0.20"
 Sphinx = "~7.4"
 sphinx-rtd-theme = "~3.0"
 sphinxcontrib-napoleon = "~0.7"
 m2r = "~0.3"
-third-party-license-file-generator = "~2024.8"
-pyinstrument="5.0.1"
+third-party-license-file-generator = "~2025.6"
+pyinstrument="5.0.2"
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
