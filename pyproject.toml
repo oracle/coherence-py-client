@@ -44,7 +44,7 @@ sphinx-rtd-theme = "~3.0"
 sphinxcontrib-napoleon = "~0.7"
 m2r = "~0.3"
 third-party-license-file-generator = "~2025.6"
-pyinstrument="5.0.2"
+pyinstrument="5.0.3"
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
