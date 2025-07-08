@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-__version__ = "2.0.3"
+__version__ = "2.0.4"
 
 import contextvars
 import logging
