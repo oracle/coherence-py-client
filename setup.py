@@ -6,7 +6,7 @@ from distutils.core import setup
 
 setup(
     name="coherence-client",
-    version="2.0.3",
+    version="2.0.4",
     packages=["coherence"],
     url="https://github.com/oracle/coherence-py-client",
     license="UPL",
