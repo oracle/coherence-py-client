@@ -24,7 +24,7 @@ classifiers = [
 python = "^3.9"
 protobuf = "5.29.5"
 grpcio = "1.73.0"
-grpcio-tools = "1.71.0"
+grpcio-tools = "1.71.2"
 jsonpickle = ">=3.0,<4.2"
 pymitter = ">=0.4,<1.2"
 typing-extensions = ">=4.11,<4.15"
