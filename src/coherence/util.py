@@ -1,4 +1,4 @@
-# Copyright (c) 2022, 2023 Oracle and/or its affiliates.
+# Copyright (c) 2022, 2025 Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -471,14 +471,16 @@ class RequestFactory:
         )
         return p
 
-    def put_all_request(self, map: dict[K, V]) -> PutAllRequest:
+    def put_all_request(self, map: dict[K, V], ttl: Optional[int] = 0) -> PutAllRequest:
         entry_list = list()
         for key, value in map.items():
             k = self._serializer.serialize(key)
             v = self._serializer.serialize(value)
             e = Entry(key=k, value=v)
             entry_list.append(e)
-        p = PutAllRequest(scope=self._scope, cache=self._cache_name, format=self._serializer.format, entry=entry_list)
+        p = PutAllRequest(
+            scope=self._scope, cache=self._cache_name, format=self._serializer.format, entry=entry_list, ttl=ttl
+        )
         return p
 
     def clear_request(self) -> ClearRequest:

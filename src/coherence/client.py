@@ -1,4 +1,4 @@
-# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2025, Oracle and/or its affiliates.
 # Licensed under the Universal Permissive License v 1.0 as shown at
 # https://oss.oracle.com/licenses/upl.
 
@@ -777,8 +777,8 @@ class NamedCacheClient(NamedCache[K, V]):
         return self._request_factory.serializer.deserialize(v.value)
 
     @_pre_call_cache
-    async def put_all(self, map: dict[K, V]) -> None:
-        p = self._request_factory.put_all_request(map)
+    async def put_all(self, map: dict[K, V], ttl: Optional[int] = 0) -> None:
+        p = self._request_factory.put_all_request(map, ttl)
         await self._client_stub.putAll(p)
 
     @_pre_call_cache
