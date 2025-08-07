@@ -43,6 +43,7 @@ from .messages_pb2 import (
     InvokeAllRequest,
     InvokeRequest,
     IsEmptyRequest,
+    IsReadyRequest,
     KeySetRequest,
     MapListenerRequest,
     PageRequest,
@@ -557,6 +558,10 @@ class RequestFactory:
         r = IsEmptyRequest(scope=self._scope, cache=self._cache_name)
         return r
 
+    def is_ready_request(self) -> IsReadyRequest:
+        r = IsReadyRequest(scope=self._scope, cache=self._cache_name)
+        return r
+
     def size_request(self) -> SizeRequest:
         r = SizeRequest(scope=self._scope, cache=self._cache_name)
         return r
@@ -1013,6 +1018,16 @@ class RequestFactoryV1:
     def is_empty_request(self) -> UnaryDispatcher[bool]:
         named_cache_request = NamedCacheRequest(
             type=NamedCacheRequestType.IsEmpty,
+            cacheId=self.cache_id,
+        )
+
+        return UnaryDispatcher(
+            self.request_timeout, self.create_proxy_request(named_cache_request), BoolValueTransformer(self._serializer)
+        )
+
+    def is_ready_request(self) -> UnaryDispatcher[bool]:
+        named_cache_request = NamedCacheRequest(
+            type=NamedCacheRequestType.IsReady,
             cacheId=self.cache_id,
         )
 

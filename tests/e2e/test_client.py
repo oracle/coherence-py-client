@@ -12,8 +12,8 @@ from grpc import StatusCode
 from grpc.aio import AioRpcError
 
 import tests
-from coherence import Aggregators, Filters, MapEntry, NamedCache, Session, request_timeout
-from coherence.client import CacheOptions
+from coherence import COH_LOG, Aggregators, Filters, MapEntry, NamedCache, Session, request_timeout
+from coherence.client import CacheOptions, OperationNotSupportedError
 from coherence.event import MapLifecycleEvent
 from coherence.extractor import ChainedExtractor, Extractors, UniversalExtractor
 from coherence.processor import ExtractorProcessor
@@ -361,6 +361,16 @@ async def test_is_empty(cache: NamedCache[str, str]) -> None:
     await cache.clear()
     r = await cache.is_empty()
     assert r is True
+
+
+@pytest.mark.asyncio
+async def test_is_ready(cache: NamedCache[str, str]) -> None:
+    try:
+        r: bool = await cache.is_ready()
+        assert r is True
+    except OperationNotSupportedError as e:
+        COH_LOG.info("Skipped " + str(e))
+        pytest.skip("Server version does not support is_ready method.")
 
 
 # noinspection PyShadowingNames

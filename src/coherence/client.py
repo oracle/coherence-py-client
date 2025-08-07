@@ -518,6 +518,14 @@ class NamedMap(abc.ABC, Generic[K, V]):
         """
 
     @abc.abstractmethod
+    async def is_ready(self) -> bool:
+        """
+        Returns `true` if this map is ready to be used.
+
+        :return: `true`if this map is ready to be used.
+        """
+
+    @abc.abstractmethod
     async def size(self) -> int:
         """
         Signifies the number of key-value mappings in this map.
@@ -845,6 +853,22 @@ class NamedCacheClient(NamedCache[K, V]):
         r = self._request_factory.is_empty_request()
         v = await self._client_stub.isEmpty(r)
         return self._request_factory.serializer.deserialize(v.value)
+
+    @_pre_call_cache
+    async def is_ready(self) -> bool:
+        try:
+            r = self._request_factory.is_ready_request()
+            v = await self._client_stub.isReady(r)
+            return self._request_factory.serializer.deserialize(v.value)
+        except grpc.aio._call.AioRpcError as e:
+            if e.code() == grpc.StatusCode.UNIMPLEMENTED:
+                raise OperationNotSupportedError(
+                    "This operation is not supported by the gRPC proxy for the connected Coherence Server."
+                    "Please upgrade to a version that supports this operation."
+                ) from e
+            raise  # Re-raise all other gRPC errors
+        except Exception as e:
+            raise RuntimeError("An unexpected error occurred in is_ready()") from e
 
     @_pre_call_cache
     async def size(self) -> int:
@@ -1361,6 +1385,11 @@ class NamedCacheClientV1(NamedCache[K, V]):
     @_pre_call_cache
     async def is_empty(self) -> bool:
         dispatcher: UnaryDispatcher[bool] = self._request_factory.is_empty_request()
+        await dispatcher.dispatch(self._stream_handler)
+        return dispatcher.result()
+
+    async def is_ready(self) -> bool:
+        dispatcher: UnaryDispatcher[bool] = self._request_factory.is_ready_request()
         await dispatcher.dispatch(self._stream_handler)
         return dispatcher.result()
 
@@ -2701,3 +2730,9 @@ class StreamHandler:
                     self._events_manager._emitter.emit(
                         MapLifecycleEvent.TRUNCATED.value, self._events_manager._named_map.name
                     )
+
+
+class OperationNotSupportedError(Exception):
+    """Exception raised when the requested operation is not supported by the server."""
+
+    pass
