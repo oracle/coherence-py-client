@@ -525,7 +525,7 @@ class NamedMap(abc.ABC, Generic[K, V]):
         partitioned cache service that owns this cache has no storage-enabled
         members.
 
-        :return: `true`if this map is ready to be used.
+        :return: `true` if this map is ready to be used.
         """
 
     @abc.abstractmethod
@@ -870,8 +870,6 @@ class NamedCacheClient(NamedCache[K, V]):
                     "Please upgrade to a version that supports this operation."
                 ) from e
             raise  # Re-raise all other gRPC errors
-        except Exception as e:
-            raise RuntimeError("An unexpected error occurred in is_ready()") from e
 
     @_pre_call_cache
     async def size(self) -> int:
