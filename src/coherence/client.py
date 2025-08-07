@@ -521,6 +521,9 @@ class NamedMap(abc.ABC, Generic[K, V]):
     async def is_ready(self) -> bool:
         """
         Returns `true` if this map is ready to be used.
+        An example of when this method would return `false` would be where a
+        partitioned cache service that owns this cache has no storage-enabled
+        members.
 
         :return: `true`if this map is ready to be used.
         """
