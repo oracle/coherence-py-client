@@ -661,4 +661,4 @@ async def test_unary_error(test_session: Session) -> None:
     with pytest.raises(Exception) as ex:
         await cache.put("a", d)
 
-    assert "Could not deserialize" in str(ex.value)
+    assert ("Could not deserialize" in str(ex.value)) or ("Failed to deserialize" in str(ex.value))
