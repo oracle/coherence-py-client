@@ -43,7 +43,7 @@ Sphinx = "~7.4"
 sphinx-rtd-theme = "~3.0"
 sphinxcontrib-napoleon = "~0.7"
 m2r = "~0.3"
-third-party-license-file-generator = "~2025.6"
+third-party-license-file-generator = "~2025.9"
 pyinstrument="5.1.0"
 
 [tool.pytest.ini_options]
