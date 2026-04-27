@@ -7,6 +7,10 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "0 5 * * *"
+
+permissions:
+  contents: read
+
 jobs:
   run-examples-with-latest-release:
     strategy:
